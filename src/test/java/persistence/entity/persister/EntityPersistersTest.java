@@ -1,21 +1,14 @@
 package persistence.entity.persister;
 
 import domain.FixtureEntity;
-import jdbc.JdbcTemplate;
 import mock.MockDmlGenerator;
 import mock.MockJdbcTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.Application;
-import persistence.core.EntityMetadata;
+import persistence.core.EntityMetadataProvider;
 import persistence.core.EntityScanner;
-import persistence.sql.dml.DmlGenerator;
-
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,17 +17,9 @@ class EntityPersistersTest {
     private EntityPersisters entityPersisters;
 
     @BeforeEach
-    void setUp() throws SQLException {
-        entityPersisters = new EntityPersisters(initEntityPersisters(new MockDmlGenerator(), new MockJdbcTemplate()));
-    }
-
-    private Map<Class<?>, EntityPersister> initEntityPersisters(final DmlGenerator dmlGenerator, final JdbcTemplate jdbcTemplate) {
+    void setUp() {
         final EntityScanner entityScanner = new EntityScanner(Application.class);
-        return entityScanner.getEntityClasses().stream()
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        clazz -> EntityPersister.of(EntityMetadata.from(clazz), dmlGenerator, jdbcTemplate)
-                ));
+        entityPersisters = new EntityPersisters(EntityMetadataProvider.getInstance(), entityScanner, new MockDmlGenerator(), new MockJdbcTemplate());
     }
 
     @Test
