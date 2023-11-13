@@ -28,7 +28,7 @@ public class MetaModelImpl implements MetaModel {
     }
 
     @Override
-    public <T> EntityClass<T> getEntityClass(Class<T> clazz) {
+    public <T> EntityClass<T> getEntityClass(final Class<T> clazz) {
         if (entityClassMap.containsKey(clazz)) {
             return (EntityClass<T>) entityClassMap.get(clazz);
         }
