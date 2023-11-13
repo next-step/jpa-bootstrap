@@ -6,6 +6,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+
 public class JdbcTemplate {
     private final Connection connection;
 
@@ -21,12 +23,32 @@ public class JdbcTemplate {
         }
     }
 
-    public <T> T queryForObject(final String sql, final RowMapper<T> rowMapper) {
-        final List<T> results = query(sql, rowMapper);
-        if (results.size() != 1) {
-            throw new RuntimeException("Expected 1 result, got " + results.size());
+    public Object executeInsert(final String sql) {
+        try (final Statement statement = connection.createStatement()) {
+            statement.executeUpdate(sql, RETURN_GENERATED_KEYS);
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            generatedKeys.next();
+            return generatedKeys.getObject(1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return results.get(0);
+    }
+
+    public boolean executeUpdate(final String sql) {
+        try (final Statement statement = connection.createStatement()) {
+            return statement.executeUpdate(sql) > 0;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public <T> T queryForObject(final String sql, final RowMapper<T> rowMapper) {
+        try (final ResultSet resultSet = connection.prepareStatement(sql).executeQuery()) {
+            resultSet.next();
+            return rowMapper.mapRow(resultSet);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public <T> List<T> query(final String sql, final RowMapper<T> rowMapper) {
