@@ -26,4 +26,12 @@ public class MetaModelImpl implements MetaModel {
     public Map<Class<?>, EntityClass<?>> getEntityClasses() {
         return Collections.unmodifiableMap(entityClassMap);
     }
+
+    @Override
+    public <T> EntityClass<T> getEntityClass(Class<T> clazz) {
+        if (entityClassMap.containsKey(clazz)) {
+            return (EntityClass<T>) entityClassMap.get(clazz);
+        }
+        throw new IllegalArgumentException("해당 클래스는 엔티티 클래스가 아닙니다.");
+    }
 }
