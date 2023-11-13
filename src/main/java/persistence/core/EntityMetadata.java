@@ -19,7 +19,7 @@ public class EntityMetadata<T> {
     private final List<EntityOneToManyColumn> oneToManyColumns;
     private final List<EntityManyToOneColumn> manyToOneColumns;
 
-    public EntityMetadata(final Class<T> clazz) {
+    private EntityMetadata(final Class<T> clazz) {
         this.validate(clazz);
         this.clazz = clazz;
         this.tableName = initTableName(clazz);

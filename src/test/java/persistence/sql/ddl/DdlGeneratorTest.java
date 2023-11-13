@@ -33,7 +33,7 @@ class DdlGeneratorTest {
     @Test
     @DisplayName("Person class create 쿼리 생성 테스트")
     void generatePersonCreateDdlTest() {
-        entityMetadata = new EntityMetadata<>(FixtureEntity.Person.class);
+        entityMetadata = EntityMetadata.from(FixtureEntity.Person.class);
         final String query = generator.generateCreateDdl(entityMetadata);
 
         assertThat(query).isEqualToIgnoringCase("create table users (id bigint not null auto_increment,nick_name varchar(255),old int,email varchar(255) not null,CONSTRAINT PK_Users PRIMARY KEY (id))");
@@ -42,7 +42,7 @@ class DdlGeneratorTest {
     @Test
     @DisplayName("Person class drop 쿼리 생성 테스트")
     void generatePersonDropDdlTest() {
-        entityMetadata = new EntityMetadata<>(FixtureEntity.Person.class);
+        entityMetadata = EntityMetadata.from(FixtureEntity.Person.class);
         final String query = generator.generateDropDdl(entityMetadata);
 
         assertThat(query).isEqualToIgnoringCase("drop table users");
@@ -52,7 +52,7 @@ class DdlGeneratorTest {
     @MethodSource("fixtureArgumentProvider")
     @DisplayName("class create 쿼리 생성 테스트")
     void generateFixtureCreateDdlTest(final Class<?> clazz, final String expected, final String message) {
-        entityMetadata = new EntityMetadata<>(clazz);
+        entityMetadata = EntityMetadata.from(clazz);
         final String query = generator.generateCreateDdl(entityMetadata);
 
         assertThat(query).isEqualToIgnoringCase(expected);
@@ -61,7 +61,7 @@ class DdlGeneratorTest {
     @Test
     @DisplayName("Order class create 쿼리 생성 테스트")
     void generateOrderCreateDdlTest() {
-        entityMetadata = new EntityMetadata<>(FixtureAssociatedEntity.Order.class);
+        entityMetadata = EntityMetadata.from(FixtureAssociatedEntity.Order.class);
         final String query = generator.generateCreateDdl(entityMetadata);
         assertThat(query)
                 .isEqualToIgnoringCase("create table orders (id bigint not null auto_increment,orderNumber varchar(255),CONSTRAINT PK_orders PRIMARY KEY (id))");
@@ -70,7 +70,7 @@ class DdlGeneratorTest {
     @Test
     @DisplayName("OrderItem class create 쿼리 생성 테스트")
     void generateOrderItemCreateDdlTest() {
-        entityMetadata = new EntityMetadata<>(FixtureAssociatedEntity.OrderItem.class);
+        entityMetadata = EntityMetadata.from(FixtureAssociatedEntity.OrderItem.class);
         final String query = generator.generateCreateDdl(entityMetadata);
         assertThat(query)
                 .isEqualToIgnoringCase("create table order_items (id bigint not null auto_increment,product varchar(255),quantity int,order_id bigint,foreign key(order_id) references orders (id),CONSTRAINT PK_order_items PRIMARY KEY (id))");
@@ -79,7 +79,7 @@ class DdlGeneratorTest {
     @Test
     @DisplayName("Country class create 쿼리 생성 테스트")
     void generateCountryCreateDdlTest() {
-        entityMetadata = new EntityMetadata<>(FixtureAssociatedEntity.Country.class);
+        entityMetadata = EntityMetadata.from(FixtureAssociatedEntity.Country.class);
         final String query = generator.generateCreateDdl(entityMetadata);
         assertThat(query)
                 .isEqualToIgnoringCase("create table country (id bigint not null auto_increment,name varchar(255),CONSTRAINT PK_country PRIMARY KEY (id))");
@@ -88,7 +88,7 @@ class DdlGeneratorTest {
     @Test
     @DisplayName("City class create 쿼리 생성 테스트")
     void generateCityCreateDdlTest() {
-        entityMetadata = new EntityMetadata<>(FixtureAssociatedEntity.City.class);
+        entityMetadata = EntityMetadata.from(FixtureAssociatedEntity.City.class);
         final String query = generator.generateCreateDdl(entityMetadata);
         assertThat(query)
                 .isEqualToIgnoringCase("create table city (id bigint not null auto_increment,name varchar(255),country_id bigint,foreign key(country_id) references country (id),CONSTRAINT PK_city PRIMARY KEY (id))");

@@ -32,7 +32,7 @@ public class EntityMetadataProvider {
 
     public void init(final EntityScanner entityScanner) {
         entityScanner.getEntityClasses()
-                .forEach(entity -> cache.put(entity, new EntityMetadata<>(entity)));
+                .forEach(entity -> cache.put(entity, EntityMetadata.from(entity)));
     }
 
     public Set<EntityMetadata<?>> getOneToManyAssociatedEntitiesMetadata(final EntityMetadata<?> entityMetadata) {

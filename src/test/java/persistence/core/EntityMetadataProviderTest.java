@@ -59,7 +59,7 @@ class EntityMetadataProviderTest {
     @DisplayName("getOneToManyAssociatedEntitiesMetadata(EntityMetadata) 를 통해 EntityMetadata 를 OneToMany 연관관계로 가진 EntityMetadata 들 전부를 반환받을 수 있다.")
     void getAllAssociatedEntitiesMetadataTest() {
         mockClass = FixtureAssociatedEntity.WithId.class;
-        final EntityMetadata<?> entityMetadata = new EntityMetadata<>(mockClass);
+        final EntityMetadata<?> entityMetadata = EntityMetadata.from(mockClass);
 
         final Set<EntityMetadata<?>> allAssociatedEntitiesMetadata = entityMetadataProvider.getOneToManyAssociatedEntitiesMetadata(entityMetadata);
 

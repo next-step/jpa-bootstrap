@@ -17,7 +17,7 @@ class LeftJoinClauseBuilderTest {
     @Test
     @DisplayName("LeftJoinClauseBuilder 를 이용해 left join 절을 만들 수 있다.")
     void leftJoinClauseBuilderTest() {
-        final EntityMetadata<WithOneToManyFetchTypeEAGER> withOneToManyEntityMetadata = new EntityMetadata<>(WithOneToManyFetchTypeEAGER.class);
+        final EntityMetadata<WithOneToManyFetchTypeEAGER> withOneToManyEntityMetadata = EntityMetadata.from(WithOneToManyFetchTypeEAGER.class);
 
         final LeftJoinClauseBuilder queryBuilder = LeftJoinClauseBuilder.builder(new SelectQueryBuilder(new H2Dialect()));
         withOneToManyEntityMetadata.getEagerOneToManyColumns()
