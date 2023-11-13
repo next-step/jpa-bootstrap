@@ -1,4 +1,4 @@
-package fixtures;
+package persistence.study;
 
 public class HelloTarget {
     public String sayHello(String name) {

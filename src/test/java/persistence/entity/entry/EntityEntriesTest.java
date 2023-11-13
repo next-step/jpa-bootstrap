@@ -1,6 +1,6 @@
 package persistence.entity.entry;
 
-import fixtures.EntityFixtures;
+import entity.SampleOneWithValidAnnotation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,8 +23,8 @@ class EntityEntriesTest {
             @DisplayName("매핑되는 EntityEntry의 Status를 변경한다.")
             void changeOrSetStatus() {
                 //given
-                EntityFixtures.SampleOneWithValidAnnotation sample
-                        = new EntityFixtures.SampleOneWithValidAnnotation(1L, "민준", 29);
+                SampleOneWithValidAnnotation sample
+                        = new SampleOneWithValidAnnotation(1L, "민준", 29);
                 EntityEntries entityEntries = new EntityEntries();
 
                 //when
@@ -49,8 +49,8 @@ class EntityEntriesTest {
             @DisplayName("매핑된 EntityEntry를 리턴한다.")
             void getEntityEntry() {
                 //given
-                EntityFixtures.SampleOneWithValidAnnotation sample
-                        = new EntityFixtures.SampleOneWithValidAnnotation(1L, "민준", 29);
+                SampleOneWithValidAnnotation sample
+                        = new SampleOneWithValidAnnotation(1L, "민준", 29);
                 EntityEntries entityEntries = new EntityEntries();
 
                 entityEntries.changeOrSetStatus(Status.MANAGED, sample);

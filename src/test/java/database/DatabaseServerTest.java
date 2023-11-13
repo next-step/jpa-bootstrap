@@ -1,6 +1,6 @@
 package database;
 
-import fixtures.EntityFixtures;
+import entity.SampleOneWithValidAnnotation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import persistence.DatabaseTest;
 import persistence.entity.attribute.EntityAttribute;
 import persistence.entity.attribute.EntityAttributes;
+import persistence.entity.attribute.EntityBinder;
 import persistence.mapper.TestEntityRowMapper;
 import persistence.sql.dml.builder.InsertQueryBuilder;
 import persistence.sql.infra.H2SqlConverter;
@@ -28,19 +29,21 @@ public class DatabaseServerTest extends DatabaseTest {
             @Test
             @DisplayName("예외를 던지지않고 종료한다.")
             void doseNotThrowException() {
-                setUpFixtureTable(EntityFixtures.SampleOneWithValidAnnotation.class, new H2SqlConverter());
+                EntityBinder.init();
+
+                setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
 
                 InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
 
                 EntityAttributes entityAttributes = new EntityAttributes();
-                EntityAttribute entityAttribute = entityAttributes.findEntityAttribute(EntityFixtures.SampleOneWithValidAnnotation.class);
+                EntityAttribute entityAttribute = entityAttributes.findEntityAttribute(SampleOneWithValidAnnotation.class);
 
-                EntityFixtures.SampleOneWithValidAnnotation entityOne =
-                        new EntityFixtures.SampleOneWithValidAnnotation("민준", 29);
-                EntityFixtures.SampleOneWithValidAnnotation entityTwo =
-                        new EntityFixtures.SampleOneWithValidAnnotation("민준", 29);
-                EntityFixtures.SampleOneWithValidAnnotation entityThree =
-                        new EntityFixtures.SampleOneWithValidAnnotation("민준", 29);
+                SampleOneWithValidAnnotation entityOne =
+                        new SampleOneWithValidAnnotation("민준", 29);
+                SampleOneWithValidAnnotation entityTwo =
+                        new SampleOneWithValidAnnotation("민준", 29);
+                SampleOneWithValidAnnotation entityThree =
+                        new SampleOneWithValidAnnotation("민준", 29);
 
                 String insertDMLOne = insertQueryBuilder.prepareStatement(entityAttribute, entityOne);
                 String insertDMLTwo = insertQueryBuilder.prepareStatement(entityAttribute, entityTwo);
@@ -52,7 +55,7 @@ public class DatabaseServerTest extends DatabaseTest {
                         () -> Assertions.assertDoesNotThrow(() -> jdbcTemplate.execute(insertDMLThree))
                 );
 
-                List<EntityFixtures.SampleOneWithValidAnnotation> entities =
+                List<SampleOneWithValidAnnotation> entities =
                         jdbcTemplate.queryForObject("SELECT * FROM ENTITY_NAME;", new TestEntityRowMapper());
 
                 assertThat(entities.size()).isEqualTo(3);

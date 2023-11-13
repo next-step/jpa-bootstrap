@@ -1,6 +1,6 @@
 package persistence.entity.attribute.resolver;
 
-import fixtures.EntityFixtures;
+import entity.SampleOneWithValidAnnotation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,8 +44,8 @@ class LongTypeIdAttributeResolverTest {
             void returnAttribute() throws NoSuchFieldException {
                 //given
                 IdAttributeResolver resolver = new LongTypeIdAttributeResolver();
-                EntityFixtures.SampleOneWithValidAnnotation sample
-                        = new EntityFixtures.SampleOneWithValidAnnotation(1, "민준", 29);
+                SampleOneWithValidAnnotation sample
+                        = new SampleOneWithValidAnnotation(1, "민준", 29);
                 Field field = sample.getClass().getDeclaredField("id");
 
                 //when
@@ -66,8 +66,8 @@ class LongTypeIdAttributeResolverTest {
             void setIdToEntity() throws NoSuchFieldException, IllegalAccessException {
                 //given
                 IdAttributeResolver resolver = new LongTypeIdAttributeResolver();
-                EntityFixtures.SampleOneWithValidAnnotation sample
-                        = new EntityFixtures.SampleOneWithValidAnnotation("민준", 29);
+                SampleOneWithValidAnnotation sample
+                        = new SampleOneWithValidAnnotation("민준", 29);
 
                 Field field = sample.getClass().getDeclaredField("id");
 

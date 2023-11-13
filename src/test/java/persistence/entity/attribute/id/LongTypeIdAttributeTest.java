@@ -1,6 +1,6 @@
 package persistence.entity.attribute.id;
 
-import fixtures.EntityFixtures;
+import entity.SampleOneWithValidAnnotation;
 import jakarta.persistence.GenerationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -15,8 +15,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DisplayName("LongTypeIdAttribute 클래스의")
 class LongTypeIdAttributeTest {
 
-    EntityFixtures.SampleOneWithValidAnnotation sample
-            = new EntityFixtures.SampleOneWithValidAnnotation(1, "test_nick_name", 29);
+    private final SampleOneWithValidAnnotation sample
+            = new SampleOneWithValidAnnotation(1, "test_nick_name", 29);
 
     @Nested
     @DisplayName("생성자는")

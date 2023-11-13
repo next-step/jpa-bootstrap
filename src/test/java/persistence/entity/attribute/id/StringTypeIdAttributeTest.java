@@ -1,6 +1,6 @@
 package persistence.entity.attribute.id;
 
-import fixtures.EntityFixtures;
+import entity.SampleEntityWithStringId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,8 +13,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @Nested
 @DisplayName("StringTypeIdAttribute 클래스의")
 class StringTypeIdAttributeTest {
-    EntityFixtures.EntityWithStringId sample
-            = new EntityFixtures.EntityWithStringId("test id", "test_nick_name", 29);
+    SampleEntityWithStringId sample
+            = new SampleEntityWithStringId("test id", "test_nick_name", 29);
 
     @Nested
     @DisplayName("생성자는")

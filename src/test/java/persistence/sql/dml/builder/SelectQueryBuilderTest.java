@@ -1,6 +1,7 @@
 package persistence.sql.dml.builder;
 
-import fixtures.EntityFixtures;
+import entity.Order;
+import entity.SampleOneWithValidAnnotation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ public class SelectQueryBuilderTest {
                 //given
                 //when
                 EntityAttributes entityAttributes = new EntityAttributes();
-                EntityAttribute entityAttribute = entityAttributes.findEntityAttribute(EntityFixtures.SampleOneWithValidAnnotation.class);
+                EntityAttribute entityAttribute = entityAttributes.findEntityAttribute(SampleOneWithValidAnnotation.class);
                 String dml = SelectQueryBuilder.of(entityAttribute).where("id", "1").prepareStatement();
 
                 //then
@@ -44,7 +45,7 @@ public class SelectQueryBuilderTest {
                 //given
                 //when
                 EntityAttributes entityAttributes = new EntityAttributes();
-                String dml = SelectQueryBuilder.of(entityAttributes.findEntityAttribute(EntityFixtures.Order.class))
+                String dml = SelectQueryBuilder.of(entityAttributes.findEntityAttribute(Order.class))
                         .where("orders", "id", "1")
                         .prepareStatement();
 

@@ -1,7 +1,9 @@
 package persistence.context;
 
 
-import fixtures.EntityFixtures;
+import entity.Order;
+import entity.OrderItem;
+import entity.SampleOneWithValidAnnotation;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -34,10 +36,10 @@ class PersistenceContextImplTest extends DatabaseTest {
             @DisplayName("객체를 반환한다.")
             void returnFromFirstCache() throws SQLException {
                 //given
-                setUpFixtureTable(EntityFixtures.SampleOneWithValidAnnotation.class, new H2SqlConverter());
+                setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
 
-                EntityFixtures.SampleOneWithValidAnnotation sample =
-                        new EntityFixtures.SampleOneWithValidAnnotation("민준", 29);
+                SampleOneWithValidAnnotation sample =
+                        new SampleOneWithValidAnnotation("민준", 29);
 
                 EntityLoader entityLoader = new SimpleEntityLoader(new JdbcTemplate(server.getConnection()));
                 SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
@@ -47,8 +49,8 @@ class PersistenceContextImplTest extends DatabaseTest {
                 persistenceContext.addEntity(sample);
 
                 //when
-                EntityFixtures.SampleOneWithValidAnnotation retrieved
-                        = persistenceContext.getEntity(EntityFixtures.SampleOneWithValidAnnotation.class, "1");
+                SampleOneWithValidAnnotation retrieved
+                        = persistenceContext.getEntity(SampleOneWithValidAnnotation.class, "1");
 
                 //then
                 assertThat(retrieved.toString()).isEqualTo("SampleOneWithValidAnnotation{id=1, name='민준', age=29}");
@@ -62,7 +64,7 @@ class PersistenceContextImplTest extends DatabaseTest {
             @DisplayName("null을 반환한다.")
             void returnNull() throws SQLException {
                 //given
-                setUpFixtureTable(EntityFixtures.SampleOneWithValidAnnotation.class, new H2SqlConverter());
+                setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
 
                 EntityLoader entityLoader = new SimpleEntityLoader(new JdbcTemplate(server.getConnection()));
                 SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
@@ -70,8 +72,8 @@ class PersistenceContextImplTest extends DatabaseTest {
                 PersistenceContext persistenceContext = new PersistenceContextImpl(simpleEntityPersister, entityAttributes);
 
                 //when
-                EntityFixtures.SampleOneWithValidAnnotation instance
-                        = persistenceContext.getEntity(EntityFixtures.SampleOneWithValidAnnotation.class, "1");
+                SampleOneWithValidAnnotation instance
+                        = persistenceContext.getEntity(SampleOneWithValidAnnotation.class, "1");
 
                 //then
                 assertThat(instance).isNull();
@@ -85,25 +87,25 @@ class PersistenceContextImplTest extends DatabaseTest {
             @DisplayName("객체를 반환한다.")
             void returnFromFirstCache() throws SQLException {
                 //given
-                setUpFixtureTable(EntityFixtures.OrderItem.class, new H2SqlConverter());
-                setUpFixtureTable(EntityFixtures.Order.class, new H2SqlConverter());
+                setUpFixtureTable(OrderItem.class, new H2SqlConverter());
+                setUpFixtureTable(Order.class, new H2SqlConverter());
 
-                EntityFixtures.OrderItem orderItem = new EntityFixtures.OrderItem("티비", 1);
+                OrderItem orderItem = new OrderItem("티비", 1);
 
                 EntityLoader entityLoader = new SimpleEntityLoader(new JdbcTemplate(server.getConnection()));
                 SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
                 EntityAttributes entityAttributes = new EntityAttributes();
                 PersistenceContext persistenceContext = new PersistenceContextImpl(simpleEntityPersister, entityAttributes);
 
-                EntityFixtures.OrderItem insertedOrderItem = persistenceContext.addEntity(orderItem);
-                EntityFixtures.Order order =
-                        new EntityFixtures.Order("민준", List.of(insertedOrderItem));
+                OrderItem insertedOrderItem = persistenceContext.addEntity(orderItem);
+                Order order =
+                        new Order("민준", List.of(insertedOrderItem));
 
                 persistenceContext.addEntity(order);
 
                 //when
-                EntityFixtures.Order insertedOrder
-                        = persistenceContext.getEntity(EntityFixtures.Order.class, "1");
+                Order insertedOrder
+                        = persistenceContext.getEntity(Order.class, "1");
 
                 //then
                 assertThat(insertedOrder.toString())
@@ -117,8 +119,8 @@ class PersistenceContextImplTest extends DatabaseTest {
                 @DisplayName("null을 반환한다.")
                 void returnNull() throws SQLException {
                     //given
-                    setUpFixtureTable(EntityFixtures.OrderItem.class, new H2SqlConverter());
-                    setUpFixtureTable(EntityFixtures.Order.class, new H2SqlConverter());
+                    setUpFixtureTable(OrderItem.class, new H2SqlConverter());
+                    setUpFixtureTable(Order.class, new H2SqlConverter());
 
                     EntityLoader entityLoader = new SimpleEntityLoader(new JdbcTemplate(server.getConnection()));
                     SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
@@ -126,8 +128,8 @@ class PersistenceContextImplTest extends DatabaseTest {
                     PersistenceContext persistenceContext = new PersistenceContextImpl(simpleEntityPersister, entityAttributes);
 
                     //when
-                    EntityFixtures.Order insertedOrder
-                            = persistenceContext.getEntity(EntityFixtures.Order.class, "1");
+                    Order insertedOrder
+                            = persistenceContext.getEntity(Order.class, "1");
 
                     //then
                     assertThat(insertedOrder).isNull();
@@ -147,10 +149,10 @@ class PersistenceContextImplTest extends DatabaseTest {
             @DisplayName("영속성 컨택스트에 객체를 넣는다")
             void putInstanceToFirstCache() throws SQLException {
                 //given
-                setUpFixtureTable(EntityFixtures.SampleOneWithValidAnnotation.class, new H2SqlConverter());
+                setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
 
-                EntityFixtures.SampleOneWithValidAnnotation sample =
-                        new EntityFixtures.SampleOneWithValidAnnotation("민준", 29);
+                SampleOneWithValidAnnotation sample =
+                        new SampleOneWithValidAnnotation("민준", 29);
 
                 EntityLoader entityLoader = new SimpleEntityLoader(new JdbcTemplate(server.getConnection()));
                 SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
@@ -158,7 +160,7 @@ class PersistenceContextImplTest extends DatabaseTest {
                 PersistenceContext persistenceContext = new PersistenceContextImpl(simpleEntityPersister, entityAttributes);
 
                 //when
-                EntityFixtures.SampleOneWithValidAnnotation sampleOneWithValidAnnotation = persistenceContext.addEntity(sample);
+                SampleOneWithValidAnnotation sampleOneWithValidAnnotation = persistenceContext.addEntity(sample);
 
                 //then
                 assertThat(sampleOneWithValidAnnotation.toString()).isEqualTo("SampleOneWithValidAnnotation{id=1, name='민준', age=29}");
@@ -177,10 +179,10 @@ class PersistenceContextImplTest extends DatabaseTest {
             @DisplayName("엔트리 상태를 REMOVED로 변경한다.")
             void removeInstanceInFirstCache() throws SQLException {
                 //given
-                setUpFixtureTable(EntityFixtures.SampleOneWithValidAnnotation.class, new H2SqlConverter());
+                setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
 
-                EntityFixtures.SampleOneWithValidAnnotation sample =
-                        new EntityFixtures.SampleOneWithValidAnnotation("민준", 29);
+                SampleOneWithValidAnnotation sample =
+                        new SampleOneWithValidAnnotation("민준", 29);
 
                 EntityLoader entityLoader = new SimpleEntityLoader(new JdbcTemplate(server.getConnection()));
                 SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
@@ -189,8 +191,8 @@ class PersistenceContextImplTest extends DatabaseTest {
 
                 persistenceContext.addEntity(sample);
 
-                EntityFixtures.SampleOneWithValidAnnotation retrieved
-                        = persistenceContext.getEntity(EntityFixtures.SampleOneWithValidAnnotation.class, "1");
+                SampleOneWithValidAnnotation retrieved
+                        = persistenceContext.getEntity(SampleOneWithValidAnnotation.class, "1");
 
                 //when
                 //then
@@ -210,10 +212,10 @@ class PersistenceContextImplTest extends DatabaseTest {
             @DisplayName("스냅샷을 반환한다.")
             void returnIfExists() throws SQLException {
                 //given
-                setUpFixtureTable(EntityFixtures.SampleOneWithValidAnnotation.class, new H2SqlConverter());
+                setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
 
-                EntityFixtures.SampleOneWithValidAnnotation sample =
-                        new EntityFixtures.SampleOneWithValidAnnotation("민준", 29);
+                SampleOneWithValidAnnotation sample =
+                        new SampleOneWithValidAnnotation("민준", 29);
 
                 EntityLoader entityLoader = new SimpleEntityLoader(new JdbcTemplate(server.getConnection()));
                 SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
@@ -240,21 +242,21 @@ class PersistenceContextImplTest extends DatabaseTest {
                 @DisplayName("일차 캐시를 반환한다.")
                 void returnFromFirstCache() throws SQLException {
                     //given
-                    setUpFixtureTable(EntityFixtures.OrderItem.class, new H2SqlConverter());
-                    setUpFixtureTable(EntityFixtures.Order.class, new H2SqlConverter());
+                    setUpFixtureTable(OrderItem.class, new H2SqlConverter());
+                    setUpFixtureTable(Order.class, new H2SqlConverter());
 
-                    EntityFixtures.OrderItem orderItem = new EntityFixtures.OrderItem("티비", 1);
+                    OrderItem orderItem = new OrderItem("티비", 1);
 
                     EntityLoader entityLoader = new SimpleEntityLoader(new JdbcTemplate(server.getConnection()));
                     SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
                     EntityAttributes entityAttributes = new EntityAttributes();
                     PersistenceContext persistenceContext = new PersistenceContextImpl(simpleEntityPersister, entityAttributes);
 
-                    EntityFixtures.OrderItem insertedOrderItem = persistenceContext.addEntity(orderItem);
-                    EntityFixtures.Order order =
-                            new EntityFixtures.Order("민준", List.of(insertedOrderItem));
+                    OrderItem insertedOrderItem = persistenceContext.addEntity(orderItem);
+                    Order order =
+                            new Order("민준", List.of(insertedOrderItem));
 
-                    EntityFixtures.Order insertedOrder = persistenceContext.addEntity(order);
+                    Order insertedOrder = persistenceContext.addEntity(order);
 
                     //when
                     //then
@@ -270,22 +272,22 @@ class PersistenceContextImplTest extends DatabaseTest {
                 @DisplayName("null을 반환한다.")
                 void returnNull() throws SQLException {
                     //given
-                    setUpFixtureTable(EntityFixtures.OrderItem.class, new H2SqlConverter());
-                    setUpFixtureTable(EntityFixtures.Order.class, new H2SqlConverter());
+                    setUpFixtureTable(OrderItem.class, new H2SqlConverter());
+                    setUpFixtureTable(Order.class, new H2SqlConverter());
 
-                    EntityFixtures.OrderItem orderItem = new EntityFixtures.OrderItem("티비", 1);
+                    OrderItem orderItem = new OrderItem("티비", 1);
 
                     EntityLoader entityLoader = new SimpleEntityLoader(new JdbcTemplate(server.getConnection()));
                     SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
                     EntityAttributes entityAttributes = new EntityAttributes();
                     PersistenceContext persistenceContext = new PersistenceContextImpl(simpleEntityPersister, entityAttributes);
 
-                    EntityFixtures.OrderItem insertedOrderItem = persistenceContext.addEntity(orderItem);
-                    EntityFixtures.Order order =
-                            new EntityFixtures.Order("민준", List.of(insertedOrderItem));
+                    OrderItem insertedOrderItem = persistenceContext.addEntity(orderItem);
+                    Order order =
+                            new Order("민준", List.of(insertedOrderItem));
 
                     //when
-                    EntityFixtures.Order notInsertedOrder
+                    Order notInsertedOrder
                             = persistenceContext.getDatabaseSnapshot(order, "1");
 
                     //then

@@ -1,6 +1,6 @@
 package persistence.entity.attribute.id;
 
-import fixtures.EntityFixtures;
+import entity.SampleEntityWithIntegerId;
 import jakarta.persistence.GenerationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -24,8 +24,8 @@ class IntegerTypeIdAttributeTest {
             @DisplayName("아이디 필드를 파싱해서 메타데이터 상태를 가진다.")
             void holdMetaData() throws NoSuchFieldException {
                 //given
-                EntityFixtures.EntityWithIntegerId sample
-                        = new EntityFixtures.EntityWithIntegerId(1, "민준", 29);
+                SampleEntityWithIntegerId sample
+                        = new SampleEntityWithIntegerId(1, "민준", 29);
                 Field field = sample.getClass().getDeclaredField("id");
 
                 //when

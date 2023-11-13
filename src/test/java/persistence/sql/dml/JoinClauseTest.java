@@ -1,6 +1,6 @@
 package persistence.sql.dml;
 
-import fixtures.EntityFixtures;
+import entity.Order;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ class JoinClauseTest {
             @DisplayName("적절한 조인 DML을 제공한다.")
             void returnJoinDML() {
                 //given
-                EntityAttribute owner = entityAttributes.findEntityAttribute(EntityFixtures.Order.class);
+                EntityAttribute owner = entityAttributes.findEntityAttribute(Order.class);
 
                 //when
                 JoinClause joinClause = new JoinClause(owner.getTableName(), owner.getIdAttribute(), owner.getOneToManyFields());
