@@ -53,7 +53,7 @@ class EntityManagerImplTest {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        jdbcTemplate.execute(createQueryBuilder.generateQuery(EntityClass.getInstance(TestEntity.class)));
+        jdbcTemplate.execute(createQueryBuilder.generateQuery(new EntityClass<>(TestEntity.class)));
     }
 
     @AfterEach
@@ -138,7 +138,7 @@ class EntityManagerImplTest {
 
         // when
         entityManager.persist(givenEntity);
-        TestEntity actual = jdbcTemplate.queryForObject("select id, nick_name, age from test_entity;", ReflectionRowMapper.getInstance(EntityClass.getInstance(TestEntity.class)));
+        TestEntity actual = jdbcTemplate.queryForObject("select id, nick_name, age from test_entity;", ReflectionRowMapper.getInstance(new EntityClass<>(TestEntity.class)));
         TestEntity actualPersistenceContext = (TestEntity) persistenceContextEntities.get(new EntityKey(actual.id, TestEntity.class));
 
         // then

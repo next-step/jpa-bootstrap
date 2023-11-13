@@ -51,7 +51,7 @@ class CustomJpaRepositoryTest {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        jdbcTemplate.execute(createQueryBuilder.generateQuery(EntityClass.getInstance(TestEntity.class)));
+        jdbcTemplate.execute(createQueryBuilder.generateQuery(new EntityClass<>(TestEntity.class)));
     }
 
     @AfterEach

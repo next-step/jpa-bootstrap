@@ -18,7 +18,7 @@ public class MetaModelImpl implements MetaModel {
     public static MetaModel createPackageMetaModel(final String packageName) {
         Map<Class<?>, EntityClass<?>> entityClassMap = AnnotationBinder.parseEntityClasses(packageName)
                 .stream()
-                .collect(Collectors.toMap(clazz -> clazz, EntityClass::getInstance));
+                .collect(Collectors.toMap(clazz -> clazz, EntityClass::new));
         return new MetaModelImpl(entityClassMap);
     }
 

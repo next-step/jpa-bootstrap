@@ -31,7 +31,7 @@ public class EntityPersister {
     }
 
     public Object insert(final Object entity) {
-        EntityClass<?> entityClass = EntityClass.getInstance(entity.getClass());
+        EntityClass<?> entityClass = new EntityClass<>(entity.getClass());
         final String query = insertQueryBuilder.generateQuery(
                 entityClass.tableName(),
                 entityClass.getFieldValues(entity)
@@ -40,7 +40,7 @@ public class EntityPersister {
     }
 
     public void delete(final Object entity) {
-        EntityClass<?> entityClass = EntityClass.getInstance(entity.getClass());
+        EntityClass<?> entityClass = new EntityClass<>(entity.getClass());
         EntityColumn entityId = entityClass.getEntityId();
         final String query = deleteQueryBuilder.generateQuery(
                 entityClass.tableName(),

@@ -27,7 +27,7 @@ class PersistentListTest {
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
 
-        jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(EntityClass.getInstance(TestEntity.class)));
+        jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(TestEntity.class)));
     }
 
     @AfterAll
@@ -43,7 +43,7 @@ class PersistentListTest {
         jdbcTemplate.execute("insert into test_entity (id, nick_name, age) values (2, '진영최', 29)");
 
         // when
-        int actual = new PersistentList<>(EntityClass.getInstance(TestEntity.class), entityLoader)
+        int actual = new PersistentList<>(new EntityClass<>(TestEntity.class), entityLoader)
                 .size();
 
         // then

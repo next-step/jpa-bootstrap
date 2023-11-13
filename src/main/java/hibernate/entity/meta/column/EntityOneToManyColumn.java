@@ -24,7 +24,7 @@ public class EntityOneToManyColumn implements EntityJoinColumn {
         this.fieldName = parseFieldName(field);
         this.fetchType = field.getAnnotation(OneToMany.class)
                 .fetch();
-        this.entityClass = EntityClass.getInstance((Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]);
+        this.entityClass = new EntityClass<>((Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]);
         this.field = field;
     }
 

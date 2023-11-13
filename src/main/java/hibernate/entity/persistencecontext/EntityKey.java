@@ -11,7 +11,7 @@ public class EntityKey {
 
     public EntityKey(final Object id, final Class<?> clazz) {
         this.id = id;
-        this.entityClass = EntityClass.getInstance(clazz);
+        this.entityClass = new EntityClass<>(clazz);
     }
 
     public EntityKey(final Object id, final Object object) {

@@ -18,7 +18,7 @@ class EntitySnapshotTest {
         TestEntity givenEntity = new TestEntity(1L, "최진영", "jinyoungchoi95@gmail.com");
         EntitySnapshot actual = new EntitySnapshot(givenEntity);
         givenEntity.name = "영진최";
-        EntityColumn entityColumn = EntityClass.getInstance(TestEntity.class)
+        EntityColumn entityColumn = new EntityClass<>(TestEntity.class)
                 .getEntityColumns()
                 .stream()
                 .filter(it -> it.getFieldName() == "name")

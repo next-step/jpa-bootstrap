@@ -30,7 +30,7 @@ class EntityPersisterTest {
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
 
-        jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(EntityClass.getInstance(TestEntity.class)));
+        jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(TestEntity.class)));
     }
 
     @AfterEach
@@ -47,7 +47,7 @@ class EntityPersisterTest {
     @Test
     void update_쿼리를_실행한다() {
         // given
-        EntityClass<TestEntity> entityClass = EntityClass.getInstance(TestEntity.class);
+        EntityClass<TestEntity> entityClass = new EntityClass<>(TestEntity.class);
         jdbcTemplate.execute("insert into test_entity (id, nick_name) values (1, '최진영');");
 
         // when
