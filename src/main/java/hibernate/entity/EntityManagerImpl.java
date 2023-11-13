@@ -5,6 +5,7 @@ import hibernate.entity.meta.column.EntityColumn;
 import hibernate.entity.persistencecontext.EntityKey;
 import hibernate.entity.persistencecontext.EntitySnapshot;
 import hibernate.entity.persistencecontext.PersistenceContext;
+import hibernate.metamodel.MetaModel;
 
 import java.util.Map;
 
@@ -15,15 +16,18 @@ public class EntityManagerImpl implements EntityManager {
     private final EntityPersister entityPersister;
     private final EntityLoader entityLoader;
     private final PersistenceContext persistenceContext;
+    private final MetaModel metaModel;
 
     public EntityManagerImpl(
             final EntityPersister entityPersister,
             final EntityLoader entityLoader,
-            final PersistenceContext persistenceContext
+            final PersistenceContext persistenceContext,
+            final MetaModel metaModel
     ) {
         this.entityPersister = entityPersister;
         this.entityLoader = entityLoader;
         this.persistenceContext = persistenceContext;
+        this.metaModel = metaModel;
     }
 
     @Override
