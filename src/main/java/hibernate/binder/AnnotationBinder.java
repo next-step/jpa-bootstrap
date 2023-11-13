@@ -12,7 +12,7 @@ public class AnnotationBinder {
     private AnnotationBinder() {
     }
 
-    public static List<Class<?>> parseEntityClasses(String basePackage) throws ClassNotFoundException {
+    public static List<Class<?>> parseEntityClasses(String basePackage) {
         List<Class<?>> classes = ComponentScanner.scan(basePackage);
         return classes.stream()
                 .filter(clazz -> clazz.isAnnotationPresent(ENTITY_ANNOTATION))
