@@ -38,7 +38,7 @@ public class EntityManagerImpl implements EntityManager {
             return (T) persistenceContextEntity;
         }
 
-        EntityClass<T> entityClass = new EntityClass<>(clazz);
+        EntityClass<T> entityClass = metaModel.getEntityClass(clazz);
         T loadEntity = entityLoader.find(entityClass, id);
         persistenceContext.addEntity(id, loadEntity, LOADING);
         return loadEntity;
@@ -46,7 +46,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void persist(final Object entity) {
-        EntityColumn entityId = new EntityClass<>(entity.getClass())
+        EntityColumn entityId = metaModel.getEntityClass(entity.getClass())
                 .getEntityId();
         Object id = entityId.getFieldValue(entity);
         if (id == null) {
@@ -66,7 +66,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void merge(final Object entity) {
-        EntityClass<?> entityClass = new EntityClass<>(entity.getClass());
+        EntityClass<?> entityClass = metaModel.getEntityClass(entity.getClass());
         Object entityId = getNotNullEntityId(entityClass, entity);
         Map<EntityColumn, Object> changedColumns = getSnapshot(entity, entityId).changedColumns(entity);
         if (changedColumns.isEmpty()) {
