@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.context.EntityKey;
 import persistence.context.EntityKeyGenerator;
+import persistence.core.EntityMetadataProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +19,7 @@ class EntityKeyGeneratorTest {
 
     @BeforeEach
     void setUp() {
-        entityKeyGenerator = new EntityKeyGenerator();
+        entityKeyGenerator = new EntityKeyGenerator(EntityMetadataProvider.getInstance());
     }
 
     @Test

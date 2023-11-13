@@ -31,7 +31,7 @@ public class SimpleEntityManager implements EntityManager {
         this.entityPersisters = entityPersisters;
         this.entityLoaders = entityLoaders;
         this.entityProxyFactory = entityProxyFactory;
-        this.entityKeyGenerator = new EntityKeyGenerator();
+        this.entityKeyGenerator = new EntityKeyGenerator(entityMetadataProvider);
         this.persistenceContext = new SimplePersistenceContext();
     }
 

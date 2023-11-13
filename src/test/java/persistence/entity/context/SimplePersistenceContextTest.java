@@ -11,6 +11,7 @@ import persistence.context.EntityKey;
 import persistence.context.EntityKeyGenerator;
 import persistence.context.PersistenceContext;
 import persistence.context.SimplePersistenceContext;
+import persistence.core.EntityMetadataProvider;
 import persistence.entity.entry.EntityEntry;
 import persistence.entity.entry.Status;
 
@@ -28,7 +29,7 @@ class SimplePersistenceContextTest {
     @BeforeEach
     void setUp() {
         persistenceContext = new SimplePersistenceContext();
-        entityKeyGenerator = new EntityKeyGenerator();
+        entityKeyGenerator = new EntityKeyGenerator(EntityMetadataProvider.getInstance());
         personEntityKey = entityKeyGenerator.generate(Person.class, 1L);
         person = FixturePerson.create(1L);
         persistenceContext.addEntityEntry(person, Status.LOADING);
