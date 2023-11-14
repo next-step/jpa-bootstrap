@@ -43,10 +43,8 @@ class EntityManagerImplTest {
         persistenceContextSnapshotEntities = new ConcurrentHashMap<>();
         entityEntryContextEntities = new ConcurrentHashMap<>();
         entityManager = new EntityManagerImpl(
-                new EntityPersister(jdbcTemplate),
-                new EntityLoader(jdbcTemplate),
                 new SimplePersistenceContext(persistenceContextEntities, persistenceContextSnapshotEntities, new EntityEntryContext(entityEntryContextEntities)),
-                MetaModelImpl.createPackageMetaModel("hibernate.entity")
+                MetaModelImpl.createPackageMetaModel("hibernate.entity", jdbcTemplate)
         );
     }
 

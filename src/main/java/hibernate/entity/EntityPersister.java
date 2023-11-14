@@ -9,18 +9,21 @@ import jdbc.JdbcTemplate;
 
 import java.util.Map;
 
-public class EntityPersister {
+public class EntityPersister<T> {
 
     private final JdbcTemplate jdbcTemplate;
+    private final EntityClass<T> entityClass;
+
     private final InsertQueryBuilder insertQueryBuilder = InsertQueryBuilder.INSTANCE;
     private final DeleteQueryBuilder deleteQueryBuilder = DeleteQueryBuilder.INSTANCE;
     private final UpdateQueryBuilder updateQueryBuilder = UpdateQueryBuilder.INSTANCE;
 
-    public EntityPersister(final JdbcTemplate jdbcTemplate) {
+    public EntityPersister(final JdbcTemplate jdbcTemplate, final EntityClass<T> entityClass) {
         this.jdbcTemplate = jdbcTemplate;
+        this.entityClass = entityClass;
     }
 
-    public boolean update(final EntityClass<?> entityClass, final Object entityId, final Map<EntityColumn, Object> updateFields) {
+    public boolean update(final Object entityId, final Map<EntityColumn, Object> updateFields) {
         final String query = updateQueryBuilder.generateQuery(
                 entityClass.tableName(),
                 updateFields,
@@ -31,7 +34,6 @@ public class EntityPersister {
     }
 
     public Object insert(final Object entity) {
-        EntityClass<?> entityClass = new EntityClass<>(entity.getClass());
         final String query = insertQueryBuilder.generateQuery(
                 entityClass.tableName(),
                 entityClass.getFieldValues(entity)
@@ -40,7 +42,6 @@ public class EntityPersister {
     }
 
     public void delete(final Object entity) {
-        EntityClass<?> entityClass = new EntityClass<>(entity.getClass());
         EntityColumn entityId = entityClass.getEntityId();
         final String query = deleteQueryBuilder.generateQuery(
                 entityClass.tableName(),

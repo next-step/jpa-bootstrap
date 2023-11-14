@@ -11,5 +11,7 @@
 - MetaModel
   - AnnotationBinder를 통해 값을 세팅할 수 있다.
     - Map<Class<?>, EntityClass> entityClassMap = new ConcurrentHashMap<>();
-  - 특정 Class를 받아 EntityClass를 반환할 수 있다.
+    - Map<Class<?>, EntityPersister<?>> entityPersisterMap;
+    - Map<Class<?>, EntityLoader<?>> entityLoaderMap;
+  - 특정 Class를 받아 Entity 어노테이션을 통해 만든 map의 value를 반환한다.
     - 없는 EntityClass인 경우 예외가 발생한다.

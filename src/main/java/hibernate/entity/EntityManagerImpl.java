@@ -13,19 +13,13 @@ import static hibernate.entity.entityentry.Status.*;
 
 public class EntityManagerImpl implements EntityManager {
 
-    private final EntityPersister entityPersister;
-    private final EntityLoader entityLoader;
     private final PersistenceContext persistenceContext;
     private final MetaModel metaModel;
 
     public EntityManagerImpl(
-            final EntityPersister entityPersister,
-            final EntityLoader entityLoader,
             final PersistenceContext persistenceContext,
             final MetaModel metaModel
     ) {
-        this.entityPersister = entityPersister;
-        this.entityLoader = entityLoader;
         this.persistenceContext = persistenceContext;
         this.metaModel = metaModel;
     }
@@ -38,14 +32,15 @@ public class EntityManagerImpl implements EntityManager {
             return (T) persistenceContextEntity;
         }
 
-        EntityClass<T> entityClass = metaModel.getEntityClass(clazz);
-        T loadEntity = entityLoader.find(entityClass, id);
+        T loadEntity = metaModel.getEntityLoader(clazz)
+                .find(id);
         persistenceContext.addEntity(id, loadEntity, LOADING);
         return loadEntity;
     }
 
     @Override
     public void persist(final Object entity) {
+        EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
         EntityColumn entityId = metaModel.getEntityClass(entity.getClass())
                 .getEntityId();
         Object id = entityId.getFieldValue(entity);
@@ -73,7 +68,8 @@ public class EntityManagerImpl implements EntityManager {
             return;
         }
         persistenceContext.addEntity(entityId, entity);
-        entityPersister.update(entityClass, entityId, changedColumns);
+        metaModel.getEntityPersister(entity.getClass())
+                .update(entityId, changedColumns);
     }
 
     private Object getNotNullEntityId(final EntityClass<?> entityClass, final Object entity) {
@@ -98,7 +94,8 @@ public class EntityManagerImpl implements EntityManager {
     @Override
     public void remove(final Object entity) {
         persistenceContext.addEntityEntry(entity, DELETED);
-        entityPersister.delete(entity);
+        metaModel.getEntityPersister(entity.getClass())
+                .delete(entity);
         persistenceContext.removeEntity(entity);
     }
 }

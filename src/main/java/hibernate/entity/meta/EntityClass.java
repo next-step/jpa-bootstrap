@@ -9,11 +9,8 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityClass<T> {
-
-    private static final Map<Class<?>, EntityClass<?>> CACHE = new ConcurrentHashMap<>();
 
     private final EntityTableName tableName;
     private final EntityColumns entityColumns;

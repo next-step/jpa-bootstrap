@@ -22,7 +22,6 @@ class EntityLoaderTest {
 
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
-    private final EntityLoader entityLoader = new EntityLoader(jdbcTemplate);
 
     @BeforeAll
     static void beforeAll() throws SQLException {
@@ -70,9 +69,10 @@ class EntityLoaderTest {
     void find_쿼리를_실행한다() {
         // given
         jdbcTemplate.execute("insert into test_entity (id, nick_name, age) values (1, '최진영', 19)");
+        EntityLoader<TestEntity> entityLoader = new EntityLoader<>(jdbcTemplate, new EntityClass<>(TestEntity.class));
 
         // when
-        TestEntity actual = entityLoader.find(new EntityClass<>(TestEntity.class), 1L);
+        TestEntity actual = entityLoader.find(1L);
 
         // then
         assertAll(
@@ -92,8 +92,10 @@ class EntityLoaderTest {
         jdbcTemplate.execute("insert into lazy_order_items (id, lazy_order_id, product, quantity) values (2, 1, '김치', 2);");
         jdbcTemplate.execute("insert into lazy_order_items (id, lazy_order_id, product, quantity) values (3, 1, '바나나', 4);");
 
+        EntityLoader<Order> entityLoader = new EntityLoader<>(jdbcTemplate, new EntityClass<>(Order.class));
+
         // when
-        Order actual = entityLoader.find(new EntityClass<>(Order.class), 1L);
+        Order actual = entityLoader.find(1L);
 
         // then
         assertAll(
@@ -109,8 +111,10 @@ class EntityLoaderTest {
         jdbcTemplate.execute("insert into test_entity (id, nick_name, age) values (1, '최진영', 19)");
         jdbcTemplate.execute("insert into test_entity (id, nick_name, age) values (2, '진영최', 29)");
 
+        EntityLoader<TestEntity> entityLoader = new EntityLoader<>(jdbcTemplate, new EntityClass<>(TestEntity.class));
+
         // when
-        List<TestEntity> actual = entityLoader.findAll(new EntityClass<>(TestEntity.class));
+        List<TestEntity> actual = entityLoader.findAll();
 
         // then
         assertThat(actual).hasSize(2);

@@ -19,7 +19,6 @@ class PersistentListTest {
 
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
-    private final EntityLoader entityLoader = new EntityLoader(jdbcTemplate);
 
     @BeforeAll
     static void beforeAll() throws SQLException {
@@ -41,6 +40,8 @@ class PersistentListTest {
         // given
         jdbcTemplate.execute("insert into test_entity (id, nick_name, age) values (1, '최진영', 19)");
         jdbcTemplate.execute("insert into test_entity (id, nick_name, age) values (2, '진영최', 29)");
+
+        EntityLoader<TestEntity> entityLoader = new EntityLoader<>(jdbcTemplate, new EntityClass<>(TestEntity.class));
 
         // when
         int actual = new PersistentList<>(new EntityClass<>(TestEntity.class), entityLoader)
