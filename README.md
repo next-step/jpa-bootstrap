@@ -28,3 +28,7 @@
     - 기존 MetaModelImple에서 Map<Class<?>, EntityClass<?>> 를 가져간다
   - MetaModelImpl
     - BasicMetaModel과 jdbcTemplate을 받아 EntityManager에 주입할 MetaModel 생성
+  - EntityManagerFactoryImpl
+    - BasicMetaModel을 통해 새로운 EntityManager를 생성한다.
+    - 이미 현재 스레드에 EntityManager를 만들었는데 생성하려하는 경우 예외가 발생한다.
+    - 현재 CurrentSessionContext에 보유중인 EntityManager를 반환한다.
