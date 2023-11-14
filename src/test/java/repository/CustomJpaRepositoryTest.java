@@ -3,12 +3,15 @@ package repository;
 import database.DatabaseServer;
 import database.H2;
 import hibernate.ddl.CreateQueryBuilder;
+import hibernate.entity.EntityManager;
 import hibernate.entity.EntityManagerImpl;
 import hibernate.entity.entityentry.EntityEntryContext;
 import hibernate.entity.meta.EntityClass;
 import hibernate.entity.persistencecontext.EntityKey;
 import hibernate.entity.persistencecontext.EntitySnapshot;
+import hibernate.entity.persistencecontext.PersistenceContext;
 import hibernate.entity.persistencecontext.SimplePersistenceContext;
+import hibernate.metamodel.MetaModel;
 import hibernate.metamodel.MetaModelImpl;
 import jakarta.persistence.*;
 import jdbc.JdbcTemplate;
@@ -27,7 +30,6 @@ class CustomJpaRepositoryTest {
 
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
-    private EntityManagerImpl entityManager;
     private Map<EntityKey, Object> persistenceContextEntities;
     private Map<EntityKey, EntitySnapshot> persistenceContextSnapshotEntities;
     private CustomJpaRepository<TestEntity, Long> customJpaRepository;
@@ -37,10 +39,10 @@ class CustomJpaRepositoryTest {
     void beforeEach() {
         persistenceContextEntities = new ConcurrentHashMap<>();
         persistenceContextSnapshotEntities = new ConcurrentHashMap<>();
-        entityManager = new EntityManagerImpl(
-                new SimplePersistenceContext(persistenceContextEntities, persistenceContextSnapshotEntities, new EntityEntryContext(new ConcurrentHashMap<>())),
-                MetaModelImpl.createPackageMetaModel("repository", jdbcTemplate)
-        );
+        EntityEntryContext entityEntryContext = new EntityEntryContext(new ConcurrentHashMap<>());
+        PersistenceContext persistenceContext = new SimplePersistenceContext(persistenceContextEntities, persistenceContextSnapshotEntities, entityEntryContext);
+        MetaModel metaModel = MetaModelImpl.createPackageMetaModel("repository", jdbcTemplate);
+        EntityManager entityManager = new EntityManagerImpl(persistenceContext, metaModel);
         customJpaRepository = new CustomJpaRepository<>(entityManager);
     }
 

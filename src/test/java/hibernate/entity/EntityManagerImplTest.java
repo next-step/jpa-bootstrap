@@ -8,7 +8,9 @@ import hibernate.entity.entityentry.EntityEntryContext;
 import hibernate.entity.meta.EntityClass;
 import hibernate.entity.persistencecontext.EntityKey;
 import hibernate.entity.persistencecontext.EntitySnapshot;
+import hibernate.entity.persistencecontext.PersistenceContext;
 import hibernate.entity.persistencecontext.SimplePersistenceContext;
+import hibernate.metamodel.MetaModel;
 import hibernate.metamodel.MetaModelImpl;
 import jakarta.persistence.*;
 import jdbc.JdbcTemplate;
@@ -42,10 +44,10 @@ class EntityManagerImplTest {
         persistenceContextEntities = new ConcurrentHashMap<>();
         persistenceContextSnapshotEntities = new ConcurrentHashMap<>();
         entityEntryContextEntities = new ConcurrentHashMap<>();
-        entityManager = new EntityManagerImpl(
-                new SimplePersistenceContext(persistenceContextEntities, persistenceContextSnapshotEntities, new EntityEntryContext(entityEntryContextEntities)),
-                MetaModelImpl.createPackageMetaModel("hibernate.entity", jdbcTemplate)
-        );
+        EntityEntryContext entityEntryContext = new EntityEntryContext(entityEntryContextEntities);
+        PersistenceContext persistenceContext = new SimplePersistenceContext(persistenceContextEntities, persistenceContextSnapshotEntities, entityEntryContext);
+        MetaModel metaModel = MetaModelImpl.createPackageMetaModel("hibernate.entity", jdbcTemplate);
+        entityManager = new EntityManagerImpl(persistenceContext, metaModel);
     }
 
     @BeforeAll
