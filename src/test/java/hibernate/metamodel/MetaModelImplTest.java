@@ -7,19 +7,10 @@ import hibernate.metamodel.entity.Entity1;
 import hibernate.metamodel.entity.NoEntity;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class MetaModelImplTest {
-
-    @Test
-    void 패키지하위의_Entity를_스캔하여_EntityClassMap을_생성한다() {
-        MetaModel metaModel = MetaModelImpl.createPackageMetaModel("hibernate.metamodel.entity", null);
-        Map<Class<?>, EntityClass<?>> actual = metaModel.getEntityClasses();
-        assertThat(actual).hasSize(2);
-    }
 
     @Test
     void 패키지하위의_Entity를_스캔하여_EntityClass를_반환한다() {

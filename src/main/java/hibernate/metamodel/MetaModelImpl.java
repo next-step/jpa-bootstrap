@@ -6,7 +6,6 @@ import hibernate.entity.EntityPersister;
 import hibernate.entity.meta.EntityClass;
 import jdbc.JdbcTemplate;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,11 +38,6 @@ public class MetaModelImpl implements MetaModel {
                 .stream()
                 .collect(Collectors.toMap(clazz -> clazz, clazz -> new EntityLoader<>(jdbcTemplate, entityClassMap.get(clazz))));
         return new MetaModelImpl(entityClassMap, entityPersisterMap, entityLoaderMap);
-    }
-
-    @Override
-    public Map<Class<?>, EntityClass<?>> getEntityClasses() {
-        return Collections.unmodifiableMap(entityClassMap);
     }
 
     @Override
