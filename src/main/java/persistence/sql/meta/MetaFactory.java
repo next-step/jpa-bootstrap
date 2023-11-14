@@ -1,11 +1,11 @@
 package persistence.sql.meta;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MetaFactory {
 
-    private static final Map<String, EntityMeta> metaMap = new HashMap<>();
+    private static final Map<String, EntityMeta> metaMap = new ConcurrentHashMap<>();
 
     private MetaFactory() {}
 
