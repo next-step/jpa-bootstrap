@@ -17,6 +17,10 @@ public class SimpleCurrentSessionContext implements CurrentSessionContext {
 
     @Override
     public EntityManager currentSession() {
+        Thread currentThread = Thread.currentThread();
+        if (entityManagerMap.containsKey(currentThread)) {
+            return entityManagerMap.get(currentThread);
+        }
         throw new IllegalStateException("현재 스레드에 존재하는 entitymanager 세션이 없습니다.");
     }
 }
