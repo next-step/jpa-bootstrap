@@ -1,8 +1,6 @@
 package persistence.sql.meta;
 
-import domain.Order;
-import domain.OrderItem;
-import domain.Person;
+import domain.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,8 +16,8 @@ class EntityMetaScannerTest {
         EntityMetaScanner scanner = new EntityMetaScanner();
         List<Class<?>> scannedList = scanner.scan(EntityMeta.BASE_PACKAGE);
 
-        assertThat(scannedList.size()).isEqualTo(3);
-        assertThat(scannedList).contains(Order.class, OrderItem.class, Person.class);
+        assertThat(scannedList.size()).isEqualTo(5);
+        assertThat(scannedList).contains(Order.class, OrderItem.class, Person.class, Employee.class, Department.class);
     }
 
 }
