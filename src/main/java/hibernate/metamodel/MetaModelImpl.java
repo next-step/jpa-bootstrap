@@ -41,6 +41,17 @@ public class MetaModelImpl implements MetaModel {
         return new MetaModelImpl(entityClassMap, entityPersisterMap, entityLoaderMap);
     }
 
+    public static MetaModel createPackageMetaModel(final BasicMetaModel basicMetaModel, final JdbcTemplate jdbcTemplate) {
+        Map<Class<?>, EntityClass<?>> entityClassMap = basicMetaModel.getEntityClassMap();
+        Map<Class<?>, EntityPersister<?>> entityPersisterMap = entityClassMap.keySet()
+                .stream()
+                .collect(Collectors.toMap(clazz -> clazz, clazz -> new EntityPersister<>(jdbcTemplate, entityClassMap.get(clazz))));
+        Map<Class<?>, EntityLoader<?>> entityLoaderMap = entityClassMap.keySet()
+                .stream()
+                .collect(Collectors.toMap(clazz -> clazz, clazz -> new EntityLoader<>(jdbcTemplate, entityClassMap.get(clazz))));
+        return new MetaModelImpl(entityClassMap, entityPersisterMap, entityLoaderMap);
+    }
+
     @Override
     public EntityColumn getEntityId(final Class<?> clazz) {
         if (entityClassMap.containsKey(clazz)) {
