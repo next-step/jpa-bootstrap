@@ -15,3 +15,10 @@
     - Map<Class<?>, EntityLoader<?>> entityLoaderMap;
   - 특정 Class를 받아 Entity 어노테이션을 통해 만든 map의 value를 반환한다.
     - 없는 EntityClass인 경우 예외가 발생한다.
+
+## 2단계 - SessionFactory
+### 요구사항 1 - EntityManagerFactory 를 만들어 보기
+- CurrentSessionContext
+  - currentSession()
+    - 현재 스레드에 연결된 EntityManager를 반환한다.
+    - 현재 열린 EntityManager가 없는 경우 예외가 발생한다.
