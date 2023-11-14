@@ -21,7 +21,7 @@
 - CurrentSessionContext
   - currentSession()
     - 현재 스레드에 연결된 EntityManager를 반환한다.
-    - 현재 열린 EntityManager가 없는 경우 예외가 발생한다.
+    - 현재 열린 EntityManager가 없는 경우 null을 반환한다.
 - EntityManagerFactory
   - BasicMetaModel
     - EntityClass Map을 가지고 MetaModel을 만들 수 있도록 기초공사역할을 한다.
