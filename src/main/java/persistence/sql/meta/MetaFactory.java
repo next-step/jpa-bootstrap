@@ -7,6 +7,8 @@ public class MetaFactory {
 
     private static final Map<String, EntityMeta> metaMap = new HashMap<>();
 
+    private MetaFactory() {}
+
     private static void put(Class<?> clazz) {
         metaMap.put(clazz.getName(), EntityMeta.of(clazz));
     }
