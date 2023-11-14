@@ -1,9 +1,6 @@
 package domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Employee {
@@ -14,9 +11,13 @@ public class Employee {
 
     private String name;
 
+    @JoinColumn(name = "department_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private Long departmentId;
+
     protected Employee() {}
 
-    public Employee(String name) {
+    public Employee(String name, Long departmentId) {
         this.name = name;
+        this.departmentId = departmentId;
     }
 }
