@@ -4,6 +4,7 @@ import hibernate.binder.AnnotationBinder;
 import hibernate.entity.EntityLoader;
 import hibernate.entity.EntityPersister;
 import hibernate.entity.meta.EntityClass;
+import hibernate.entity.meta.column.EntityColumn;
 import jdbc.JdbcTemplate;
 
 import java.util.List;
@@ -41,9 +42,10 @@ public class MetaModelImpl implements MetaModel {
     }
 
     @Override
-    public <T> EntityClass<T> getEntityClass(final Class<T> clazz) {
+    public EntityColumn getEntityId(final Class<?> clazz) {
         if (entityClassMap.containsKey(clazz)) {
-            return (EntityClass<T>) entityClassMap.get(clazz);
+            return entityClassMap.get(clazz)
+                    .getEntityId();
         }
         throw new IllegalArgumentException("해당 클래스는 엔티티 클래스가 아닙니다.");
     }

@@ -1,6 +1,5 @@
 package hibernate.entity;
 
-import hibernate.entity.meta.EntityClass;
 import hibernate.entity.meta.column.EntityColumn;
 import hibernate.entity.persistencecontext.EntityKey;
 import hibernate.entity.persistencecontext.EntitySnapshot;
@@ -41,8 +40,7 @@ public class EntityManagerImpl implements EntityManager {
     @Override
     public void persist(final Object entity) {
         EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
-        EntityColumn entityId = metaModel.getEntityClass(entity.getClass())
-                .getEntityId();
+        EntityColumn entityId = metaModel.getEntityId(entity.getClass());
         Object id = entityId.getFieldValue(entity);
         if (id == null) {
             persistenceContext.addEntityEntry(entity, SAVING);
@@ -61,8 +59,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void merge(final Object entity) {
-        EntityClass<?> entityClass = metaModel.getEntityClass(entity.getClass());
-        Object entityId = getNotNullEntityId(entityClass, entity);
+        Object entityId = getNotNullEntityId(entity);
         Map<EntityColumn, Object> changedColumns = getSnapshot(entity, entityId).changedColumns(entity);
         if (changedColumns.isEmpty()) {
             return;
@@ -72,8 +69,8 @@ public class EntityManagerImpl implements EntityManager {
                 .update(entityId, changedColumns);
     }
 
-    private Object getNotNullEntityId(final EntityClass<?> entityClass, final Object entity) {
-        Object entityId = entityClass.getEntityId()
+    private Object getNotNullEntityId(final Object entity) {
+        Object entityId = metaModel.getEntityId(entity.getClass())
                 .getFieldValue(entity);
         if (entityId == null) {
             throw new IllegalStateException("id가 없는 entity는 merge할 수 없습니다.");
