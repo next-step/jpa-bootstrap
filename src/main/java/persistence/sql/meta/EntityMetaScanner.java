@@ -1,5 +1,7 @@
 package persistence.sql.meta;
 
+import jakarta.persistence.Entity;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,9 +28,13 @@ public class EntityMetaScanner {
             classes.addAll(scan(basePackage + "." + file.getName()));
             return;
         }
-        if (file.getName().endsWith(".class")) {
-            String className = basePackage + "." + file.getName().substring(0, file.getName().length() - 6);
-            classes.add(Class.forName(className));
+        if (!file.getName().endsWith(".class")) {
+            return;
+        }
+        String className = basePackage + "." + file.getName().substring(0, file.getName().length() - 6);
+        Class<?> addTarget = Class.forName(className);
+        if (addTarget.isAnnotationPresent(Entity.class)) {
+            classes.add(addTarget);
         }
     }
 
