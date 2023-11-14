@@ -9,6 +9,8 @@ import java.util.stream.StreamSupport;
 
 public class EntityMeta {
 
+    public static final String BASE_PACKAGE = "domain";
+
     private final Class<?> clazz;
     private final ColumnMetas columnMetas;
 
