@@ -50,13 +50,13 @@ class EntityMetaScannerTest {
         }
 
         @AfterEach
-        void tearDown() {
-            EntityMeta personMeta = MetaFactory.get(Person.class);
-            EntityMeta orderMeta = MetaFactory.get(Order.class);
-            EntityMeta orderItemMeta = MetaFactory.get(OrderItem.class);
-            jdbcTemplate.execute(ddlQueryGenerator.generateDropQuery(personMeta));
-            jdbcTemplate.execute(ddlQueryGenerator.generateDropQuery(orderMeta));
-            jdbcTemplate.execute(ddlQueryGenerator.generateDropQuery(orderItemMeta));
+        void tearDown() throws Exception {
+            EntityMetaScanner metaScanner = new EntityMetaScanner();
+            metaScanner.scan(EntityMeta.BASE_PACKAGE)
+                    .forEach(scanClass -> {
+                        EntityMeta entityMeta = MetaFactory.get(scanClass);
+                        jdbcTemplate.execute(ddlQueryGenerator.generateDropQuery(entityMeta));
+                    });
             server.stop();
         }
 
