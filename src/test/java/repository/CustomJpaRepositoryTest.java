@@ -11,6 +11,7 @@ import hibernate.entity.persistencecontext.EntityKey;
 import hibernate.entity.persistencecontext.EntitySnapshot;
 import hibernate.entity.persistencecontext.PersistenceContext;
 import hibernate.entity.persistencecontext.SimplePersistenceContext;
+import hibernate.metamodel.BasicMetaModel;
 import hibernate.metamodel.MetaModel;
 import hibernate.metamodel.MetaModelImpl;
 import jakarta.persistence.*;
@@ -41,7 +42,8 @@ class CustomJpaRepositoryTest {
         persistenceContextSnapshotEntities = new ConcurrentHashMap<>();
         EntityEntryContext entityEntryContext = new EntityEntryContext(new ConcurrentHashMap<>());
         PersistenceContext persistenceContext = new SimplePersistenceContext(persistenceContextEntities, persistenceContextSnapshotEntities, entityEntryContext);
-        MetaModel metaModel = MetaModelImpl.createPackageMetaModel("repository", jdbcTemplate);
+        BasicMetaModel basicMetaModel = BasicMetaModel.createPackageMetaModel("repository");
+        MetaModel metaModel = MetaModelImpl.createPackageMetaModel(basicMetaModel, jdbcTemplate);
         EntityManager entityManager = new EntityManagerImpl(persistenceContext, metaModel);
         customJpaRepository = new CustomJpaRepository<>(entityManager);
     }
