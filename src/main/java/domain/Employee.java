@@ -14,4 +14,9 @@ public class Employee {
 
     private String name;
 
+    protected Employee() {}
+
+    public Employee(String name) {
+        this.name = name;
+    }
 }

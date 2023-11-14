@@ -17,4 +17,9 @@ public class Department {
     @JoinColumn(name = "department_id")
     private List<Employee> employees;
 
+    protected Department() {}
+
+    public Department(String name) {
+        this.name = name;
+    }
 }
