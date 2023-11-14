@@ -54,7 +54,6 @@ public class MetaModelImpl implements MetaModel {
         throw new IllegalArgumentException("해당 클래스는 엔티티 클래스가 아닙니다.");
     }
 
-    // TODO 테스트 추가
     @Override
     public <T> EntityPersister<T> getEntityPersister(Class<T> clazz) {
         if (entityPersisterMap.containsKey(clazz)) {
@@ -63,7 +62,6 @@ public class MetaModelImpl implements MetaModel {
         throw new IllegalArgumentException("해당 클래스는 엔티티 클래스가 아닙니다.");
     }
 
-    // TODO 테스트 추가
     @Override
     public <T> EntityLoader<T> getEntityLoader(Class<T> clazz) {
         if (entityPersisterMap.containsKey(clazz)) {
