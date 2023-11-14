@@ -106,7 +106,7 @@ class EntityFieldTest {
                 .hasMessage("Entity 객체에 일치하는 필드값이 없습니다.");
     }
 
-    static class TestEntity {
+    private static class TestEntity {
 
         private Long id;
         @Column(name = "nick_name")

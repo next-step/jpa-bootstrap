@@ -37,7 +37,7 @@ class PrimaryKetOptionGenerateStrategyTest {
         assertThat(actual).isEqualTo("primary key");
     }
 
-    static class TestEntity {
+    private static class TestEntity {
         @Id
         private Long id1;
 

@@ -24,7 +24,7 @@ class ReflectionRowMapperTest {
         givenResultSet.addColumn("child_entity.age", Types.INTEGER, 0, 0);
         givenResultSet.addRow(1L, "최진영", 3L, 19);
         givenResultSet.next();
-        RowMapper<TestEntity> rowMapper = ReflectionRowMapper.getInstance(EntityClass.getInstance(TestEntity.class));
+        RowMapper<TestEntity> rowMapper = ReflectionRowMapper.getInstance(new EntityClass<>(TestEntity.class));
 
         // when
         TestEntity actual = rowMapper.mapRow(givenResultSet);
@@ -41,7 +41,7 @@ class ReflectionRowMapperTest {
 
     @Entity
     @Table(name = "test_entity")
-    static class TestEntity {
+    private static class TestEntity {
         @Id
         private Long id;
 

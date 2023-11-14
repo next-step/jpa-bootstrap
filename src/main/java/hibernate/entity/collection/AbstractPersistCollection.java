@@ -11,9 +11,9 @@ public abstract class AbstractPersistCollection<T> implements Collection<T> {
     protected Collection<T> values = null;
     protected boolean isLoaded = false;
     protected final EntityClass<T> entityClass;
-    protected final EntityLoader entityLoader;
+    protected final EntityLoader<T> entityLoader;
 
-    protected AbstractPersistCollection(final EntityClass<T> entityClass, final EntityLoader entityLoader) {
+    protected AbstractPersistCollection(final EntityClass<T> entityClass, final EntityLoader<T> entityLoader) {
         this.entityClass = entityClass;
         this.entityLoader = entityLoader;
     }
@@ -22,7 +22,7 @@ public abstract class AbstractPersistCollection<T> implements Collection<T> {
         if (isLoaded) {
             return;
         }
-        values = entityLoader.findAll(entityClass);
+        values = entityLoader.findAll();
         isLoaded = true;
     }
 

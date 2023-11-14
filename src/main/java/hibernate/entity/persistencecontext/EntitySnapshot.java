@@ -17,7 +17,7 @@ public class EntitySnapshot {
     }
 
     private Map<EntityColumn, Object> parseToSnapshot(final Object entity) {
-        return EntityClass.getInstance(entity.getClass())
+        return new EntityClass<>(entity.getClass())
                 .getEntityColumns()
                 .stream()
                 .collect(Collectors.toMap(

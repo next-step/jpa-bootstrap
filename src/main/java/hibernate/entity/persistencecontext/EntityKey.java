@@ -1,17 +1,15 @@
 package hibernate.entity.persistencecontext;
 
-import hibernate.entity.meta.EntityClass;
-
 import java.util.Objects;
 
 public class EntityKey {
 
     private final Object id;
-    private final EntityClass<?> entityClass;
+    private final Class<?> clazz;
 
     public EntityKey(final Object id, final Class<?> clazz) {
         this.id = id;
-        this.entityClass = EntityClass.getInstance(clazz);
+        this.clazz = clazz;
     }
 
     public EntityKey(final Object id, final Object object) {
@@ -23,11 +21,11 @@ public class EntityKey {
         if (this == entity) return true;
         if (entity == null || getClass() != entity.getClass()) return false;
         EntityKey entityKey = (EntityKey) entity;
-        return Objects.equals(id, entityKey.id) && Objects.equals(entityClass, entityKey.entityClass);
+        return Objects.equals(id, entityKey.id) && Objects.equals(clazz, entityKey.clazz);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, entityClass);
+        return Objects.hash(id, clazz);
     }
 }

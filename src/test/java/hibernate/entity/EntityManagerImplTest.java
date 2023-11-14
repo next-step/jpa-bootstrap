@@ -8,7 +8,10 @@ import hibernate.entity.entityentry.EntityEntryContext;
 import hibernate.entity.meta.EntityClass;
 import hibernate.entity.persistencecontext.EntityKey;
 import hibernate.entity.persistencecontext.EntitySnapshot;
+import hibernate.entity.persistencecontext.PersistenceContext;
 import hibernate.entity.persistencecontext.SimplePersistenceContext;
+import hibernate.metamodel.MetaModel;
+import hibernate.metamodel.MetaModelImpl;
 import jakarta.persistence.*;
 import jdbc.JdbcTemplate;
 import jdbc.ReflectionRowMapper;
@@ -41,11 +44,10 @@ class EntityManagerImplTest {
         persistenceContextEntities = new ConcurrentHashMap<>();
         persistenceContextSnapshotEntities = new ConcurrentHashMap<>();
         entityEntryContextEntities = new ConcurrentHashMap<>();
-        entityManager = new EntityManagerImpl(
-                new EntityPersister(jdbcTemplate),
-                new EntityLoader(jdbcTemplate),
-                new SimplePersistenceContext(persistenceContextEntities, persistenceContextSnapshotEntities, new EntityEntryContext(entityEntryContextEntities))
-        );
+        EntityEntryContext entityEntryContext = new EntityEntryContext(entityEntryContextEntities);
+        PersistenceContext persistenceContext = new SimplePersistenceContext(persistenceContextEntities, persistenceContextSnapshotEntities, entityEntryContext);
+        MetaModel metaModel = MetaModelImpl.createPackageMetaModel("hibernate.entity", jdbcTemplate);
+        entityManager = new EntityManagerImpl(persistenceContext, metaModel);
     }
 
     @BeforeAll
@@ -53,7 +55,7 @@ class EntityManagerImplTest {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        jdbcTemplate.execute(createQueryBuilder.generateQuery(EntityClass.getInstance(TestEntity.class)));
+        jdbcTemplate.execute(createQueryBuilder.generateQuery(new EntityClass<>(TestEntity.class)));
     }
 
     @AfterEach
@@ -138,7 +140,7 @@ class EntityManagerImplTest {
 
         // when
         entityManager.persist(givenEntity);
-        TestEntity actual = jdbcTemplate.queryForObject("select id, nick_name, age from test_entity;", ReflectionRowMapper.getInstance(EntityClass.getInstance(TestEntity.class)));
+        TestEntity actual = jdbcTemplate.queryForObject("select id, nick_name, age from test_entity;", ReflectionRowMapper.getInstance(new EntityClass<>(TestEntity.class)));
         TestEntity actualPersistenceContext = (TestEntity) persistenceContextEntities.get(new EntityKey(actual.id, TestEntity.class));
 
         // then
@@ -251,7 +253,7 @@ class EntityManagerImplTest {
 
     @Entity
     @Table(name = "test_entity")
-    static class TestEntity {
+    private static class TestEntity {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;

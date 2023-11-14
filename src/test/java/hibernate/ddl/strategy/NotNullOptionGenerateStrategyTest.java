@@ -39,7 +39,7 @@ class NotNullOptionGenerateStrategyTest {
         assertThat(actual).isEqualTo("not null");
     }
 
-    static class TestEntity {
+    private static class TestEntity {
         @Column(nullable = false)
         private String name1;
 

@@ -22,7 +22,6 @@ class EntityPersisterTest {
 
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
-    private final EntityPersister entityPersister = new EntityPersister(jdbcTemplate);
 
     @BeforeAll
     static void beforeAll() throws SQLException {
@@ -30,7 +29,7 @@ class EntityPersisterTest {
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
 
-        jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(EntityClass.getInstance(TestEntity.class)));
+        jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(TestEntity.class)));
     }
 
     @AfterEach
@@ -47,11 +46,12 @@ class EntityPersisterTest {
     @Test
     void update_쿼리를_실행한다() {
         // given
-        EntityClass<TestEntity> entityClass = EntityClass.getInstance(TestEntity.class);
+        EntityClass<TestEntity> entityClass = new EntityClass<>(TestEntity.class);
+        EntityPersister<TestEntity> entityPersister = new EntityPersister<>(jdbcTemplate, entityClass);
         jdbcTemplate.execute("insert into test_entity (id, nick_name) values (1, '최진영');");
 
         // when
-        boolean actual = entityPersister.update(entityClass, 1L, Map.of(entityClass.getEntityColumns().get(1), "영진최"));
+        boolean actual = entityPersister.update(1L, Map.of(entityClass.getEntityColumns().get(1), "영진최"));
 
         // then
         assertThat(actual).isTrue();
@@ -61,6 +61,7 @@ class EntityPersisterTest {
     void insert_쿼리를_실행한다() {
         // given
         TestEntity givenEntity = new TestEntity("최진영");
+        EntityPersister<TestEntity> entityPersister = new EntityPersister<>(jdbcTemplate, new EntityClass<>(TestEntity.class));
 
         // when
         entityPersister.insert(givenEntity);
@@ -74,6 +75,7 @@ class EntityPersisterTest {
     void delete_쿼리를_실행한다() {
         // given
         TestEntity givenEntity = new TestEntity(1L, "최진영");
+        EntityPersister<TestEntity> entityPersister = new EntityPersister<>(jdbcTemplate, new EntityClass<>(TestEntity.class));
         jdbcTemplate.execute("insert into test_entity (id, nick_name) values (1, '최진영');");
 
         // when
@@ -99,7 +101,7 @@ class EntityPersisterTest {
 
     @Entity
     @Table(name = "test_entity")
-    static class TestEntity {
+    private static class TestEntity {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;

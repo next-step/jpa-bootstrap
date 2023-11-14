@@ -22,14 +22,14 @@ class EntityJoinColumnsTest {
     })
     void EAGER가_컬럼에_있는지_확인한다(final String className, final boolean expected) throws ClassNotFoundException {
         Class<?> inputClass = Class.forName(className);
-        boolean actual = oneToManyColumns(EntityClass.getInstance(inputClass))
+        boolean actual = oneToManyColumns(new EntityClass<>(inputClass))
                 .hasEagerFetchType();
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     void oneToMany어노테이션이_달린_Eager컬럼만_가져온다() {
-        List<EntityJoinColumn> actual = oneToManyColumns(EntityClass.getInstance(TestEntity.class))
+        List<EntityJoinColumn> actual = oneToManyColumns(new EntityClass<>(TestEntity.class))
                 .getEagerValues();
         assertAll(
                 () -> assertThat(actual).hasSize(1),
@@ -44,7 +44,7 @@ class EntityJoinColumnsTest {
     })
     void LAZY가_컬럼에_있는지_확인한다(final String className, final boolean expected) throws ClassNotFoundException {
         Class<?> inputClass = Class.forName(className);
-        boolean actual = oneToManyColumns(EntityClass.getInstance(inputClass))
+        boolean actual = oneToManyColumns(new EntityClass<>(inputClass))
                 .hasLazyFetchType();
         assertThat(actual).isEqualTo(expected);
     }
@@ -52,7 +52,7 @@ class EntityJoinColumnsTest {
 
     @Test
     void oneToMany어노테이션이_달린_LAZY컬럼만_가져온다() {
-        List<EntityJoinColumn> actual = oneToManyColumns(EntityClass.getInstance(TestEntity.class))
+        List<EntityJoinColumn> actual = oneToManyColumns(new EntityClass<>(TestEntity.class))
                 .getLazyValues();
         assertAll(
                 () -> assertThat(actual).hasSize(1),
@@ -62,7 +62,7 @@ class EntityJoinColumnsTest {
 
     @Test
     void eager_join테이블의_필드를_가져온다() {
-        Map<String, List<String>> actual = EntityJoinColumns.oneToManyColumns(EntityClass.getInstance(Order.class))
+        Map<String, List<String>> actual = EntityJoinColumns.oneToManyColumns(new EntityClass<>(Order.class))
                 .getEagerJoinTableFields();
 
         assertAll(
@@ -73,7 +73,7 @@ class EntityJoinColumnsTest {
 
     @Test
     void eager_join테이블의_fk필드를_가져온다() {
-        Map<String, Object> actual = EntityJoinColumns.oneToManyColumns(EntityClass.getInstance(Order.class))
+        Map<String, Object> actual = EntityJoinColumns.oneToManyColumns(new EntityClass<>(Order.class))
                 .getEagerJoinTableIds();
 
         assertAll(
@@ -89,7 +89,7 @@ class EntityJoinColumnsTest {
     }
 
     @Entity
-    static class TestEntity {
+    private static class TestEntity {
         @Id
         private Long id;
 

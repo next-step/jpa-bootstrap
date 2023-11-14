@@ -41,7 +41,7 @@ class IdIdentityOptionGenerateStrategyTest {
         assertThat(actual).isEqualTo("auto_increment");
     }
 
-    static class TestEntity {
+    private static class TestEntity {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id1;

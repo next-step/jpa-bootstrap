@@ -18,7 +18,7 @@ public class CustomJpaRepository<T, ID> {
     }
 
     private boolean isNewEntity(T t) {
-        return EntityClass.getInstance(t.getClass())
+        return new EntityClass<>(t.getClass())
                 .getEntityId()
                 .getFieldValue(t) == null;
     }

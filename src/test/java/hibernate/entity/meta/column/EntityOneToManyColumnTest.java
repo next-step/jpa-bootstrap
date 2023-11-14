@@ -27,7 +27,7 @@ class EntityOneToManyColumnTest {
         assertAll(
                 () -> assertThat(actual.getJoinColumnName()).isEqualTo("child_id"),
                 () -> assertThat(actual.getFetchType()).isEqualTo(FetchType.EAGER),
-                () -> assertThat(actual.getEntityClass()).isEqualTo(EntityClass.getInstance(ChildEntity.class))
+                () -> assertThat(actual.getEntityClass()).isEqualTo(new EntityClass<>(ChildEntity.class))
         );
     }
 
@@ -67,7 +67,7 @@ class EntityOneToManyColumnTest {
     }
 
     @Entity
-    static class TestEntity {
+    private static class TestEntity {
         @Id
         private Long id;
 

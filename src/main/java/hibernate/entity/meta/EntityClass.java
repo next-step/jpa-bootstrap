@@ -9,27 +9,20 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityClass<T> {
-
-    private static final Map<Class<?>, EntityClass<?>> CACHE = new ConcurrentHashMap<>();
 
     private final EntityTableName tableName;
     private final EntityColumns entityColumns;
     private final Class<T> clazz;
 
-    private EntityClass(final Class<T> clazz) {
+    public EntityClass(final Class<T> clazz) {
         if (!clazz.isAnnotationPresent(Entity.class)) {
             throw new IllegalArgumentException("Entity 어노테이션이 없는 클래스는 입력될 수 없습니다.");
         }
         this.tableName = new EntityTableName(clazz);
         this.entityColumns = new EntityColumns(clazz.getDeclaredFields());
         this.clazz = clazz;
-    }
-
-    public static <T> EntityClass<T> getInstance(final Class<T> clazz) {
-        return (EntityClass<T>) CACHE.computeIfAbsent(clazz, EntityClass::new);
     }
 
     public T newInstance()  {
