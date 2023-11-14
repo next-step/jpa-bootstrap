@@ -22,3 +22,9 @@
   - currentSession()
     - 현재 스레드에 연결된 EntityManager를 반환한다.
     - 현재 열린 EntityManager가 없는 경우 예외가 발생한다.
+- EntityManagerFactory
+  - BasicMetaModel
+    - EntityClass Map을 가지고 MetaModel을 만들 수 있도록 기초공사역할을 한다.
+    - 기존 MetaModelImple에서 Map<Class<?>, EntityClass<?>> 를 가져간다
+  - MetaModelImpl
+    - BasicMetaModel과 jdbcTemplate을 받아 EntityManager에 주입할 MetaModel 생성
