@@ -32,7 +32,7 @@ class InsertQueryBuilderTest {
 
     @Entity
     @Table(name = "test_entity")
-    static class TestEntity {
+    private static class TestEntity {
 
         @Id
         private Long id;

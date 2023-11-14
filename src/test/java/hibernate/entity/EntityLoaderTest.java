@@ -29,7 +29,7 @@ class EntityLoaderTest {
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
 
-        jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(EntityManagerImplTest.TestEntity.class)));
+        jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(TestEntity.class)));
         jdbcTemplate.execute("CREATE TABLE orders (\n" +
                 "    id BIGINT PRIMARY KEY,\n" +
                 "    orderNumber VARCHAR\n" +
@@ -122,7 +122,7 @@ class EntityLoaderTest {
 
     @Entity
     @Table(name = "test_entity")
-    static class TestEntity {
+    private static class TestEntity {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;

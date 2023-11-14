@@ -93,7 +93,7 @@ class SimplePersistenceContextTest {
     }
 
     @Entity
-    static class TestEntity {
+    private static class TestEntity {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;

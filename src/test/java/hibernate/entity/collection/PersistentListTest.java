@@ -53,7 +53,7 @@ class PersistentListTest {
 
     @Entity
     @Table(name = "test_entity")
-    static class TestEntity {
+    private static class TestEntity {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;

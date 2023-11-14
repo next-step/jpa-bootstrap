@@ -67,7 +67,7 @@ class EntityOneToManyColumnTest {
     }
 
     @Entity
-    static class TestEntity {
+    private static class TestEntity {
         @Id
         private Long id;
 
