@@ -32,3 +32,4 @@
     - BasicMetaModel을 통해 새로운 EntityManager를 생성한다.
     - 이미 현재 스레드에 EntityManager를 만들었는데 생성하려하는 경우 예외가 발생한다.
     - 현재 CurrentSessionContext에 보유중인 EntityManager를 반환한다.
+    - 현재 열린 EntityManager가 없는데 반환하려하는 경우 예외가 발생한다.

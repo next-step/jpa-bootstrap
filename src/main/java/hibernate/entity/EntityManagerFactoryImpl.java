@@ -34,4 +34,13 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
                 MetaModelImpl.createPackageMetaModel(basicMetaModel, new JdbcTemplate(connection))
         );
     }
+
+    @Override
+    public EntityManager currentSession() {
+        EntityManager entityManager = currentSessionContext.currentSession();
+        if (entityManager == null) {
+            throw new IllegalStateException("현재 스레드에 생성된 EntityManager가 없습니다.");
+        }
+        return entityManager;
+    }
 }

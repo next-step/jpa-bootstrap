@@ -30,4 +30,22 @@ class EntityManagerFactoryImplTest {
         EntityManager actual = entityManagerFactory.openSession();
         assertThat(actual).isNotNull();
     }
+
+    @Test
+    void 현재_열린_EntityManager_세션이_없는데_반환하려하면_예외가_발생한다() {
+        EntityManagerFactory entityManagerFactory = new EntityManagerFactoryImpl(new SimpleCurrentSessionContext(), null, null);
+        assertThatThrownBy(entityManagerFactory::currentSession)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("현재 스레드에 생성된 EntityManager가 없습니다.");
+    }
+
+    @Test
+    void 현재_열린_EntityManager_세션을_반환한다() {
+        CurrentSessionContext currentSessionContext = new SimpleCurrentSessionContext(
+                Map.of(Thread.currentThread(), new EntityManagerImpl(null, null)));
+        EntityManagerFactory entityManagerFactory = new EntityManagerFactoryImpl(currentSessionContext, null, null);
+
+        EntityManager actual = entityManagerFactory.currentSession();
+        assertThat(actual).isNotNull();
+    }
 }
