@@ -6,6 +6,7 @@ import persistence.sql.meta.MetaFactory;
 import persistence.sql.util.StringConstant;
 
 import java.util.List;
+import java.util.Objects;
 
 public class InsertQueryBuilder {
 
@@ -21,13 +22,14 @@ public class InsertQueryBuilder {
     }
 
     public static InsertQueryBuilder of(Object entityInstance) {
-        EntityMeta entityMeta = MetaFactory.get(entityInstance.getClass());
+        MetaFactory metaFactory = MetaFactory.getInstance();
+        EntityMeta entityMeta = metaFactory.get(entityInstance.getClass());
         validateEntityAnnotation(entityMeta);
         return new InsertQueryBuilder(entityMeta, ColumnValues.ofFilteredAutoGenType(entityInstance));
     }
 
     private static void validateEntityAnnotation(EntityMeta entityMeta) {
-        if (!entityMeta.isEntity()) {
+        if (Objects.isNull(entityMeta) || !entityMeta.isEntity()) {
             throw new IllegalArgumentException("Insert Query 빌드 대상이 아닙니다.");
         }
     }

@@ -29,7 +29,8 @@ public class Application {
             DdlQueryGenerator ddlGenerator = DdlQueryGenerator.of(H2Dialect.getInstance());
             DmlQueryGenerator dmlGenerator = DmlQueryGenerator.of(H2Dialect.getInstance());
 
-            EntityMeta personMeta = MetaFactory.get(Person.class);
+            MetaFactory metaFactory = MetaFactory.getInstance();
+            EntityMeta personMeta = metaFactory.get(Person.class);
             jdbcTemplate.execute(ddlGenerator.generateCreateQuery(personMeta));
 
             for (Person personFixture : PersonFixtureFactory.getFixtures()) {
