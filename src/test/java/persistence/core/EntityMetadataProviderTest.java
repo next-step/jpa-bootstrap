@@ -8,6 +8,7 @@ import domain.FixtureEntity;
 import persistence.Application;
 import persistence.exception.PersistenceException;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,7 +68,7 @@ class EntityMetadataProviderTest {
     @Test
     @DisplayName("getAllEntityClasses 를 통해 모든 Entity 의 class 정보를 반환받을 수 있다.")
     void getAllEntityClassesTest() {
-        final Set<Class<?>> allAssociatedEntitiesMetadata = entityMetadataProvider.getAllEntityClasses();
+        final List<Class<?>> allAssociatedEntitiesMetadata = entityMetadataProvider.getAllEntityClasses();
 
         assertThat(allAssociatedEntitiesMetadata).isNotEmpty();
     }

@@ -2,6 +2,7 @@ package persistence.core;
 
 import persistence.exception.PersistenceException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -10,10 +11,12 @@ import java.util.stream.Collectors;
 
 public class EntityMetadataProvider {
 
+    private final List<Class<?>> entityClasses;
     private final Map<Class<?>, EntityMetadata<?>> cache;
 
     private EntityMetadataProvider(final EntityScanner entityScanner) {
-        this.cache = entityScanner.getEntityClasses()
+        this.entityClasses = entityScanner.getEntityClasses();
+        this.cache = entityClasses
                 .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
@@ -40,8 +43,8 @@ public class EntityMetadataProvider {
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    public Set<Class<?>> getAllEntityClasses() {
-        return cache.keySet();
+    public List<Class<?>> getAllEntityClasses() {
+        return this.entityClasses;
     }
 
 }
