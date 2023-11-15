@@ -20,10 +20,12 @@ public class EntityLoader {
 
     private final JdbcTemplate jdbcTemplate;
     private final DmlQueryGenerator dmlQueryGenerator;
+    private final MetaFactory metaFactory;
 
     private EntityLoader(JdbcTemplate jdbcTemplate, DmlQueryGenerator dmlQueryGenerator) {
         this.jdbcTemplate = jdbcTemplate;
         this.dmlQueryGenerator = dmlQueryGenerator;
+        this.metaFactory = MetaFactory.getInstance();
     }
 
     public static EntityLoader of(JdbcTemplate jdbcTemplate) {
@@ -36,7 +38,7 @@ public class EntityLoader {
     public <T> T selectOne(Class<T> clazz, Long id) {
         String selectByPkQuery = dmlQueryGenerator.generateSelectByPkQuery(clazz, id);
         T entity = jdbcTemplate.queryForObject(selectByPkQuery, new EntityRowMapper<>(clazz));
-        EntityMeta entityMeta = MetaFactory.get(clazz);
+        EntityMeta entityMeta = metaFactory.get(clazz);
         ColumnMetas columnMetas = entityMeta.getColumnMetas();
         if (columnMetas.hasJoinEntity()) {
             setJoinTargets(entity, id);
@@ -50,7 +52,7 @@ public class EntityLoader {
 
     private <T> void setJoinTargets(T entity, Long id) {
         String selectQuery = dmlQueryGenerator.generateSelectWithJoinByPkQuery(entity.getClass(), id);
-        EntityMeta entityMeta = MetaFactory.get(entity.getClass());
+        EntityMeta entityMeta = metaFactory.get(entity.getClass());
         ColumnMetas columnMetas = entityMeta.getColumnMetas();
         columnMetas.forEach(columnMeta -> {
             if (columnMeta.isJoinFetchTypeEager()) {

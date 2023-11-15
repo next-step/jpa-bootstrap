@@ -11,9 +11,11 @@ import persistence.sql.meta.MetaFactory;
 public class DmlQueryGenerator {
 
     private final Dialect dialect;
+    private final MetaFactory metaFactory;
 
     private DmlQueryGenerator(Dialect dialect) {
         this.dialect = dialect;
+        this.metaFactory = MetaFactory.getInstance();
     }
 
     public static DmlQueryGenerator of(Dialect dialect) {
@@ -25,37 +27,37 @@ public class DmlQueryGenerator {
     }
 
     public String generateSelectAllQuery(Class<?> clazz) {
-        EntityMeta entityMeta = MetaFactory.get(clazz);
+        EntityMeta entityMeta = metaFactory.get(clazz);
         return SelectQueryBuilder.of(entityMeta).buildSelectAllQuery();
     }
 
     public String generateSelectByPkQuery(Class<?> clazz, Object pkObject) {
-        EntityMeta entityMeta = MetaFactory.get(clazz);
+        EntityMeta entityMeta = metaFactory.get(clazz);
         return SelectQueryBuilder.of(entityMeta).buildSelectByPkQuery(pkObject);
     }
 
     public String generateSelectWithJoinByPkQuery(Class<?> clazz, Object pkObject) {
-        EntityMeta entityMeta = MetaFactory.get(clazz);
+        EntityMeta entityMeta = metaFactory.get(clazz);
         return SelectQueryBuilder.of(entityMeta).buildSelectWithJoinByPkQuery(pkObject);
     }
 
     public String generateUpdateQuery(Object entity) {
-        EntityMeta entityMeta = MetaFactory.get(entity.getClass());
+        EntityMeta entityMeta = metaFactory.get(entity.getClass());
         return UpdateQueryBuilder.of(entityMeta).buildUpdateQuery(entity);
     }
 
     public String generateDeleteAllQuery(Class<?> clazz) {
-        EntityMeta entityMeta = MetaFactory.get(clazz);
+        EntityMeta entityMeta = metaFactory.get(clazz);
         return DeleteQueryBuilder.of(entityMeta).buildDeleteAllQuery();
     }
 
     public String generateDeleteQuery(Object entity) {
-        EntityMeta entityMeta = MetaFactory.get(entity.getClass());
+        EntityMeta entityMeta = metaFactory.get(entity.getClass());
         return DeleteQueryBuilder.of(entityMeta).buildDeleteQuery(entity);
     }
 
     public String generateDeleteByPkQuery(Class<?> clazz, Object pkObject) {
-        EntityMeta entityMeta = MetaFactory.get(clazz);
+        EntityMeta entityMeta = metaFactory.get(clazz);
         return DeleteQueryBuilder.of(entityMeta).buildDeleteByPkQuery(pkObject);
     }
 
