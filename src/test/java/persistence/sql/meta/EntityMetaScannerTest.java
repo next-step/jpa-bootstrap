@@ -14,6 +14,7 @@ import persistence.sql.dialect.DialectFactory;
 import persistence.sql.dml.DmlQueryGenerator;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,9 +22,11 @@ class EntityMetaScannerTest {
 
     @Test
     @DisplayName("domain 패키지의 Entity 클래스 전체 스캔")
-    void scan() throws Exception {
+    void scan() {
         EntityMetaScanner scanner = new EntityMetaScanner(new EntityScanFilter());
-        List<Class<?>> scannedList = scanner.scan();
+        List<Class<?>> scannedList = scanner.scan().stream()
+                .map(EntityMeta::getInnerClass)
+                .collect(Collectors.toList());
 
         assertThat(scannedList.size()).isEqualTo(5);
         assertThat(scannedList).contains(Order.class, OrderItem.class, Person.class, Employee.class, Department.class);
@@ -50,25 +53,19 @@ class EntityMetaScannerTest {
         }
 
         @AfterEach
-        void tearDown() throws Exception {
+        void tearDown() {
             EntityMetaScanner metaScanner = new EntityMetaScanner(new EntityScanFilter());
             metaScanner.scan()
-                    .forEach(scanClass -> {
-                        EntityMeta entityMeta = MetaFactory.get(scanClass);
-                        jdbcTemplate.execute(ddlQueryGenerator.generateDropQuery(entityMeta));
-                    });
+                    .forEach(entityMeta -> jdbcTemplate.execute(ddlQueryGenerator.generateDropQuery(entityMeta)));
             server.stop();
         }
 
         @Test
         @DisplayName("Meta 정보 scan 목록을 대상으로 테이블을 생성한 후, 데이터를 입력한다")
-        void ddlByScannedInfo() throws Exception {
+        void ddlByScannedInfo() {
             EntityMetaScanner metaScanner = new EntityMetaScanner(new EntityScanFilter());
             metaScanner.scan()
-                    .forEach(scanClass -> {
-                        EntityMeta entityMeta = MetaFactory.get(scanClass);
-                        jdbcTemplate.execute(ddlQueryGenerator.generateCreateQuery(entityMeta));
-                    });
+                    .forEach(entityMeta -> jdbcTemplate.execute(ddlQueryGenerator.generateCreateQuery(entityMeta)));
 
             jdbcTemplate.execute(dmlQueryGenerator.generateInsertQuery(PersonFixtureFactory.getFixture()));
             jdbcTemplate.execute(dmlQueryGenerator.generateInsertQuery(OrderFixtureFactory.getFixture()));
