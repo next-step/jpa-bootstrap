@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import persistence.core.EntityMetadata;
 import persistence.entity.manager.EntityManager;
 import persistence.entity.manager.EntityManagerFactory;
-import persistence.core.EntityScanner;
 import persistence.entity.manager.SimpleEntityManagerFactory;
 
 import java.util.List;

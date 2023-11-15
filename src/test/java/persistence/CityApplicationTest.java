@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.core.EntityMetadata;
-import persistence.core.EntityScanner;
 import persistence.entity.manager.EntityManager;
 import persistence.entity.manager.EntityManagerFactory;
 import persistence.entity.manager.SimpleEntityManagerFactory;
