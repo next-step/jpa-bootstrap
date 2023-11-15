@@ -1,7 +1,5 @@
 package persistence.sql.meta;
 
-import jakarta.persistence.Entity;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,6 +8,12 @@ import java.util.List;
 public class EntityMetaScanner {
 
     private static final String BASE_PACKAGE = "domain";
+
+    private final MetaScanFilterStrategy filterStrategy;
+
+    public EntityMetaScanner(MetaScanFilterStrategy filterStrategy) {
+        this.filterStrategy = filterStrategy;
+    }
 
     public List<Class<?>> scan() throws IOException, ClassNotFoundException {
         return scan(BASE_PACKAGE);
@@ -39,7 +43,7 @@ public class EntityMetaScanner {
         }
         String className = packageDir + "." + file.getName().substring(0, file.getName().length() - 6);
         Class<?> addTarget = Class.forName(className);
-        if (addTarget.isAnnotationPresent(Entity.class)) {
+        if (filterStrategy.match(addTarget)) {
             classes.add(addTarget);
         }
     }
