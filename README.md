@@ -30,6 +30,8 @@ public List<Class<?>> scan(String basePackage) throws IOException, ClassNotFound
 - [x] EntityLoaders 를 가지고 있다.
 - [x] EntityMetadataProvider 역할을 위임받는다.
 - 요구사항 3 - Metamodel 을 활용해 리팩터링을 진행해보자
+- [x] 밑의 두 클래스 적용
+- [ ] EntityMetadataProvider 대신 Metamodel 적용
 ```java
 @Entity
 public class Department {
