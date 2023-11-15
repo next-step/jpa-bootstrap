@@ -15,20 +15,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EntityPersistersTest {
     private static EntityMetadataProvider entityMetadataProvider;
-    private static EntityScanner entityScanner;
-
     private Class<?> fixtureClass;
     private EntityPersisters entityPersisters;
 
     @BeforeAll
     static void beforeAll() {
-        entityScanner = new EntityScanner(Application.class);
-        entityMetadataProvider = EntityMetadataProvider.from(entityScanner);
+        entityMetadataProvider = EntityMetadataProvider.from(new EntityScanner(Application.class));
     }
 
     @BeforeEach
     void setUp() {
-        entityPersisters = new EntityPersisters(entityMetadataProvider, entityScanner, new MockDmlGenerator(), new MockJdbcTemplate());
+        entityPersisters = new EntityPersisters(entityMetadataProvider, new MockDmlGenerator(), new MockJdbcTemplate());
     }
 
     @Test

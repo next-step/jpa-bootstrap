@@ -20,7 +20,7 @@ public class SimpleEntityManagerFactory implements EntityManagerFactory {
         this.entityMetadataProvider = entityMetadataProvider;
         final DmlGenerator dmlGenerator = persistenceEnvironment.getDmlGenerator();
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(persistenceEnvironment.getConnection());
-        this.entityPersisters = new EntityPersisters(entityMetadataProvider, entityScanner, dmlGenerator, jdbcTemplate);
+        this.entityPersisters = new EntityPersisters(entityMetadataProvider, dmlGenerator, jdbcTemplate);
         this.entityLoaders = new EntityLoaders(entityMetadataProvider, entityScanner, dmlGenerator, jdbcTemplate);
         this.entityProxyFactory = new EntityProxyFactory(entityLoaders);
     }
