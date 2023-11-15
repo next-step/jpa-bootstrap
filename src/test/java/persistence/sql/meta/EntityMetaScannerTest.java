@@ -22,7 +22,7 @@ class EntityMetaScannerTest {
     @Test
     @DisplayName("domain 패키지의 Entity 클래스 전체 스캔")
     void scan() throws Exception {
-        EntityMetaScanner scanner = new EntityMetaScanner();
+        EntityMetaScanner scanner = new EntityMetaScanner(new EntityScanFilter());
         List<Class<?>> scannedList = scanner.scan();
 
         assertThat(scannedList.size()).isEqualTo(5);
@@ -51,7 +51,7 @@ class EntityMetaScannerTest {
 
         @AfterEach
         void tearDown() throws Exception {
-            EntityMetaScanner metaScanner = new EntityMetaScanner();
+            EntityMetaScanner metaScanner = new EntityMetaScanner(new EntityScanFilter());
             metaScanner.scan()
                     .forEach(scanClass -> {
                         EntityMeta entityMeta = MetaFactory.get(scanClass);
@@ -63,7 +63,7 @@ class EntityMetaScannerTest {
         @Test
         @DisplayName("Meta 정보 scan 목록을 대상으로 테이블을 생성한 후, 데이터를 입력한다")
         void ddlByScannedInfo() throws Exception {
-            EntityMetaScanner metaScanner = new EntityMetaScanner();
+            EntityMetaScanner metaScanner = new EntityMetaScanner(new EntityScanFilter());
             metaScanner.scan()
                     .forEach(scanClass -> {
                         EntityMeta entityMeta = MetaFactory.get(scanClass);
