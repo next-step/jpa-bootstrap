@@ -43,9 +43,10 @@ class EntityLoaderTest {
         Dialect dialect = dialectFactory.getDialect(jdbcTemplate.getDbmsName());
         ddlQueryGenerator = DdlQueryGenerator.of(dialect);
 
-        EntityMeta personMeta = MetaFactory.get(Person.class);
-        EntityMeta orderMeta = MetaFactory.get(Order.class);
-        EntityMeta orderItemMeta = MetaFactory.get(OrderItem.class);
+        MetaFactory metaFactory = MetaFactory.getInstance();
+        EntityMeta personMeta = metaFactory.get(Person.class);
+        EntityMeta orderMeta = metaFactory.get(Order.class);
+        EntityMeta orderItemMeta = metaFactory.get(OrderItem.class);
         jdbcTemplate.execute(ddlQueryGenerator.generateCreateQuery(personMeta));
         jdbcTemplate.execute(ddlQueryGenerator.generateCreateQuery(orderMeta));
         jdbcTemplate.execute(ddlQueryGenerator.generateCreateQuery(orderItemMeta));
@@ -60,9 +61,10 @@ class EntityLoaderTest {
 
     @AfterEach
     void tearDown() {
-        EntityMeta personMeta = MetaFactory.get(Person.class);
-        EntityMeta orderMeta = MetaFactory.get(Order.class);
-        EntityMeta orderItemMeta = MetaFactory.get(OrderItem.class);
+        MetaFactory metaFactory = MetaFactory.getInstance();
+        EntityMeta personMeta = metaFactory.get(Person.class);
+        EntityMeta orderMeta = metaFactory.get(Order.class);
+        EntityMeta orderItemMeta = metaFactory.get(OrderItem.class);
         jdbcTemplate.execute(ddlQueryGenerator.generateDropQuery(personMeta));
         jdbcTemplate.execute(ddlQueryGenerator.generateDropQuery(orderMeta));
         jdbcTemplate.execute(ddlQueryGenerator.generateDropQuery(orderItemMeta));

@@ -30,7 +30,8 @@ class DefaultPersistenceContextTest {
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
 
-        EntityMeta personMeta = MetaFactory.get(Person.class);
+        MetaFactory metaFactory = MetaFactory.getInstance();
+        EntityMeta personMeta = metaFactory.get(Person.class);
         DialectFactory dialectFactory = DialectFactory.getInstance();
         ddlQueryGenerator = DdlQueryGenerator.of(dialectFactory.getDialect(jdbcTemplate.getDbmsName()));
         jdbcTemplate.execute(ddlQueryGenerator.generateCreateQuery(personMeta));
@@ -38,7 +39,8 @@ class DefaultPersistenceContextTest {
 
     @AfterEach
     void tearDown() {
-        EntityMeta personMeta = MetaFactory.get(Person.class);
+        MetaFactory metaFactory = MetaFactory.getInstance();
+        EntityMeta personMeta = metaFactory.get(Person.class);
         jdbcTemplate.execute(ddlQueryGenerator.generateDropQuery(personMeta));
         server.stop();
     }
