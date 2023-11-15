@@ -34,11 +34,14 @@ public class EntityMetadataProvider {
         return (EntityMetadata<T>) entityMetadata;
     }
 
-
     public Set<EntityMetadata<?>> getOneToManyAssociatedEntitiesMetadata(final EntityMetadata<?> entityMetadata) {
         return cache.values().stream()
                 .filter(metadata -> metadata.hasOneToManyAssociatedOf(entityMetadata))
                 .collect(Collectors.toUnmodifiableSet());
+    }
+
+    public Set<Class<?>> getAllEntityClasses() {
+        return cache.keySet();
     }
 
 }

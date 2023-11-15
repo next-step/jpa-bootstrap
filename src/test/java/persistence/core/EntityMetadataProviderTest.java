@@ -63,4 +63,12 @@ class EntityMetadataProviderTest {
 
         assertThat(allAssociatedEntitiesMetadata).hasSize(6);
     }
+
+    @Test
+    @DisplayName("getAllEntityClasses 를 통해 모든 Entity 의 class 정보를 반환받을 수 있다.")
+    void getAllEntityClassesTest() {
+        final Set<Class<?>> allAssociatedEntitiesMetadata = entityMetadataProvider.getAllEntityClasses();
+
+        assertThat(allAssociatedEntitiesMetadata).isNotEmpty();
+    }
 }
