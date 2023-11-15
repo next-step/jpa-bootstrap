@@ -2,32 +2,40 @@ package persistence.sql.ddl;
 
 
 import domain.FixtureAssociatedEntity;
-import extension.EntityMetadataExtension;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import persistence.Application;
 import persistence.core.EntityMetadata;
 import domain.FixtureEntity;
 import persistence.core.EntityMetadataProvider;
+import persistence.core.EntityScanner;
+import persistence.dialect.Dialect;
 import persistence.dialect.h2.H2Dialect;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(EntityMetadataExtension.class)
 class DdlGeneratorTest {
+    private static Dialect dialect;
+    private static EntityMetadataProvider entityMetadataProvider;
     DdlGenerator generator;
     EntityMetadata<?> entityMetadata;
 
+    @BeforeAll
+    static void beforeAll() {
+        dialect = new H2Dialect();
+        entityMetadataProvider = EntityMetadataProvider.from(new EntityScanner(Application.class));
+    }
+
     @BeforeEach
     void setUp() {
-        final H2Dialect dialect = new H2Dialect();
-        generator = new DdlGenerator(EntityMetadataProvider.getInstance(), dialect);
+        generator = new DdlGenerator(entityMetadataProvider, dialect);
     }
 
     @Test

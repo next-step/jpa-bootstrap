@@ -4,13 +4,10 @@ package persistence.entity.mapper;
 import domain.FixtureAssociatedEntity;
 import domain.FixtureAssociatedEntity.Order;
 import domain.FixtureEntity.Person;
-import extension.EntityMetadataExtension;
 import org.h2.tools.SimpleResultSet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.core.EntityColumns;
-import persistence.core.EntityMetadata;
 
 import java.sql.SQLException;
 import java.sql.Types;
@@ -18,7 +15,6 @@ import java.util.List;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-@ExtendWith(EntityMetadataExtension.class)
 class EntityRowMapperTest {
 
     @Test

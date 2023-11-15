@@ -23,8 +23,7 @@ class SimpleEntityManagerTest extends IntegrationTestEnvironment {
 
     @BeforeEach
     void setUp() {
-        final EntityMetadataProvider entityMetadataProvider = EntityMetadataProvider.getInstance();
-        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, new EntityScanner(Application.class), persistenceEnvironment);
+        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, entityScanner, persistenceEnvironment);
         entityManager = entityManagerFactory.createEntityManager();
     }
 

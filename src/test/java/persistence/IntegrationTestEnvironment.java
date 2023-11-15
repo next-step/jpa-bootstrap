@@ -3,13 +3,13 @@ package persistence;
 import database.DatabaseServer;
 import database.H2;
 import domain.FixtureEntity.Person;
-import extension.EntityMetadataExtension;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.core.EntityMetadata;
 import persistence.core.EntityMetadataProvider;
+import persistence.core.EntityScanner;
 import persistence.core.PersistenceEnvironment;
 import persistence.dialect.h2.H2Dialect;
 import persistence.sql.ddl.DdlGenerator;
@@ -19,8 +19,10 @@ import persistence.util.ReflectionUtils;
 import java.sql.SQLException;
 import java.util.List;
 
-@ExtendWith(EntityMetadataExtension.class)
 public abstract class IntegrationTestEnvironment {
+    protected static EntityScanner entityScanner;
+    protected static EntityMetadataProvider entityMetadataProvider;
+
     private DatabaseServer server;
     protected DdlGenerator ddlGenerator;
     protected DmlGenerator dmlGenerator;
@@ -29,16 +31,25 @@ public abstract class IntegrationTestEnvironment {
     protected PersistenceEnvironment persistenceEnvironment;
     protected List<Person> people;
 
+    @BeforeAll
+    static void beforeAll() {
+        entityScanner = new EntityScanner(Application.class);
+        entityMetadataProvider = EntityMetadataProvider.from(entityScanner);
+    }
+
+
     @BeforeEach
     void integrationSetUp() throws SQLException {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         persistenceEnvironment = new PersistenceEnvironment(server, new H2Dialect());
-        ddlGenerator = new DdlGenerator(EntityMetadataProvider.getInstance(), persistenceEnvironment.getDialect());
+        entityScanner = new EntityScanner(Application.class);
+        entityMetadataProvider = EntityMetadataProvider.from(entityScanner);
+        ddlGenerator = new DdlGenerator(entityMetadataProvider, persistenceEnvironment.getDialect());
         dmlGenerator = new DmlGenerator(persistenceEnvironment.getDialect());
 
-        personEntityMetadata = EntityMetadataProvider.getInstance().getEntityMetadata(Person.class);
+        personEntityMetadata = entityMetadataProvider.getEntityMetadata(Person.class);
         final String createPersonDdl = ddlGenerator.generateCreateDdl(personEntityMetadata);
         jdbcTemplate.execute(createPersonDdl);
         people = createDummyUsers();

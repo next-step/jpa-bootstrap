@@ -2,13 +2,11 @@ package persistence.entity.persister;
 
 import domain.FixtureEntity.Person;
 import domain.FixturePerson;
-import extension.EntityMetadataExtension;
 import mock.MockDmlGenerator;
 import mock.MockJdbcTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.core.EntityMetadata;
 
 import java.util.List;
@@ -16,7 +14,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIterable;
 
-@ExtendWith(EntityMetadataExtension.class)
 class EntityPersisterTest {
 
     private EntityPersister entityPersister;

@@ -5,19 +5,24 @@ import persistence.exception.PersistenceException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class EntityMetadataProvider {
 
     private final Map<Class<?>, EntityMetadata<?>> cache;
 
-    private EntityMetadataProvider() {
-        this.cache = new ConcurrentHashMap<>();
+    private EntityMetadataProvider(final EntityScanner entityScanner) {
+        this.cache = entityScanner.getEntityClasses()
+                .stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        EntityMetadata::from
+                ));
     }
 
-    public static EntityMetadataProvider getInstance() {
-        return InstanceHolder.INSTANCE;
+    public static EntityMetadataProvider from(final EntityScanner entityScanner) {
+        return new EntityMetadataProvider(entityScanner);
     }
 
     @SuppressWarnings("unchecked")
@@ -30,19 +35,10 @@ public class EntityMetadataProvider {
     }
 
 
-    public void init(final EntityScanner entityScanner) {
-        entityScanner.getEntityClasses()
-                .forEach(entity -> cache.put(entity, EntityMetadata.from(entity)));
-    }
-
     public Set<EntityMetadata<?>> getOneToManyAssociatedEntitiesMetadata(final EntityMetadata<?> entityMetadata) {
         return cache.values().stream()
                 .filter(metadata -> metadata.hasOneToManyAssociatedOf(entityMetadata))
                 .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private static class InstanceHolder {
-        private static final EntityMetadataProvider INSTANCE = new EntityMetadataProvider();
     }
 
 }

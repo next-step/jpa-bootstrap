@@ -2,16 +2,13 @@ package persistence.entity.context;
 
 import domain.FixtureEntity.Person;
 import domain.FixtureEntity.WithId;
-import extension.EntityMetadataExtension;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.context.EntityKey;
 import persistence.core.EntityMetadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(EntityMetadataExtension.class)
 class EntityKeyTest {
 
     @Test

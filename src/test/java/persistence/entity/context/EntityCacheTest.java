@@ -3,11 +3,9 @@ package persistence.entity.context;
 
 import domain.FixtureEntity.Person;
 import domain.FixturePerson;
-import extension.EntityMetadataExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.context.EntityCache;
 import persistence.context.EntityKey;
 import persistence.core.EntityMetadata;
@@ -17,7 +15,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-@ExtendWith(EntityMetadataExtension.class)
 class EntityCacheTest {
     private EntityCache entityCache;
     private Person fixture;

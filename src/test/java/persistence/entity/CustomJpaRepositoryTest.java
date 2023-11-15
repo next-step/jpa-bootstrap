@@ -7,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.Application;
 import persistence.IntegrationTestEnvironment;
-import persistence.core.EntityMetadataProvider;
 import persistence.core.EntityScanner;
 import persistence.entity.manager.EntityManager;
 import persistence.entity.manager.EntityManagerFactory;
@@ -21,7 +20,6 @@ class CustomJpaRepositoryTest extends IntegrationTestEnvironment {
 
     @BeforeEach
     void setup() {
-        final EntityMetadataProvider entityMetadataProvider = EntityMetadataProvider.getInstance();
         final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, new EntityScanner(Application.class), persistenceEnvironment);
         final EntityManager entityManager = entityManagerFactory.createEntityManager();
         customJpaRepository = new CustomJpaRepository<>(entityManager, entityMetadataProvider.getEntityMetadata(Person.class));

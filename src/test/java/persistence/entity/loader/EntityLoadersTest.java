@@ -3,6 +3,7 @@ package persistence.entity.loader;
 import domain.FixtureEntity;
 import mock.MockDmlGenerator;
 import mock.MockJdbcTemplate;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,13 +14,21 @@ import persistence.core.EntityScanner;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EntityLoadersTest {
+    private static EntityMetadataProvider entityMetadataProvider;
+    private static EntityScanner entityScanner;
     private Class<FixtureEntity.WithId> fixtureClass;
     private EntityLoaders entityLoaders;
+
+    @BeforeAll
+    static void beforeAll() {
+        entityScanner = new EntityScanner(Application.class);
+        entityMetadataProvider = EntityMetadataProvider.from(entityScanner);
+    }
 
     @BeforeEach
     void setUp() {
         final EntityScanner entityScanner = new EntityScanner(Application.class);
-        entityLoaders = new EntityLoaders(EntityMetadataProvider.getInstance(), entityScanner, new MockDmlGenerator(), new MockJdbcTemplate());
+        entityLoaders = new EntityLoaders(entityMetadataProvider, entityScanner, new MockDmlGenerator(), new MockJdbcTemplate());
     }
 
     @Test

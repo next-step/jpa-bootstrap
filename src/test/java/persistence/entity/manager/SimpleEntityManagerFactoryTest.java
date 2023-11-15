@@ -15,7 +15,7 @@ class SimpleEntityManagerFactoryTest {
     @DisplayName("EntityManagerFactory 를 이용해 EntityManager 를 생성할 수 있다.")
     void test() {
         final EntityScanner entityScanner = new EntityScanner(Application.class);
-        final EntityMetadataProvider entityMetadataProvider = EntityMetadataProvider.getInstance();
+        final EntityMetadataProvider entityMetadataProvider = EntityMetadataProvider.from(entityScanner);
         final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, entityScanner, new MockPersistenceEnvironment());
 
         final EntityManager entityManager = entityManagerFactory.createEntityManager();
