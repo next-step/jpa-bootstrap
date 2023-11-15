@@ -4,13 +4,9 @@ import database.DatabaseServer;
 import database.H2;
 import domain.FixtureEntity.Person;
 import jdbc.JdbcTemplate;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import persistence.core.EntityMetadata;
-import persistence.core.EntityMetadataProvider;
-import persistence.core.EntityScanner;
-import persistence.core.PersistenceEnvironment;
+import persistence.core.*;
 import persistence.dialect.h2.H2Dialect;
 import persistence.sql.ddl.DdlGenerator;
 import persistence.sql.dml.DmlGenerator;
@@ -20,35 +16,27 @@ import java.sql.SQLException;
 import java.util.List;
 
 public abstract class IntegrationTestEnvironment {
-    private static EntityScanner entityScanner;
+    protected static DatabaseServer server;
+    protected static PersistenceEnvironment persistenceEnvironment;
+    protected static EntityScanner entityScanner;
     protected static EntityMetadataProvider entityMetadataProvider;
-
-    private DatabaseServer server;
-    protected DdlGenerator ddlGenerator;
-    protected DmlGenerator dmlGenerator;
-    protected EntityMetadata<Person> personEntityMetadata;
-    protected JdbcTemplate jdbcTemplate;
-    protected PersistenceEnvironment persistenceEnvironment;
-    protected List<Person> people;
+    protected static DdlGenerator ddlGenerator;
+    protected static DmlGenerator dmlGenerator;
+    protected static JdbcTemplate jdbcTemplate;
+    protected static EntityMetadata<Person> personEntityMetadata;
+    protected static List<Person> people;
 
     @BeforeAll
-    static void beforeAll() {
-        entityScanner = new EntityScanner(Application.class);
-        entityMetadataProvider = EntityMetadataProvider.from(entityScanner);
-    }
-
-
-    @BeforeEach
-    void integrationSetUp() throws SQLException {
+    static void integrationBeforeAll() throws SQLException {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         persistenceEnvironment = new PersistenceEnvironment(server, new H2Dialect());
         entityScanner = new EntityScanner(Application.class);
         entityMetadataProvider = EntityMetadataProvider.from(entityScanner);
-        ddlGenerator = new DdlGenerator(entityMetadataProvider, persistenceEnvironment.getDialect());
+        final MetaModelFactory metaModelFactory = new MetaModelFactory(entityScanner, persistenceEnvironment);
+        ddlGenerator = new DdlGenerator(metaModelFactory.createMetaModel(), persistenceEnvironment.getDialect());
         dmlGenerator = new DmlGenerator(persistenceEnvironment.getDialect());
-
         personEntityMetadata = entityMetadataProvider.getEntityMetadata(Person.class);
         final String createPersonDdl = ddlGenerator.generateCreateDdl(personEntityMetadata);
         jdbcTemplate.execute(createPersonDdl);
@@ -56,8 +44,8 @@ public abstract class IntegrationTestEnvironment {
         saveDummyUsers();
     }
 
-    @AfterEach
-    void integrationTearDown() {
+    @AfterAll
+    static void integrationAfterAll() {
         final String dropDdl = ddlGenerator.generateDropDdl(personEntityMetadata);
         jdbcTemplate.execute(dropDdl);
         server.stop();
@@ -71,7 +59,7 @@ public abstract class IntegrationTestEnvironment {
         return List.of(test00, test01, test02, test03);
     }
 
-    private void saveDummyUsers() {
+    private static void saveDummyUsers() {
         people.forEach(person -> {
             final List<String> columnNames = personEntityMetadata.toInsertableColumnNames();
             final List<Object> values = ReflectionUtils.getFieldValues(person, personEntityMetadata.toInsertableColumnFieldNames());

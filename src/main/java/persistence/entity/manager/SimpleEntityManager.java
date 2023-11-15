@@ -5,7 +5,7 @@ import persistence.context.EntityKeyGenerator;
 import persistence.context.PersistenceContext;
 import persistence.context.SimplePersistenceContext;
 import persistence.core.EntityMetadata;
-import persistence.core.EntityMetadataProvider;
+import persistence.core.MetaModel;
 import persistence.entity.entry.Status;
 import persistence.entity.loader.EntityLoader;
 import persistence.entity.loader.EntityLoaders;
@@ -19,19 +19,19 @@ import java.util.Objects;
 
 public class SimpleEntityManager implements EntityManager {
 
-    private final EntityMetadataProvider entityMetadataProvider;
+    private final MetaModel metaModel;
     private final EntityPersisters entityPersisters;
     private final EntityLoaders entityLoaders;
     private final EntityProxyFactory entityProxyFactory;
     private final PersistenceContext persistenceContext;
     private final EntityKeyGenerator entityKeyGenerator;
 
-    public SimpleEntityManager(final EntityMetadataProvider entityMetadataProvider, final EntityPersisters entityPersisters, final EntityLoaders entityLoaders, final EntityProxyFactory entityProxyFactory) {
-        this.entityMetadataProvider = entityMetadataProvider;
-        this.entityPersisters = entityPersisters;
-        this.entityLoaders = entityLoaders;
-        this.entityProxyFactory = entityProxyFactory;
-        this.entityKeyGenerator = new EntityKeyGenerator(entityMetadataProvider);
+    public SimpleEntityManager(final MetaModel metaModel) {
+        this.metaModel = metaModel;
+        this.entityPersisters = metaModel.getEntityPersisters();
+        this.entityLoaders = metaModel.getEntityLoaders();
+        this.entityProxyFactory = new EntityProxyFactory(entityLoaders);
+        this.entityKeyGenerator = new EntityKeyGenerator(metaModel);
         this.persistenceContext = new SimplePersistenceContext();
     }
 
@@ -40,7 +40,7 @@ public class SimpleEntityManager implements EntityManager {
         final EntityLoader<T> entityLoader = entityLoaders.getEntityLoader(clazz);
         final EntityKey entityKey = entityKeyGenerator.generate(clazz, id);
         final Object entity = persistenceContext.getEntity(entityKey)
-                .orElseGet(() -> initEntity(entityMetadataProvider.getEntityMetadata(clazz), entityKey, entityLoader));
+                .orElseGet(() -> initEntity(metaModel.getEntityMetadata(clazz), entityKey, entityLoader));
         return clazz.cast(entity);
     }
 

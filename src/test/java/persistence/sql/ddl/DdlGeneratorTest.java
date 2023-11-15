@@ -2,6 +2,7 @@ package persistence.sql.ddl;
 
 
 import domain.FixtureAssociatedEntity;
+import mock.MockPersistenceEnvironment;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,10 +11,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import persistence.Application;
-import persistence.core.EntityMetadata;
+import persistence.core.*;
 import domain.FixtureEntity;
-import persistence.core.EntityMetadataProvider;
-import persistence.core.EntityScanner;
 import persistence.dialect.Dialect;
 import persistence.dialect.h2.H2Dialect;
 
@@ -23,19 +22,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class DdlGeneratorTest {
     private static Dialect dialect;
-    private static EntityMetadataProvider entityMetadataProvider;
+    private static MetaModelFactory metaModelFactory;
     DdlGenerator generator;
     EntityMetadata<?> entityMetadata;
 
     @BeforeAll
     static void beforeAll() {
         dialect = new H2Dialect();
-        entityMetadataProvider = EntityMetadataProvider.from(new EntityScanner(Application.class));
+        metaModelFactory = new MetaModelFactory(new EntityScanner(Application.class), new MockPersistenceEnvironment());
     }
 
     @BeforeEach
     void setUp() {
-        generator = new DdlGenerator(entityMetadataProvider, dialect);
+        generator = new DdlGenerator(metaModelFactory.createMetaModel(), dialect);
     }
 
     @Test

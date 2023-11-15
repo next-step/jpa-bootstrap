@@ -28,7 +28,7 @@ public class OrderApplicationTest extends IntegrationTestEnvironment {
         jdbcTemplate.execute(createOrderItemDdl);
         saveDummyOrder();
         saveDummyOrderItems();
-        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, persistenceEnvironment);
+        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityScanner, persistenceEnvironment);
         entityManager = entityManagerFactory.createEntityManager();
 
     }

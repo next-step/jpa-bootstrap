@@ -26,7 +26,7 @@ public class CityApplicationTest extends IntegrationTestEnvironment {
         jdbcTemplate.execute(createCityDdl);
         saveDummyCountry();
         saveDummyCity();
-        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, persistenceEnvironment);
+        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityScanner, persistenceEnvironment);
         entityManager = entityManagerFactory.createEntityManager();
     }
 

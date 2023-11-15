@@ -2,6 +2,7 @@ package persistence.entity.context;
 
 import domain.FixtureEntity;
 import domain.FixtureEntity.Person;
+import mock.MockPersistenceEnvironment;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,23 +10,23 @@ import org.junit.jupiter.api.Test;
 import persistence.Application;
 import persistence.context.EntityKey;
 import persistence.context.EntityKeyGenerator;
-import persistence.core.EntityMetadataProvider;
 import persistence.core.EntityScanner;
+import persistence.core.MetaModelFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EntityKeyGeneratorTest {
-    private static EntityMetadataProvider entityMetadataProvider;
+    private static MetaModelFactory metaModelFactory;
     private EntityKeyGenerator entityKeyGenerator;
 
     @BeforeAll
     static void beforeAll() {
-        entityMetadataProvider = EntityMetadataProvider.from(new EntityScanner(Application.class));
+        metaModelFactory = new MetaModelFactory(new EntityScanner(Application.class), new MockPersistenceEnvironment());
     }
 
     @BeforeEach
     void setUp() {
-        entityKeyGenerator = new EntityKeyGenerator(entityMetadataProvider);
+        entityKeyGenerator = new EntityKeyGenerator(metaModelFactory.createMetaModel());
     }
 
     @Test

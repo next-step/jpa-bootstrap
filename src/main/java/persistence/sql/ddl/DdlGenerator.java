@@ -7,11 +7,11 @@ import java.util.Set;
 
 public class DdlGenerator {
 
-    private final EntityMetadataProvider entityMetadataProvider;
+    private final MetaModel metaModel;
     private final Dialect dialect;
 
-    public DdlGenerator(final EntityMetadataProvider entityMetadataProvider, final Dialect dialect) {
-        this.entityMetadataProvider = entityMetadataProvider;
+    public DdlGenerator(final MetaModel metaModel, final Dialect dialect) {
+        this.metaModel = metaModel;
         this.dialect = dialect;
     }
 
@@ -55,13 +55,13 @@ public class DdlGenerator {
     }
 
     private String generateManyToOneColumnsClause(final EntityManyToOneColumn manyToOneColumn) {
-        final EntityMetadata<?> associatedEntityMetadata = entityMetadataProvider.getEntityMetadata(manyToOneColumn.getJoinColumnType());
+        final EntityMetadata<?> associatedEntityMetadata = metaModel.getEntityMetadata(manyToOneColumn.getJoinColumnType());
         return generateAssociatedColumnsClause(manyToOneColumn, associatedEntityMetadata);
     }
 
     private String generateOneToManyColumnsClause(final EntityMetadata<?> entityMetadata) {
         final StringBuilder builder = new StringBuilder();
-        final Set<EntityMetadata<?>> oneToManyAssociatedEntitiesMetadata = entityMetadataProvider.getOneToManyAssociatedEntitiesMetadata(entityMetadata);
+        final Set<EntityMetadata<?>> oneToManyAssociatedEntitiesMetadata = metaModel.getOneToManyAssociatedEntitiesMetadata(entityMetadata);
         oneToManyAssociatedEntitiesMetadata.forEach(oneToManyAssociatedEntityMetadata ->
                 oneToManyAssociatedEntityMetadata.getOneToManyColumns().forEach(oneToManyColumn ->
                         builder.append(generateAssociatedColumnsClause(oneToManyColumn, oneToManyAssociatedEntityMetadata))

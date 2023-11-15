@@ -2,6 +2,7 @@ package persistence.entity.context;
 
 import domain.FixtureEntity.Person;
 import domain.FixturePerson;
+import mock.MockPersistenceEnvironment;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,8 +12,8 @@ import persistence.context.EntityKey;
 import persistence.context.EntityKeyGenerator;
 import persistence.context.PersistenceContext;
 import persistence.context.SimplePersistenceContext;
-import persistence.core.EntityMetadataProvider;
 import persistence.core.EntityScanner;
+import persistence.core.MetaModelFactory;
 import persistence.entity.entry.EntityEntry;
 import persistence.entity.entry.Status;
 
@@ -21,7 +22,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class SimplePersistenceContextTest {
 
-    private static EntityMetadataProvider entityMetadataProvider;
+    private static MetaModelFactory metaModelFactory;
 
     private PersistenceContext persistenceContext;
     private EntityKeyGenerator entityKeyGenerator;
@@ -30,13 +31,13 @@ class SimplePersistenceContextTest {
 
     @BeforeAll
     static void beforeAll() {
-        entityMetadataProvider = EntityMetadataProvider.from(new EntityScanner(Application.class));
+        metaModelFactory = new MetaModelFactory(new EntityScanner(Application.class), new MockPersistenceEnvironment());
     }
 
     @BeforeEach
     void setUp() {
         persistenceContext = new SimplePersistenceContext();
-        entityKeyGenerator = new EntityKeyGenerator(entityMetadataProvider);
+        entityKeyGenerator = new EntityKeyGenerator(metaModelFactory.createMetaModel());
         personEntityKey = entityKeyGenerator.generate(Person.class, 1L);
         person = FixturePerson.create(1L);
         persistenceContext.addEntityEntry(person, Status.LOADING);
