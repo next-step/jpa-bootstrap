@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.mock.MockEntity;
-import persistence.sql.meta.MetaFactory;
+import persistence.sql.meta.EntityMeta;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +35,7 @@ class ColumnValuesTest {
     @Test
     @DisplayName("PK 조건절 조립")
     void buildPkConditions() {
-        ColumnValues columnValues = ColumnValues.ofId(MetaFactory.get(Person.class), 1L);
+        ColumnValues columnValues = ColumnValues.ofId(EntityMeta.of(Person.class), 1L);
         List<String> valueConditions = columnValues.buildValueConditions();
         assertThat(valueConditions).isEqualTo(List.of("id=1"));
     }
@@ -70,7 +70,7 @@ class ColumnValuesTest {
     @Test
     @DisplayName("Id 컬럼 추출")
     void ofId() {
-        ColumnValues columnValues = ColumnValues.ofId(MetaFactory.get(Person.class), 1L);
+        ColumnValues columnValues = ColumnValues.ofId(EntityMeta.of(Person.class), 1L);
         List<String> columns = columnValues.columns();
         List<String> values = columnValues.values();
         Assertions.assertAll(

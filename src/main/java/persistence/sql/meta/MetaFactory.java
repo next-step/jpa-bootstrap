@@ -5,17 +5,26 @@ import java.util.Map;
 
 public class MetaFactory {
 
-    private static final Map<String, EntityMeta> metaMap = new HashMap<>();
+    private static MetaFactory INSTANCE;
 
-    private static void put(Class<?> clazz) {
-        metaMap.put(clazz.getName(), EntityMeta.of(clazz));
+    private final Map<String, EntityMeta> metaMap = new HashMap<>();
+
+    private MetaFactory() {
+        EntityMetaScanner metaScanner = new EntityMetaScanner(new EntityScanFilter());
+        metaScanner.scan().forEach(entityMeta -> {
+            Class<?> innerClass = entityMeta.getInnerClass();
+            metaMap.put(innerClass.getName(), entityMeta);
+        });
     }
 
-    public static EntityMeta get(Class<?> clazz) {
-        if (metaMap.containsKey(clazz.getName())) {
-            return metaMap.get(clazz.getName());
+    public static MetaFactory getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new MetaFactory();
         }
-        put(clazz);
+        return INSTANCE;
+    }
+
+    public EntityMeta get(Class<?> clazz) {
         return metaMap.get(clazz.getName());
     }
 

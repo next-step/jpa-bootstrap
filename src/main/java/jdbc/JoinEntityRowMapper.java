@@ -17,7 +17,7 @@ public class JoinEntityRowMapper<T> implements RowMapper<T> {
 
     public JoinEntityRowMapper(Class<T> clazz) {
         this.clazz = clazz;
-        this.entityMeta = MetaFactory.get(clazz);
+        this.entityMeta = MetaFactory.getInstance().get(clazz);
     }
 
     @Override
