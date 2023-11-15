@@ -5,10 +5,7 @@ import jdbc.RowMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.Application;
 import persistence.IntegrationTestEnvironment;
-import persistence.core.EntityMetadataProvider;
-import persistence.core.EntityScanner;
 import persistence.exception.PersistenceException;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -15,14 +15,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EntityLoadersTest {
     private static EntityMetadataProvider entityMetadataProvider;
-    private static EntityScanner entityScanner;
     private Class<FixtureEntity.WithId> fixtureClass;
     private EntityLoaders entityLoaders;
 
     @BeforeAll
     static void beforeAll() {
-        entityScanner = new EntityScanner(Application.class);
-        entityMetadataProvider = EntityMetadataProvider.from(entityScanner);
+        entityMetadataProvider = EntityMetadataProvider.from(new EntityScanner(Application.class));
     }
 
     @BeforeEach

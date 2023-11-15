@@ -2,7 +2,6 @@ package persistence.core;
 
 import domain.FixtureAssociatedEntity;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import domain.FixtureEntity;
