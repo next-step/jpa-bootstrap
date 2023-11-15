@@ -16,6 +16,7 @@ public class EntityManyToOneColumn implements EntityAssociatedColumn {
     private final FetchType fetchType;
     private final Class<?> joinColumnType;
     private final String joinColumnName;
+    private final EntityMetadata<?> associatedEntityMetadata;
 
     public EntityManyToOneColumn(final Field field, final String tableName) {
         field.setAccessible(true);
@@ -24,6 +25,7 @@ public class EntityManyToOneColumn implements EntityAssociatedColumn {
         this.isInsertable = initIsInsertable(field);
         this.fetchType = initFetchType(field);
         this.joinColumnType = field.getType();
+        this.associatedEntityMetadata = EntityMetadata.from(this.joinColumnType);
         this.joinColumnName = initJoinColumnName(field);
     }
 
@@ -62,6 +64,11 @@ public class EntityManyToOneColumn implements EntityAssociatedColumn {
 
     public String getAssociatedEntityIdColumnNameWithAlias() {
         return getAssociatedEntityMetadata().getIdColumnNameWithAlias();
+    }
+
+    @Override
+    public EntityMetadata<?> getAssociatedEntityMetadata() {
+        return this.associatedEntityMetadata;
     }
 
     @Override
