@@ -15,17 +15,17 @@ public class EntityLoaders {
     private final Map<Class<?>, EntityLoader<?>> cache;
 
     public EntityLoaders(final EntityMetadataProvider entityMetadataProvider,
-                         final EntityScanner entityScanner,
                          final DmlGenerator dmlGenerator,
                          final JdbcTemplate jdbcTemplate) {
-        this.cache = createEntityLoaders(entityMetadataProvider, entityScanner.getEntityClasses(), dmlGenerator, jdbcTemplate);
+        this.cache = createEntityLoaders(entityMetadataProvider, dmlGenerator, jdbcTemplate);
     }
 
     private Map<Class<?>, EntityLoader<?>> createEntityLoaders(final EntityMetadataProvider entityMetadataProvider,
-                                                               final List<Class<?>> entityClasses,
                                                                final DmlGenerator dmlGenerator,
                                                                final JdbcTemplate jdbcTemplate) {
-        return entityClasses.stream()
+        return entityMetadataProvider
+                .getAllEntityClasses()
+                .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
                         clazz -> EntityLoader.of(entityMetadataProvider.getEntityMetadata(clazz), dmlGenerator, jdbcTemplate)

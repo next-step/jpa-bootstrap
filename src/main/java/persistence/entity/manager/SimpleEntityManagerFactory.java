@@ -2,7 +2,6 @@ package persistence.entity.manager;
 
 import jdbc.JdbcTemplate;
 import persistence.core.EntityMetadataProvider;
-import persistence.core.EntityScanner;
 import persistence.core.PersistenceEnvironment;
 import persistence.entity.loader.EntityLoaders;
 import persistence.entity.persister.EntityPersisters;
@@ -16,12 +15,12 @@ public class SimpleEntityManagerFactory implements EntityManagerFactory {
     private final EntityProxyFactory entityProxyFactory;
 
 
-    public SimpleEntityManagerFactory(final EntityMetadataProvider entityMetadataProvider, final EntityScanner entityScanner, final PersistenceEnvironment persistenceEnvironment) {
+    public SimpleEntityManagerFactory(final EntityMetadataProvider entityMetadataProvider, final PersistenceEnvironment persistenceEnvironment) {
         this.entityMetadataProvider = entityMetadataProvider;
         final DmlGenerator dmlGenerator = persistenceEnvironment.getDmlGenerator();
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(persistenceEnvironment.getConnection());
         this.entityPersisters = new EntityPersisters(entityMetadataProvider, dmlGenerator, jdbcTemplate);
-        this.entityLoaders = new EntityLoaders(entityMetadataProvider, entityScanner, dmlGenerator, jdbcTemplate);
+        this.entityLoaders = new EntityLoaders(entityMetadataProvider, dmlGenerator, jdbcTemplate);
         this.entityProxyFactory = new EntityProxyFactory(entityLoaders);
     }
 

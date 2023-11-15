@@ -28,7 +28,7 @@ public class LazyCityApplicationTest extends IntegrationTestEnvironment {
         jdbcTemplate.execute(createLazyCityDdl);
         saveDummyLazyCountry();
         saveDummyLazyCity();
-        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, new EntityScanner(Application.class), persistenceEnvironment);
+        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, persistenceEnvironment);
         entityManager = entityManagerFactory.createEntityManager();
     }
 

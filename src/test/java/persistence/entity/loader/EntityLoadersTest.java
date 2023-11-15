@@ -25,8 +25,7 @@ class EntityLoadersTest {
 
     @BeforeEach
     void setUp() {
-        final EntityScanner entityScanner = new EntityScanner(Application.class);
-        entityLoaders = new EntityLoaders(entityMetadataProvider, entityScanner, new MockDmlGenerator(), new MockJdbcTemplate());
+        entityLoaders = new EntityLoaders(entityMetadataProvider, new MockDmlGenerator(), new MockJdbcTemplate());
     }
 
     @Test

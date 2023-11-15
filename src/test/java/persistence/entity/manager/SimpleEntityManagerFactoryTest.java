@@ -16,7 +16,7 @@ class SimpleEntityManagerFactoryTest {
     void test() {
         final EntityScanner entityScanner = new EntityScanner(Application.class);
         final EntityMetadataProvider entityMetadataProvider = EntityMetadataProvider.from(entityScanner);
-        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, entityScanner, new MockPersistenceEnvironment());
+        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, new MockPersistenceEnvironment());
 
         final EntityManager entityManager = entityManagerFactory.createEntityManager();
 

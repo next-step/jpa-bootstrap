@@ -29,7 +29,7 @@ class EntityProxyFactoryTest {
     static class MockEntityLoaders extends EntityLoaders {
 
         public MockEntityLoaders(final SimpleResultSet resultSet) {
-            super(EntityMetadataProvider.from(new EntityScanner(Application.class)), new EntityScanner(Application.class), new MockDmlGenerator(), new MockJdbcTemplate(resultSet));
+            super(EntityMetadataProvider.from(new EntityScanner(Application.class)), new MockDmlGenerator(), new MockJdbcTemplate(resultSet));
         }
     }
 

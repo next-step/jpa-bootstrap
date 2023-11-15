@@ -20,7 +20,7 @@ class CustomJpaRepositoryTest extends IntegrationTestEnvironment {
 
     @BeforeEach
     void setup() {
-        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, new EntityScanner(Application.class), persistenceEnvironment);
+        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, persistenceEnvironment);
         final EntityManager entityManager = entityManagerFactory.createEntityManager();
         customJpaRepository = new CustomJpaRepository<>(entityManager, entityMetadataProvider.getEntityMetadata(Person.class));
     }
