@@ -405,4 +405,47 @@ public class FixtureAssociatedEntity {
             return name;
         }
     }
+
+    @Entity
+    public static class Department {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        private String name;
+
+        @OneToMany
+        @JoinColumn(name = "department_id")
+        private List<Employee> employees;
+
+        public Long getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<Employee> getEmployees() {
+            return employees;
+        }
+    }
+
+    @Entity
+    public static class Employee {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        private String name;
+
+        public Long getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
 }

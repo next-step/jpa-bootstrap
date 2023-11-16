@@ -5,13 +5,11 @@ import domain.FixtureAssociatedEntity.LazyCity;
 import domain.FixtureAssociatedEntity.Order;
 import domain.FixtureAssociatedEntity.OrderLazyItem;
 import domain.FixtureEntity.Person;
-import extension.EntityMetadataExtension;
 import mock.MockDmlGenerator;
 import mock.MockJdbcTemplate;
 import org.h2.tools.SimpleResultSet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.core.EntityMetadata;
 import persistence.exception.PersistenceException;
 
@@ -23,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-@ExtendWith(EntityMetadataExtension.class)
 class EntityLoaderTest {
 
     @Test

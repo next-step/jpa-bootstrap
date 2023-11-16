@@ -3,16 +3,13 @@ package persistence.core;
 
 import domain.FixtureAssociatedEntity;
 import domain.FixtureEntity;
-import extension.EntityMetadataExtension;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.exception.PersistenceException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-@ExtendWith(EntityMetadataExtension.class)
 class EntityMetadataTest {
     private Class<?> mockClass;
 

@@ -6,8 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.core.EntityMetadata;
-import persistence.core.EntityMetadataProvider;
-import persistence.core.EntityScanner;
 import persistence.entity.manager.EntityManager;
 import persistence.entity.manager.EntityManagerFactory;
 import persistence.entity.manager.SimpleEntityManagerFactory;
@@ -20,7 +18,6 @@ public class CityApplicationTest extends IntegrationTestEnvironment {
 
     @BeforeEach
     void setUp() {
-        final EntityMetadataProvider entityMetadataProvider = EntityMetadataProvider.getInstance();
         final EntityMetadata<Country> countryEntityMetadata = entityMetadataProvider.getEntityMetadata(Country.class);
         final EntityMetadata<City> cityEntityMetadata = entityMetadataProvider.getEntityMetadata(City.class);
         final String createCountryDdl = ddlGenerator.generateCreateDdl(countryEntityMetadata);
@@ -29,7 +26,7 @@ public class CityApplicationTest extends IntegrationTestEnvironment {
         jdbcTemplate.execute(createCityDdl);
         saveDummyCountry();
         saveDummyCity();
-        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, new EntityScanner(Application.class), persistenceEnvironment);
+        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityScanner, persistenceEnvironment);
         entityManager = entityManagerFactory.createEntityManager();
     }
 

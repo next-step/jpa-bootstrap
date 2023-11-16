@@ -3,6 +3,7 @@ package persistence.entity.persister;
 import domain.FixtureEntity;
 import mock.MockDmlGenerator;
 import mock.MockJdbcTemplate;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,13 +14,18 @@ import persistence.core.EntityScanner;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EntityPersistersTest {
+    private static EntityMetadataProvider entityMetadataProvider;
     private Class<?> fixtureClass;
     private EntityPersisters entityPersisters;
 
+    @BeforeAll
+    static void beforeAll() {
+        entityMetadataProvider = EntityMetadataProvider.from(new EntityScanner(Application.class));
+    }
+
     @BeforeEach
     void setUp() {
-        final EntityScanner entityScanner = new EntityScanner(Application.class);
-        entityPersisters = new EntityPersisters(EntityMetadataProvider.getInstance(), entityScanner, new MockDmlGenerator(), new MockJdbcTemplate());
+        entityPersisters = new EntityPersisters(entityMetadataProvider, new MockDmlGenerator(), new MockJdbcTemplate());
     }
 
     @Test

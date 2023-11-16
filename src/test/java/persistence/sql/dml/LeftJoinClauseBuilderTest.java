@@ -1,16 +1,13 @@
 package persistence.sql.dml;
 
 import domain.FixtureAssociatedEntity.WithOneToManyFetchTypeEAGER;
-import extension.EntityMetadataExtension;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.core.EntityMetadata;
 import persistence.dialect.h2.H2Dialect;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(EntityMetadataExtension.class)
 class LeftJoinClauseBuilderTest {
 
 

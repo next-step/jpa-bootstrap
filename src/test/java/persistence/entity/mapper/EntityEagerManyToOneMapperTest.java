@@ -2,11 +2,9 @@ package persistence.entity.mapper;
 
 import domain.FixtureAssociatedEntity.City;
 import domain.FixtureAssociatedEntity.Country;
-import extension.EntityMetadataExtension;
 import org.h2.tools.SimpleResultSet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.core.EntityColumns;
 import persistence.util.ReflectionUtils;
 
@@ -15,7 +13,6 @@ import java.sql.Types;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-@ExtendWith(EntityMetadataExtension.class)
 class EntityEagerManyToOneMapperTest {
     @Test
     @DisplayName("EntityEagerManyToOneMapper 를 통해 ResultSet 들의 정보로 Entity 객체의 ManyToOneColumn 에 해당하는 필드에 값을 바인딩 할 수 있다.")

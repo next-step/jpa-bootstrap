@@ -2,34 +2,42 @@ package persistence.entity.context;
 
 import domain.FixtureEntity.Person;
 import domain.FixturePerson;
-import extension.EntityMetadataExtension;
+import mock.MockPersistenceEnvironment;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import persistence.Application;
 import persistence.context.EntityKey;
 import persistence.context.EntityKeyGenerator;
 import persistence.context.PersistenceContext;
 import persistence.context.SimplePersistenceContext;
-import persistence.core.EntityMetadataProvider;
+import persistence.core.EntityScanner;
+import persistence.core.MetaModelFactory;
 import persistence.entity.entry.EntityEntry;
 import persistence.entity.entry.Status;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-@ExtendWith(EntityMetadataExtension.class)
 class SimplePersistenceContextTest {
+
+    private static MetaModelFactory metaModelFactory;
 
     private PersistenceContext persistenceContext;
     private EntityKeyGenerator entityKeyGenerator;
     private EntityKey personEntityKey;
     private Person person;
 
+    @BeforeAll
+    static void beforeAll() {
+        metaModelFactory = new MetaModelFactory(new EntityScanner(Application.class), new MockPersistenceEnvironment());
+    }
+
     @BeforeEach
     void setUp() {
         persistenceContext = new SimplePersistenceContext();
-        entityKeyGenerator = new EntityKeyGenerator(EntityMetadataProvider.getInstance());
+        entityKeyGenerator = new EntityKeyGenerator(metaModelFactory.createMetaModel());
         personEntityKey = entityKeyGenerator.generate(Person.class, 1L);
         person = FixturePerson.create(1L);
         persistenceContext.addEntityEntry(person, Status.LOADING);

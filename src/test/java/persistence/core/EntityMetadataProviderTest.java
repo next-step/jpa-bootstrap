@@ -1,29 +1,28 @@
 package persistence.core;
 
 import domain.FixtureAssociatedEntity;
-import extension.EntityMetadataExtension;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import domain.FixtureEntity;
-import org.junit.jupiter.api.extension.ExtendWith;
+import persistence.Application;
 import persistence.exception.PersistenceException;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-@ExtendWith(EntityMetadataExtension.class)
 class EntityMetadataProviderTest {
 
+    private static EntityMetadataProvider entityMetadataProvider;
     private Class<?> mockClass;
-    private EntityMetadataProvider entityMetadataProvider;
 
-    @BeforeEach
-    void setUp() {
-        entityMetadataProvider = EntityMetadataProvider.getInstance();
+    @BeforeAll
+    static void beforeAll() {
+        entityMetadataProvider = EntityMetadataProvider.from(new EntityScanner(Application.class));
     }
 
     @Test
@@ -64,5 +63,13 @@ class EntityMetadataProviderTest {
         final Set<EntityMetadata<?>> allAssociatedEntitiesMetadata = entityMetadataProvider.getOneToManyAssociatedEntitiesMetadata(entityMetadata);
 
         assertThat(allAssociatedEntitiesMetadata).hasSize(6);
+    }
+
+    @Test
+    @DisplayName("getAllEntityClasses 를 통해 모든 Entity 의 class 정보를 반환받을 수 있다.")
+    void getAllEntityClassesTest() {
+        final List<Class<?>> allAssociatedEntitiesMetadata = entityMetadataProvider.getAllEntityClasses();
+
+        assertThat(allAssociatedEntitiesMetadata).isNotEmpty();
     }
 }

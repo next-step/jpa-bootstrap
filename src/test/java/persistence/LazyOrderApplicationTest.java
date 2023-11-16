@@ -8,10 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.core.EntityMetadata;
-import persistence.core.EntityMetadataProvider;
 import persistence.entity.manager.EntityManager;
 import persistence.entity.manager.EntityManagerFactory;
-import persistence.core.EntityScanner;
 import persistence.entity.manager.SimpleEntityManagerFactory;
 
 import java.util.List;
@@ -25,7 +23,6 @@ public class LazyOrderApplicationTest extends IntegrationTestEnvironment {
 
     @BeforeEach
     void setUp() {
-        final EntityMetadataProvider entityMetadataProvider = EntityMetadataProvider.getInstance();
         final EntityMetadata<OrderLazy> lazyOrderEntityMetadata = entityMetadataProvider.getEntityMetadata(OrderLazy.class);
         final EntityMetadata<OrderLazyItem> lazyOrderItemEntityMetadata = entityMetadataProvider.getEntityMetadata(OrderLazyItem.class);
         final String createLazyOrderDdl = ddlGenerator.generateCreateDdl(lazyOrderEntityMetadata);
@@ -34,7 +31,7 @@ public class LazyOrderApplicationTest extends IntegrationTestEnvironment {
         jdbcTemplate.execute(createOrderItemDdl);
         saveDummyOrder();
         saveDummyOrderItems();
-        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, new EntityScanner(Application.class), persistenceEnvironment);
+        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityScanner, persistenceEnvironment);
         entityManager = entityManagerFactory.createEntityManager();
 
     }

@@ -4,14 +4,12 @@ import domain.FixtureAssociatedEntity.LazyCity;
 import domain.FixtureAssociatedEntity.LazyCountry;
 import domain.FixtureAssociatedEntity.OrderLazy;
 import domain.FixtureAssociatedEntity.OrderLazyItem;
-import extension.EntityMetadataExtension;
 import mock.MockDmlGenerator;
 import mock.MockJdbcTemplate;
 import net.sf.cglib.proxy.Enhancer;
 import org.h2.tools.SimpleResultSet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.Application;
 import persistence.core.EntityManyToOneColumn;
 import persistence.core.EntityMetadataProvider;
@@ -26,13 +24,12 @@ import java.util.List;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 
-@ExtendWith(EntityMetadataExtension.class)
 class EntityProxyFactoryTest {
 
     static class MockEntityLoaders extends EntityLoaders {
 
         public MockEntityLoaders(final SimpleResultSet resultSet) {
-            super(EntityMetadataProvider.getInstance(), new EntityScanner(Application.class), new MockDmlGenerator(), new MockJdbcTemplate(resultSet));
+            super(EntityMetadataProvider.from(new EntityScanner(Application.class)), new MockDmlGenerator(), new MockJdbcTemplate(resultSet));
         }
     }
 

@@ -2,13 +2,10 @@ package persistence.sql.dml;
 
 
 import domain.FixtureEntity.Person;
-import extension.EntityMetadataExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import persistence.core.EntityMetadata;
-import persistence.core.EntityMetadataProvider;
 import persistence.dialect.Dialect;
 import persistence.dialect.h2.H2Dialect;
 import persistence.util.ReflectionUtils;
@@ -17,7 +14,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(EntityMetadataExtension.class)
 class DmlGeneratorTest {
 
     private EntityMetadata<?> entityMetadata;
@@ -29,7 +25,7 @@ class DmlGeneratorTest {
         final Dialect dialect = new H2Dialect();
         this.generator = new DmlGenerator(dialect);
         this.person = new Person(1L, "min", 30, "jongmin4943@gmail.com");
-        this.entityMetadata = EntityMetadataProvider.getInstance().getEntityMetadata(Person.class);
+        this.entityMetadata = EntityMetadata.from(Person.class);
     }
 
     @Test

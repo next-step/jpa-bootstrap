@@ -7,8 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.core.EntityMetadata;
-import persistence.core.EntityMetadataProvider;
-import persistence.core.EntityScanner;
 import persistence.entity.manager.EntityManager;
 import persistence.entity.manager.EntityManagerFactory;
 import persistence.entity.manager.SimpleEntityManagerFactory;
@@ -21,7 +19,6 @@ public class LazyCityApplicationTest extends IntegrationTestEnvironment {
 
     @BeforeEach
     void setUp() {
-        final EntityMetadataProvider entityMetadataProvider = EntityMetadataProvider.getInstance();
         final EntityMetadata<LazyCountry> lazyCountryEntityMetadata = entityMetadataProvider.getEntityMetadata(LazyCountry.class);
         final EntityMetadata<LazyCity> lazyCityEntityMetadata = entityMetadataProvider.getEntityMetadata(LazyCity.class);
         final String createLazyCountryDdl = ddlGenerator.generateCreateDdl(lazyCountryEntityMetadata);
@@ -30,7 +27,7 @@ public class LazyCityApplicationTest extends IntegrationTestEnvironment {
         jdbcTemplate.execute(createLazyCityDdl);
         saveDummyLazyCountry();
         saveDummyLazyCity();
-        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityMetadataProvider, new EntityScanner(Application.class), persistenceEnvironment);
+        final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityScanner, persistenceEnvironment);
         entityManager = entityManagerFactory.createEntityManager();
     }
 
