@@ -15,7 +15,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         this.connection = connection;
     }
 
-    public static EntityManagerFactoryImpl of(Connection connection) {
+    public static EntityManagerFactory of(Connection connection) {
         DefaultCurrentSessionContext sessionContext = DefaultCurrentSessionContext.getInstance();
         return new EntityManagerFactoryImpl(sessionContext, connection);
     }
