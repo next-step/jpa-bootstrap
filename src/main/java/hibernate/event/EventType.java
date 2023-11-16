@@ -1,9 +1,9 @@
 package hibernate.event;
 
-import hibernate.event.listener.DeleteEventListener;
-import hibernate.event.listener.LoadEventListener;
-import hibernate.event.listener.MergeEventListener;
-import hibernate.event.listener.PersistEventListener;
+import hibernate.event.delete.DeleteEventListener;
+import hibernate.event.load.LoadEventListener;
+import hibernate.event.merge.MergeEventListener;
+import hibernate.event.persist.PersistEventListener;
 
 public enum EventType {
     LOAD("load", LoadEventListener.class),

@@ -1,4 +1,4 @@
-package hibernate.event.listener;
+package hibernate.event.merge;
 
 import hibernate.metamodel.BasicMetaModel;
 import hibernate.metamodel.MetaModel;
@@ -7,10 +7,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-class DeleteEventTest {
+class MergeEventTest {
 
     private final MetaModel metamodel = MetaModelImpl.createPackageMetaModel(
             BasicMetaModel.createPackageMetaModel("hibernate.event.listener"),
@@ -18,12 +20,12 @@ class DeleteEventTest {
     );
 
     @Test
-    void DeleteEvent를_생성한다() {
-        TestEntity givenEntity = new TestEntity();
-        DeleteEvent actual = DeleteEvent.createEvent(metamodel, givenEntity);
+    void MergeEvent를_생성한다() {
+        MergeEvent actual = MergeEvent.createEvent(metamodel, TestEntity.class, 1L, Map.of());
         assertAll(
-                () -> assertThat(actual.getEntity()).isEqualTo(givenEntity),
-                () -> assertThat(actual.getEntityPersister()).isNotNull()
+                () -> assertThat(actual.getEntityPersister()).isNotNull(),
+                () -> assertThat(actual.getEntityId()).isEqualTo(1L),
+                () -> assertThat(actual.getChangeColumns()).isNotNull()
         );
     }
 
@@ -31,5 +33,7 @@ class DeleteEventTest {
     private static class TestEntity {
         @Id
         private Long id;
+
+        private String name;
     }
 }

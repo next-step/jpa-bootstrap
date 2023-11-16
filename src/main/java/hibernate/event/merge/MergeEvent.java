@@ -1,4 +1,4 @@
-package hibernate.event.listener;
+package hibernate.event.merge;
 
 import hibernate.entity.EntityPersister;
 import hibernate.entity.meta.column.EntityColumn;

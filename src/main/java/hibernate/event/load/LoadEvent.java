@@ -1,4 +1,4 @@
-package hibernate.event.listener;
+package hibernate.event.load;
 
 import hibernate.entity.EntityLoader;
 import hibernate.metamodel.MetaModel;

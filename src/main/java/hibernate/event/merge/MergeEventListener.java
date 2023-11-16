@@ -1,4 +1,4 @@
-package hibernate.event.listener;
+package hibernate.event.merge;
 
 public interface MergeEventListener {
 }
