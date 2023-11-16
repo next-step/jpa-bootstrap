@@ -1,12 +1,11 @@
 package persistence.entity.attribute;
 
-import fixtures.EntityFixtures;
+import entity.SampleOneWithValidAnnotation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import persistence.sql.ddl.converter.SqlConverter;
-import persistence.sql.infra.H2SqlConverter;
+import persistence.entity.fixture.EntityFixtures;
 
 import java.util.HashSet;
 
@@ -15,8 +14,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @Nested
 @DisplayName("EntityAttribute 클래스의")
 public class EntityAttributeTest {
-    SqlConverter sqlConverter = new H2SqlConverter();
-
     @Nested
     @DisplayName("of 메소드는")
     class of {
@@ -29,7 +26,7 @@ public class EntityAttributeTest {
                 //given
                 //when
                 EntityAttribute entityAttribute =
-                        EntityAttribute.of(EntityFixtures.SampleOneWithValidAnnotation.class, new HashSet<>());
+                        EntityAttribute.of(SampleOneWithValidAnnotation.class, new HashSet<>());
 
                 //then
                 Assertions.assertAll(
@@ -42,6 +39,7 @@ public class EntityAttributeTest {
         @Nested
         @DisplayName("@Id 가 여러개인 클래스 정보와 파서가 들어오면")
         class withMultiIdClass {
+
             @Test
             @DisplayName("예외를 반환한다.")
             void throwException() {

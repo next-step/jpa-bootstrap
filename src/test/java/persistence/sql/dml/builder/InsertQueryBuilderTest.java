@@ -1,7 +1,7 @@
 package persistence.sql.dml.builder;
 
 import entity.Person;
-import fixtures.EntityFixtures;
+import entity.SampleOneWithValidAnnotation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ public class InsertQueryBuilderTest {
                 //given
                 Person person = new Person(1L, "민준", 29, "민준.com");
                 EntityAttributes entityAttributes = new EntityAttributes();
-                EntityAttribute entityAttribute = entityAttributes.findEntityAttribute(EntityFixtures.SampleOneWithValidAnnotation.class);
+                EntityAttribute entityAttribute = entityAttributes.findEntityAttribute(SampleOneWithValidAnnotation.class);
 
                 InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
 

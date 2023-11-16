@@ -1,6 +1,6 @@
 package persistence.entity.attribute.resolver;
 
-import fixtures.EntityFixtures;
+import entity.SampleEntityWithIntegerId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,8 +43,8 @@ class IntegerTypeIdAttributeResolverTest {
             void returnAttribute() throws NoSuchFieldException {
                 //given
                 IdAttributeResolver resolver = new IntegerTypeIdAttributeResolver();
-                EntityFixtures.EntityWithIntegerId sample
-                        = new EntityFixtures.EntityWithIntegerId(1, "민준", 29);
+                SampleEntityWithIntegerId sample
+                        = new SampleEntityWithIntegerId(1, "민준", 29);
                 Field field = sample.getClass().getDeclaredField("id");
 
                 //when
@@ -65,8 +65,8 @@ class IntegerTypeIdAttributeResolverTest {
             void setIdToEntity() throws NoSuchFieldException, IllegalAccessException {
                 //given
                 IdAttributeResolver resolver = new IntegerTypeIdAttributeResolver();
-                EntityFixtures.EntityWithIntegerId sample
-                        = new EntityFixtures.EntityWithIntegerId("민준", 29);
+                SampleEntityWithIntegerId sample
+                        = new SampleEntityWithIntegerId("민준", 29);
 
                 Field field = sample.getClass().getDeclaredField("id");
 

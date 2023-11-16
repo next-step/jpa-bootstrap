@@ -5,11 +5,13 @@ import database.H2;
 import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.entity.attribute.EntityBinder;
 
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
+        EntityBinder.init();
         logger.info("Starting application...");
         try {
             final DatabaseServer server = new H2();

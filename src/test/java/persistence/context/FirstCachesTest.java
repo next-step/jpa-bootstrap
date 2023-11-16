@@ -1,6 +1,8 @@
 package persistence.context;
 
-import fixtures.EntityFixtures;
+import entity.Order;
+import entity.OrderItem;
+import entity.SampleOneWithValidAnnotation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,14 +31,14 @@ class FirstCachesTest {
                 //given
                 FirstCaches firstCaches = new FirstCaches();
 
-                EntityFixtures.OrderItem orderItem = new EntityFixtures.OrderItem(1L, "티비", 1);
-                EntityFixtures.Order order
-                        = new EntityFixtures.Order(1L, "민준", List.of(orderItem));
+                OrderItem orderItem = new OrderItem(1L, "티비", 1);
+                Order order
+                        = new Order(1L, "민준", List.of(orderItem));
 
                 firstCaches.putFirstCache(order, "1");
 
                 //when
-                Object firstCache = firstCaches.getFirstCacheOrNull(EntityFixtures.Order.class, "1");
+                Object firstCache = firstCaches.getFirstCacheOrNull(Order.class, "1");
 
                 //then
                 assertThat(firstCache.toString())
@@ -54,7 +56,7 @@ class FirstCachesTest {
                 FirstCaches firstCaches = new FirstCaches();
 
                 //when
-                Object firstCache = firstCaches.getFirstCacheOrNull(EntityFixtures.SampleOneWithValidAnnotation.class, "1");
+                Object firstCache = firstCaches.getFirstCacheOrNull(SampleOneWithValidAnnotation.class, "1");
 
                 //then
                 assertThat(firstCache).isNull();
@@ -74,8 +76,8 @@ class FirstCachesTest {
                 //given
                 FirstCaches firstCaches = new FirstCaches();
 
-                EntityFixtures.SampleOneWithValidAnnotation sample
-                        = new EntityFixtures.SampleOneWithValidAnnotation(1L, "민준", 29);
+                SampleOneWithValidAnnotation sample
+                        = new SampleOneWithValidAnnotation(1L, "민준", 29);
 
                 //when
                 //then
@@ -91,11 +93,11 @@ class FirstCachesTest {
             void putFirstCache() {
                 //given
                 FirstCaches firstCaches = new FirstCaches();
-                EntityFixtures.OrderItem orderItem = new EntityFixtures.OrderItem(1L, "티비", 1);
-                EntityFixtures.Order order
-                        = new EntityFixtures.Order(1L, "민준", List.of(orderItem));
+                OrderItem orderItem = new OrderItem(1L, "티비", 1);
+                Order order
+                        = new Order(1L, "민준", List.of(orderItem));
 
-                EntityAttribute entityAttribute = entityAttributes.findEntityAttribute(EntityFixtures.Order.class);
+                EntityAttribute entityAttribute = entityAttributes.findEntityAttribute(Order.class);
 
                 //when
                 //then
@@ -115,14 +117,14 @@ class FirstCachesTest {
             void putFirstCache() {
                 //given
                 FirstCaches firstCaches = new FirstCaches();
-                EntityFixtures.SampleOneWithValidAnnotation sample
-                        = new EntityFixtures.SampleOneWithValidAnnotation(1L, "민준", 29);
+                SampleOneWithValidAnnotation sample
+                        = new SampleOneWithValidAnnotation(1L, "민준", 29);
                 firstCaches.putFirstCache(sample, "1");
 
                 //when
                 //then
                 Assertions.assertDoesNotThrow(() ->
-                        firstCaches.remove(EntityFixtures.SampleOneWithValidAnnotation.class, "1"));
+                        firstCaches.remove(SampleOneWithValidAnnotation.class, "1"));
             }
         }
     }

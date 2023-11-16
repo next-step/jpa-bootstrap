@@ -1,6 +1,6 @@
 package persistence.entity.persister;
 
-import fixtures.EntityFixtures;
+import entity.SampleOneWithValidAnnotation;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -20,8 +20,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DisplayName("SimpleEntityPersister 클래스의")
 public class SimpleEntityPersisterTest extends DatabaseTest {
     private final EntityAttributes entityAttributes = new EntityAttributes();
-    EntityFixtures.SampleOneWithValidAnnotation sample
-            = new EntityFixtures.SampleOneWithValidAnnotation(1, "test_nick_name", 29);
+    private final SampleOneWithValidAnnotation sample
+            = new SampleOneWithValidAnnotation(1, "test_nick_name", 29);
 
     @Nested
     @DisplayName("insert 메소드는")
@@ -33,13 +33,13 @@ public class SimpleEntityPersisterTest extends DatabaseTest {
             @DisplayName("객체를 데이터베이스에 저장하고, 아이디가 매핑된 객체를 반환한다.")
             void returnInstanceWithIdMapping() throws SQLException {
                 //given
-                setUpFixtureTable(EntityFixtures.SampleOneWithValidAnnotation.class, new H2SqlConverter());
+                setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
                 EntityLoader entityLoader = new SimpleEntityLoader(jdbcTemplate);
                 SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
 
                 //when
-                EntityFixtures.SampleOneWithValidAnnotation inserted = simpleEntityPersister.insert(sample);
+                SampleOneWithValidAnnotation inserted = simpleEntityPersister.insert(sample);
 
                 //then
                 assertThat(inserted.toString())
@@ -58,17 +58,17 @@ public class SimpleEntityPersisterTest extends DatabaseTest {
             @DisplayName("객체를 데이터베이스에 저장하고, 아이디가 매핑된 객체를 반환한다.")
             void returnInstanceWithIdMapping() throws SQLException {
                 //given
-                setUpFixtureTable(EntityFixtures.SampleOneWithValidAnnotation.class, new H2SqlConverter());
+                setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
                 EntityLoader entityLoader = new SimpleEntityLoader(jdbcTemplate);
                 SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
-                EntityFixtures.SampleOneWithValidAnnotation inserted = simpleEntityPersister.insert(sample);
+                SampleOneWithValidAnnotation inserted = simpleEntityPersister.insert(sample);
 
-                EntityFixtures.SampleOneWithValidAnnotation updatedSample
-                        = new EntityFixtures.SampleOneWithValidAnnotation(1, "test_nick_name_updated", 29);
+                SampleOneWithValidAnnotation updatedSample
+                        = new SampleOneWithValidAnnotation(1, "test_nick_name_updated", 29);
 
                 //when
-                EntityFixtures.SampleOneWithValidAnnotation updated = simpleEntityPersister.update(inserted, updatedSample);
+                SampleOneWithValidAnnotation updated = simpleEntityPersister.update(inserted, updatedSample);
 
                 //then
                 assertThat(updated.toString())
@@ -87,12 +87,12 @@ public class SimpleEntityPersisterTest extends DatabaseTest {
             @DisplayName("데이터베이스에서 객체에 해당하는 로우를 삭제한다.")
             void returnInstanceWithIdMapping() throws SQLException {
                 //given
-                setUpFixtureTable(EntityFixtures.SampleOneWithValidAnnotation.class, new H2SqlConverter());
+                setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
                 EntityLoader entityLoader = new SimpleEntityLoader(jdbcTemplate);
                 SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
 
-                EntityFixtures.SampleOneWithValidAnnotation inserted = simpleEntityPersister.insert(sample);
+                SampleOneWithValidAnnotation inserted = simpleEntityPersister.insert(sample);
 
                 //when
                 //then
@@ -111,7 +111,7 @@ public class SimpleEntityPersisterTest extends DatabaseTest {
             @DisplayName("적절한 객체를 로드한다.")
             void returnObject() throws SQLException {
                 //given
-                setUpFixtureTable(EntityFixtures.SampleOneWithValidAnnotation.class, new H2SqlConverter());
+                setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
                 EntityLoader entityLoader = new SimpleEntityLoader(jdbcTemplate);
                 SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
@@ -119,7 +119,7 @@ public class SimpleEntityPersisterTest extends DatabaseTest {
                 simpleEntityPersister.insert(sample);
 
                 //when
-                EntityFixtures.SampleOneWithValidAnnotation loaded = simpleEntityPersister.load(EntityFixtures.SampleOneWithValidAnnotation.class, "1");
+                SampleOneWithValidAnnotation loaded = simpleEntityPersister.load(SampleOneWithValidAnnotation.class, "1");
 
                 //then
                 assertThat(loaded.toString()).isEqualTo("SampleOneWithValidAnnotation{id=1, name='test_nick_name', age=29}");

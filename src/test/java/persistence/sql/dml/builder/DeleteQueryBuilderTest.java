@@ -1,6 +1,6 @@
 package persistence.sql.dml.builder;
 
-import fixtures.EntityFixtures;
+import entity.SampleTwoWithValidAnnotation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ public class DeleteQueryBuilderTest {
 
                 //when
                 String dml = deleteQueryBuilder.prepareStatement(
-                        entityAttributes.findEntityAttribute(EntityFixtures.SampleTwoWithValidAnnotation.class),
+                        entityAttributes.findEntityAttribute(SampleTwoWithValidAnnotation.class),
                         String.valueOf(1));
 
                 //then

@@ -1,6 +1,6 @@
 package persistence.context;
 
-import fixtures.EntityFixtures;
+import entity.SampleOneWithValidAnnotation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -22,13 +22,13 @@ class SnapShotsTest {
             void returnSnapShot() {
                 //given
                 SnapShots snapShots = new SnapShots();
-                EntityFixtures.SampleOneWithValidAnnotation sample
-                        = new EntityFixtures.SampleOneWithValidAnnotation(1L, "민준", 29);
+                SampleOneWithValidAnnotation sample
+                        = new SampleOneWithValidAnnotation(1L, "민준", 29);
 
                 snapShots.putSnapShot(sample, "1");
 
                 //when
-                Object snapShot = snapShots.getSnapShotOrNull(EntityFixtures.SampleOneWithValidAnnotation.class, "1");
+                Object snapShot = snapShots.getSnapShotOrNull(SampleOneWithValidAnnotation.class, "1");
 
                 //then
                 assertThat(snapShot.toString()).isEqualTo("SampleOneWithValidAnnotation{id=1, name='민준', age=29}");
@@ -45,7 +45,7 @@ class SnapShotsTest {
                 SnapShots snapShots = new SnapShots();
 
                 //when
-                Object snapShot = snapShots.getSnapShotOrNull(EntityFixtures.SampleOneWithValidAnnotation.class, "1");
+                Object snapShot = snapShots.getSnapShotOrNull(SampleOneWithValidAnnotation.class, "1");
 
                 //then
                 assertThat(snapShot).isNull();
@@ -65,8 +65,8 @@ class SnapShotsTest {
                 //given
                 SnapShots snapShots = new SnapShots();
 
-                EntityFixtures.SampleOneWithValidAnnotation sample
-                        = new EntityFixtures.SampleOneWithValidAnnotation(1L, "민준", 29);
+                SampleOneWithValidAnnotation sample
+                        = new SampleOneWithValidAnnotation(1L, "민준", 29);
 
                 //when
                 //then
@@ -87,15 +87,15 @@ class SnapShotsTest {
             void putFirstCache() {
                 //given
                 FirstCaches firstCaches = new FirstCaches();
-                EntityFixtures.SampleOneWithValidAnnotation sample
-                        = new EntityFixtures.SampleOneWithValidAnnotation(1L, "민준", 29);
+                SampleOneWithValidAnnotation sample
+                        = new SampleOneWithValidAnnotation(1L, "민준", 29);
 
                 firstCaches.putFirstCache(sample, "1");
 
                 //when
                 //then
                 Assertions.assertDoesNotThrow(() ->
-                        firstCaches.remove(EntityFixtures.SampleOneWithValidAnnotation.class, "1"));
+                        firstCaches.remove(SampleOneWithValidAnnotation.class, "1"));
             }
         }
     }

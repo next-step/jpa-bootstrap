@@ -1,6 +1,7 @@
 package persistence.entity.loader;
 
-import fixtures.EntityFixtures;
+import entity.Order;
+import entity.OrderItem;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,21 +31,21 @@ class SimpleCollectionLoaderTest extends DatabaseTest {
             @Test
             @DisplayName("적절한 객체 리스트를 반환한다.")
             void returnListObject() {
-                setUpFixtureTable(EntityFixtures.Order.class, new H2SqlConverter());
-                setUpFixtureTable(EntityFixtures.OrderItem.class, new H2SqlConverter());
+                setUpFixtureTable(Order.class, new H2SqlConverter());
+                setUpFixtureTable(OrderItem.class, new H2SqlConverter());
 
                 EntityLoader entityLoader = new SimpleEntityLoader(jdbcTemplate);
                 CollectionLoader collectionLoader = new SimpleCollectionLoader(jdbcTemplate);
                 EntityPersister entityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);
-                EntityFixtures.OrderItem orderItemOne = new EntityFixtures.OrderItem("티비", 1, 1L);
-                EntityFixtures.OrderItem orderItemTwo = new EntityFixtures.OrderItem("세탁기", 3, 1L);
-                EntityFixtures.OrderItem insertedOrderItemOne = entityPersister.insert(orderItemOne);
-                EntityFixtures.OrderItem insertedOrderItemTwo = entityPersister.insert(orderItemTwo);
-                EntityFixtures.Order order = new EntityFixtures.Order("1324", List.of(insertedOrderItemOne, insertedOrderItemTwo));
+                OrderItem orderItemOne = new OrderItem("티비", 1, 1L);
+                OrderItem orderItemTwo = new OrderItem("세탁기", 3, 1L);
+                OrderItem insertedOrderItemOne = entityPersister.insert(orderItemOne);
+                OrderItem insertedOrderItemTwo = entityPersister.insert(orderItemTwo);
+                Order order = new Order("1324", List.of(insertedOrderItemOne, insertedOrderItemTwo));
                 entityPersister.insert(order);
 
-                List<EntityFixtures.OrderItem> orderItems = collectionLoader.loadCollection(
-                        entityAttributes.findEntityAttribute(EntityFixtures.OrderItem.class), "order_id", "1");
+                List<OrderItem> orderItems = collectionLoader.loadCollection(
+                        entityAttributes.findEntityAttribute(OrderItem.class), "order_id", "1");
 
                 assertThat(orderItems.toString()).isEqualTo(
                         "[OrderItem{id=1, product='티비', quantity=1, orderId=1}, OrderItem{id=2, product='세탁기', quantity=3, orderId=1}]");

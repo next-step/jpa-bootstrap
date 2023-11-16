@@ -1,6 +1,6 @@
 package persistence.entity.attribute.resolver;
 
-import fixtures.EntityFixtures;
+import entity.SampleTwoWithValidAnnotation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -45,8 +45,8 @@ class LongTypeGeneralAttributeResolverTest {
             void returnAttribute() throws NoSuchFieldException {
                 //given
                 GeneralAttributeResolver resolver = new LongTypeGeneralAttributeResolver();
-                EntityFixtures.SampleTwoWithValidAnnotation sample
-                        = new EntityFixtures.SampleTwoWithValidAnnotation(1L, "민준", 29L);
+                SampleTwoWithValidAnnotation sample
+                        = new SampleTwoWithValidAnnotation(1L, "민준", 29L);
                 Field field = sample.getClass().getDeclaredField("age");
 
                 //when

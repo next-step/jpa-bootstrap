@@ -1,6 +1,6 @@
 package persistence.entity.repository;
 
-import fixtures.EntityFixtures;
+import entity.SampleOneWithValidAnnotation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,10 +30,10 @@ class CustomJpaRepositoryTest extends DatabaseTest {
             @Test
             void save() {
                 //given
-                EntityFixtures.SampleOneWithValidAnnotation sample =
-                        new EntityFixtures.SampleOneWithValidAnnotation("민준", 29);
+                SampleOneWithValidAnnotation sample =
+                        new SampleOneWithValidAnnotation("민준", 29);
 
-                setUpFixtureTable(EntityFixtures.SampleOneWithValidAnnotation.class, new H2SqlConverter());
+                setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
 
                 EntityLoader entityLoader = new SimpleEntityLoader(jdbcTemplate);
                 SimpleEntityPersister simpleEntityPersister = new SimpleEntityPersister(jdbcTemplate, entityLoader, entityAttributes);

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.entity.attribute.EntityAttribute;
 import persistence.entity.attribute.EntityAttributes;
+import persistence.entity.attribute.EntityBinder;
 import persistence.mapper.StringRowMapper;
 import persistence.sql.common.DDLType;
 import persistence.sql.ddl.builder.DDLQueryBuilder;
@@ -25,6 +26,7 @@ public class DatabaseTest {
 
     @BeforeEach
     void setUp() throws SQLException {
+        EntityBinder.init();
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
