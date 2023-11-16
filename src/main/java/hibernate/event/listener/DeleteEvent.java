@@ -3,18 +3,18 @@ package hibernate.event.listener;
 import hibernate.entity.EntityPersister;
 import hibernate.metamodel.MetaModel;
 
-public class PersistEvent {
+public class DeleteEvent {
 
     private final EntityPersister<?> entityPersister;
     private final Object entity;
 
-    private PersistEvent(final EntityPersister<?> entityPersister, final Object entity) {
+    private DeleteEvent(final EntityPersister<?> entityPersister, final Object entity) {
         this.entityPersister = entityPersister;
         this.entity = entity;
     }
 
-    public static PersistEvent createEvent(final MetaModel metaModel, final Object entity) {
-        return new PersistEvent(metaModel.getEntityPersister(entity.getClass()), entity);
+    public static DeleteEvent createEvent(final MetaModel metaModel, final Object entity) {
+        return new DeleteEvent(metaModel.getEntityPersister(entity.getClass()), entity);
     }
 
     public EntityPersister<?> getEntityPersister() {
