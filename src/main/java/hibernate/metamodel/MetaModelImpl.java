@@ -1,13 +1,11 @@
 package hibernate.metamodel;
 
-import hibernate.binder.AnnotationBinder;
 import hibernate.entity.EntityLoader;
 import hibernate.entity.EntityPersister;
 import hibernate.entity.meta.EntityClass;
 import hibernate.entity.meta.column.EntityColumn;
 import jdbc.JdbcTemplate;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -27,15 +25,12 @@ public class MetaModelImpl implements MetaModel {
         this.entityLoaderMap = entityLoaderMap;
     }
 
-    public static MetaModel createPackageMetaModel(final String packageName, final JdbcTemplate jdbcTemplate) {
-        List<Class<?>> classes = AnnotationBinder.parseEntityClasses(packageName);
-        Map<Class<?>, EntityClass<?>> entityClassMap = classes
-                .stream()
-                .collect(Collectors.toMap(clazz -> clazz, EntityClass::new));
-        Map<Class<?>, EntityPersister<?>> entityPersisterMap = classes
+    public static MetaModel createPackageMetaModel(final BasicMetaModel basicMetaModel, final JdbcTemplate jdbcTemplate) {
+        Map<Class<?>, EntityClass<?>> entityClassMap = basicMetaModel.getEntityClassMap();
+        Map<Class<?>, EntityPersister<?>> entityPersisterMap = entityClassMap.keySet()
                 .stream()
                 .collect(Collectors.toMap(clazz -> clazz, clazz -> new EntityPersister<>(jdbcTemplate, entityClassMap.get(clazz))));
-        Map<Class<?>, EntityLoader<?>> entityLoaderMap = classes
+        Map<Class<?>, EntityLoader<?>> entityLoaderMap = entityClassMap.keySet()
                 .stream()
                 .collect(Collectors.toMap(clazz -> clazz, clazz -> new EntityLoader<>(jdbcTemplate, entityClassMap.get(clazz))));
         return new MetaModelImpl(entityClassMap, entityPersisterMap, entityLoaderMap);
