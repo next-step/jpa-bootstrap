@@ -25,11 +25,13 @@ public class CustomJpaRepository<T, ID> {
 
     private T persist(T t) {
         entityManager.persist(t);
+        entityManager.flush();
         return t;
     }
 
     private T merge(T t) {
         entityManager.merge(t);
+        entityManager.flush();
         return t;
     }
 }

@@ -117,6 +117,11 @@ public class EntityManagerImpl implements EntityManager, EntitySource {
     }
 
     @Override
+    public void flush() {
+        actionQueue.executeAllActions();
+    }
+
+    @Override
     public MetaModel getMetaModel() {
         return metaModel;
     }

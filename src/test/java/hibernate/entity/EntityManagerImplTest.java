@@ -62,16 +62,30 @@ class EntityManagerImplTest {
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         jdbcTemplate.execute(createQueryBuilder.generateQuery(new EntityClass<>(TestEntity.class)));
+        jdbcTemplate.execute("CREATE TABLE orders (\n" +
+                "    id BIGINT PRIMARY KEY,\n" +
+                "    orderNumber VARCHAR\n" +
+                ");\n");
+        jdbcTemplate.execute("CREATE TABLE order_items (\n" +
+                "    id BIGINT PRIMARY KEY,\n" +
+                "    order_id BIGINT,\n" +
+                "    product VARCHAR,\n" +
+                "    quantity INTEGER\n" +
+                ");\n");
     }
 
     @AfterEach
     void afterEach() {
         jdbcTemplate.execute("truncate table test_entity;");
+        jdbcTemplate.execute("truncate table orders;");
+        jdbcTemplate.execute("truncate table order_items;");
     }
 
     @AfterAll
     static void afterAll() {
         jdbcTemplate.execute("drop table test_entity;");
+        jdbcTemplate.execute("drop table orders;");
+        jdbcTemplate.execute("drop table order_items;");
         server.stop();
     }
 
@@ -109,16 +123,6 @@ class EntityManagerImplTest {
     @Test
     void eager로_잡힌_oneTomany를_검색한다() {
         // given
-        jdbcTemplate.execute("CREATE TABLE orders (\n" +
-                "    id BIGINT PRIMARY KEY,\n" +
-                "    orderNumber VARCHAR\n" +
-                ");\n");
-        jdbcTemplate.execute("CREATE TABLE order_items (\n" +
-                "    id BIGINT PRIMARY KEY,\n" +
-                "    order_id BIGINT,\n" +
-                "    product VARCHAR,\n" +
-                "    quantity INTEGER\n" +
-                ");\n");
         jdbcTemplate.execute("insert into orders (id, orderNumber) values (1, 'ABC123');");
         jdbcTemplate.execute("insert into order_items (id, order_id, product, quantity) values (1, 1, '라면', 3);");
         jdbcTemplate.execute("insert into order_items (id, order_id, product, quantity) values (2, 1, '김치', 2);");
@@ -178,6 +182,7 @@ class EntityManagerImplTest {
 
         // when
         entityManager.remove(givenEntity);
+        entityManager.flush();
         Integer actual = jdbcTemplate.queryForObject("select count(*) from test_entity", new RowMapper<Integer>() {
             @Override
             public Integer mapRow(ResultSet resultSet) {
@@ -212,6 +217,7 @@ class EntityManagerImplTest {
 
         // when
         entityManager.merge(givenEntity);
+        entityManager.flush();
         TestEntity actual = findTestEntity();
 
         // then
@@ -232,6 +238,7 @@ class EntityManagerImplTest {
 
         // when
         entityManager.merge(givenEntity);
+        entityManager.flush();
         TestEntity actual = findTestEntity();
 
         // then

@@ -9,4 +9,6 @@ public interface EntityManager {
     void merge(Object entity);
 
     void remove(Object entity);
+
+    void flush();
 }
