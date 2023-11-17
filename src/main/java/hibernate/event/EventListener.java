@@ -15,11 +15,11 @@ public class EventListener<T> {
         return value;
     }
 
-    public <E, R> R fireWithReturn(E event, BiFunction<T, E, R> function) {
-        return function.apply(value, event);
+    public <E, R> R fireWithReturn(E event, BiFunction<T, E, R> action) {
+        return action.apply(value, event);
     }
 
-    public <E> void fireJustRun(E event, BiConsumer<T, E> function) {
-        function.accept(value, event);
+    public <E> void fireJustRun(E event, BiConsumer<T, E> action) {
+        action.accept(value, event);
     }
 }
