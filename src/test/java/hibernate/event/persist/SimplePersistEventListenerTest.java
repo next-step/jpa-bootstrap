@@ -62,7 +62,7 @@ class SimplePersistEventListenerTest {
     }
 
     @Test
-    void Event를_받아_persist한다() {
+    void Event를_받아_persist_action을_저장한다() {
         // given
         TestEntity givenEntity = new TestEntity("최진영", 19);
         PersistEvent<TestEntity> persistEvent = PersistEvent.createEvent(entitySource, givenEntity);

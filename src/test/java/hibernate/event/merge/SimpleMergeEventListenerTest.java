@@ -63,7 +63,7 @@ class SimpleMergeEventListenerTest {
     }
 
     @Test
-    void Event를_받아_merge한다() {
+    void Event를_받아_merge_action을_저장한다() {
         // given
         jdbcTemplate.execute("insert into test_entity (id, nick_name) values (1, '최진영');");
 
