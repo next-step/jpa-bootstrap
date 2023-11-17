@@ -15,13 +15,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class MergeEventTest {
 
     private final MetaModel metamodel = MetaModelImpl.createPackageMetaModel(
-            BasicMetaModel.createPackageMetaModel("hibernate.event.listener"),
+            BasicMetaModel.createPackageMetaModel("hibernate.event.merge"),
             null
     );
 
     @Test
     void MergeEvent를_생성한다() {
-        MergeEvent actual = MergeEvent.createEvent(metamodel, TestEntity.class, 1L, Map.of());
+        MergeEvent<TestEntity> actual = MergeEvent.createEvent(metamodel, TestEntity.class, 1L, Map.of());
         assertAll(
                 () -> assertThat(actual.getEntityPersister()).isNotNull(),
                 () -> assertThat(actual.getEntityId()).isEqualTo(1L),
