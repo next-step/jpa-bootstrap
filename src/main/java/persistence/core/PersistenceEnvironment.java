@@ -23,12 +23,8 @@ public class PersistenceEnvironment {
         return this.dialect;
     }
 
-    public Connection getConnection() {
-        try {
-            return this.server.getConnection();
-        } catch (final SQLException e) {
-            throw new PersistenceException("커넥션 연결을 실패했습니다.", e);
-        }
+    public Connection getConnection() throws SQLException {
+        return this.server.getConnection();
     }
 
     public DmlGenerator getDmlGenerator() {
