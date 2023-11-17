@@ -64,7 +64,7 @@ class SimplePersistEventListenerTest {
     @Test
     void Event를_받아_persist_action을_저장한다() {
         // given
-        TestEntity givenEntity = new TestEntity("최진영", 19);
+        TestEntity givenEntity = new TestEntity(1L, "최진영", 19);
         PersistEvent<TestEntity> persistEvent = PersistEvent.createEvent(entitySource, givenEntity);
         PersistEventListener persistEventListener = new SimplePersistEventListener();
 
@@ -80,7 +80,6 @@ class SimplePersistEventListenerTest {
     @Table(name = "test_entity")
     private static class TestEntity {
         @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
 
         @Column(name = "nick_name")
@@ -99,7 +98,8 @@ class SimplePersistEventListenerTest {
             this.name = name;
         }
 
-        public TestEntity(String name, Integer age) {
+        public TestEntity(Long id, String name, Integer age) {
+            this.id = id;
             this.name = name;
             this.age = age;
         }

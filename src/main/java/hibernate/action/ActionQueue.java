@@ -27,9 +27,9 @@ public class ActionQueue {
         insertions.add(action);
     }
 
-    // TODO action all insertions
     public void addAction(final EntityIdentityInsertAction<?> action) {
         insertions.add(action);
+        executeInserts();
     }
 
     public void addAction(final EntityUpdateAction<?> action) {
@@ -38,5 +38,12 @@ public class ActionQueue {
 
     public void addAction(final EntityDeleteAction<?> action) {
         deletions.add(action);
+    }
+
+    private void executeInserts() {
+        while (!insertions.isEmpty()) {
+            insertions.poll()
+                    .execute();
+        }
     }
 }

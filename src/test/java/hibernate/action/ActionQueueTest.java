@@ -1,0 +1,74 @@
+package hibernate.action;
+
+import hibernate.entity.EntityPersister;
+import hibernate.entity.meta.EntityClass;
+import hibernate.entity.meta.column.EntityColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import org.junit.jupiter.api.Test;
+
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class ActionQueueTest {
+
+    @Test
+    void IdentityInsertAction이_입력되면_기존의_insert_action을_모두_처리한다() {
+        // given
+        Queue<EntityInsertAction<?>> givenInsertions = new ConcurrentLinkedQueue<>();
+        ActionQueue actionQueue = new ActionQueue(
+                givenInsertions,
+                new ConcurrentLinkedQueue<>(),
+                new ConcurrentLinkedQueue<>()
+        );
+        actionQueue.addAction(new EntityBasicInsertAction<>(new MockEntityPersister<>(), null));
+        actionQueue.addAction(new EntityBasicInsertAction<>(new MockEntityPersister<>(), null));
+
+        // when
+        actionQueue.addAction(new EntityIdentityInsertAction<>(
+                new MockEntityPersister<>(), new TestEntity(1L, "최진영"), new EntityClass<>(TestEntity.class).getEntityId()));
+
+        // then
+        assertThat(givenInsertions).hasSize(0);
+    }
+
+    private static class MockEntityPersister<T> extends EntityPersister<T> {
+
+        public MockEntityPersister() {
+            super(null, null);
+        }
+
+        @Override
+        public boolean update(Object entityId, Map<EntityColumn, Object> updateFields) {
+            return true;
+        }
+
+        @Override
+        public Object insert(Object entity) {
+            return 1L;
+        }
+
+        @Override
+        public void delete(Object entity) {
+        }
+    }
+
+    @Entity
+    private static class TestEntity {
+        @Id
+        private Long id;
+
+        private String name;
+
+        public TestEntity() {
+        }
+
+        public TestEntity(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+    }
+}
