@@ -25,14 +25,16 @@ public class SimpleEntityManager implements EntityManager {
     private final EntityProxyFactory entityProxyFactory;
     private final PersistenceContext persistenceContext;
     private final EntityKeyGenerator entityKeyGenerator;
+    private final SessionCloseStrategy sessionCloseStrategy;
 
-    public SimpleEntityManager(final MetaModel metaModel) {
+    public SimpleEntityManager(final MetaModel metaModel, final SessionCloseStrategy sessionCloseStrategy) {
         this.metaModel = metaModel;
         this.entityPersisters = metaModel.getEntityPersisters();
         this.entityLoaders = metaModel.getEntityLoaders();
         this.entityProxyFactory = new EntityProxyFactory(entityLoaders);
         this.entityKeyGenerator = new EntityKeyGenerator(metaModel);
         this.persistenceContext = new SimplePersistenceContext();
+        this.sessionCloseStrategy = sessionCloseStrategy;
     }
 
     @Override
@@ -84,6 +86,11 @@ public class SimpleEntityManager implements EntityManager {
         persistenceContext.updateEntityEntryStatus(entity, Status.DELETED);
 
         entityPersister.delete(entity);
+    }
+
+    @Override
+    public void close() {
+        this.sessionCloseStrategy.close();
     }
 
     private Object extractId(final Object entity, final EntityPersister entityPersister) {
