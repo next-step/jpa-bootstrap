@@ -4,6 +4,17 @@ import hibernate.entity.meta.column.EntityColumn;
 import hibernate.entity.persistencecontext.EntityKey;
 import hibernate.entity.persistencecontext.EntitySnapshot;
 import hibernate.entity.persistencecontext.PersistenceContext;
+import hibernate.event.EventListener;
+import hibernate.event.EventListenerRegistry;
+import hibernate.event.EventType;
+import hibernate.event.delete.DeleteEvent;
+import hibernate.event.delete.DeleteEventListener;
+import hibernate.event.load.LoadEvent;
+import hibernate.event.load.LoadEventListener;
+import hibernate.event.merge.MergeEvent;
+import hibernate.event.merge.MergeEventListener;
+import hibernate.event.persist.PersistEvent;
+import hibernate.event.persist.PersistEventListener;
 import hibernate.metamodel.MetaModel;
 
 import java.util.Map;
@@ -14,13 +25,16 @@ public class EntityManagerImpl implements EntityManager {
 
     private final PersistenceContext persistenceContext;
     private final MetaModel metaModel;
+    private final EventListenerRegistry eventListenerRegistry;
 
     public EntityManagerImpl(
             final PersistenceContext persistenceContext,
-            final MetaModel metaModel
+            final MetaModel metaModel,
+            final EventListenerRegistry eventListenerRegistry
     ) {
         this.persistenceContext = persistenceContext;
         this.metaModel = metaModel;
+        this.eventListenerRegistry = eventListenerRegistry;
     }
 
     @Override
@@ -31,20 +45,23 @@ public class EntityManagerImpl implements EntityManager {
             return (T) persistenceContextEntity;
         }
 
-        T loadEntity = metaModel.getEntityLoader(clazz)
-                .find(id);
+        EventListener<LoadEventListener> listener = eventListenerRegistry.getListener(EventType.LOAD);
+        T loadEntity = listener.fireWithReturn(LoadEvent.createEvent(metaModel, clazz, id), LoadEventListener::onLoad);
+
         persistenceContext.addEntity(id, loadEntity, LOADING);
         return loadEntity;
     }
 
     @Override
     public void persist(final Object entity) {
-        EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
+        PersistEvent<?> persistEvent = PersistEvent.createEvent(metaModel, entity);
+        EventListener<PersistEventListener> listener = eventListenerRegistry.getListener(EventType.PERSIST);
+
         EntityColumn entityId = metaModel.getEntityId(entity.getClass());
         Object id = entityId.getFieldValue(entity);
         if (id == null) {
             persistenceContext.addEntityEntry(entity, SAVING);
-            Object generatedId = entityPersister.insert(entity);
+            Object generatedId = listener.fireWithReturn(persistEvent, PersistEventListener::onPersist);
             entityId.assignFieldValue(entity, generatedId);
             persistenceContext.addEntity(generatedId, entity);
             return;
@@ -54,7 +71,7 @@ public class EntityManagerImpl implements EntityManager {
             throw new IllegalStateException("이미 영속화되어있는 entity입니다.");
         }
         persistenceContext.addEntity(id, entity, SAVING);
-        entityPersister.insert(entity);
+        listener.fireWithReturn(persistEvent, PersistEventListener::onPersist);
     }
 
     @Override
@@ -65,8 +82,8 @@ public class EntityManagerImpl implements EntityManager {
             return;
         }
         persistenceContext.addEntity(entityId, entity);
-        metaModel.getEntityPersister(entity.getClass())
-                .update(entityId, changedColumns);
+        EventListener<MergeEventListener> listener = eventListenerRegistry.getListener(EventType.MERGE);
+        listener.fireJustRun(MergeEvent.createEvent(metaModel, entity.getClass(), entityId, changedColumns), MergeEventListener::onMerge);
     }
 
     private Object getNotNullEntityId(final Object entity) {
@@ -91,8 +108,8 @@ public class EntityManagerImpl implements EntityManager {
     @Override
     public void remove(final Object entity) {
         persistenceContext.addEntityEntry(entity, DELETED);
-        metaModel.getEntityPersister(entity.getClass())
-                .delete(entity);
+        EventListener<DeleteEventListener> listener = eventListenerRegistry.getListener(EventType.DELETE);
+        listener.fireJustRun(DeleteEvent.createEvent(metaModel, entity), DeleteEventListener::onDelete);
         persistenceContext.removeEntity(entity);
     }
 }

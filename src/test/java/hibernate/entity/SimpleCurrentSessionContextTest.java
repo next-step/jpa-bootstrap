@@ -17,7 +17,7 @@ class SimpleCurrentSessionContextTest {
 
     @Test
     void 현재_보유중인_entityManager_세션이_있는_경우_가져온다() {
-        SimpleCurrentSessionContext simpleCurrentSessionContext = new SimpleCurrentSessionContext(Map.of(Thread.currentThread(), new EntityManagerImpl(null, null)));
+        SimpleCurrentSessionContext simpleCurrentSessionContext = new SimpleCurrentSessionContext(Map.of(Thread.currentThread(), new EntityManagerImpl(null, null, null)));
         EntityManager actual = simpleCurrentSessionContext.currentSession();
         assertThat(actual).isNotNull();
     }

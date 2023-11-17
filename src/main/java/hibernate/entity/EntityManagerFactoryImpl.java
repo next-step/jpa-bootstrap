@@ -1,6 +1,7 @@
 package hibernate.entity;
 
 import hibernate.entity.persistencecontext.SimplePersistenceContext;
+import hibernate.event.EventListenerRegistry;
 import hibernate.metamodel.BasicMetaModel;
 import hibernate.metamodel.MetaModelImpl;
 import jdbc.JdbcTemplate;
@@ -31,7 +32,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         }
         return new EntityManagerImpl(
                 new SimplePersistenceContext(),
-                MetaModelImpl.createPackageMetaModel(basicMetaModel, new JdbcTemplate(connection))
+                MetaModelImpl.createPackageMetaModel(basicMetaModel, new JdbcTemplate(connection)),
+                EventListenerRegistry.createDefaultRegistry()
         );
     }
 
