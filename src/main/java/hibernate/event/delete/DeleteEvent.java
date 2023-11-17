@@ -3,25 +3,25 @@ package hibernate.event.delete;
 import hibernate.entity.EntityPersister;
 import hibernate.metamodel.MetaModel;
 
-public class DeleteEvent {
+public class DeleteEvent<T> {
 
-    private final EntityPersister<?> entityPersister;
-    private final Object entity;
+    private final EntityPersister<T> entityPersister;
+    private final T entity;
 
-    private DeleteEvent(final EntityPersister<?> entityPersister, final Object entity) {
+    private DeleteEvent(final EntityPersister<T> entityPersister, final T entity) {
         this.entityPersister = entityPersister;
         this.entity = entity;
     }
 
-    public static DeleteEvent createEvent(final MetaModel metaModel, final Object entity) {
-        return new DeleteEvent(metaModel.getEntityPersister(entity.getClass()), entity);
+    public static <T> DeleteEvent<T> createEvent(final MetaModel metaModel, final T entity) {
+        return new DeleteEvent<T>(metaModel.getEntityPersister((Class<T>) entity.getClass()), entity);
     }
 
-    public EntityPersister<?> getEntityPersister() {
+    public EntityPersister<T> getEntityPersister() {
         return entityPersister;
     }
 
-    public Object getEntity() {
+    public T getEntity() {
         return entity;
     }
 }

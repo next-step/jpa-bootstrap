@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class DeleteEventTest {
 
     private final MetaModel metamodel = MetaModelImpl.createPackageMetaModel(
-            BasicMetaModel.createPackageMetaModel("hibernate.event.listener"),
+            BasicMetaModel.createPackageMetaModel("hibernate.event.delete"),
             null
     );
 
