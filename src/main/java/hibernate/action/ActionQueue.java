@@ -40,9 +40,29 @@ public class ActionQueue {
         deletions.add(action);
     }
 
+    public void executeAllActions() {
+        executeInserts();
+        executeUpdates();
+        executeDeletes();
+    }
+
     private void executeInserts() {
         while (!insertions.isEmpty()) {
             insertions.poll()
+                    .execute();
+        }
+    }
+
+    private void executeUpdates() {
+        while (!updates.isEmpty()) {
+            updates.poll()
+                    .execute();
+        }
+    }
+
+    private void executeDeletes() {
+        while (!deletions.isEmpty()) {
+            deletions.poll()
                     .execute();
         }
     }

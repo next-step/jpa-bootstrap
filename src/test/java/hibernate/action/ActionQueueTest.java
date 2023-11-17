@@ -12,6 +12,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class ActionQueueTest {
 
@@ -33,6 +34,29 @@ class ActionQueueTest {
 
         // then
         assertThat(givenInsertions).hasSize(0);
+    }
+
+    @Test
+    void 모든_action을_실행한다() {
+        // given
+        Queue<EntityInsertAction<?>> givenInsertions = new ConcurrentLinkedQueue<>();
+        Queue<EntityUpdateAction<?>> givenUpdates = new ConcurrentLinkedQueue<>();
+        Queue<EntityDeleteAction<?>> givenDeletions = new ConcurrentLinkedQueue<>();
+        ActionQueue actionQueue = new ActionQueue(givenInsertions, givenUpdates, givenDeletions);
+
+        actionQueue.addAction(new EntityBasicInsertAction<>(new MockEntityPersister<>(), null));
+        actionQueue.addAction(new EntityUpdateAction<>(new MockEntityPersister<>(), null, null));
+        actionQueue.addAction(new EntityDeleteAction<>(new MockEntityPersister<>(), null));
+
+        // when
+        actionQueue.executeAllActions();
+
+        // then
+        assertAll(
+                () -> assertThat(givenInsertions).isEmpty(),
+                () -> assertThat(givenUpdates).isEmpty(),
+                () -> assertThat(givenDeletions).isEmpty()
+        );
     }
 
     private static class MockEntityPersister<T> extends EntityPersister<T> {
