@@ -87,7 +87,7 @@ public class EntityManagerImpl implements EntityManager, EntitySource {
         }
         persistenceContext.addEntity(entityId, entity);
         EventListener<MergeEventListener> listener = eventListenerRegistry.getListener(EventType.MERGE);
-        listener.fireJustRun(MergeEvent.createEvent(metaModel, entity.getClass(), entityId, changedColumns), MergeEventListener::onMerge);
+        listener.fireJustRun(MergeEvent.createEvent(this, entity.getClass(), entityId, changedColumns), MergeEventListener::onMerge);
     }
 
     private Object getNotNullEntityId(final Object entity) {
