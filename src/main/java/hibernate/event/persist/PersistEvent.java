@@ -3,25 +3,25 @@ package hibernate.event.persist;
 import hibernate.entity.EntityPersister;
 import hibernate.metamodel.MetaModel;
 
-public class PersistEvent {
+public class PersistEvent<T> {
 
-    private final EntityPersister<?> entityPersister;
-    private final Object entity;
+    private final EntityPersister<T> entityPersister;
+    private final T entity;
 
-    private PersistEvent(final EntityPersister<?> entityPersister, final Object entity) {
+    private PersistEvent(final EntityPersister<T> entityPersister, final T entity) {
         this.entityPersister = entityPersister;
         this.entity = entity;
     }
 
-    public static PersistEvent createEvent(final MetaModel metaModel, final Object entity) {
-        return new PersistEvent(metaModel.getEntityPersister(entity.getClass()), entity);
+    public static <T> PersistEvent<T> createEvent(final MetaModel metaModel, final T entity) {
+        return new PersistEvent<>(metaModel.getEntityPersister((Class<T>) entity.getClass()), entity);
     }
 
-    public EntityPersister<?> getEntityPersister() {
+    public EntityPersister<T> getEntityPersister() {
         return entityPersister;
     }
 
-    public Object getEntity() {
+    public T getEntity() {
         return entity;
     }
 }
