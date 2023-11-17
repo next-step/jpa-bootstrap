@@ -1,6 +1,7 @@
 package hibernate.action;
 
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ActionQueue {
 
@@ -16,6 +17,10 @@ public class ActionQueue {
         this.insertions = insertions;
         this.updates = updates;
         this.deletions = deletions;
+    }
+
+    public ActionQueue() {
+        this(new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>());
     }
 
     public void addAction(final EntityInsertAction<?> action) {

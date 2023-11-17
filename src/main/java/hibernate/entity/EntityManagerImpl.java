@@ -1,5 +1,6 @@
 package hibernate.entity;
 
+import hibernate.action.ActionQueue;
 import hibernate.entity.meta.column.EntityColumn;
 import hibernate.entity.persistencecontext.EntityKey;
 import hibernate.entity.persistencecontext.EntitySnapshot;
@@ -21,20 +22,23 @@ import java.util.Map;
 
 import static hibernate.entity.entityentry.Status.*;
 
-public class EntityManagerImpl implements EntityManager {
+public class EntityManagerImpl implements EntityManager, EntitySource {
 
     private final PersistenceContext persistenceContext;
     private final MetaModel metaModel;
     private final EventListenerRegistry eventListenerRegistry;
+    private final ActionQueue actionQueue;
 
     public EntityManagerImpl(
             final PersistenceContext persistenceContext,
             final MetaModel metaModel,
-            final EventListenerRegistry eventListenerRegistry
+            final EventListenerRegistry eventListenerRegistry,
+            final ActionQueue actionQueue
     ) {
         this.persistenceContext = persistenceContext;
         this.metaModel = metaModel;
         this.eventListenerRegistry = eventListenerRegistry;
+        this.actionQueue = actionQueue;
     }
 
     @Override
@@ -111,5 +115,15 @@ public class EntityManagerImpl implements EntityManager {
         EventListener<DeleteEventListener> listener = eventListenerRegistry.getListener(EventType.DELETE);
         listener.fireJustRun(DeleteEvent.createEvent(metaModel, entity), DeleteEventListener::onDelete);
         persistenceContext.removeEntity(entity);
+    }
+
+    @Override
+    public MetaModel getMetaModel() {
+        return metaModel;
+    }
+
+    @Override
+    public ActionQueue getActionQueue() {
+        return actionQueue;
     }
 }

@@ -2,6 +2,7 @@ package repository;
 
 import database.DatabaseServer;
 import database.H2;
+import hibernate.action.ActionQueue;
 import hibernate.ddl.CreateQueryBuilder;
 import hibernate.entity.EntityManager;
 import hibernate.entity.EntityManagerImpl;
@@ -46,7 +47,8 @@ class CustomJpaRepositoryTest {
         BasicMetaModel basicMetaModel = BasicMetaModel.createPackageMetaModel("repository");
         MetaModel metaModel = MetaModelImpl.createPackageMetaModel(basicMetaModel, jdbcTemplate);
         EventListenerRegistry eventListenerRegistry = EventListenerRegistry.createDefaultRegistry();
-        EntityManager entityManager = new EntityManagerImpl(persistenceContext, metaModel, eventListenerRegistry);
+        ActionQueue actionQueue = new ActionQueue();
+        EntityManager entityManager = new EntityManagerImpl(persistenceContext, metaModel, eventListenerRegistry, actionQueue);
         customJpaRepository = new CustomJpaRepository<>(entityManager);
     }
 

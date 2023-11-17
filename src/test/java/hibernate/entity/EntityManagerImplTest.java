@@ -2,6 +2,7 @@ package hibernate.entity;
 
 import database.DatabaseServer;
 import database.H2;
+import hibernate.action.ActionQueue;
 import hibernate.ddl.CreateQueryBuilder;
 import hibernate.entity.entityentry.EntityEntry;
 import hibernate.entity.entityentry.EntityEntryContext;
@@ -51,7 +52,8 @@ class EntityManagerImplTest {
         BasicMetaModel basicMetaModel = BasicMetaModel.createPackageMetaModel("hibernate.entity");
         MetaModel metaModel = MetaModelImpl.createPackageMetaModel(basicMetaModel, jdbcTemplate);
         EventListenerRegistry eventListenerRegistry = EventListenerRegistry.createDefaultRegistry();
-        entityManager = new EntityManagerImpl(persistenceContext, metaModel, eventListenerRegistry);
+        ActionQueue actionQueue = new ActionQueue();
+        entityManager = new EntityManagerImpl(persistenceContext, metaModel, eventListenerRegistry, actionQueue);
     }
 
     @BeforeAll

@@ -1,5 +1,6 @@
 package hibernate.entity;
 
+import hibernate.action.ActionQueue;
 import hibernate.entity.persistencecontext.SimplePersistenceContext;
 import hibernate.event.EventListenerRegistry;
 import hibernate.metamodel.BasicMetaModel;
@@ -33,7 +34,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         return new EntityManagerImpl(
                 new SimplePersistenceContext(),
                 MetaModelImpl.createPackageMetaModel(basicMetaModel, new JdbcTemplate(connection)),
-                EventListenerRegistry.createDefaultRegistry()
+                EventListenerRegistry.createDefaultRegistry(),
+                new ActionQueue()
         );
     }
 
