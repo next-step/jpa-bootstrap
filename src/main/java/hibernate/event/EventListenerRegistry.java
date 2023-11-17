@@ -9,22 +9,22 @@ import java.util.Map;
 
 public class EventListenerRegistry {
 
-    private final Map<EventType, EventListener> listeners;
+    private final Map<EventType, EventListener<?>> listeners;
 
-    public EventListenerRegistry(final Map<EventType, EventListener> listeners) {
+    public EventListenerRegistry(final Map<EventType, EventListener<?>> listeners) {
         this.listeners = listeners;
     }
 
     public static EventListenerRegistry createDefaultRegistry() {
         return new EventListenerRegistry(Map.of(
-                EventType.LOAD, new SimpleLoadEventListener(),
-                EventType.PERSIST, new SimplePersistEventListener(),
-                EventType.MERGE, new SimpleMergeEventListener(),
-                EventType.DELETE, new SimpleDeleteEventListener()
+                EventType.LOAD, new EventListener<>(new SimpleLoadEventListener()),
+                EventType.PERSIST, new EventListener<>(new SimplePersistEventListener()),
+                EventType.MERGE, new EventListener<>(new SimpleMergeEventListener()),
+                EventType.DELETE, new EventListener<>(new SimpleDeleteEventListener())
         ));
     }
 
-    public EventListener getListener(final EventType eventType) {
+    public EventListener<?> getListener(final EventType eventType) {
         if (listeners.containsKey(eventType)) {
             return listeners.get(eventType);
         }

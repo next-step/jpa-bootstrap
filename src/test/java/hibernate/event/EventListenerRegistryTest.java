@@ -29,7 +29,7 @@ class EventListenerRegistryTest {
     })
     void createDefaultRegistry로_EventType에_맞는_Listener를_가져온다(final EventType eventType, final String expectedClassName) throws ClassNotFoundException {
         EventListenerRegistry defaultRegistry = createDefaultRegistry();
-        EventListener actual = defaultRegistry.getListener(eventType);
-        assertThat(actual).isInstanceOf(Class.forName(expectedClassName));
+        EventListener<?> actual = defaultRegistry.getListener(eventType);
+        assertThat(actual.getValue()).isInstanceOf(Class.forName(expectedClassName));
     }
 }
