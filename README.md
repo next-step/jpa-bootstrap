@@ -55,3 +55,10 @@
   - DeleteEventListener
     - entity object와 해당 object를 제거할 수 있는 persister가 담긴 DeleteEvent를 받아 처리한다.
   - 각 Listener는 Event객체를 받아 처리하고, Event 결과를 반환하거나 리턴하지 않는다.
+
+### 요구사항 2 - ActionQueue 를 활용해 쓰기 지연 구현해보기
+- ActionQueue
+  - insert, delete, update는 각각 Queue로 가지고 있는다.
+  - 개별로 실행가능하며, Queue가 소진될 때까지 실행한다.
+- EntityAction
+  - 각 action은 개별로 실행가능하다. 따라서 각 action은 persister를 가지며 개별동작을 할 수 있다.
