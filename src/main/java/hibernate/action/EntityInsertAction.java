@@ -2,17 +2,12 @@ package hibernate.action;
 
 import hibernate.entity.EntityPersister;
 
-public class EntityInsertAction<T> extends AbstractEntityAction<T> {
+public abstract class EntityInsertAction<T> extends AbstractEntityAction<T> {
 
-    private final T entity;
+    protected final T entity;
 
-    public EntityInsertAction(final EntityPersister<T> entityPersister, final T entity) {
+    public EntityInsertAction(EntityPersister<T> entityPersister, T entity) {
         super(entityPersister);
         this.entity = entity;
-    }
-
-    @Override
-    public void execute() {
-        entityPersister.insert(entity);
     }
 }

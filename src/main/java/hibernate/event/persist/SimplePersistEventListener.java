@@ -1,14 +1,18 @@
 package hibernate.event.persist;
 
-import hibernate.action.EntityInsertAction;
+import hibernate.action.EntityBasicInsertAction;
+import hibernate.action.EntityIdentityInsertAction;
 
 public class SimplePersistEventListener implements PersistEventListener {
 
-    // TODO void로 전체 변경 필요
     @Override
-    public <T> Object onPersist(final PersistEvent<T> event) {
+    public <T> void onPersist(final PersistEvent<T> event) {
+        if (event.isIdentity()) {
+            event.getActionQueue()
+                    .addAction(new EntityIdentityInsertAction<>(event.getEntityPersister(), event.getEntity(), event.getEntityId()));
+            return;
+        }
         event.getActionQueue()
-                .addAction(new EntityInsertAction<>(event.getEntityPersister(), event.getEntity()));
-        return null;
+                .addAction(new EntityBasicInsertAction<>(event.getEntityPersister(), event.getEntity()));
     }
 }

@@ -23,7 +23,12 @@ public class ActionQueue {
         this(new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>());
     }
 
-    public void addAction(final EntityInsertAction<?> action) {
+    public void addAction(final EntityBasicInsertAction<?> action) {
+        insertions.add(action);
+    }
+
+    // TODO action all insertions
+    public void addAction(final EntityIdentityInsertAction<?> action) {
         insertions.add(action);
     }
 

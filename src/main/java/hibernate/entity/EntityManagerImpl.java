@@ -65,9 +65,8 @@ public class EntityManagerImpl implements EntityManager, EntitySource {
         Object id = entityId.getFieldValue(entity);
         if (id == null) {
             persistenceContext.addEntityEntry(entity, SAVING);
-            Object generatedId = listener.fireWithReturn(persistEvent, PersistEventListener::onPersist);
-            entityId.assignFieldValue(entity, generatedId);
-            persistenceContext.addEntity(generatedId, entity);
+            listener.fireJustRun(persistEvent, PersistEventListener::onPersist);
+            persistenceContext.addEntity(entityId.getFieldValue(entity), entity);
             return;
         }
 
@@ -75,7 +74,7 @@ public class EntityManagerImpl implements EntityManager, EntitySource {
             throw new IllegalStateException("이미 영속화되어있는 entity입니다.");
         }
         persistenceContext.addEntity(id, entity, SAVING);
-        listener.fireWithReturn(persistEvent, PersistEventListener::onPersist);
+        listener.fireJustRun(persistEvent, PersistEventListener::onPersist);
     }
 
     @Override
