@@ -3,8 +3,8 @@ package hibernate.event.persist;
 public class SimplePersistEventListener implements PersistEventListener {
 
     @Override
-    public <T> void onPersist(PersistEvent<T> event) {
-        event.getEntityPersister()
+    public <T> Object onPersist(PersistEvent<T> event) {
+        return event.getEntityPersister()
                 .insert(event.getEntity());
     }
 }

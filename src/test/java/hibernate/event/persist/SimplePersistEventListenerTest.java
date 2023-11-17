@@ -58,11 +58,10 @@ class SimplePersistEventListenerTest {
         PersistEventListener persistEventListener = new SimplePersistEventListener();
 
         // when
-        persistEventListener.onPersist(persistEvent);
-        Integer actual = testEntityCount();
+        Object actual = persistEventListener.onPersist(persistEvent);
 
         // then
-        assertThat(actual).isEqualTo(1);
+        assertThat(actual).isEqualTo(1L);
 
     }
 

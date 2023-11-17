@@ -2,5 +2,5 @@ package hibernate.event.persist;
 
 public interface PersistEventListener {
 
-    <T> void onPersist(PersistEvent<T> event);
+    <T> Object onPersist(PersistEvent<T> event);
 }
