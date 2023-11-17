@@ -2,7 +2,10 @@ package hibernate.event.persist;
 
 import database.DatabaseServer;
 import database.H2;
+import hibernate.action.ActionQueue;
 import hibernate.ddl.CreateQueryBuilder;
+import hibernate.entity.EntityManagerImpl;
+import hibernate.entity.EntitySource;
 import hibernate.entity.meta.EntityClass;
 import hibernate.metamodel.BasicMetaModel;
 import hibernate.metamodel.MetaModel;
@@ -24,17 +27,19 @@ class SimplePersistEventListenerTest {
 
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
-    private static MetaModel metaModel;
+    private static EntitySource entitySource;
 
     @BeforeAll
     static void beforeAll() throws SQLException {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        metaModel = MetaModelImpl.createPackageMetaModel(
+        MetaModel metaModel = MetaModelImpl.createPackageMetaModel(
                 BasicMetaModel.createPackageMetaModel("hibernate.event.persist"),
                 jdbcTemplate
         );
+        ActionQueue actionQueue = new ActionQueue();
+        entitySource = new EntityManagerImpl(null, metaModel, null, actionQueue);
 
         jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(TestEntity.class)));
     }
@@ -54,7 +59,7 @@ class SimplePersistEventListenerTest {
     void Event를_받아_persist한다() {
         // given
         TestEntity givenEntity = new TestEntity("최진영", 19);
-        PersistEvent<TestEntity> persistEvent = PersistEvent.createEvent(metaModel, givenEntity);
+        PersistEvent<TestEntity> persistEvent = PersistEvent.createEvent(entitySource, givenEntity);
         PersistEventListener persistEventListener = new SimplePersistEventListener();
 
         // when

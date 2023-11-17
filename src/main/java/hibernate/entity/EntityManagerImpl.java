@@ -58,7 +58,7 @@ public class EntityManagerImpl implements EntityManager, EntitySource {
 
     @Override
     public void persist(final Object entity) {
-        PersistEvent<?> persistEvent = PersistEvent.createEvent(metaModel, entity);
+        PersistEvent<?> persistEvent = PersistEvent.createEvent(this, entity);
         EventListener<PersistEventListener> listener = eventListenerRegistry.getListener(EventType.PERSIST);
 
         EntityColumn entityId = metaModel.getEntityId(entity.getClass());

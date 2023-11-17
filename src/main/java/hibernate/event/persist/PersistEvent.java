@@ -1,20 +1,27 @@
 package hibernate.event.persist;
 
+import hibernate.action.ActionQueue;
 import hibernate.entity.EntityPersister;
-import hibernate.metamodel.MetaModel;
+import hibernate.entity.EntitySource;
+import hibernate.event.AbstractEntityEvent;
 
-public class PersistEvent<T> {
+public class PersistEvent<T> extends AbstractEntityEvent {
 
     private final EntityPersister<T> entityPersister;
     private final T entity;
 
-    private PersistEvent(final EntityPersister<T> entityPersister, final T entity) {
+    private PersistEvent(final ActionQueue actionQueue, final EntityPersister<T> entityPersister, final T entity) {
+        super(actionQueue);
         this.entityPersister = entityPersister;
         this.entity = entity;
     }
 
-    public static <T> PersistEvent<T> createEvent(final MetaModel metaModel, final T entity) {
-        return new PersistEvent<>(metaModel.getEntityPersister((Class<T>) entity.getClass()), entity);
+    public static <T> PersistEvent<T> createEvent(final EntitySource entitySource, final T entity) {
+        return new PersistEvent<>(
+                entitySource.getActionQueue(),
+                entitySource.getMetaModel().getEntityPersister((Class<T>) entity.getClass()),
+                entity
+        );
     }
 
     public EntityPersister<T> getEntityPersister() {
