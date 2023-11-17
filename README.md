@@ -57,8 +57,19 @@
   - 각 Listener는 Event객체를 받아 처리하고, Event 결과를 반환하거나 리턴하지 않는다.
 
 ### 요구사항 2 - ActionQueue 를 활용해 쓰기 지연 구현해보기
+- EntitySource
+  - EntityManager의 데이터값만 반환할 수 있도록 추상화한 인터페이스
+- EntityListener
+  - 각 Listener가 persister를 호출하여 처리하는 것이 아닌 action queue에 모두 담는것으로 마무리 한다.
 - EntityAction
   - 각 action은 개별로 실행가능하다. 따라서 각 action은 persister를 가지며 개별동작을 할 수 있다.
-  - InsertEntityAction
-  - UpdateEntityAction
-  - DeleteEntityAction
+  - EntityInsertAction
+    - EntityBasicInsertAction : id까지 insert하는 action
+    - EntityIdentityInsertAction : id의 전략이 identity인 action
+  - EntityUpdateAction
+  - EntityDeleteAction
+- ActionQueue
+  - 각 action에 맞는 queue에 저장한다.
+  - identity insert action이 들어오는 경우 insert queue를 모두 처리한다.
+  - 모든 action을 처리할 수 있다.
+- 
