@@ -1,10 +1,12 @@
 package hibernate.event.delete;
 
+import hibernate.action.EntityDeleteAction;
+
 public class SimpleDeleteEventListener implements DeleteEventListener {
 
     @Override
     public <T> void onDelete(DeleteEvent<T> event) {
-        event.getEntityPersister()
-                .delete(event.getEntity());
+        event.getActionQueue()
+                .addAction(new EntityDeleteAction<>(event.getEntityPersister(), event.getEntity()));
     }
 }

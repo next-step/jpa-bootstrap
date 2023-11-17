@@ -3,6 +3,7 @@ package hibernate.event.persist;
 import database.DatabaseServer;
 import database.H2;
 import hibernate.action.ActionQueue;
+import hibernate.action.EntityInsertAction;
 import hibernate.ddl.CreateQueryBuilder;
 import hibernate.entity.EntityManagerImpl;
 import hibernate.entity.EntitySource;
@@ -12,14 +13,14 @@ import hibernate.metamodel.MetaModel;
 import hibernate.metamodel.MetaModelImpl;
 import jakarta.persistence.*;
 import jdbc.JdbcTemplate;
-import jdbc.RowMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +29,7 @@ class SimplePersistEventListenerTest {
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
     private static EntitySource entitySource;
+    private static final Queue<EntityInsertAction<?>> insertActionQueue = new LinkedList<>();
 
     @BeforeAll
     static void beforeAll() throws SQLException {
@@ -38,7 +40,11 @@ class SimplePersistEventListenerTest {
                 BasicMetaModel.createPackageMetaModel("hibernate.event.persist"),
                 jdbcTemplate
         );
-        ActionQueue actionQueue = new ActionQueue();
+        ActionQueue actionQueue = new ActionQueue(
+                insertActionQueue,
+                new LinkedList<>(),
+                new LinkedList<>()
+        );
         entitySource = new EntityManagerImpl(null, metaModel, null, actionQueue);
 
         jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(TestEntity.class)));
@@ -63,24 +69,11 @@ class SimplePersistEventListenerTest {
         PersistEventListener persistEventListener = new SimplePersistEventListener();
 
         // when
-        Object actual = persistEventListener.onPersist(persistEvent);
+        persistEventListener.onPersist(persistEvent);
 
         // then
-        assertThat(actual).isEqualTo(1L);
+        assertThat(insertActionQueue).hasSize(1);
 
-    }
-
-    private Integer testEntityCount() {
-        return jdbcTemplate.queryForObject("select count(*) from test_entity", new RowMapper<Integer>() {
-            @Override
-            public Integer mapRow(ResultSet resultSet) {
-                try {
-                    return resultSet.getInt(1);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
     }
 
     @Entity

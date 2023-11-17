@@ -9,4 +9,8 @@ public abstract class AbstractEntityEvent {
     public AbstractEntityEvent(ActionQueue actionQueue) {
         this.actionQueue = actionQueue;
     }
+
+    public ActionQueue getActionQueue() {
+        return actionQueue;
+    }
 }

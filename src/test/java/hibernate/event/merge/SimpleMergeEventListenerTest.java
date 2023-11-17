@@ -3,6 +3,7 @@ package hibernate.event.merge;
 import database.DatabaseServer;
 import database.H2;
 import hibernate.action.ActionQueue;
+import hibernate.action.EntityUpdateAction;
 import hibernate.ddl.CreateQueryBuilder;
 import hibernate.entity.EntityManagerImpl;
 import hibernate.entity.EntitySource;
@@ -12,15 +13,15 @@ import hibernate.metamodel.MetaModel;
 import hibernate.metamodel.MetaModelImpl;
 import jakarta.persistence.*;
 import jdbc.JdbcTemplate;
-import jdbc.RowMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,6 +30,7 @@ class SimpleMergeEventListenerTest {
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
     private static EntitySource entitySource;
+    private static final Queue<EntityUpdateAction<?>> updateActionQueue = new LinkedList<>();
 
     @BeforeAll
     static void beforeAll() throws SQLException {
@@ -39,7 +41,11 @@ class SimpleMergeEventListenerTest {
                 BasicMetaModel.createPackageMetaModel("hibernate.event.merge"),
                 jdbcTemplate
         );
-        ActionQueue actionQueue = new ActionQueue();
+        ActionQueue actionQueue = new ActionQueue(
+                new LinkedList<>(),
+                updateActionQueue,
+                new LinkedList<>()
+        );
         entitySource = new EntityManagerImpl(null, metaModel, null, actionQueue);
 
         jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(TestEntity.class)));
@@ -68,27 +74,9 @@ class SimpleMergeEventListenerTest {
 
         // when
         mergeEventListener.onMerge(mergeEvent);
-        TestEntity actual = testEntity();
 
         // then
-        assertThat(actual.name).isEqualTo(expectedChangedName);
-    }
-
-    private TestEntity testEntity() {
-        return jdbcTemplate.queryForObject("select id, nick_name, age from test_entity", new RowMapper<TestEntity>() {
-            @Override
-            public TestEntity mapRow(ResultSet resultSet) {
-                try {
-                    return new TestEntity(
-                            resultSet.getLong("id"),
-                            resultSet.getString("nick_name"),
-                            resultSet.getInt("age")
-                    );
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+        assertThat(updateActionQueue).hasSize(1);
     }
 
     @Entity

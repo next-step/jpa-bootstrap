@@ -3,6 +3,7 @@ package hibernate.event.delete;
 import database.DatabaseServer;
 import database.H2;
 import hibernate.action.ActionQueue;
+import hibernate.action.EntityDeleteAction;
 import hibernate.ddl.CreateQueryBuilder;
 import hibernate.entity.EntityManagerImpl;
 import hibernate.entity.EntitySource;
@@ -12,14 +13,14 @@ import hibernate.metamodel.MetaModel;
 import hibernate.metamodel.MetaModelImpl;
 import jakarta.persistence.*;
 import jdbc.JdbcTemplate;
-import jdbc.RowMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +29,7 @@ class SimpleDeleteEventListenerTest {
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
     private static EntitySource entitySource;
+    private static final Queue<EntityDeleteAction<?>> deleteActionQueue = new LinkedList<>();
 
     @BeforeAll
     static void beforeAll() throws SQLException {
@@ -38,7 +40,11 @@ class SimpleDeleteEventListenerTest {
                 BasicMetaModel.createPackageMetaModel("hibernate.event.delete"),
                 jdbcTemplate
         );
-        ActionQueue actionQueue = new ActionQueue();
+        ActionQueue actionQueue = new ActionQueue(
+                new LinkedList<>(),
+                new LinkedList<>(),
+                deleteActionQueue
+        );
         entitySource = new EntityManagerImpl(null, metaModel, null, actionQueue);
 
         jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(TestEntity.class)));
@@ -56,7 +62,7 @@ class SimpleDeleteEventListenerTest {
     }
 
     @Test
-    void Event를_받아_delete한다() {
+    void Event를_받아_delete_action을_저장한다() {
         // given
         jdbcTemplate.execute("insert into test_entity (id, nick_name, age) values (1, '최진영', 19);");
 
@@ -65,23 +71,9 @@ class SimpleDeleteEventListenerTest {
 
         // when
         deleteEventListener.onDelete(deleteEvent);
-        Integer actual = testEntityCount();
 
         // then
-        assertThat(actual).isEqualTo(0);
-    }
-
-    private Integer testEntityCount() {
-        return jdbcTemplate.queryForObject("select count(*) from test_entity", new RowMapper<Integer>() {
-            @Override
-            public Integer mapRow(ResultSet resultSet) {
-                try {
-                    return resultSet.getInt(1);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+        assertThat(deleteActionQueue).hasSize(1);
     }
 
     @Entity
