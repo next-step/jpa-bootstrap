@@ -113,7 +113,7 @@ public class EntityManagerImpl implements EntityManager, EntitySource {
     public void remove(final Object entity) {
         persistenceContext.addEntityEntry(entity, DELETED);
         EventListener<DeleteEventListener> listener = eventListenerRegistry.getListener(EventType.DELETE);
-        listener.fireJustRun(DeleteEvent.createEvent(metaModel, entity), DeleteEventListener::onDelete);
+        listener.fireJustRun(DeleteEvent.createEvent(this, entity), DeleteEventListener::onDelete);
         persistenceContext.removeEntity(entity);
     }
 
