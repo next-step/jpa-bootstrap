@@ -12,7 +12,7 @@ public class SimpleEntityManagerFactory implements EntityManagerFactory {
     }
 
     @Override
-    public EntityManager createEntityManager() {
+    public EntityManager openSession() {
         return new SimpleEntityManager(metaModelFactory.createMetaModel());
     }
 }

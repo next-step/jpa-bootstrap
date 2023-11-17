@@ -16,7 +16,7 @@ class SimpleEntityManagerFactoryTest {
         final EntityScanner entityScanner = new EntityScanner(Application.class);
         final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityScanner, new MockPersistenceEnvironment());
 
-        final EntityManager entityManager = entityManagerFactory.createEntityManager();
+        final EntityManager entityManager = entityManagerFactory.openSession();
 
         assertThat(entityManager).isNotNull();
     }
