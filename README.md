@@ -59,3 +59,23 @@ public class Employee {
     // getter, setter, constructors, 등등
 }
 ```
+
+### 2단계 - SessionFactory
+- 요구사항 1 - EntityManagerFactory 를 만들어 보기
+```java
+public class EntityManagerFactoryImpl {
+    private final CurrentSessionContext currentSessionContext;
+    // 메서드 및 책임을 자유롭게 추가해도 됩니다.
+
+    public EntityManagerFactoryImpl(적절히) {
+        // 구현해보기
+    }
+    public EntityManager openSession(적절히) {
+        // 구현해보기
+    }
+}
+```
+- [ ] EntityManagerFactory 를 이용해 EntityManager 를 생성할 수 있다.
+- [ ] EntityManagerFactory 를 이용해 생성할때 이미 되어진것이 있다면 해당 객체를 반환한다.
+
+- 요구사항 2 - EntityManagerFactory 를 적용하여 리팩터링을 해보자
