@@ -24,9 +24,9 @@ public class EventListenerRegistry {
         ));
     }
 
-    public EventListener<?> getListener(final EventType eventType) {
+    public <T> EventListener<T> getListener(final EventType eventType) {
         if (listeners.containsKey(eventType)) {
-            return listeners.get(eventType);
+            return (EventListener<T>) listeners.get(eventType);
         }
         throw new IllegalArgumentException("해당 EventType에 일치하는 EventListener가 없습니다.");
     }
