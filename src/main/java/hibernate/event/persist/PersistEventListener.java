@@ -1,6 +1,8 @@
 package hibernate.event.persist;
 
-public interface PersistEventListener {
+import hibernate.event.EventListener;
+
+public interface PersistEventListener extends EventListener {
 
     <T> void onPersist(PersistEvent<T> event);
 }

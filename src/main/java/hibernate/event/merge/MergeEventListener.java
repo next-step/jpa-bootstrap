@@ -1,6 +1,8 @@
 package hibernate.event.merge;
 
-public interface MergeEventListener {
+import hibernate.event.EventListener;
+
+public interface MergeEventListener extends EventListener {
 
     <T> void onMerge(MergeEvent<T> event);
 }

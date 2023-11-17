@@ -1,6 +1,8 @@
 package hibernate.event.load;
 
-public interface LoadEventListener {
+import hibernate.event.EventListener;
+
+public interface LoadEventListener extends EventListener {
 
     <T> T onLoad(LoadEvent<T> event);
 }

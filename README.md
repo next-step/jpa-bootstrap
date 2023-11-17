@@ -42,6 +42,7 @@
   - 이후 EventListenerRegistry에 저장할 때 해당 interface listener를 상속받은 구현체만 저장할 수 있도록 한다.
 - EventListenerRegistry
   - 모든 EventType을 받아서 각 타입에 맞는 Listener의 구현체를 받아 저장하고 있는다.
+  - 없는 EventType을 꺼내려하는 경우 예외가 발생한다.
 - EventListener
   - LoadEventListener
     - entityId와 해당 entity를 가져올 수 있는 Loader를 담은 LoadEvent를 받아 처리한다.

@@ -1,6 +1,8 @@
 package hibernate.event.delete;
 
-public interface DeleteEventListener {
+import hibernate.event.EventListener;
+
+public interface DeleteEventListener extends EventListener {
 
     <T> void onDelete(DeleteEvent<T> event);
 }
