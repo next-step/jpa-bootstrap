@@ -27,4 +27,8 @@ public class EntityManagerImpl implements EntityManager {
     public <T> void remove(T instance) {
         persistenceContext.removeEntity(instance);
     }
+
+    public void close() {
+
+    }
 }

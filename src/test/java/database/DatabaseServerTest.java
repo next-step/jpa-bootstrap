@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import persistence.DatabaseTest;
 import persistence.entity.attribute.EntityAttribute;
 import persistence.entity.attribute.EntityAttributes;
-import persistence.entity.attribute.EntityBinder;
 import persistence.mapper.TestEntityRowMapper;
 import persistence.sql.dml.builder.InsertQueryBuilder;
 import persistence.sql.infra.H2SqlConverter;
@@ -29,8 +28,6 @@ public class DatabaseServerTest extends DatabaseTest {
             @Test
             @DisplayName("예외를 던지지않고 종료한다.")
             void doseNotThrowException() {
-                EntityBinder.init();
-
                 setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
 
                 InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
