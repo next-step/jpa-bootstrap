@@ -27,7 +27,7 @@ public class CityApplicationTest extends IntegrationTestEnvironment {
         saveDummyCountry();
         saveDummyCity();
         final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityScanner, persistenceEnvironment);
-        entityManager = entityManagerFactory.createEntityManager();
+        entityManager = entityManagerFactory.openSession();
     }
 
     @Test

@@ -5,6 +5,8 @@ import persistence.entity.loader.EntityLoaders;
 import persistence.entity.persister.EntityPersisters;
 import persistence.sql.dml.DmlGenerator;
 
+import java.sql.Connection;
+
 public class MetaModelFactory {
     private final EntityMetadataProvider entityMetadataProvider;
     private final PersistenceEnvironment persistenceEnvironment;
@@ -16,11 +18,11 @@ public class MetaModelFactory {
     }
 
     public MetaModel createMetaModel() {
+        final Connection connection = persistenceEnvironment.getConnection();
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
         final DmlGenerator dmlGenerator = persistenceEnvironment.getDmlGenerator();
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(persistenceEnvironment.getConnection());
         final EntityPersisters entityPersisters = new EntityPersisters(entityMetadataProvider, dmlGenerator, jdbcTemplate);
         final EntityLoaders entityLoaders = new EntityLoaders(entityMetadataProvider, dmlGenerator, jdbcTemplate);
         return new MetaModelImpl(entityMetadataProvider, entityPersisters, entityLoaders);
     }
-
 }

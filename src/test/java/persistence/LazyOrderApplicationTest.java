@@ -32,7 +32,7 @@ public class LazyOrderApplicationTest extends IntegrationTestEnvironment {
         saveDummyOrder();
         saveDummyOrderItems();
         final EntityManagerFactory entityManagerFactory = new SimpleEntityManagerFactory(entityScanner, persistenceEnvironment);
-        entityManager = entityManagerFactory.createEntityManager();
+        entityManager = entityManagerFactory.openSession();
 
     }
 
