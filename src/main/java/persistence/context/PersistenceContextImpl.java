@@ -4,7 +4,7 @@ import persistence.entity.attribute.EntityAttribute;
 import persistence.entity.attribute.EntityAttributes;
 import persistence.entity.attribute.id.IdAttribute;
 import persistence.entity.entry.EntityEntries;
-import persistence.entity.persister.SimpleEntityPersister;
+import persistence.entity.persister.EntityPersister;
 
 import java.lang.reflect.Field;
 import java.util.Optional;
@@ -13,12 +13,12 @@ import static persistence.entity.entry.Status.*;
 
 public class PersistenceContextImpl implements PersistenceContext {
     private final EntityAttributes entityAttributes;
-    private final SimpleEntityPersister simpleEntityPersister;
+    private final EntityPersister simpleEntityPersister;
     private final EntityEntries entityEntries = new EntityEntries();
     private final FirstCaches firstCaches = new FirstCaches();
     private final SnapShots snapShots = new SnapShots();
 
-    public PersistenceContextImpl(SimpleEntityPersister simpleEntityPersister, EntityAttributes entityAttributes) {
+    public PersistenceContextImpl(EntityPersister simpleEntityPersister, EntityAttributes entityAttributes) {
         this.simpleEntityPersister = simpleEntityPersister;
         this.entityAttributes = entityAttributes;
     }

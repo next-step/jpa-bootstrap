@@ -19,3 +19,4 @@ public class EntityAttributes {
         entityAttributeCenter.put(clazz, EntityAttribute.of(clazz, createReferenceTracingLog()));
     }
 }
+
