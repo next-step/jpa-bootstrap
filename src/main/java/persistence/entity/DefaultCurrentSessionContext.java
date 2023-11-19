@@ -1,32 +1,17 @@
 package persistence.entity;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+public class DefaultCurrentSessionContext {
 
-public class DefaultCurrentSessionContext implements CurrentSessionContext {
-
-    private static DefaultCurrentSessionContext INSTANCE;
-
-    private final Map<Long, EntityManager> entityManagerMap = new ConcurrentHashMap<>();
+    private static final ThreadLocal<EntityManager> entityManagerThreadLocal = new ThreadLocal<>();
 
     private DefaultCurrentSessionContext() {
     }
 
-    public static DefaultCurrentSessionContext getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new DefaultCurrentSessionContext();
-        }
-        return INSTANCE;
+    public static void openSession(EntityManager entityManager) {
+        entityManagerThreadLocal.set(entityManager);
     }
 
-    @Override
-    public void openSession(Thread thread, EntityManager entityManager) {
-        entityManagerMap.put(thread.getId(), entityManager);
-    }
-
-    @Override
-    public EntityManager currentSession() {
-        Thread currentThread = Thread.currentThread();
-        return entityManagerMap.get(currentThread.getId());
+    public static EntityManager currentSession() {
+        return entityManagerThreadLocal.get();
     }
 }
