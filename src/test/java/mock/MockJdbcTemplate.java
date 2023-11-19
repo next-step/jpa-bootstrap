@@ -1,5 +1,6 @@
 package mock;
 
+import jdbc.IdMapper;
 import jdbc.JdbcTemplate;
 import jdbc.RowMapper;
 import org.h2.tools.SimpleResultSet;
@@ -10,7 +11,7 @@ import java.util.List;
 public class MockJdbcTemplate extends JdbcTemplate {
     private final SimpleResultSet rs;
 
-    public MockJdbcTemplate(){
+    public MockJdbcTemplate() {
         this(null);
     }
 
@@ -27,6 +28,15 @@ public class MockJdbcTemplate extends JdbcTemplate {
                 result.add(rowMapper.mapRow(rs));
             }
             return result;
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void executeInsert(final String sql, final IdMapper idMapper) {
+        try (rs) {
+            idMapper.mapId(rs);
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
