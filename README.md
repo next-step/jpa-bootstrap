@@ -82,3 +82,40 @@ public class EntityManagerFactoryImpl {
 - 요구사항 2 - EntityManagerFactory 를 적용하여 리팩터링을 해보자
 - [x] 기존 openSession 에서 항상 EntityManager 를 생성하는게 아닌 CurrentSessionContext 에 있는 EntityManager 를 먼저 사용할 수 있다.
 - [x] EntityManager 가 할일을 마치고 close 될때 CurrentSessionContext 도 cleanup 할 수 있다.
+
+### 3단계 - Event
+- 요구사항 1 - EventType 을 활용해 리팩터링 해보기
+```java
+public class EventType<T> {
+    public static final EventType<LoadEventListener> LOAD = create("load", LoadEventListener.class);
+    ...
+    
+    private final String eventName;
+    private final Class<T> baseListenerInterface;
+
+    private EventType(String eventName, Class<T> baseListenerInterface) {
+    	this.eventName = eventName;
+    	this.baseListenerInterface = baseListenerInterface;
+    }
+    
+    private static <T> EventType<T> create(String name, Class<T> listenerRole) {
+        return new EventType<>( name, listenerRole);
+    }
+}
+public interface LoadEventListener {
+    public void onLoad(파마리터들..);
+    ...
+}
+public class DefaultLoadEventListener implements LoadEventListener {
+    public void onLoad(파마리터들..) {
+
+    }
+}
+    private final Map<EventType<?>, EventListener> listeners;
+```
+- [ ] EntityManager 에서 바로 db 와 소통하던 부분을 Event 기반으로 전환한다.
+- [ ] Insert Event 관련 처리
+- [ ] Update Event 관련 처리
+- [ ] Delete Event 관련 처리
+- [ ] Load Event 관련 처리
+- [ ] 해당 Event 들을 하나로 그룹화 해보기
