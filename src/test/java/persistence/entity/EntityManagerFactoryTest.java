@@ -24,39 +24,24 @@ class EntityManagerFactoryTest {
 
     @AfterEach
     void tearDown() {
+        CurrentSessionContext.close();
         server.stop();
     }
 
     @Test
     @DisplayName("세션 오픈 후 Entity Manager 정상반환")
-    void openSession() {
-        Thread thread = new Thread(() -> {
-            try {
-                EntityManagerFactory entityManagerFactory = EntityManagerFactoryImpl.of(server.getConnection());
-                EntityManager entityManager = entityManagerFactory.openSession();
-                assertThat(entityManager).isNotNull();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        thread.start();
+    void openSession() throws Exception {
+        EntityManagerFactory entityManagerFactory = EntityManagerFactoryImpl.of(server.getConnection());
+        EntityManager entityManager = entityManagerFactory.openSession();
+        assertThat(entityManager).isNotNull();
     }
 
     @Test
     @DisplayName("세션 중복오픈 시, 기 생성 세션오류 발생")
-    void openDuplicateSession() {
-        Thread thread = new Thread(() -> {
-            try {
-                EntityManagerFactory entityManagerFactory = EntityManagerFactoryImpl.of(server.getConnection());
-                entityManagerFactory.openSession();
-                assertThrows(IllegalStateException.class, entityManagerFactory::openSession, "세션 생성이 완료되었습니다.");
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        thread.start();
+    void openDuplicateSession() throws Exception {
+        EntityManagerFactory entityManagerFactory = EntityManagerFactoryImpl.of(server.getConnection());
+        entityManagerFactory.openSession();
+        assertThrows(IllegalStateException.class, entityManagerFactory::openSession, "세션 생성이 완료되었습니다.");
     }
 
 }
