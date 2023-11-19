@@ -14,4 +14,8 @@ public class CurrentSessionContext {
     public static EntityManager currentSession() {
         return entityManagerThreadLocal.get();
     }
+
+    public static void close() {
+        entityManagerThreadLocal.remove();
+    }
 }
