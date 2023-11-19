@@ -18,12 +18,12 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
     @Override
     public EntityManager openSession() {
-        EntityManager entityManager = DefaultCurrentSessionContext.currentSession();
+        EntityManager entityManager = CurrentSessionContext.currentSession();
         if (entityManager != null) {
             throw new IllegalStateException("세션 생성이 완료되었습니다.");
         }
         DefaultEntityManager defaultEntityManager = DefaultEntityManager.of(new JdbcTemplate(connection));
-        DefaultCurrentSessionContext.openSession(defaultEntityManager);
+        CurrentSessionContext.openSession(defaultEntityManager);
         return defaultEntityManager;
     }
 

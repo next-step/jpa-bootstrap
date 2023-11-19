@@ -1,10 +1,10 @@
 package persistence.entity;
 
-public class DefaultCurrentSessionContext {
+public class CurrentSessionContext {
 
     private static final ThreadLocal<EntityManager> entityManagerThreadLocal = new ThreadLocal<>();
 
-    private DefaultCurrentSessionContext() {
+    private CurrentSessionContext() {
     }
 
     public static void openSession(EntityManager entityManager) {
