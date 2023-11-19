@@ -12,6 +12,8 @@ import persistence.entity.loader.EntityLoaders;
 import persistence.entity.persister.EntityPersister;
 import persistence.entity.persister.EntityPersisters;
 import persistence.entity.proxy.EntityProxyFactory;
+import persistence.event.EventListenerGroup;
+import persistence.event.PersistEvent;
 import persistence.exception.PersistenceException;
 import persistence.util.ReflectionUtils;
 
@@ -26,6 +28,7 @@ public class SimpleEntityManager implements EntityManager {
     private final PersistenceContext persistenceContext;
     private final EntityKeyGenerator entityKeyGenerator;
     private final SessionCloseStrategy sessionCloseStrategy;
+    private final EventListenerGroup eventListenerGroup;
 
     public SimpleEntityManager(final MetaModel metaModel, final SessionCloseStrategy sessionCloseStrategy) {
         this.metaModel = metaModel;
@@ -35,6 +38,7 @@ public class SimpleEntityManager implements EntityManager {
         this.entityKeyGenerator = new EntityKeyGenerator(metaModel);
         this.persistenceContext = new SimplePersistenceContext();
         this.sessionCloseStrategy = sessionCloseStrategy;
+        this.eventListenerGroup = new EventListenerGroup(entityPersisters);
     }
 
     @Override
@@ -51,8 +55,7 @@ public class SimpleEntityManager implements EntityManager {
         final EntityPersister entityPersister = entityPersisters.getEntityPersister(entity.getClass());
 
         final Object idValue = extractId(entity, entityPersister);
-        final boolean hasIdValue = !Objects.isNull(idValue);
-        if (hasIdValue) {
+        if (Objects.nonNull(idValue)) {
             checkEntityAlreadyExists(entity, idValue);
             processUpdate(entity, entityPersister);
             return;
@@ -125,7 +128,7 @@ public class SimpleEntityManager implements EntityManager {
     private void processInsert(final Object entity, final EntityPersister entityPersister) {
         persistenceContext.addEntityEntry(entity, Status.SAVING);
 
-        entityPersister.insert(entity);
+        eventListenerGroup.persist(new PersistEvent(entity));
 
         final Object idValue = extractId(entity, entityPersister);
         final EntityKey entityKey = entityKeyGenerator.generate(entity.getClass(), idValue);
