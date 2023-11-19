@@ -14,6 +14,7 @@ import java.sql.SQLException;
 
 public class EntityManagerFactoryImpl implements EntityManagerFactory {
     private final CurrentSessionContext currentSessionContext = new CurrentSessionContext();
+
     private final DatabaseServer databaseServer;
 
     public EntityManagerFactoryImpl(DatabaseServer databaseServer) {
@@ -21,7 +22,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     }
 
     @Override
-    public EntityManager openSession(DatabaseServer databaseServer) throws SQLException {
+    public void openSession() throws SQLException {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(databaseServer.getConnection());
         EntityAttributes entityAttributes = new EntityAttributes();
         EntityLoader entityLoader = new SimpleEntityLoader(jdbcTemplate);
@@ -32,11 +33,16 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         EntityManager entityManager = EntityManagerImpl.of(persistenceContext);
         currentSessionContext.setSession(entityManager);
 
-        return entityManager;
     }
 
     @Override
-    public EntityManager getSession(DatabaseServer databaseServer) throws SQLException {
+    public EntityManager getSession() {
+        EntityManager entityManager = currentSessionContext.getSession();
+
+        if (entityManager == null) {
+            throw new IllegalArgumentException("세션이 아직 열리지 않았습니다.");
+        }
+
         return currentSessionContext.getSession();
     }
 }

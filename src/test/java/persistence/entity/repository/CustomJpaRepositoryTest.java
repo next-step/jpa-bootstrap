@@ -28,6 +28,7 @@ class CustomJpaRepositoryTest extends DatabaseTest {
         @DisplayName("적절한 인스턴스가 주어지면")
         public class withInstance {
             @Test
+            @DisplayName("저장한다.")
             void save() {
                 //given
                 SampleOneWithValidAnnotation sample =
