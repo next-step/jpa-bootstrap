@@ -3,7 +3,10 @@ package persistence.core;
 import persistence.entity.loader.EntityLoaders;
 import persistence.entity.persister.EntityPersisters;
 import persistence.entity.proxy.EntityProxyFactory;
+import persistence.event.EventListener;
 import persistence.event.EventListenerGroup;
+import persistence.event.EventListenerRegistry;
+import persistence.event.EventType;
 
 import java.util.Set;
 
@@ -12,14 +15,14 @@ public class MetaModelImpl implements MetaModel {
     private final EntityPersisters entityPersisters;
     private final EntityLoaders entityLoaders;
     private final EntityProxyFactory entityProxyFactory;
-    private final EventListenerGroup eventListenerGroup;
+    private final EventListenerRegistry eventListenerRegistry;
 
     public MetaModelImpl(final EntityMetadataProvider entityMetadataProvider, final EntityPersisters entityPersisters, final EntityLoaders entityLoaders) {
         this.entityMetadataProvider = entityMetadataProvider;
         this.entityPersisters = entityPersisters;
         this.entityLoaders = entityLoaders;
         this.entityProxyFactory = new EntityProxyFactory(entityLoaders);
-        this.eventListenerGroup = new EventListenerGroup(entityPersisters, entityLoaders);
+        this.eventListenerRegistry = new EventListenerRegistry(entityPersisters, entityLoaders);
     }
 
     @Override
@@ -48,7 +51,7 @@ public class MetaModelImpl implements MetaModel {
     }
 
     @Override
-    public EventListenerGroup getEventListenerGroup() {
-        return eventListenerGroup;
+    public <T extends EventListener> EventListenerGroup<T> getEventListenerGroup(final EventType<T> type)  {
+        return eventListenerRegistry.getListener(type);
     }
 }

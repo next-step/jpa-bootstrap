@@ -19,7 +19,6 @@ public class SimpleEntityManager implements EntityManager {
     private final MetaModel metaModel;
     private final SessionCloseStrategy sessionCloseStrategy;
     private final EntityProxyFactory entityProxyFactory;
-    private final EventListenerGroup eventListenerGroup;
     private final EntityKeyGenerator entityKeyGenerator;
     private final PersistenceContext persistenceContext;
 
@@ -27,7 +26,6 @@ public class SimpleEntityManager implements EntityManager {
         this.metaModel = metaModel;
         this.sessionCloseStrategy = sessionCloseStrategy;
         this.entityProxyFactory = metaModel.getEntityProxyFactory();
-        this.eventListenerGroup = metaModel.getEventListenerGroup();
         this.entityKeyGenerator = new EntityKeyGenerator(metaModel);
         this.persistenceContext = new SimplePersistenceContext();
     }
@@ -73,7 +71,8 @@ public class SimpleEntityManager implements EntityManager {
 
         persistenceContext.updateEntityEntryStatus(entity, Status.DELETED);
 
-        eventListenerGroup.delete(new DeleteEvent(entity));
+        metaModel.getEventListenerGroup(EventType.DELETE)
+                .fireEvent(new DeleteEvent(entity), DeleteEventListener::onDelete);
     }
 
     @Override
@@ -87,7 +86,9 @@ public class SimpleEntityManager implements EntityManager {
 
     private <T> Object initEntity(final EntityMetadata<T> entityMetadata, final EntityKey entityKey) {
         final Object key = entityKey.getKey();
-        final Object entityFromDatabase = eventListenerGroup.load(new LoadEvent<>(key, entityMetadata.getType()));
+        final Object entityFromDatabase =
+                metaModel.getEventListenerGroup(EventType.LOAD)
+                        .fireEventReturn(new LoadEvent<T>(key, entityMetadata.getType()), LoadEventListener::onLoad);
         if(Objects.isNull(entityFromDatabase)) {
             return null;
         }
@@ -115,7 +116,7 @@ public class SimpleEntityManager implements EntityManager {
     private void processInsert(final Object entity) {
         persistenceContext.addEntityEntry(entity, Status.SAVING);
 
-        eventListenerGroup.persist(new PersistEvent(entity));
+        metaModel.getEventListenerGroup(EventType.PERSIST).fireEvent(new PersistEvent(entity), PersistEventListener::onPersist);
 
         final Object idValue = extractId(entity);
         final EntityKey entityKey = entityKeyGenerator.generate(entity.getClass(), idValue);
@@ -133,7 +134,7 @@ public class SimpleEntityManager implements EntityManager {
 
         if (isDirty(entity)) {
             updateEntityEntry(foundEntity, entity);
-            eventListenerGroup.merge(new MergeEvent(entity));
+            metaModel.getEventListenerGroup(EventType.MERGE).fireEvent(new MergeEvent(entity), MergeEventListener::onMerge);
             persistenceContext.addEntity(entityKey, entity);
         }
     }

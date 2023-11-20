@@ -1,36 +1,22 @@
 package persistence.event;
 
 
-import persistence.entity.loader.EntityLoaders;
-import persistence.entity.persister.EntityPersisters;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
-public class EventListenerGroup {
+public class EventListenerGroup<EVENT_LISTENER extends EventListener> {
 
-    private final PersistEventListener persistEventListener;
-    private final MergeEventListener mergeEventListener;
-    private final DeleteEventListener deleteEventListener;
-    private final LoadEventListener loadEventListener;
+    private final EVENT_LISTENER eventListener;
 
-    public EventListenerGroup(final EntityPersisters entityPersisters, final EntityLoaders entityLoaders) {
-        this.persistEventListener = new DefaultPersisEventListener(entityPersisters);
-        this.mergeEventListener = new DefaultMergeEventListener(entityPersisters);
-        this.deleteEventListener = new DefaultDeleteEventListener(entityPersisters);
-        this.loadEventListener = new DefaultLoadEventListener(entityLoaders);
+    public EventListenerGroup(final EVENT_LISTENER eventListener) {
+        this.eventListener = eventListener;
     }
 
-    public void persist(final PersistEvent persistEvent) {
-        persistEventListener.onPersist(persistEvent);
+    public <EVENT> void fireEvent(final EVENT event, final BiConsumer<EVENT_LISTENER, EVENT> biConsumer) {
+        biConsumer.accept(eventListener, event);
     }
 
-    public void merge(final MergeEvent mergeEvent) {
-        mergeEventListener.onMerge(mergeEvent);
-    }
-
-    public void delete(final DeleteEvent deleteEvent) {
-        deleteEventListener.onDelete(deleteEvent);
-    }
-
-    public <T> T load(final LoadEvent<T> loadEvent) {
-        return loadEventListener.onLoad(loadEvent);
+    public <EVENT, RETURN> RETURN fireEventReturn(final EVENT event, final BiFunction<EVENT_LISTENER, EVENT, RETURN> biFunction) {
+        return biFunction.apply(eventListener, event);
     }
 }
