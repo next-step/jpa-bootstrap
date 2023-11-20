@@ -12,6 +12,7 @@ import persistence.entity.loader.EntityLoaders;
 import persistence.entity.persister.EntityPersister;
 import persistence.entity.persister.EntityPersisters;
 import persistence.entity.proxy.EntityProxyFactory;
+import persistence.event.DeleteEvent;
 import persistence.event.EventListenerGroup;
 import persistence.event.MergeEvent;
 import persistence.event.PersistEvent;
@@ -89,7 +90,7 @@ public class SimpleEntityManager implements EntityManager {
 
         persistenceContext.updateEntityEntryStatus(entity, Status.DELETED);
 
-        entityPersister.delete(entity);
+        eventListenerGroup.delete(new DeleteEvent(entity));
     }
 
     @Override
