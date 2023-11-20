@@ -5,6 +5,7 @@ import jdbc.JdbcTemplate;
 import jdbc.RowMapper;
 import org.h2.tools.SimpleResultSet;
 
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,5 +41,9 @@ public class MockJdbcTemplate extends JdbcTemplate {
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void execute(final String sql) {
     }
 }
