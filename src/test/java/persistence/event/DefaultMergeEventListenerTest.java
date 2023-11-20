@@ -13,7 +13,6 @@ import persistence.core.EntityMetadataProvider;
 import persistence.core.EntityScanner;
 import persistence.entity.persister.EntityPersisters;
 
-import java.sql.SQLException;
 import java.sql.Types;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -41,9 +40,9 @@ class DefaultMergeEventListenerTest {
     void onMergeTest() {
         final FixtureEntity.Person entity = new FixtureEntity.Person("종민", 30, "jongmin4943@gmail.com");
 
-        assertDoesNotThrow(() -> {
-            defaultMergeEventListener.onMerge(new MergeEvent(entity));
-        });
+        assertDoesNotThrow(() ->
+            defaultMergeEventListener.onMerge(new MergeEvent(entity))
+        );
     }
 
 }

@@ -41,7 +41,7 @@ class SimpleEntityManagerTest extends IntegrationTestEnvironment {
     @Test
     @DisplayName("존재하지 않는 Entity 를 find 하면 null 이 반환된다.")
     void entityNotExistFindTest() {
-        Person person = entityManager.find(Person.class, Integer.MAX_VALUE);
+        final Person person = entityManager.find(Person.class, Integer.MAX_VALUE);
         assertThat(person).isNull();
     }
 

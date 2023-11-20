@@ -13,7 +13,6 @@ import persistence.core.EntityMetadataProvider;
 import persistence.core.EntityScanner;
 import persistence.entity.persister.EntityPersisters;
 
-import java.sql.SQLException;
 import java.sql.Types;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,8 +40,8 @@ class DefaultDeleteEventListenerTest {
     void onDeleteTest() {
         final FixtureEntity.Person entity = new FixtureEntity.Person("종민", 30, "jongmin4943@gmail.com");
 
-        assertDoesNotThrow(() -> {
-            defaultDeleteEventListener.onDelete(new DeleteEvent(entity));
-        });
+        assertDoesNotThrow(() ->
+            defaultDeleteEventListener.onDelete(new DeleteEvent(entity))
+        );
     }
 }

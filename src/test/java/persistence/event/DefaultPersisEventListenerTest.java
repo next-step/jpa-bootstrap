@@ -13,7 +13,6 @@ import persistence.core.EntityMetadataProvider;
 import persistence.core.EntityScanner;
 import persistence.entity.persister.EntityPersisters;
 
-import java.sql.SQLException;
 import java.sql.Types;
 
 import static org.assertj.core.api.Assertions.assertThat;

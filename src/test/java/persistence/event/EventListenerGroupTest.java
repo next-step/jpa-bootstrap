@@ -18,9 +18,9 @@ class EventListenerGroupTest {
     void fireEventTest() {
         final EventListenerGroup<TestEventListener> listenerGroup = new EventListenerGroup<>(new TestEventListener());
 
-        listenerGroup.fireEvent("event", (s, s2) -> {
-            assertThat(s.test() + s2).isEqualTo("testevent");
-        });
+        listenerGroup.fireEvent("event", (s, s2) ->
+            assertThat(s.test() + s2).isEqualTo("testevent")
+        );
     }
 
     @Test

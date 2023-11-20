@@ -59,9 +59,9 @@ class EventListenerRegistryTest {
         final EventListenerGroup<MergeEventListener> listener = eventListenerRegistry.getListener(EventType.MERGE);
         final Person entity = new Person("종민", 30, "jongmin4943@gmail.com");
 
-        assertDoesNotThrow(() -> {
-            listener.fireEvent(new MergeEvent(entity), MergeEventListener::onMerge);
-        });
+        assertDoesNotThrow(() ->
+            listener.fireEvent(new MergeEvent(entity), MergeEventListener::onMerge)
+        );
     }
 
     @Test
@@ -70,9 +70,9 @@ class EventListenerRegistryTest {
         final EventListenerGroup<DeleteEventListener> listener = eventListenerRegistry.getListener(EventType.DELETE);
         final Person entity = new Person("종민", 30, "jongmin4943@gmail.com");
 
-        assertDoesNotThrow(() -> {
-            listener.fireEvent(new DeleteEvent(entity), DeleteEventListener::onDelete);
-        });
+        assertDoesNotThrow(() ->
+            listener.fireEvent(new DeleteEvent(entity), DeleteEventListener::onDelete)
+        );
     }
 
     @Test

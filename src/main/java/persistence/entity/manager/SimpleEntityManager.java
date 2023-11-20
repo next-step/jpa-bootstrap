@@ -88,7 +88,7 @@ public class SimpleEntityManager implements EntityManager {
         final Object key = entityKey.getKey();
         final Object entityFromDatabase =
                 metaModel.getEventListenerGroup(EventType.LOAD)
-                        .fireEventReturn(new LoadEvent<T>(key, entityMetadata.getType()), LoadEventListener::onLoad);
+                        .fireEventReturn(new LoadEvent<>(key, entityMetadata.getType()), LoadEventListener::onLoad);
         if(Objects.isNull(entityFromDatabase)) {
             return null;
         }

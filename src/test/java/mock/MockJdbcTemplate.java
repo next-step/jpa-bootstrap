@@ -5,7 +5,6 @@ import jdbc.JdbcTemplate;
 import jdbc.RowMapper;
 import org.h2.tools.SimpleResultSet;
 
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
