@@ -67,24 +67,4 @@ public class EntityPersister {
         return dmlGenerator.delete(tableName, idColumn.getName(), idValue);
     }
 
-    public List<String> getColumnNames() {
-        return columns.getNames();
-    }
-
-    public List<String> getColumnFieldNames() {
-        return columns.getFieldNames();
-    }
-
-    public int getColumnSize() {
-        return columns.size();
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getIdColumnFieldName() {
-        return idColumn.getFieldName();
-    }
-
 }

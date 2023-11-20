@@ -8,7 +8,6 @@ import persistence.core.EntityMetadata;
 import persistence.core.MetaModel;
 import persistence.entity.entry.Status;
 import persistence.entity.loader.EntityLoaders;
-import persistence.entity.persister.EntityPersister;
 import persistence.entity.persister.EntityPersisters;
 import persistence.entity.proxy.EntityProxyFactory;
 import persistence.event.*;
@@ -20,8 +19,6 @@ import java.util.Objects;
 public class SimpleEntityManager implements EntityManager {
 
     private final MetaModel metaModel;
-    private final EntityPersisters entityPersisters;
-    private final EntityLoaders entityLoaders;
     private final EntityProxyFactory entityProxyFactory;
     private final PersistenceContext persistenceContext;
     private final EntityKeyGenerator entityKeyGenerator;
@@ -30,8 +27,8 @@ public class SimpleEntityManager implements EntityManager {
 
     public SimpleEntityManager(final MetaModel metaModel, final SessionCloseStrategy sessionCloseStrategy) {
         this.metaModel = metaModel;
-        this.entityPersisters = metaModel.getEntityPersisters();
-        this.entityLoaders = metaModel.getEntityLoaders();
+        final EntityPersisters entityPersisters = metaModel.getEntityPersisters();
+        final EntityLoaders entityLoaders = metaModel.getEntityLoaders();
         this.entityProxyFactory = new EntityProxyFactory(entityLoaders);
         this.entityKeyGenerator = new EntityKeyGenerator(metaModel);
         this.persistenceContext = new SimplePersistenceContext();
@@ -49,36 +46,31 @@ public class SimpleEntityManager implements EntityManager {
 
     @Override
     public void persist(final Object entity) {
-        final EntityPersister entityPersister = entityPersisters.getEntityPersister(entity.getClass());
-
-        final Object idValue = extractId(entity, entityPersister);
+        final Object idValue = extractId(entity);
         if (Objects.nonNull(idValue)) {
             checkEntityAlreadyExists(entity, idValue);
-            processUpdate(entity, entityPersister);
+            processUpdate(entity);
             return;
         }
 
-        processInsert(entity, entityPersister);
+        processInsert(entity);
     }
 
     @Override
     public <T> T merge(final T entity) {
-        final EntityPersister entityPersister = entityPersisters.getEntityPersister(entity.getClass());
-
-        final Object idValue = extractId(entity, entityPersister);
+        final Object idValue = extractId(entity);
         final boolean isIdValueNull = Objects.isNull(idValue);
         if (isIdValueNull) {
             throw new PersistenceException("Id value 없이 merge 할 수 없습니다.");
         }
 
-        processUpdate(entity, entityPersister);
+        processUpdate(entity);
         return entity;
     }
 
     @Override
     public void remove(final Object entity) {
-        final EntityPersister entityPersister = entityPersisters.getEntityPersister(entity.getClass());
-        final Object idValue = extractId(entity, entityPersister);
+        final Object idValue = extractId(entity);
 
         final EntityKey entityKey = entityKeyGenerator.generate(entity.getClass(), idValue);
         persistenceContext.removeEntity(entityKey);
@@ -93,8 +85,8 @@ public class SimpleEntityManager implements EntityManager {
         this.sessionCloseStrategy.close();
     }
 
-    private Object extractId(final Object entity, final EntityPersister entityPersister) {
-        return ReflectionUtils.getFieldValue(entity, entityPersister.getIdColumnFieldName());
+    private Object extractId(final Object entity) {
+        return ReflectionUtils.getFieldValue(entity, metaModel.getEntityMetadata(entity.getClass()).getIdColumnFieldName());
     }
 
     private <T> Object initEntity(final EntityMetadata<T> entityMetadata, final EntityKey entityKey) {
@@ -124,18 +116,18 @@ public class SimpleEntityManager implements EntityManager {
         }
     }
 
-    private void processInsert(final Object entity, final EntityPersister entityPersister) {
+    private void processInsert(final Object entity) {
         persistenceContext.addEntityEntry(entity, Status.SAVING);
 
         eventListenerGroup.persist(new PersistEvent(entity));
 
-        final Object idValue = extractId(entity, entityPersister);
+        final Object idValue = extractId(entity);
         final EntityKey entityKey = entityKeyGenerator.generate(entity.getClass(), idValue);
         persistenceContext.addEntity(entityKey, entity);
     }
 
-    private void processUpdate(final Object entity, final EntityPersister entityPersister) {
-        final Object idValue = extractId(entity, entityPersister);
+    private void processUpdate(final Object entity) {
+        final Object idValue = extractId(entity);
         final EntityKey entityKey = entityKeyGenerator.generate(entity.getClass(), idValue);
 
         Object foundEntity = null;
@@ -158,12 +150,12 @@ public class SimpleEntityManager implements EntityManager {
     }
 
     private boolean isDirty(final Object entity) {
-        final EntityPersister entityPersister = entityPersisters.getEntityPersister(entity.getClass());
-        final Object idValue = extractId(entity, entityPersister);
+        final Object idValue = extractId(entity);
         final EntityKey entityKey = entityKeyGenerator.generate(entity.getClass(), idValue);
         final Object databaseSnapshot = persistenceContext.getDatabaseSnapshot(entityKey, entity);
 
-        return entityPersister.getColumnFieldNames()
+        return metaModel.getEntityMetadata(entity.getClass())
+                .getColumnFieldNames()
                 .stream()
                 .anyMatch(columnName -> hasDifferentValue(entity, databaseSnapshot, columnName));
     }
