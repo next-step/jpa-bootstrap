@@ -28,11 +28,10 @@ class DefaultDeleteEventListenerTest {
     }
 
     @BeforeEach
-    void setUp() throws SQLException {
+    void setUp() {
         final SimpleResultSet rs = new SimpleResultSet();
         rs.addColumn("id", Types.BIGINT, 10, 0);
         rs.addRow(1L);
-        rs.next();
         final EntityPersisters entityPersisters = new EntityPersisters(entityMetadataProvider, new MockDmlGenerator(), new MockJdbcTemplate(rs));
         defaultDeleteEventListener = new DefaultDeleteEventListener(entityPersisters);
     }

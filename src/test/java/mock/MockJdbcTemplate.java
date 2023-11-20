@@ -37,6 +37,7 @@ public class MockJdbcTemplate extends JdbcTemplate {
     @Override
     public void executeInsert(final String sql, final IdMapper idMapper) {
         try (rs) {
+            rs.next();
             idMapper.mapId(rs);
         } catch (final Exception e) {
             throw new RuntimeException(e);

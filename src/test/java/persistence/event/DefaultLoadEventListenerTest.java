@@ -28,7 +28,7 @@ class DefaultLoadEventListenerTest {
     }
 
     @BeforeEach
-    void setUp() throws SQLException {
+    void setUp() {
         final SimpleResultSet rs = new SimpleResultSet();
         rs.addColumn("id", Types.BIGINT, 10, 0);
         rs.addColumn("nick_name", Types.VARCHAR, 255, 0);
