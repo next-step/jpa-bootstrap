@@ -1,9 +1,8 @@
 package hibernate.event.delete;
 
 import hibernate.action.ActionQueue;
-import hibernate.entity.EntityManagerImpl;
-import hibernate.entity.EntitySource;
 import hibernate.metamodel.BasicMetaModel;
+import hibernate.metamodel.MetaModel;
 import hibernate.metamodel.MetaModelImpl;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -14,17 +13,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class DeleteEventTest {
 
-    private final EntitySource entitySource = new EntityManagerImpl(
-            null,
-            MetaModelImpl.createPackageMetaModel(BasicMetaModel.createPackageMetaModel("hibernate.event.delete"), null),
-            null,
-            new ActionQueue()
-    );
+    private final ActionQueue actionQueue = new ActionQueue();
+    private final MetaModel metaModel = MetaModelImpl.createPackageMetaModel(BasicMetaModel.createPackageMetaModel("hibernate.event.delete"), null);
 
     @Test
     void DeleteEvent를_생성한다() {
         TestEntity givenEntity = new TestEntity();
-        DeleteEvent<TestEntity> actual = DeleteEvent.createEvent(entitySource, givenEntity);
+        DeleteEvent<TestEntity> actual = DeleteEvent.createEvent(actionQueue, metaModel, givenEntity);
         assertAll(
                 () -> assertThat(actual.getEntity()).isEqualTo(givenEntity),
                 () -> assertThat(actual.getEntityPersister()).isNotNull()

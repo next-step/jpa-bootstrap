@@ -2,8 +2,8 @@ package hibernate.event.delete;
 
 import hibernate.action.ActionQueue;
 import hibernate.entity.EntityPersister;
-import hibernate.entity.EntitySource;
 import hibernate.event.AbstractEntityEvent;
+import hibernate.metamodel.MetaModel;
 
 public class DeleteEvent<T> extends AbstractEntityEvent {
 
@@ -16,12 +16,11 @@ public class DeleteEvent<T> extends AbstractEntityEvent {
         this.entity = entity;
     }
 
-    public static <T> DeleteEvent<T> createEvent(final EntitySource entitySource, final T entity) {
-        return new DeleteEvent<T>(
-                entitySource.getActionQueue(),
-                entitySource.getMetaModel().getEntityPersister((Class<T>) entity.getClass()),
-                entity
-        );
+    public static <T> DeleteEvent<T> createEvent(final ActionQueue actionQueue, final MetaModel metaModel, final T entity) {
+        return new DeleteEvent<>(
+                actionQueue,
+                metaModel.getEntityPersister((Class<T>) entity.getClass()),
+                entity);
     }
 
     public EntityPersister<T> getEntityPersister() {

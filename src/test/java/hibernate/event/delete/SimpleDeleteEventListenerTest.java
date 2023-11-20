@@ -5,8 +5,6 @@ import database.H2;
 import hibernate.action.ActionQueue;
 import hibernate.action.EntityDeleteAction;
 import hibernate.ddl.CreateQueryBuilder;
-import hibernate.entity.EntityManagerImpl;
-import hibernate.entity.EntitySource;
 import hibernate.entity.meta.EntityClass;
 import hibernate.metamodel.BasicMetaModel;
 import hibernate.metamodel.MetaModel;
@@ -28,7 +26,8 @@ class SimpleDeleteEventListenerTest {
 
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
-    private static EntitySource entitySource;
+    private static ActionQueue actionQueue;
+    private static MetaModel metaModel;
     private static final Queue<EntityDeleteAction<?>> deleteActionQueue = new LinkedList<>();
 
     @BeforeAll
@@ -36,16 +35,15 @@ class SimpleDeleteEventListenerTest {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        MetaModel metaModel = MetaModelImpl.createPackageMetaModel(
+        metaModel = MetaModelImpl.createPackageMetaModel(
                 BasicMetaModel.createPackageMetaModel("hibernate.event.delete"),
                 jdbcTemplate
         );
-        ActionQueue actionQueue = new ActionQueue(
+        actionQueue = new ActionQueue(
                 new LinkedList<>(),
                 new LinkedList<>(),
                 deleteActionQueue
         );
-        entitySource = new EntityManagerImpl(null, metaModel, null, actionQueue);
 
         jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(TestEntity.class)));
     }
@@ -66,7 +64,7 @@ class SimpleDeleteEventListenerTest {
         // given
         jdbcTemplate.execute("insert into test_entity (id, nick_name, age) values (1, '최진영', 19);");
 
-        DeleteEvent<TestEntity> deleteEvent = DeleteEvent.createEvent(entitySource, new TestEntity(1L, "최진영", 19));
+        DeleteEvent<TestEntity> deleteEvent = DeleteEvent.createEvent(actionQueue, metaModel, new TestEntity(1L, "최진영", 19));
         DeleteEventListener deleteEventListener = new SimpleDeleteEventListener();
 
         // when
