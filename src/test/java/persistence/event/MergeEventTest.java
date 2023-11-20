@@ -10,7 +10,7 @@ class MergeEventTest {
 
     @Test
     @DisplayName("merge event 를 생성 할 수 있다.")
-    void persistEventCreateTest() {
+    void mergeEventCreateTest() {
         final FixtureEntity.WithId entity = new FixtureEntity.WithId();
         final MergeEvent mergeEvent = new MergeEvent(entity);
 

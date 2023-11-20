@@ -115,7 +115,7 @@ public class DefaultLoadEventListener implements LoadEventListener {
 ```
 - [ ] EntityManager 에서 바로 db 와 소통하던 부분을 Event 기반으로 전환한다.
 - [x] Insert Event 관련 처리
-- [ ] Update Event 관련 처리
+- [x] Update Event 관련 처리
 - [ ] Delete Event 관련 처리
 - [ ] Load Event 관련 처리
 - [ ] 해당 Event 들을 하나로 그룹화 해보기

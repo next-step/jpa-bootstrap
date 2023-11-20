@@ -13,6 +13,7 @@ import persistence.entity.persister.EntityPersister;
 import persistence.entity.persister.EntityPersisters;
 import persistence.entity.proxy.EntityProxyFactory;
 import persistence.event.EventListenerGroup;
+import persistence.event.MergeEvent;
 import persistence.event.PersistEvent;
 import persistence.exception.PersistenceException;
 import persistence.util.ReflectionUtils;
@@ -146,7 +147,7 @@ public class SimpleEntityManager implements EntityManager {
 
         if (isDirty(entity)) {
             updateEntityEntry(foundEntity, entity);
-            entityPersister.update(entity);
+            eventListenerGroup.merge(new MergeEvent(entity));
             persistenceContext.addEntity(entityKey, entity);
         }
     }
