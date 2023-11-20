@@ -1,43 +1,73 @@
 package jdbc;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class JdbcTemplate {
-    private final Connection connection;
 
-    public JdbcTemplate(final Connection connection) {
-        this.connection = connection;
-    }
+  public static final int COLUMN_INDEX = 1;
+  private final Connection connection;
 
-    public void execute(final String sql) {
-        try (final Statement statement = connection.createStatement()) {
-            statement.execute(sql);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+  public JdbcTemplate(final Connection connection) {
+    this.connection = connection;
+  }
 
-    public <T> T queryForObject(final String sql, final RowMapper<T> rowMapper) {
-        final List<T> results = query(sql, rowMapper);
-        if (results.size() != 1) {
-            throw new RuntimeException("Expected 1 result, got " + results.size());
-        }
-        return results.get(0);
+  public boolean execute(final String sql) {
+    try (final Statement statement = connection.createStatement()) {
+      return statement.execute(sql);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    public <T> List<T> query(final String sql, final RowMapper<T> rowMapper) {
-        try (final ResultSet resultSet = connection.prepareStatement(sql).executeQuery()) {
-            final List<T> result = new ArrayList<>();
-            while (resultSet.next()) {
-                result.add(rowMapper.mapRow(resultSet));
-            }
-            return result;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+  public Long executeWithGeneratedKey(final String sql) {
+    try (final PreparedStatement statement = connection.prepareStatement(sql,
+        Statement.RETURN_GENERATED_KEYS)) {
+      statement.execute();
+      ResultSet resultSet = statement.getGeneratedKeys();
+      resultSet.next();
+
+      return resultSet.getLong(COLUMN_INDEX);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
+  }
+
+  public <T> T queryForObject(final String sql, final RowMapper<T> rowMapper) {
+    try (final ResultSet resultSet = connection.prepareStatement(sql).executeQuery()) {
+      if (resultSet.next()) {
+        return rowMapper.mapRow(resultSet);
+      }
+      return null;
+    } catch (Exception e) {
+      throw new RuntimeException("해당 객체는 존재 하지 않습니다.", e);
+    }
+  }
+
+  public <T> List<T> query(final String sql, final RowMapper<T> rowMapper) {
+    try (final ResultSet resultSet = connection.prepareStatement(sql).executeQuery()) {
+      final List<T> result = new ArrayList<>();
+      while (resultSet.next()) {
+        result.add(rowMapper.mapRow(resultSet));
+      }
+      return result;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public <T> List<T> queryForObject(final String sql, final CollectionRowMapper<T> rowMapper) {
+    try (final ResultSet resultSet = connection.prepareStatement(sql).executeQuery()) {
+      if (resultSet.next()) {
+        return rowMapper.mapRow(resultSet);
+      }
+      return null;
+    } catch (Exception e) {
+      throw new RuntimeException("해당 객체는 존재 하지 않습니다.", e);
+    }
+  }
 }
