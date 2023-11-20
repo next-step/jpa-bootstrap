@@ -67,6 +67,10 @@
     - EntityBasicInsertAction : id까지 insert하는 action
     - EntityIdentityInsertAction : id의 전략이 identity인 action
   - EntityUpdateAction
+    - PersistenceContext에 값이 없는 경우
+      - loader를 통해 실제 값을 가져오고 값이 있으면 넣은 후 update, 값이 없으면 insert한다.
+    - PersistenceContext에 값이 있는 경우
+      - update한다.
   - EntityDeleteAction
 - ActionQueue
   - 각 action에 맞는 queue에 저장한다.
