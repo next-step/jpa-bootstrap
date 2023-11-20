@@ -1,20 +1,21 @@
 package hibernate.event.persist;
 
 import hibernate.action.ActionQueue;
+import hibernate.action.InsertUpdateActionQueue;
 import hibernate.entity.EntityPersister;
 import hibernate.entity.meta.column.EntityColumn;
-import hibernate.event.AbstractEntityEvent;
 import hibernate.metamodel.MetaModel;
 import jakarta.persistence.GenerationType;
 
-public class PersistEvent<T> extends AbstractEntityEvent {
+public class PersistEvent<T> {
 
+    private final InsertUpdateActionQueue actionQueue;
     private final EntityPersister<T> entityPersister;
     private final T entity;
     private final EntityColumn entityId;
 
     private PersistEvent(final ActionQueue actionQueue, final EntityPersister<T> entityPersister, final T entity, final EntityColumn entityId) {
-        super(actionQueue);
+        this.actionQueue = actionQueue;
         this.entityPersister = entityPersister;
         this.entity = entity;
         this.entityId = entityId;
@@ -31,6 +32,10 @@ public class PersistEvent<T> extends AbstractEntityEvent {
 
     public boolean isIdentity() {
         return entityId.getGenerationType() == GenerationType.IDENTITY;
+    }
+
+    public InsertUpdateActionQueue getActionQueue() {
+        return actionQueue;
     }
 
     public EntityPersister<T> getEntityPersister() {

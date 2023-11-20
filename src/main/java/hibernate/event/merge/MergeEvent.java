@@ -1,21 +1,22 @@
 package hibernate.event.merge;
 
 import hibernate.action.ActionQueue;
+import hibernate.action.InsertUpdateActionQueue;
 import hibernate.entity.EntityPersister;
 import hibernate.entity.meta.column.EntityColumn;
-import hibernate.event.AbstractEntityEvent;
 import hibernate.metamodel.MetaModel;
 
 import java.util.Map;
 
-public class MergeEvent<T> extends AbstractEntityEvent {
+public class MergeEvent<T> {
 
+    private final InsertUpdateActionQueue actionQueue;
     private final EntityPersister<T> entityPersister;
     private final Object entityId;
     private final Map<EntityColumn, Object> changeColumns;
 
     private MergeEvent(final ActionQueue actionQueue, final EntityPersister<T> entityPersister, final Object entityId, final Map<EntityColumn, Object> changeColumns) {
-        super(actionQueue);
+        this.actionQueue = actionQueue;
         this.entityPersister = entityPersister;
         this.entityId = entityId;
         this.changeColumns = changeColumns;
@@ -34,6 +35,10 @@ public class MergeEvent<T> extends AbstractEntityEvent {
                 entityId,
                 changeColumns
         );
+    }
+
+    public InsertUpdateActionQueue getActionQueue() {
+        return actionQueue;
     }
 
     public EntityPersister<T> getEntityPersister() {

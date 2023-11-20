@@ -3,7 +3,7 @@ package hibernate.action;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ActionQueue {
+public class ActionQueue implements InsertUpdateActionQueue, DeleteActionQueue {
 
     private final Queue<EntityInsertAction<?>> insertions;
     private final Queue<EntityUpdateAction<?>> updates;
@@ -23,19 +23,23 @@ public class ActionQueue {
         this(new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>());
     }
 
+    @Override
     public void addAction(final EntityBasicInsertAction<?> action) {
         insertions.add(action);
     }
 
+    @Override
     public void addAction(final EntityIdentityInsertAction<?> action) {
         insertions.add(action);
         executeInserts();
     }
 
+    @Override
     public void addAction(final EntityUpdateAction<?> action) {
         updates.add(action);
     }
 
+    @Override
     public void addAction(final EntityDeleteAction<?> action) {
         deletions.add(action);
     }
