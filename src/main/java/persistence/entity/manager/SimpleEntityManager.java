@@ -7,8 +7,6 @@ import persistence.context.SimplePersistenceContext;
 import persistence.core.EntityMetadata;
 import persistence.core.MetaModel;
 import persistence.entity.entry.Status;
-import persistence.entity.loader.EntityLoaders;
-import persistence.entity.persister.EntityPersisters;
 import persistence.entity.proxy.EntityProxyFactory;
 import persistence.event.*;
 import persistence.exception.PersistenceException;
@@ -19,21 +17,19 @@ import java.util.Objects;
 public class SimpleEntityManager implements EntityManager {
 
     private final MetaModel metaModel;
-    private final EntityProxyFactory entityProxyFactory;
-    private final PersistenceContext persistenceContext;
-    private final EntityKeyGenerator entityKeyGenerator;
     private final SessionCloseStrategy sessionCloseStrategy;
+    private final EntityProxyFactory entityProxyFactory;
     private final EventListenerGroup eventListenerGroup;
+    private final EntityKeyGenerator entityKeyGenerator;
+    private final PersistenceContext persistenceContext;
 
     public SimpleEntityManager(final MetaModel metaModel, final SessionCloseStrategy sessionCloseStrategy) {
         this.metaModel = metaModel;
-        final EntityPersisters entityPersisters = metaModel.getEntityPersisters();
-        final EntityLoaders entityLoaders = metaModel.getEntityLoaders();
-        this.entityProxyFactory = new EntityProxyFactory(entityLoaders);
+        this.sessionCloseStrategy = sessionCloseStrategy;
+        this.entityProxyFactory = metaModel.getEntityProxyFactory();
+        this.eventListenerGroup = metaModel.getEventListenerGroup();
         this.entityKeyGenerator = new EntityKeyGenerator(metaModel);
         this.persistenceContext = new SimplePersistenceContext();
-        this.sessionCloseStrategy = sessionCloseStrategy;
-        this.eventListenerGroup = new EventListenerGroup(entityPersisters, entityLoaders);
     }
 
     @Override
