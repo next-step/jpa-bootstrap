@@ -22,7 +22,7 @@ import java.util.Map;
 
 import static hibernate.entity.entityentry.Status.*;
 
-public class EntityManagerImpl implements EntityManager, EntitySource {
+public class EntityManagerImpl implements EntityManager {
 
     private final PersistenceContext persistenceContext;
     private final MetaModel metaModel;
@@ -58,7 +58,7 @@ public class EntityManagerImpl implements EntityManager, EntitySource {
 
     @Override
     public void persist(final Object entity) {
-        PersistEvent<?> persistEvent = PersistEvent.createEvent(this, entity);
+        PersistEvent<?> persistEvent = PersistEvent.createEvent(actionQueue, metaModel, entity);
         EventListener<PersistEventListener> listener = eventListenerRegistry.getListener(EventType.PERSIST);
 
         EntityColumn entityId = metaModel.getEntityId(entity.getClass());
@@ -119,15 +119,5 @@ public class EntityManagerImpl implements EntityManager, EntitySource {
     @Override
     public void flush() {
         actionQueue.executeAllActions();
-    }
-
-    @Override
-    public MetaModel getMetaModel() {
-        return metaModel;
-    }
-
-    @Override
-    public ActionQueue getActionQueue() {
-        return actionQueue;
     }
 }

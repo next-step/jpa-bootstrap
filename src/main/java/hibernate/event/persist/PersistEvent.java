@@ -2,9 +2,9 @@ package hibernate.event.persist;
 
 import hibernate.action.ActionQueue;
 import hibernate.entity.EntityPersister;
-import hibernate.entity.EntitySource;
 import hibernate.entity.meta.column.EntityColumn;
 import hibernate.event.AbstractEntityEvent;
+import hibernate.metamodel.MetaModel;
 import jakarta.persistence.GenerationType;
 
 public class PersistEvent<T> extends AbstractEntityEvent {
@@ -20,12 +20,12 @@ public class PersistEvent<T> extends AbstractEntityEvent {
         this.entityId = entityId;
     }
 
-    public static <T> PersistEvent<T> createEvent(final EntitySource entitySource, final T entity) {
+    public static <T> PersistEvent<T> createEvent(final ActionQueue actionQueue, final MetaModel metaModel, final T entity) {
         return new PersistEvent<>(
-                entitySource.getActionQueue(),
-                entitySource.getMetaModel().getEntityPersister((Class<T>) entity.getClass()),
+                actionQueue,
+                metaModel.getEntityPersister((Class<T>) entity.getClass()),
                 entity,
-                entitySource.getMetaModel().getEntityId(entity.getClass())
+                metaModel.getEntityId(entity.getClass())
         );
     }
 

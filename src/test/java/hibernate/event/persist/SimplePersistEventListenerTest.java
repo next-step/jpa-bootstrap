@@ -5,8 +5,6 @@ import database.H2;
 import hibernate.action.ActionQueue;
 import hibernate.action.EntityInsertAction;
 import hibernate.ddl.CreateQueryBuilder;
-import hibernate.entity.EntityManagerImpl;
-import hibernate.entity.EntitySource;
 import hibernate.entity.meta.EntityClass;
 import hibernate.metamodel.BasicMetaModel;
 import hibernate.metamodel.MetaModel;
@@ -28,7 +26,8 @@ class SimplePersistEventListenerTest {
 
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
-    private static EntitySource entitySource;
+    private static ActionQueue actionQueue;
+    private static MetaModel metaModel;
     private static final Queue<EntityInsertAction<?>> insertActionQueue = new LinkedList<>();
 
     @BeforeAll
@@ -36,16 +35,15 @@ class SimplePersistEventListenerTest {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        MetaModel metaModel = MetaModelImpl.createPackageMetaModel(
+        metaModel = MetaModelImpl.createPackageMetaModel(
                 BasicMetaModel.createPackageMetaModel("hibernate.event.persist"),
                 jdbcTemplate
         );
-        ActionQueue actionQueue = new ActionQueue(
+        actionQueue = new ActionQueue(
                 insertActionQueue,
                 new LinkedList<>(),
                 new LinkedList<>()
         );
-        entitySource = new EntityManagerImpl(null, metaModel, null, actionQueue);
 
         jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(TestEntity.class)));
     }
@@ -65,7 +63,7 @@ class SimplePersistEventListenerTest {
     void Event를_받아_persist_action을_저장한다() {
         // given
         TestEntity givenEntity = new TestEntity(1L, "최진영", 19);
-        PersistEvent<TestEntity> persistEvent = PersistEvent.createEvent(entitySource, givenEntity);
+        PersistEvent<TestEntity> persistEvent = PersistEvent.createEvent(actionQueue, metaModel, givenEntity);
         PersistEventListener persistEventListener = new SimplePersistEventListener();
 
         // when
