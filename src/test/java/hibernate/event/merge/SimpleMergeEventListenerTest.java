@@ -5,8 +5,6 @@ import database.H2;
 import hibernate.action.ActionQueue;
 import hibernate.action.EntityUpdateAction;
 import hibernate.ddl.CreateQueryBuilder;
-import hibernate.entity.EntityManagerImpl;
-import hibernate.entity.EntitySource;
 import hibernate.entity.meta.EntityClass;
 import hibernate.metamodel.BasicMetaModel;
 import hibernate.metamodel.MetaModel;
@@ -29,7 +27,8 @@ class SimpleMergeEventListenerTest {
 
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
-    private static EntitySource entitySource;
+    private static ActionQueue actionQueue;
+    private static MetaModel metaModel;
     private static final Queue<EntityUpdateAction<?>> updateActionQueue = new LinkedList<>();
 
     @BeforeAll
@@ -37,16 +36,15 @@ class SimpleMergeEventListenerTest {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        MetaModel metaModel = MetaModelImpl.createPackageMetaModel(
+        metaModel = MetaModelImpl.createPackageMetaModel(
                 BasicMetaModel.createPackageMetaModel("hibernate.event.merge"),
                 jdbcTemplate
         );
-        ActionQueue actionQueue = new ActionQueue(
+        actionQueue = new ActionQueue(
                 new LinkedList<>(),
                 updateActionQueue,
                 new LinkedList<>()
         );
-        entitySource = new EntityManagerImpl(null, metaModel, null, actionQueue);
 
         jdbcTemplate.execute(CreateQueryBuilder.INSTANCE.generateQuery(new EntityClass<>(TestEntity.class)));
     }
@@ -68,7 +66,7 @@ class SimpleMergeEventListenerTest {
         jdbcTemplate.execute("insert into test_entity (id, nick_name) values (1, '최진영');");
 
         String expectedChangedName = "영진최";
-        MergeEvent<TestEntity> mergeEvent = MergeEvent.createEvent(entitySource, TestEntity.class, 1L,
+        MergeEvent<TestEntity> mergeEvent = MergeEvent.createEvent(actionQueue, metaModel, TestEntity.class, 1L,
                 Map.of(new EntityClass<>(TestEntity.class).getEntityColumns().get(1), expectedChangedName));
         MergeEventListener mergeEventListener = new SimpleMergeEventListener();
 
