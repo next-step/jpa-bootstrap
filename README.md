@@ -119,3 +119,17 @@ public class DefaultLoadEventListener implements LoadEventListener {
 - [x] Delete Event 관련 처리
 - [x] Load Event 관련 처리
 - [x] 해당 Event 들을 하나로 그룹화 해보기
+
+- 요구사항 2 - ActionQueue 를 활용해 쓰기 지연 구현해보기
+```java
+public class ActionQueue {
+    private List<EntityInsertAction> insertions;
+    private List<EntityDeleteAction> deletions;
+    private List<EntityUpdateAction> updates;
+    ...
+}
+```
+- [ ] 각 CURD 관련 행위를 바로 DB 에 쿼리하지 않고 ActionQueue 에 담는다.
+- [ ] 특정시점(flush) 에 순회하며 DB 에 쿼리한다.
+- [ ] insert 시 select 을 먼저 해보고 없다면 insert, 있다면 update 한다.
+- [ ] 같은 action 이 온다면 쿼리를 한번만 실행한다.
