@@ -39,9 +39,10 @@ class SimpleEntityManagerTest extends IntegrationTestEnvironment {
     }
 
     @Test
-    @DisplayName("존재하지 않는 Entity 를 find 하면 Exception 이 던져진다.")
+    @DisplayName("존재하지 않는 Entity 를 find 하면 null 이 반환된다.")
     void entityNotExistFindTest() {
-        assertThatThrownBy(() -> entityManager.find(Person.class, Integer.MAX_VALUE)).isInstanceOf(PersistenceException.class);
+        Person person = entityManager.find(Person.class, Integer.MAX_VALUE);
+        assertThat(person).isNull();
     }
 
     @Test

@@ -7,15 +7,11 @@ import persistence.context.SimplePersistenceContext;
 import persistence.core.EntityMetadata;
 import persistence.core.MetaModel;
 import persistence.entity.entry.Status;
-import persistence.entity.loader.EntityLoader;
 import persistence.entity.loader.EntityLoaders;
 import persistence.entity.persister.EntityPersister;
 import persistence.entity.persister.EntityPersisters;
 import persistence.entity.proxy.EntityProxyFactory;
-import persistence.event.DeleteEvent;
-import persistence.event.EventListenerGroup;
-import persistence.event.MergeEvent;
-import persistence.event.PersistEvent;
+import persistence.event.*;
 import persistence.exception.PersistenceException;
 import persistence.util.ReflectionUtils;
 
@@ -40,15 +36,14 @@ public class SimpleEntityManager implements EntityManager {
         this.entityKeyGenerator = new EntityKeyGenerator(metaModel);
         this.persistenceContext = new SimplePersistenceContext();
         this.sessionCloseStrategy = sessionCloseStrategy;
-        this.eventListenerGroup = new EventListenerGroup(entityPersisters);
+        this.eventListenerGroup = new EventListenerGroup(entityPersisters, entityLoaders);
     }
 
     @Override
     public <T> T find(final Class<T> clazz, final Object id) {
-        final EntityLoader<T> entityLoader = entityLoaders.getEntityLoader(clazz);
         final EntityKey entityKey = entityKeyGenerator.generate(clazz, id);
         final Object entity = persistenceContext.getEntity(entityKey)
-                .orElseGet(() -> initEntity(metaModel.getEntityMetadata(clazz), entityKey, entityLoader));
+                .orElseGet(() -> initEntity(metaModel.getEntityMetadata(clazz), entityKey));
         return clazz.cast(entity);
     }
 
@@ -102,10 +97,12 @@ public class SimpleEntityManager implements EntityManager {
         return ReflectionUtils.getFieldValue(entity, entityPersister.getIdColumnFieldName());
     }
 
-    private <T> Object initEntity(final EntityMetadata<T> entityMetadata, final EntityKey entityKey, final EntityLoader<T> entityLoader) {
+    private <T> Object initEntity(final EntityMetadata<T> entityMetadata, final EntityKey entityKey) {
         final Object key = entityKey.getKey();
-        final Object entityFromDatabase = entityLoader.loadById(key)
-                .orElseThrow(() -> new PersistenceException("존재하지 않는 entity 입니다."));
+        final Object entityFromDatabase = eventListenerGroup.load(new LoadEvent<>(key, entityMetadata.getType()));
+        if(Objects.isNull(entityFromDatabase)) {
+            return null;
+        }
 
         entityMetadata.getLazyManyToOneColumns()
                 .forEach(manyToOneColumn -> entityProxyFactory.initManyToOneProxy(entityFromDatabase, manyToOneColumn));

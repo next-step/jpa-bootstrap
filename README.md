@@ -117,5 +117,5 @@ public class DefaultLoadEventListener implements LoadEventListener {
 - [x] Insert Event 관련 처리
 - [x] Update Event 관련 처리
 - [x] Delete Event 관련 처리
-- [ ] Load Event 관련 처리
+- [x] Load Event 관련 처리
 - [ ] 해당 Event 들을 하나로 그룹화 해보기
