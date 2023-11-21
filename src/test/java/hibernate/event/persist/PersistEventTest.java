@@ -22,7 +22,7 @@ class PersistEventTest {
         PersistEvent<TestEntity> actual = PersistEvent.createEvent(actionQueue, metaModel, givenEntity);
         assertAll(
                 () -> assertThat(actual.getEntity()).isEqualTo(givenEntity),
-                () -> assertThat(actual.getEntityPersister()).isNotNull()
+                () -> assertThat(actual.getClazz()).isEqualTo(TestEntity.class)
         );
     }
 

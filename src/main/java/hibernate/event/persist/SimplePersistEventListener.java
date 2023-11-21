@@ -16,10 +16,10 @@ public class SimplePersistEventListener implements PersistEventListener {
     public <T> void onPersist(final PersistEvent<T> event) {
         if (event.isIdentity()) {
             event.getActionQueue()
-                    .addAction(new EntityIdentityInsertAction<>(event.getEntityPersister(), event.getEntity(), event.getEntityId()));
+                    .addAction(new EntityIdentityInsertAction<>(metaModel.getEntityPersister(event.getClazz()), event.getEntity(), event.getEntityId()));
             return;
         }
         event.getActionQueue()
-                .addAction(new EntityBasicInsertAction<>(event.getEntityPersister(), event.getEntity()));
+                .addAction(new EntityBasicInsertAction<>(metaModel.getEntityPersister(event.getClazz()), event.getEntity()));
     }
 }
