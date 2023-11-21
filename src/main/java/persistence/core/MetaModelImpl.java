@@ -1,5 +1,6 @@
 package persistence.core;
 
+import persistence.action.ActionQueue;
 import persistence.entity.loader.EntityLoaders;
 import persistence.entity.persister.EntityPersisters;
 import persistence.entity.proxy.EntityProxyFactory;
@@ -15,6 +16,7 @@ public class MetaModelImpl implements MetaModel {
     private final EntityPersisters entityPersisters;
     private final EntityLoaders entityLoaders;
     private final EntityProxyFactory entityProxyFactory;
+    private final ActionQueue actionQueue;
     private final EventListenerRegistry eventListenerRegistry;
 
     public MetaModelImpl(final EntityMetadataProvider entityMetadataProvider, final EntityPersisters entityPersisters, final EntityLoaders entityLoaders) {
@@ -22,7 +24,8 @@ public class MetaModelImpl implements MetaModel {
         this.entityPersisters = entityPersisters;
         this.entityLoaders = entityLoaders;
         this.entityProxyFactory = new EntityProxyFactory(entityLoaders);
-        this.eventListenerRegistry = new EventListenerRegistry(entityPersisters, entityLoaders);
+        this.actionQueue = new ActionQueue();
+        this.eventListenerRegistry = new EventListenerRegistry(actionQueue, entityPersisters, entityLoaders);
     }
 
     @Override
@@ -53,5 +56,10 @@ public class MetaModelImpl implements MetaModel {
     @Override
     public <T extends EventListener> EventListenerGroup<T> getEventListenerGroup(final EventType<T> type)  {
         return eventListenerRegistry.getListener(type);
+    }
+
+    @Override
+    public ActionQueue getActionQueue() {
+        return actionQueue;
     }
 }

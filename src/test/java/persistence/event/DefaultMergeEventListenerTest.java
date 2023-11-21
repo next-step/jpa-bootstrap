@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.Application;
+import persistence.action.ActionQueue;
 import persistence.core.EntityMetadataProvider;
 import persistence.core.EntityScanner;
 import persistence.entity.persister.EntityPersisters;
@@ -32,7 +33,7 @@ class DefaultMergeEventListenerTest {
         rs.addColumn("id", Types.BIGINT, 10, 0);
         rs.addRow(1L);
         final EntityPersisters entityPersisters = new EntityPersisters(entityMetadataProvider, new MockDmlGenerator(), new MockJdbcTemplate(rs));
-        defaultMergeEventListener = new DefaultMergeEventListener(entityPersisters);
+        defaultMergeEventListener = new DefaultMergeEventListener(new ActionQueue(), entityPersisters);
     }
 
     @Test

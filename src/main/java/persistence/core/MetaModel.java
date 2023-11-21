@@ -1,5 +1,6 @@
 package persistence.core;
 
+import persistence.action.ActionQueue;
 import persistence.entity.loader.EntityLoaders;
 import persistence.entity.persister.EntityPersisters;
 import persistence.entity.proxy.EntityProxyFactory;
@@ -21,4 +22,6 @@ public interface MetaModel {
     EntityProxyFactory getEntityProxyFactory();
 
     <T extends EventListener> EventListenerGroup<T> getEventListenerGroup(EventType<T> type);
+
+    ActionQueue getActionQueue();
 }

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.Application;
+import persistence.action.ActionQueue;
 import persistence.core.EntityMetadataProvider;
 import persistence.core.EntityScanner;
 import persistence.entity.loader.EntityLoaders;
@@ -38,7 +39,7 @@ class EventListenerRegistryTest {
         rs.addRow(1L, "min", 30, "jongmin4943@gmail.com");
         final EntityPersisters entityPersisters = new EntityPersisters(entityMetadataProvider, new MockDmlGenerator(), new MockJdbcTemplate(rs));
         final EntityLoaders entityLoaders = new EntityLoaders(entityMetadataProvider, new MockDmlGenerator(), new MockJdbcTemplate(rs));
-        eventListenerRegistry = new EventListenerRegistry(entityPersisters, entityLoaders);
+        eventListenerRegistry = new EventListenerRegistry(new ActionQueue(), entityPersisters, entityLoaders);
     }
 
 
