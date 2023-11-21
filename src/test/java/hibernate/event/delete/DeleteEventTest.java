@@ -19,10 +19,10 @@ class DeleteEventTest {
     @Test
     void DeleteEvent를_생성한다() {
         TestEntity givenEntity = new TestEntity();
-        DeleteEvent<TestEntity> actual = DeleteEvent.createEvent(actionQueue, metaModel, givenEntity);
+        DeleteEvent<TestEntity> actual = DeleteEvent.createEvent(actionQueue, givenEntity);
         assertAll(
                 () -> assertThat(actual.getEntity()).isEqualTo(givenEntity),
-                () -> assertThat(actual.getEntityPersister()).isNotNull()
+                () -> assertThat(actual.getClazz()).isEqualTo(TestEntity.class)
         );
     }
 

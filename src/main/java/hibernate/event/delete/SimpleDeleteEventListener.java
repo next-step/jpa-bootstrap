@@ -14,6 +14,6 @@ public class SimpleDeleteEventListener implements DeleteEventListener {
     @Override
     public <T> void onDelete(final DeleteEvent<T> event) {
         event.getActionQueue()
-                .addAction(new EntityDeleteAction<>(event.getEntityPersister(), event.getEntity()));
+                .addAction(new EntityDeleteAction<>(metaModel.getEntityPersister(event.getClazz()), event.getEntity()));
     }
 }
