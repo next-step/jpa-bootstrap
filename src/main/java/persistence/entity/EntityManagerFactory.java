@@ -2,7 +2,6 @@ package persistence.entity;
 
 
 import java.sql.Connection;
-import jdbc.JdbcTemplate;
 import persistence.meta.MetaModel;
 
 
@@ -17,8 +16,6 @@ public class EntityManagerFactory {
     }
 
     public EntityManager createEntityManager(Connection connection) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
-        EntityPersisteContext entityPersisteContext = EntityPersisteContext.create(metaModel, jdbcTemplate);
-        return SimpleEntityManager.create(entityPersisteContext);
+        return SimpleEntityManager.create(metaModel, connection);
     }
 }
