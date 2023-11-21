@@ -65,7 +65,7 @@ class SimpleDeleteEventListenerTest {
         jdbcTemplate.execute("insert into test_entity (id, nick_name, age) values (1, '최진영', 19);");
 
         DeleteEvent<TestEntity> deleteEvent = DeleteEvent.createEvent(actionQueue, metaModel, new TestEntity(1L, "최진영", 19));
-        DeleteEventListener deleteEventListener = new SimpleDeleteEventListener();
+        DeleteEventListener deleteEventListener = new SimpleDeleteEventListener(metaModel);
 
         // when
         deleteEventListener.onDelete(deleteEvent);

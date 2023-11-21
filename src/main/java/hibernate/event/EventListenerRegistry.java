@@ -4,6 +4,7 @@ import hibernate.event.delete.SimpleDeleteEventListener;
 import hibernate.event.load.SimpleLoadEventListener;
 import hibernate.event.merge.SimpleMergeEventListener;
 import hibernate.event.persist.SimplePersistEventListener;
+import hibernate.metamodel.MetaModel;
 
 import java.util.Map;
 
@@ -15,12 +16,12 @@ public class EventListenerRegistry {
         this.listeners = listeners;
     }
 
-    public static EventListenerRegistry createDefaultRegistry() {
+    public static EventListenerRegistry createDefaultRegistry(final MetaModel metaModel) {
         return new EventListenerRegistry(Map.of(
-                EventType.LOAD, new EventListener<>(new SimpleLoadEventListener()),
-                EventType.PERSIST, new EventListener<>(new SimplePersistEventListener()),
-                EventType.MERGE, new EventListener<>(new SimpleMergeEventListener()),
-                EventType.DELETE, new EventListener<>(new SimpleDeleteEventListener())
+                EventType.LOAD, new EventListener<>(new SimpleLoadEventListener(metaModel)),
+                EventType.PERSIST, new EventListener<>(new SimplePersistEventListener(metaModel)),
+                EventType.MERGE, new EventListener<>(new SimpleMergeEventListener(metaModel)),
+                EventType.DELETE, new EventListener<>(new SimpleDeleteEventListener(metaModel))
         ));
     }
 

@@ -1,9 +1,17 @@
 package hibernate.event.load;
 
+import hibernate.metamodel.MetaModel;
+
 public class SimpleLoadEventListener implements LoadEventListener {
 
+    private final MetaModel metaModel;
+
+    public SimpleLoadEventListener(final MetaModel metaModel) {
+        this.metaModel = metaModel;
+    }
+
     @Override
-    public <T> T onLoad(LoadEvent<T> event) {
+    public <T> T onLoad(final LoadEvent<T> event) {
         return event.getEntityLoader()
                 .find(event.getEntityId());
     }

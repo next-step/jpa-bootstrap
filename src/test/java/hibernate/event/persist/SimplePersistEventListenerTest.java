@@ -64,7 +64,7 @@ class SimplePersistEventListenerTest {
         // given
         TestEntity givenEntity = new TestEntity(1L, "최진영", 19);
         PersistEvent<TestEntity> persistEvent = PersistEvent.createEvent(actionQueue, metaModel, givenEntity);
-        PersistEventListener persistEventListener = new SimplePersistEventListener();
+        PersistEventListener persistEventListener = new SimplePersistEventListener(metaModel);
 
         // when
         persistEventListener.onPersist(persistEvent);

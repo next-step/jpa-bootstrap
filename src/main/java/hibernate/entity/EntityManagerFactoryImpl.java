@@ -4,6 +4,7 @@ import hibernate.action.ActionQueue;
 import hibernate.entity.persistencecontext.SimplePersistenceContext;
 import hibernate.event.EventListenerRegistry;
 import hibernate.metamodel.BasicMetaModel;
+import hibernate.metamodel.MetaModel;
 import hibernate.metamodel.MetaModelImpl;
 import jdbc.JdbcTemplate;
 
@@ -31,10 +32,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         if (entityManager != null) {
             throw new IllegalStateException("이미 현재 스레드에 생성된 EntityManager가 있습니다.");
         }
+        MetaModel metaModel = MetaModelImpl.createPackageMetaModel(basicMetaModel, new JdbcTemplate(connection));
         return new EntityManagerImpl(
                 new SimplePersistenceContext(),
-                MetaModelImpl.createPackageMetaModel(basicMetaModel, new JdbcTemplate(connection)),
-                EventListenerRegistry.createDefaultRegistry(),
+                metaModel,
+                EventListenerRegistry.createDefaultRegistry(metaModel),
                 new ActionQueue()
         );
     }

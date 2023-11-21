@@ -51,7 +51,7 @@ class EntityManagerImplTest {
         PersistenceContext persistenceContext = new SimplePersistenceContext(persistenceContextEntities, persistenceContextSnapshotEntities, entityEntryContext);
         BasicMetaModel basicMetaModel = BasicMetaModel.createPackageMetaModel("hibernate.entity");
         MetaModel metaModel = MetaModelImpl.createPackageMetaModel(basicMetaModel, jdbcTemplate);
-        EventListenerRegistry eventListenerRegistry = EventListenerRegistry.createDefaultRegistry();
+        EventListenerRegistry eventListenerRegistry = EventListenerRegistry.createDefaultRegistry(metaModel);
         ActionQueue actionQueue = new ActionQueue();
         entityManager = new EntityManagerImpl(persistenceContext, metaModel, eventListenerRegistry, actionQueue);
     }

@@ -53,7 +53,7 @@ class SimpleLoadEventListenerTest {
         // given
         jdbcTemplate.execute("insert into test_entity (id, nick_name, age) values (1, '최진영', 19)");
         LoadEvent<TestEntity> loadEvent = LoadEvent.createEvent(metaModel, TestEntity.class, 1L);
-        LoadEventListener loadEventListener = new SimpleLoadEventListener();
+        LoadEventListener loadEventListener = new SimpleLoadEventListener(metaModel);
 
         // when
         TestEntity actual = loadEventListener.onLoad(loadEvent);

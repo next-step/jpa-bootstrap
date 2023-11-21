@@ -68,7 +68,7 @@ class SimpleMergeEventListenerTest {
         String expectedChangedName = "영진최";
         MergeEvent<TestEntity> mergeEvent = MergeEvent.createEvent(actionQueue, metaModel, TestEntity.class, 1L,
                 Map.of(new EntityClass<>(TestEntity.class).getEntityColumns().get(1), expectedChangedName));
-        MergeEventListener mergeEventListener = new SimpleMergeEventListener();
+        MergeEventListener mergeEventListener = new SimpleMergeEventListener(metaModel);
 
         // when
         mergeEventListener.onMerge(mergeEvent);
