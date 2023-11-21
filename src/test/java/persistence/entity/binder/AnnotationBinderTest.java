@@ -36,10 +36,10 @@ class AnnotationBinderTest {
 
         //then
         assertSoftly((it) -> {
-            it.assertThat(metaModel.getMetaMap()).hasSize(7);
-            it.assertThat(metaModel.getQueryGeneratorMap()).hasSize(7);
-            it.assertThat(metaModel.getMetaMap().get(Department.class)).isNotNull();
-            it.assertThat(metaModel.getMetaMap().get(Employee.class)).isNotNull();
+            it.assertThat(metaModel.getEntityMetaContext()).hasSize(7);
+            it.assertThat(metaModel.getQueryGeneratorContext()).hasSize(7);
+            it.assertThat(metaModel.getEntityMetaContext().get(Department.class)).isNotNull();
+            it.assertThat(metaModel.getQueryGeneratorContext().get(Employee.class)).isNotNull();
         });
     }
 }

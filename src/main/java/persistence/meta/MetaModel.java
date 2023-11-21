@@ -1,23 +1,22 @@
 package persistence.meta;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import persistence.entity.EntityPersisteContext;
 import persistence.sql.QueryGenerator;
 
 public class MetaModel {
-    private final Map<Class<?>, EntityMeta> metaMap;
-    private final Map<Class<?>, QueryGenerator> queryGeneratorMap;
+    private final Map<Class<?>, EntityMeta> entityMetaContext;
+    private final Map<Class<?>, QueryGenerator> queryGeneratorContext;
 
-    public MetaModel(Map<Class<?>, EntityMeta> metaMap, Map<Class<?>, QueryGenerator> queryGeneratorMap) {
-        this.metaMap = metaMap;
-        this.queryGeneratorMap = queryGeneratorMap;
+    public MetaModel(Map<Class<?>, EntityMeta> entityMetaContext, Map<Class<?>, QueryGenerator> queryGeneratorContext) {
+        this.entityMetaContext = entityMetaContext;
+        this.queryGeneratorContext = queryGeneratorContext;
     }
-    public Map<Class<?>, EntityMeta> getMetaMap() {
-        return metaMap;
+
+    public Map<Class<?>, EntityMeta> getEntityMetaContext() {
+        return entityMetaContext;
     }
-    public Map<Class<?>, QueryGenerator> getQueryGeneratorMap() {
-        return queryGeneratorMap;
+
+    public Map<Class<?>, QueryGenerator> getQueryGeneratorContext() {
+        return queryGeneratorContext;
     }
 }
