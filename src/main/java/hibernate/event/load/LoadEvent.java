@@ -1,24 +1,17 @@
 package hibernate.event.load;
 
-import hibernate.entity.EntityLoader;
-import hibernate.metamodel.MetaModel;
-
 public class LoadEvent<T> {
 
-    private final EntityLoader<T> entityLoader;
+    private final Class<T> clazz;
     private final Object entityId;
 
-    private LoadEvent(final EntityLoader<T> entityLoader, final Object entityId) {
-        this.entityLoader = entityLoader;
+    public LoadEvent(final Class<T> clazz, final Object entityId) {
+        this.clazz = clazz;
         this.entityId = entityId;
     }
 
-    public static <T> LoadEvent<T> createEvent(final MetaModel metaModel, final Class<T> clazz, final Object entityId) {
-        return new LoadEvent<>(metaModel.getEntityLoader(clazz), entityId);
-    }
-
-    public EntityLoader<T> getEntityLoader() {
-        return entityLoader;
+    public Class<T> getClazz() {
+        return clazz;
     }
 
     public Object getEntityId() {

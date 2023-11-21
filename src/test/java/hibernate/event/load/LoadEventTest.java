@@ -1,8 +1,5 @@
 package hibernate.event.load;
 
-import hibernate.metamodel.BasicMetaModel;
-import hibernate.metamodel.MetaModel;
-import hibernate.metamodel.MetaModelImpl;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import org.junit.jupiter.api.Test;
@@ -12,17 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class LoadEventTest {
 
-    private final MetaModel metamodel = MetaModelImpl.createPackageMetaModel(
-            BasicMetaModel.createPackageMetaModel("hibernate.event.load"),
-            null
-    );
-
     @Test
     void LoadEvent를_생성한다() {
-        LoadEvent<TestEntity> actual = LoadEvent.createEvent(metamodel, TestEntity.class, 1L);
+        LoadEvent<TestEntity> actual = new LoadEvent<>(TestEntity.class, 1L);
         assertAll(
                 () -> assertThat(actual.getEntityId()).isEqualTo(1L),
-                () -> assertThat(actual.getEntityLoader()).isNotNull()
+                () -> assertThat(actual.getClazz()).isEqualTo(TestEntity.class)
         );
     }
 

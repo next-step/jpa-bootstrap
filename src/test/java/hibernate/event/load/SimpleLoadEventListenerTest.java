@@ -52,7 +52,7 @@ class SimpleLoadEventListenerTest {
     void Event를_받아_load한_결과물을_반환한다() {
         // given
         jdbcTemplate.execute("insert into test_entity (id, nick_name, age) values (1, '최진영', 19)");
-        LoadEvent<TestEntity> loadEvent = LoadEvent.createEvent(metaModel, TestEntity.class, 1L);
+        LoadEvent<TestEntity> loadEvent = new LoadEvent<>(TestEntity.class, 1L);
         LoadEventListener loadEventListener = new SimpleLoadEventListener(metaModel);
 
         // when

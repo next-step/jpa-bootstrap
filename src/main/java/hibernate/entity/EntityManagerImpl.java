@@ -50,7 +50,7 @@ public class EntityManagerImpl implements EntityManager {
         }
 
         EventListener<LoadEventListener> listener = eventListenerRegistry.getListener(EventType.LOAD);
-        T loadEntity = listener.fireWithReturn(LoadEvent.createEvent(metaModel, clazz, id), LoadEventListener::onLoad);
+        T loadEntity = listener.fireWithReturn(new LoadEvent<>(clazz, id), LoadEventListener::onLoad);
 
         persistenceContext.addEntity(id, loadEntity, LOADING);
         return loadEntity;

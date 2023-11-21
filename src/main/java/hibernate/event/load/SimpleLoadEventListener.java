@@ -12,7 +12,7 @@ public class SimpleLoadEventListener implements LoadEventListener {
 
     @Override
     public <T> T onLoad(final LoadEvent<T> event) {
-        return event.getEntityLoader()
+        return metaModel.getEntityLoader(event.getClazz())
                 .find(event.getEntityId());
     }
 }
