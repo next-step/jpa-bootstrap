@@ -8,8 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.persistentcontext.JdbcPersistenceContext;
 import persistence.sql.ddl.builder.BuilderTest;
-import persistence.sql.dml.builder.read.SelectQueryBuilder;
-import persistence.sql.fixture.PersonFixtureStep3;
+import domain.fixture.PersonFixtureStep3;
 
 @DisplayName("2. 요구사항 SELECT 구현하기, 3. 요구사항 WHERE 구현하기")
 public class SelectQueryBuilderTest extends BuilderTest {

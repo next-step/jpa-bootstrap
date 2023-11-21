@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.dialect.h2.H2Dialect;
-import persistence.sql.fixture.PersonFixture;
+import domain.fixture.PersonFixture;
 
 @DisplayName("1.2 MetaDataColumn을 Clazz에서 추출합니다.")
 public class MetaDataColumnTest {

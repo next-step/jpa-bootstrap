@@ -6,11 +6,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.entity.persistentcontext.JdbcPersistenceContext;
-import persistence.entity.persistentcontext.PersistenceContext;
 import persistence.sql.ddl.builder.BuilderTest;
-import persistence.sql.fixture.PersonFixtureStep3;
-import persistence.sql.fixture.PersonInstances;
+import domain.fixture.PersonFixtureStep3;
+import domain.fixture.PersonInstances;
 
 public class JdbcPersistenceContextTest extends BuilderTest {
 

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.meta.MetaEntity;
 import domain.Person;
-import persistence.sql.fixture.PersonFixture;
-import persistence.sql.fixture.PersonFixture2;
+import domain.fixture.PersonFixture;
+import domain.fixture.PersonFixture2;
 
 @DisplayName("1.2 Entity를 CREATE DLL로 변환합니다.")
 public class CreateQueryBuilderTest {
