@@ -33,11 +33,12 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
             throw new IllegalStateException("이미 현재 스레드에 생성된 EntityManager가 있습니다.");
         }
         MetaModel metaModel = MetaModelImpl.createPackageMetaModel(basicMetaModel, new JdbcTemplate(connection));
+        ActionQueue actionQueue = new ActionQueue();
         return new EntityManagerImpl(
                 new SimplePersistenceContext(),
                 metaModel,
-                EventListenerRegistry.createDefaultRegistry(metaModel),
-                new ActionQueue()
+                EventListenerRegistry.createDefaultRegistry(metaModel, actionQueue),
+                actionQueue
         );
     }
 

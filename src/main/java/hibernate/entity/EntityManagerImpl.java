@@ -58,7 +58,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void persist(final Object entity) {
-        PersistEvent<?> persistEvent = PersistEvent.createEvent(actionQueue, metaModel, entity);
+        PersistEvent<?> persistEvent = PersistEvent.createEvent(metaModel, entity);
         EventListener<PersistEventListener> listener = eventListenerRegistry.getListener(EventType.PERSIST);
 
         EntityColumn entityId = metaModel.getEntityId(entity.getClass());
@@ -86,7 +86,7 @@ public class EntityManagerImpl implements EntityManager {
         }
         persistenceContext.addEntity(entityId, entity);
         EventListener<MergeEventListener> listener = eventListenerRegistry.getListener(EventType.MERGE);
-        listener.fireJustRun(new MergeEvent<>(actionQueue, entity.getClass(), entityId, changedColumns), MergeEventListener::onMerge);
+        listener.fireJustRun(new MergeEvent<>(entity.getClass(), entityId, changedColumns), MergeEventListener::onMerge);
     }
 
     private Object getNotNullEntityId(final Object entity) {
@@ -112,7 +112,7 @@ public class EntityManagerImpl implements EntityManager {
     public void remove(final Object entity) {
         persistenceContext.addEntityEntry(entity, DELETED);
         EventListener<DeleteEventListener> listener = eventListenerRegistry.getListener(EventType.DELETE);
-        listener.fireJustRun(DeleteEvent.createEvent(actionQueue, entity), DeleteEventListener::onDelete);
+        listener.fireJustRun(DeleteEvent.createEvent(entity), DeleteEventListener::onDelete);
         persistenceContext.removeEntity(entity);
     }
 

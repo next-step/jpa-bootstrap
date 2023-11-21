@@ -46,8 +46,8 @@ class CustomJpaRepositoryTest {
         PersistenceContext persistenceContext = new SimplePersistenceContext(persistenceContextEntities, persistenceContextSnapshotEntities, entityEntryContext);
         BasicMetaModel basicMetaModel = BasicMetaModel.createPackageMetaModel("repository");
         MetaModel metaModel = MetaModelImpl.createPackageMetaModel(basicMetaModel, jdbcTemplate);
-        EventListenerRegistry eventListenerRegistry = EventListenerRegistry.createDefaultRegistry(metaModel);
         ActionQueue actionQueue = new ActionQueue();
+        EventListenerRegistry eventListenerRegistry = EventListenerRegistry.createDefaultRegistry(metaModel, actionQueue);
         EntityManager entityManager = new EntityManagerImpl(persistenceContext, metaModel, eventListenerRegistry, actionQueue);
         customJpaRepository = new CustomJpaRepository<>(entityManager);
     }

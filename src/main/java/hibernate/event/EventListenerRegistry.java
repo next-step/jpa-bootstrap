@@ -1,5 +1,6 @@
 package hibernate.event;
 
+import hibernate.action.ActionQueue;
 import hibernate.event.delete.SimpleDeleteEventListener;
 import hibernate.event.load.SimpleLoadEventListener;
 import hibernate.event.merge.SimpleMergeEventListener;
@@ -16,12 +17,12 @@ public class EventListenerRegistry {
         this.listeners = listeners;
     }
 
-    public static EventListenerRegistry createDefaultRegistry(final MetaModel metaModel) {
+    public static EventListenerRegistry createDefaultRegistry(final MetaModel metaModel, final ActionQueue actionQueue) {
         return new EventListenerRegistry(Map.of(
                 EventType.LOAD, new EventListener<>(new SimpleLoadEventListener(metaModel)),
-                EventType.PERSIST, new EventListener<>(new SimplePersistEventListener(metaModel)),
-                EventType.MERGE, new EventListener<>(new SimpleMergeEventListener(metaModel)),
-                EventType.DELETE, new EventListener<>(new SimpleDeleteEventListener(metaModel))
+                EventType.PERSIST, new EventListener<>(new SimplePersistEventListener(metaModel, actionQueue)),
+                EventType.MERGE, new EventListener<>(new SimpleMergeEventListener(metaModel, actionQueue)),
+                EventType.DELETE, new EventListener<>(new SimpleDeleteEventListener(metaModel, actionQueue))
         ));
     }
 
