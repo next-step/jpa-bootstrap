@@ -1,5 +1,6 @@
 package persistence.entity.manager;
 
+import persistence.action.ActionQueue;
 import persistence.context.EntityKey;
 import persistence.context.EntityKeyGenerator;
 import persistence.context.PersistenceContext;
@@ -76,7 +77,14 @@ public class SimpleEntityManager implements EntityManager {
     }
 
     @Override
+    public void flush() {
+        final ActionQueue actionQueue = metaModel.getActionQueue();
+        actionQueue.flush();
+    }
+
+    @Override
     public void close() {
+        flush();
         this.sessionCloseStrategy.close();
     }
 

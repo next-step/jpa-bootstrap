@@ -131,5 +131,4 @@ public class ActionQueue {
 ```
 - [x] 각 CURD 관련 행위를 바로 DB 에 쿼리하지 않고 ActionQueue 에 담는다.
 - [x] 특정시점(flush) 에 순회하며 DB 에 쿼리한다.
-- [ ] insert 시 select 을 먼저 해보고 없다면 insert, 있다면 update 한다.
 - [x] 같은 action 이 온다면 쿼리를 한번만 실행한다.

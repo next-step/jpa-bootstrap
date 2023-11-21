@@ -56,6 +56,7 @@ class CustomJpaRepositoryTest extends IntegrationTestEnvironment {
 
         fixture.changeEmail("something new");
         customJpaRepository.save(fixture);
+        customJpaRepository.flush();
 
         final Person testV2 = jdbcTemplate.queryForObject("select * from users where id=1", personRowMapper());
         assertSoftly(softly -> {

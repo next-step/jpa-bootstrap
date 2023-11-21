@@ -10,5 +10,7 @@ public interface EntityManager {
 
     void remove(Object entity);
 
+    void flush();
+
     void close();
 }

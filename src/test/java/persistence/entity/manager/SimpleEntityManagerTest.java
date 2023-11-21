@@ -50,7 +50,10 @@ class SimpleEntityManagerTest extends IntegrationTestEnvironment {
     void entityManagerPersistTest() {
         final Person newPerson = new Person("min", 30, "jongmin4943@gmail.com");
 
-        assertDoesNotThrow(() -> entityManager.persist(newPerson));
+        assertDoesNotThrow(() -> {
+            entityManager.persist(newPerson);
+            entityManager.flush();
+        });
     }
 
     @Test
@@ -58,6 +61,7 @@ class SimpleEntityManagerTest extends IntegrationTestEnvironment {
     void entityManagerRemoveTest() {
         final Person newPerson = new Person("min", 30, "jongmin4943@gmail.com");
         entityManager.persist(newPerson);
+        entityManager.flush();
 
         assertDoesNotThrow(() -> entityManager.remove(newPerson));
     }
@@ -67,6 +71,7 @@ class SimpleEntityManagerTest extends IntegrationTestEnvironment {
     void persistTest() {
         final Person person = new Person("test", 30, "test@test.com");
         entityManager.persist(person);
+        entityManager.flush();
 
         assertThat(person.getId()).isNotNull();
     }
@@ -85,6 +90,7 @@ class SimpleEntityManagerTest extends IntegrationTestEnvironment {
     void findIdentityFromPersistTest() {
         final Person person1 = new Person("test", 30, "test@test.com");
         entityManager.persist(person1);
+        entityManager.flush();
         final Person person2 = entityManager.find(Person.class, person1.getId());
 
         assertThat(person1 == person2).isTrue();
@@ -105,6 +111,8 @@ class SimpleEntityManagerTest extends IntegrationTestEnvironment {
 
         test.changeEmail("changed!");
         entityManager.merge(test);
+        entityManager.flush();
+        entityManager.close();
 
         final Person testV2 = jdbcTemplate.queryForObject("select * from users where id=1", personRowMapper());
         assertSoftly(softly -> {
@@ -131,6 +139,7 @@ class SimpleEntityManagerTest extends IntegrationTestEnvironment {
         final Person test = new Person(1L, "changedTester", 111, "changedEmail");
 
         entityManager.persist(test);
+        entityManager.flush();
 
         final Person testV2 = jdbcTemplate.queryForObject("select * from users where id=1", personRowMapper());
         assertSoftly(softly -> {
