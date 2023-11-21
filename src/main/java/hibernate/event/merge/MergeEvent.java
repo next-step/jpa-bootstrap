@@ -2,47 +2,30 @@ package hibernate.event.merge;
 
 import hibernate.action.ActionQueue;
 import hibernate.action.InsertUpdateActionQueue;
-import hibernate.entity.EntityPersister;
 import hibernate.entity.meta.column.EntityColumn;
-import hibernate.metamodel.MetaModel;
 
 import java.util.Map;
 
 public class MergeEvent<T> {
 
     private final InsertUpdateActionQueue actionQueue;
-    private final EntityPersister<T> entityPersister;
+    private final Class<T> clazz;
     private final Object entityId;
     private final Map<EntityColumn, Object> changeColumns;
 
-    private MergeEvent(final ActionQueue actionQueue, final EntityPersister<T> entityPersister, final Object entityId, final Map<EntityColumn, Object> changeColumns) {
+    public MergeEvent(final ActionQueue actionQueue, final Class<T> clazz, final Object entityId, final Map<EntityColumn, Object> changeColumns) {
         this.actionQueue = actionQueue;
-        this.entityPersister = entityPersister;
+        this.clazz = clazz;
         this.entityId = entityId;
         this.changeColumns = changeColumns;
-    }
-
-    public static <T> MergeEvent<T> createEvent(
-            final ActionQueue actionQueue,
-            final MetaModel metaModel,
-            final Class<T> clazz,
-            final Object entityId,
-            final Map<EntityColumn, Object> changeColumns
-    ) {
-        return new MergeEvent<>(
-                actionQueue,
-                metaModel.getEntityPersister(clazz),
-                entityId,
-                changeColumns
-        );
     }
 
     public InsertUpdateActionQueue getActionQueue() {
         return actionQueue;
     }
 
-    public EntityPersister<T> getEntityPersister() {
-        return entityPersister;
+    public Class<T> getClazz() {
+        return clazz;
     }
 
     public Object getEntityId() {

@@ -66,7 +66,7 @@ class SimpleMergeEventListenerTest {
         jdbcTemplate.execute("insert into test_entity (id, nick_name) values (1, '최진영');");
 
         String expectedChangedName = "영진최";
-        MergeEvent<TestEntity> mergeEvent = MergeEvent.createEvent(actionQueue, metaModel, TestEntity.class, 1L,
+        MergeEvent<TestEntity> mergeEvent = new MergeEvent<>(actionQueue, TestEntity.class, 1L,
                 Map.of(new EntityClass<>(TestEntity.class).getEntityColumns().get(1), expectedChangedName));
         MergeEventListener mergeEventListener = new SimpleMergeEventListener(metaModel);
 

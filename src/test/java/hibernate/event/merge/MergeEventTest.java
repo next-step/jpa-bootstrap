@@ -20,9 +20,9 @@ class MergeEventTest {
 
     @Test
     void MergeEvent를_생성한다() {
-        MergeEvent<TestEntity> actual = MergeEvent.createEvent(actionQueue, metaModel, TestEntity.class, 1L, Map.of());
+        MergeEvent<TestEntity> actual = new MergeEvent<>(actionQueue, TestEntity.class, 1L, Map.of());
         assertAll(
-                () -> assertThat(actual.getEntityPersister()).isNotNull(),
+                () -> assertThat(actual.getClazz()).isEqualTo(TestEntity.class),
                 () -> assertThat(actual.getEntityId()).isEqualTo(1L),
                 () -> assertThat(actual.getChangeColumns()).isNotNull()
         );
