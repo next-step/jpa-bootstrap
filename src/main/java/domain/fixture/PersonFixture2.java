@@ -1,16 +1,13 @@
-package persistence.sql.fixture;
+package domain.fixture;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
-@Table(name = "users")
 @Entity
-public class PersonFixture {
+public class PersonFixture2 {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -20,6 +17,7 @@ public class PersonFixture {
   private Integer age;
   @Column(nullable = false)
   private String email;
-  @Transient
+  @Column
   private Integer index;
+
 }
