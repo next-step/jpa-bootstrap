@@ -12,6 +12,7 @@ public class SimpleEntityManager implements EntityManager {
     private SimpleEntityManager(EntityPersisteContext entityPersisterContenxt) {
         this.persistenceContext = new SimplePersistenceContext();
         this.entityPersisterContenxt = entityPersisterContenxt;
+
     }
 
     public static SimpleEntityManager create(EntityPersisteContext entityPersisterContenxt) {

@@ -13,9 +13,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.dialect.Dialect;
+import persistence.entity.binder.EntityPersisterBinder;
 import persistence.entity.persister.EntityPersister;
-import persistence.entity.persister.EntityPersisterFactory;
 import persistence.fake.FakeDialect;
+import persistence.meta.EntityMeta;
 import persistence.sql.QueryGenerator;
 import persistence.testFixtures.Person;
 
@@ -24,7 +25,7 @@ class SimplePersistenceContextTest {
     private JdbcTemplate jdbcTemplate;
     private DatabaseServer server;
     private Dialect dialect;
-    private EntityPersisterFactory entityPersisterFactory;
+
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -33,7 +34,7 @@ class SimplePersistenceContextTest {
         dialect = new FakeDialect();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).create());
-        entityPersisterFactory = new EntityPersisterFactory(jdbcTemplate);
+
     }
 
     @Test
@@ -122,7 +123,9 @@ class SimplePersistenceContextTest {
         //given
         Person person = new Person(1L, "이름", 30, "email@odna");
         SimplePersistenceContext simplePersistenceContext = new SimplePersistenceContext();
-        EntityPersister entityPersister = entityPersisterFactory.create(Person.class, dialect);
+        EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate, QueryGenerator.of(Person.class, dialect)
+                , EntityMeta.from(person.getClass()));
+
 
         //when
         simplePersistenceContext.saving(entityPersister, person);
@@ -137,7 +140,10 @@ class SimplePersistenceContextTest {
         //given
         Person person = new Person(1L, "이름", 30, "email@odna");
         SimplePersistenceContext simplePersistenceContext = new SimplePersistenceContext();
-        EntityPersister entityPersister = entityPersisterFactory.create(Person.class, dialect);
+        final QueryGenerator queryGenerator = QueryGenerator.of(Person.class, dialect);
+        final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate
+                , queryGenerator
+                , EntityMeta.from(person.getClass()));
 
         //when
         simplePersistenceContext.saving(entityPersister, person);
@@ -153,7 +159,11 @@ class SimplePersistenceContextTest {
         //given
         Person person = new Person(1L, "이름", 30, "email@odna");
         SimplePersistenceContext simplePersistenceContext = new SimplePersistenceContext();
-        EntityPersister entityPersister = entityPersisterFactory.create(Person.class, dialect);
+        final QueryGenerator queryGenerator = QueryGenerator.of(Person.class, dialect);
+        final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate
+                , queryGenerator
+                , EntityMeta.from(person.getClass()));
+
         //when
         simplePersistenceContext.saving(entityPersister, person);
         final Person loading = simplePersistenceContext.loading(entityPersister, Person.class, 1L);
@@ -169,7 +179,9 @@ class SimplePersistenceContextTest {
         Person person = new Person(1L, "이름", 30, "email@odna");
         Person person2 = new Person(2L, "이름", 30, "email@odna");
         SimplePersistenceContext simplePersistenceContext = new SimplePersistenceContext();
-        EntityPersister entityPersister = entityPersisterFactory.create(Person.class, dialect);
+        final QueryGenerator queryGenerator = QueryGenerator.of(Person.class, dialect);
+        final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate, queryGenerator,
+                EntityMeta.from(person.getClass()));
 
         //when
         simplePersistenceContext.saving(entityPersister, person);

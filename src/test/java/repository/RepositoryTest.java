@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import database.DatabaseServer;
 import database.H2;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Stream;
@@ -20,6 +21,8 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 import persistence.dialect.Dialect;
 import persistence.entity.EntityManagerFactory;
+import persistence.entity.EntityScanner;
+import persistence.entity.binder.AnnotationBinder;
 import persistence.fake.FakeDialect;
 import persistence.testFixtures.Person;
 
@@ -32,14 +35,18 @@ public class RepositoryTest {
     private Person person2 = new Person("이름2", 32, "email2@odna");
     private Dialect dialect;
     EntityManagerFactory entityManagerFactory;
+    Connection connection;
 
     @BeforeEach
     void setUp() throws SQLException {
         server = new H2();
         server.start();
-        jdbcTemplate = new JdbcTemplate(server.getConnection());
+        connection = server.getConnection();
+        jdbcTemplate = new JdbcTemplate(connection);
         dialect = new FakeDialect();
-        entityManagerFactory = EntityManagerFactory.of("persistence.testFixtures", jdbcTemplate, dialect);
+        EntityScanner scanner = new EntityScanner();
+        AnnotationBinder annotationBinder = new AnnotationBinder(scanner.scan("persistence.testFixtures"), dialect);
+        entityManagerFactory = EntityManagerFactory.create(annotationBinder.getMetaModel());
 
     }
 
@@ -49,7 +56,7 @@ public class RepositoryTest {
 
         final DDLRepository<Person> ddlRepository = new BaseDDLRepository<>(jdbcTemplate, Person.class, dialect);
         final SimpleCrudRepository<Person, Long> crudRepository = new SimpleCrudRepository<>(
-                entityManagerFactory.createEntityManager(), Person.class);
+                entityManagerFactory.createEntityManager(connection), Person.class);
 
         return Stream.of(
                 dynamicContainer("테이블이", Stream.of(

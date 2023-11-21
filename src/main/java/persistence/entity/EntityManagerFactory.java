@@ -1,28 +1,24 @@
 package persistence.entity;
 
 
-import java.util.Set;
+import java.sql.Connection;
 import jdbc.JdbcTemplate;
-import persistence.dialect.Dialect;
+import persistence.meta.MetaModel;
 
 
 public class EntityManagerFactory {
-    private final EntityPersisteContext entityPersisteContext;
-
-    private EntityManagerFactory(Set<Class<?>> entityClasses, JdbcTemplate jdbcTemplate, Dialect dialect) {
-        this.entityPersisteContext = EntityPersisteContext.create(entityClasses, jdbcTemplate, dialect);
+    private MetaModel metaModel;
+    private EntityManagerFactory(MetaModel metaModel) {
+        this.metaModel = metaModel;
     }
 
-    public static EntityManagerFactory of(String packageName, JdbcTemplate jdbcTemplate, Dialect dialect) {
-        return new EntityManagerFactory(getEntityClassesFromPackage(packageName), jdbcTemplate, dialect);
+    public static EntityManagerFactory create(MetaModel metaModel) {
+        return new EntityManagerFactory(metaModel);
     }
 
-
-    private static Set<Class<?>> getEntityClassesFromPackage(String packageName) {
-        return new EntityScanner().scan(packageName);
-    }
-
-    public EntityManager createEntityManager() {
+    public EntityManager createEntityManager(Connection connection) {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
+        EntityPersisteContext entityPersisteContext = EntityPersisteContext.create(metaModel, jdbcTemplate);
         return SimpleEntityManager.create(entityPersisteContext);
     }
 }

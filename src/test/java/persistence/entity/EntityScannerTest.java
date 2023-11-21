@@ -29,7 +29,7 @@ class EntityScannerTest {
         final Set<Class<?>> entityClasses = entityScanner.scan("persistence.testFixtures");
 
         //then
-        assertThat(entityClasses).hasSize(5);
+        assertThat(entityClasses).hasSize(7);
     }
 
 }

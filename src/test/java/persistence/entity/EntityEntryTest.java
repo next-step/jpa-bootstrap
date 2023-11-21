@@ -15,8 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.dialect.Dialect;
+import persistence.entity.binder.EntityPersisterBinder;
 import persistence.entity.persister.EntityPersister;
-import persistence.entity.persister.EntityPersisterFactory;
 import persistence.entity.persister.SimpleEntityPersister;
 import persistence.exception.ObjectNotFoundException;
 import persistence.fake.FakeDialect;
@@ -30,8 +30,6 @@ class EntityEntryTest {
     private DatabaseServer server;
     private Dialect dialect;
 
-    private EntityPersisterFactory entityPersisterFactory;
-
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -40,7 +38,7 @@ class EntityEntryTest {
         dialect = new FakeDialect();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).create());
-        entityPersisterFactory = new EntityPersisterFactory(jdbcTemplate);
+
     }
 
 
@@ -51,7 +49,7 @@ class EntityEntryTest {
         Person person = new Person(1L, "이름", 30, "email@odna");
         final EntityMeta entityMeta = EntityMeta.from(person.getClass());
         final QueryGenerator queryGenerator = QueryGenerator.of((entityMeta), new FakeDialect());
-        final SimpleEntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate, queryGenerator,
+        final EntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate, queryGenerator,
                 entityMeta);
 
         //when
@@ -84,7 +82,8 @@ class EntityEntryTest {
         //given
         Person person = new Person(1L, "이름", 30, "email@odna");
         EntityEntry entityEntry = EntityEntry.loadingOf(EntityKey.of(person));
-        final EntityPersister entityPersister = entityPersisterFactory.create(person.getClass(), dialect);
+        final QueryGenerator queryGenerator = QueryGenerator.of(Person.class, dialect);
+        final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate, queryGenerator, EntityMeta.from(person.getClass()));
 
         //when
         entityEntry.readOnly();
@@ -130,7 +129,11 @@ class EntityEntryTest {
         //given
         Person person = new Person(1L, "이름", 30, "email@odna");
         EntityEntry entityEntry = EntityEntry.loadingOf(EntityKey.of(person));
-        final EntityPersister entityPersister = entityPersisterFactory.create(person.getClass(), dialect);
+        final QueryGenerator queryGenerator = QueryGenerator.of(Person.class, dialect);
+        final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate
+                , queryGenerator
+                , EntityMeta.from(person.getClass()));
+
 
         //when
         entityEntry.gone();
