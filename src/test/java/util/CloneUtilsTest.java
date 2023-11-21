@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.sql.fixture.PersonFixtureStep3;
-import persistence.sql.fixture.PersonInstances;
+import domain.fixture.PersonFixtureStep3;
+import domain.fixture.PersonInstances;
 
 public class CloneUtilsTest {
 
