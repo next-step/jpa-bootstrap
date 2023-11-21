@@ -21,6 +21,6 @@ public class SimplePersistEventListener implements PersistEventListener {
             actionQueue.addAction(new EntityIdentityInsertAction<>(metaModel.getEntityPersister(event.getClazz()), event.getEntity(), event.getEntityId()));
             return;
         }
-        actionQueue.addAction(new EntityBasicInsertAction<>(metaModel.getEntityPersister(event.getClazz()), event.getEntity()));
+        actionQueue.addAction(new EntityBasicInsertAction<>(metaModel.getEntityPersister(event.getClazz()), event.getEntity(), event.getEntityId()));
     }
 }

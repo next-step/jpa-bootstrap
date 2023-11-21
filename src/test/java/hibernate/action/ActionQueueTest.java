@@ -25,8 +25,8 @@ class ActionQueueTest {
                 new ConcurrentLinkedQueue<>(),
                 new ConcurrentLinkedQueue<>()
         );
-        actionQueue.addAction(new EntityBasicInsertAction<>(new MockEntityPersister<>(), null));
-        actionQueue.addAction(new EntityBasicInsertAction<>(new MockEntityPersister<>(), null));
+        actionQueue.addAction(new EntityBasicInsertAction<>(new MockEntityPersister<>(), null, null));
+        actionQueue.addAction(new EntityBasicInsertAction<>(new MockEntityPersister<>(), null, null));
 
         // when
         actionQueue.addAction(new EntityIdentityInsertAction<>(
@@ -37,6 +37,25 @@ class ActionQueueTest {
     }
 
     @Test
+    void 동일한_id의_EntityBasicInsertAction이_입력되면_중복저장하지_않는다() {
+        // given
+        Queue<EntityInsertAction<?>> givenInsertions = new ConcurrentLinkedQueue<>();
+        ActionQueue actionQueue = new ActionQueue(
+                givenInsertions,
+                new ConcurrentLinkedQueue<>(),
+                new ConcurrentLinkedQueue<>()
+        );
+        TestEntity givenEntity = new TestEntity(1L, "최진영");
+        actionQueue.addAction(new EntityBasicInsertAction<>(new MockEntityPersister<>(), givenEntity, 1L));
+
+        // when
+        actionQueue.addAction(new EntityBasicInsertAction<>(new MockEntityPersister<>(), givenEntity, 1L));
+
+        // then
+        assertThat(givenInsertions).hasSize(1);
+    }
+
+    @Test
     void 모든_action을_실행한다() {
         // given
         Queue<EntityInsertAction<?>> givenInsertions = new ConcurrentLinkedQueue<>();
@@ -44,7 +63,7 @@ class ActionQueueTest {
         Queue<EntityDeleteAction<?>> givenDeletions = new ConcurrentLinkedQueue<>();
         ActionQueue actionQueue = new ActionQueue(givenInsertions, givenUpdates, givenDeletions);
 
-        actionQueue.addAction(new EntityBasicInsertAction<>(new MockEntityPersister<>(), null));
+        actionQueue.addAction(new EntityBasicInsertAction<>(new MockEntityPersister<>(), null, null));
         actionQueue.addAction(new EntityUpdateAction<>(new MockEntityPersister<>(), null, null));
         actionQueue.addAction(new EntityDeleteAction<>(new MockEntityPersister<>(), null));
 

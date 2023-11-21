@@ -25,6 +25,9 @@ public class ActionQueue implements InsertUpdateActionQueue, DeleteActionQueue {
 
     @Override
     public void addAction(final EntityBasicInsertAction<?> action) {
+        if (insertions.contains(action)) {
+            return;
+        }
         insertions.add(action);
     }
 

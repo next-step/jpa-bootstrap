@@ -76,4 +76,4 @@
   - 각 action에 맞는 queue에 저장한다.
   - identity insert action이 들어오는 경우 insert queue를 모두 처리한다.
   - 모든 action을 처리할 수 있다.
-- 
+  - EntityBasicInsertAction은 동일한 id값이 들어올 경우 중복저장하지 않는다.
