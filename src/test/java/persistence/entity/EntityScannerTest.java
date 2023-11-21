@@ -8,14 +8,14 @@ import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("엔티티 클래스 로더 테스트")
-class EntityClassLoaderTest {
+@DisplayName("엔티티 스캐너 테스트")
+class EntityScannerTest {
 
     @Test
     @DisplayName("존재하지 않는 패키지이면 예외가 발생한다.")
     void noPackage() {
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> new EntityClassLoader("noPackage"));
+                .isThrownBy(() -> new EntityScanner().scan("noPackage"));
 
     }
 
@@ -23,10 +23,10 @@ class EntityClassLoaderTest {
     @DisplayName("엔티티 클래스들을 로드 한다.")
     void entity() {
         //givne
-        EntityClassLoader entityClassLoader = new EntityClassLoader("persistence.testFixtures");
+        EntityScanner entityScanner = new EntityScanner();
 
         //when
-        final Set<Class<?>> entityClasses = entityClassLoader.getEntityClasses();
+        final Set<Class<?>> entityClasses = entityScanner.scan("persistence.testFixtures");
 
         //then
         assertThat(entityClasses).hasSize(5);

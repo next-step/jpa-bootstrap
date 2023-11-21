@@ -19,7 +19,7 @@ public class EntityManagerFactory {
 
 
     private static Set<Class<?>> getEntityClassesFromPackage(String packageName) {
-        return new EntityClassLoader(packageName).getEntityClasses();
+        return new EntityScanner().scan(packageName);
     }
 
     public EntityManager createEntityManager() {

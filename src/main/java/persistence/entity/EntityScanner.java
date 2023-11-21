@@ -8,16 +8,9 @@ import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class EntityClassLoader {
-    private final Set<Class<?>> entityClasses;
-
-    public EntityClassLoader(String packageName) {
-        entityClasses = getEntityClasses(packageName);
-    }
-
-    private Set<Class<?>> getEntityClasses(String packageName) {
+public class EntityScanner {
+    public Set<Class<?>> scan(String packageName) {
         final InputStream packageNameWithResource = getPackageNameWithResource(packageName);
-
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(packageNameWithResource))) {
             return reader.lines()
                     .filter(this::isClassFile)
@@ -53,9 +46,5 @@ public class EntityClassLoader {
 
     private boolean isValidEntityClass(Class<?> clazz) {
         return clazz != null && clazz.isAnnotationPresent(Entity.class);
-    }
-
-    public Set<Class<?>> getEntityClasses() {
-        return entityClasses;
     }
 }
