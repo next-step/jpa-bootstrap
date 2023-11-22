@@ -3,16 +3,12 @@ package persistence.meta.model;
 import java.util.Map;
 import java.util.Optional;
 import persistence.entity.persistentcontext.EntityPersister;
-import persistence.meta.MetaEntity;
 
 public class MetaModelImpl implements MetaModel{
   private final Map<Class<?>, EntityPersister<?>> persisterMap;
-  private final Map<Class<?>, MetaEntity<?>> metaEntityMapping;
 
-  public MetaModelImpl(Map<Class<?>, EntityPersister<?>> persisterMap,
-      Map<Class<?>, MetaEntity<?>> metaEntityMapping) {
+  public MetaModelImpl(Map<Class<?>, EntityPersister<?>> persisterMap) {
     this.persisterMap = persisterMap;
-    this.metaEntityMapping = metaEntityMapping;
   }
 
   @Override
