@@ -36,7 +36,7 @@ public class JdbcEntityManagerTest extends BuilderTest {
   @Test
   @DisplayName("EntityManager를 이용해서 find 합니다.")
   public void findEntity() {
-    JdbcEntityManager jdbcEntityManager = new JdbcEntityManager(connection, persistenceContext,
+    JdbcEntityManager jdbcEntityManager = new JdbcEntityManager(persistenceContext,
         entityEntry, metaModel);
 
     PersonFixtureStep3 person = jdbcEntityManager.find(PersonFixtureStep3.class, ID1);
@@ -48,7 +48,7 @@ public class JdbcEntityManagerTest extends BuilderTest {
   @Test
   @DisplayName("EntityManager를 이용해서 persist 합니다.")
   public void persistEntity() {
-    JdbcEntityManager jdbcEntityManager = new JdbcEntityManager(connection, persistenceContext, entityEntry, metaModel);
+    JdbcEntityManager jdbcEntityManager = new JdbcEntityManager(persistenceContext, entityEntry, metaModel);
 
     jdbcEntityManager.persist(세번째사람);
 
@@ -63,7 +63,7 @@ public class JdbcEntityManagerTest extends BuilderTest {
   @Test
   @DisplayName("EntityManager를 이용해서 remove 하고 조회하였을 때, 해당 row가 없습니다.")
   public void removeEntity() {
-    JdbcEntityManager jdbcEntityManager = new JdbcEntityManager(connection, persistenceContext, entityEntry, metaModel);
+    JdbcEntityManager jdbcEntityManager = new JdbcEntityManager(persistenceContext, entityEntry, metaModel);
 
     jdbcEntityManager.remove(첫번째사람);
     PersonFixtureStep3 person = jdbcEntityManager.find(PersonFixtureStep3.class, ID);
@@ -74,7 +74,7 @@ public class JdbcEntityManagerTest extends BuilderTest {
   @Test
   @DisplayName("find시에 1차 캐시에 저장된 entity를 가져온다.")
   public void findEntityWithPersistenceContext() {
-    JdbcEntityManager jdbcEntityManager = new JdbcEntityManager(connection, persistenceContext,
+    JdbcEntityManager jdbcEntityManager = new JdbcEntityManager(persistenceContext,
         entityEntry, metaModel);
 
     jdbcEntityManager.persist(두번째사람);
@@ -88,7 +88,7 @@ public class JdbcEntityManagerTest extends BuilderTest {
   @Test
   @DisplayName("persist시에 1차 캐시의 entity와 snapshot의 값이 다르면 더티체킹으로 업데이트한다.")
   public void persistDiffEntityWithPersistenceContext() {
-    JdbcEntityManager jdbcEntityManager = new JdbcEntityManager(connection, persistenceContext,
+    JdbcEntityManager jdbcEntityManager = new JdbcEntityManager(persistenceContext,
         entityEntry, metaModel);
 
     PersonFixtureStep3 person = jdbcEntityManager.find(PersonFixtureStep3.class, ID1);

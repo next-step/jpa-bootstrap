@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import jdbc.JdbcTemplate;
 import persistence.entity.loader.CollectionElementLoader;
-import persistence.entity.loader.EmptyCollectionLoader;
 import persistence.entity.loader.EntityLoader;
 import persistence.entity.loader.JdbcEntityLoader;
 import persistence.entity.loader.RelationLoader;
