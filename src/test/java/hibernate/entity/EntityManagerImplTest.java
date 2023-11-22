@@ -61,6 +61,7 @@ class EntityManagerImplTest {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
+        jdbcTemplate.execute(createQueryBuilder.generateQuery(new EntityClass<>(NoIdTestEntity.class)));
         jdbcTemplate.execute(createQueryBuilder.generateQuery(new EntityClass<>(TestEntity.class)));
         jdbcTemplate.execute("CREATE TABLE orders (\n" +
                 "    id BIGINT PRIMARY KEY,\n" +
@@ -76,6 +77,7 @@ class EntityManagerImplTest {
 
     @AfterEach
     void afterEach() {
+        jdbcTemplate.execute("truncate table no_id_test_entity;");
         jdbcTemplate.execute("truncate table test_entity;");
         jdbcTemplate.execute("truncate table orders;");
         jdbcTemplate.execute("truncate table order_items;");
@@ -83,6 +85,7 @@ class EntityManagerImplTest {
 
     @AfterAll
     static void afterAll() {
+        jdbcTemplate.execute("drop table no_id_test_entity;");
         jdbcTemplate.execute("drop table test_entity;");
         jdbcTemplate.execute("drop table orders;");
         jdbcTemplate.execute("drop table order_items;");
@@ -155,10 +158,10 @@ class EntityManagerImplTest {
 
         // then
         assertAll(
-                () -> assertThat(actual.id).isEqualTo(1L),
+                () -> assertThat(actual.id).isNotNull(),
                 () -> assertThat(actual.name).isEqualTo(givenEntity.name),
                 () -> assertThat(actual.age).isEqualTo(givenEntity.age),
-                () -> assertThat(actualPersistenceContext.id).isEqualTo(1L)
+                () -> assertThat(actualPersistenceContext.id).isEqualTo(actual.id)
         );
     }
 
@@ -202,11 +205,21 @@ class EntityManagerImplTest {
     }
 
     @Test
-    void id가_없는_entity가_merge하는_경우_예외가_발생한다() {
-        TestEntity givenEntity = new TestEntity(null, "영진최", 19, "jinyoungchoi95@gmail.com");
+    void Identity가_아닌데_id가_없는_entity가_merge하는_경우_예외가_발생한다() {
+        NoIdTestEntity givenEntity = new NoIdTestEntity(null, "영진최");
         assertThatThrownBy(() -> entityManager.merge(givenEntity))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("id가 없는 entity는 merge할 수 없습니다.");
+    }
+
+    @Test
+    void Identity인데_id가_있는_경우_merge로_영속화한다() {
+        TestEntity givenEntity = new TestEntity(null, "영진최", 19, "jinyoungchoi95@gmail.com");
+        entityManager.merge(givenEntity);
+        assertAll(
+                () -> assertThat(givenEntity.id).isNotNull(),
+                () -> assertThat(persistenceContextEntities).containsValue(givenEntity)
+        );
     }
 
     @Test
@@ -246,7 +259,6 @@ class EntityManagerImplTest {
                 () -> assertThat(actual.id).isEqualTo(1L),
                 () -> assertThat(actual.name).isEqualTo("영진최"),
                 () -> assertThat(actual.age).isEqualTo(19),
-                () -> assertThat(persistenceContextEntities.values()).contains(givenEntity),
                 () -> assertThat(persistenceContextSnapshotEntities.values().stream().findAny().get().getSnapshot().values().contains("영진최")).isTrue()
         );
     }
@@ -262,6 +274,23 @@ class EntityManagerImplTest {
                 );
             }
         });
+    }
+
+    @Entity
+    @Table(name = "no_id_test_entity")
+    private static class NoIdTestEntity {
+        @Id
+        private Long id;
+
+        private String name;
+
+        public NoIdTestEntity() {
+        }
+
+        public NoIdTestEntity(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
     }
 
     @Entity

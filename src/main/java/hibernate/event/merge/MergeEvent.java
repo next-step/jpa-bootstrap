@@ -8,12 +8,27 @@ public class MergeEvent<T> {
 
     private final Class<T> clazz;
     private final Object entityId;
+    private final EntityColumn entityColumnId;
     private final Map<EntityColumn, Object> changeColumns;
+    private final T changedEntity;
 
-    public MergeEvent(final Class<T> clazz, final Object entityId, final Map<EntityColumn, Object> changeColumns) {
+    private MergeEvent(final Class<T> clazz, final Object entityId, final EntityColumn entityColumnId, final Map<EntityColumn, Object> changeColumns, final T changedEntity) {
         this.clazz = clazz;
         this.entityId = entityId;
+        this.entityColumnId = entityColumnId;
         this.changeColumns = changeColumns;
+        this.changedEntity = changedEntity;
+    }
+
+    public static <T> MergeEvent<T> createEvent(final T originalEntity, final EntityColumn entityColumnId, final Map<EntityColumn, Object> changeColumns) {
+        Class<T> clazz = (Class<T>) originalEntity.getClass();
+        return new MergeEvent<>(
+                clazz,
+                entityColumnId.getFieldValue(originalEntity),
+                entityColumnId,
+                changeColumns,
+                originalEntity
+        );
     }
 
     public Class<T> getClazz() {
@@ -24,7 +39,15 @@ public class MergeEvent<T> {
         return entityId;
     }
 
+    public EntityColumn getEntityColumnId() {
+        return entityColumnId;
+    }
+
     public Map<EntityColumn, Object> getChangeColumns() {
         return changeColumns;
+    }
+
+    public T getChangedEntity() {
+        return changedEntity;
     }
 }

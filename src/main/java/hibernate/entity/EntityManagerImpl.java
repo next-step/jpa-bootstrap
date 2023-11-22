@@ -17,6 +17,7 @@ import hibernate.event.merge.MergeEventListener;
 import hibernate.event.persist.PersistEvent;
 import hibernate.event.persist.PersistEventListener;
 import hibernate.metamodel.MetaModel;
+import jakarta.persistence.GenerationType;
 
 import java.util.Map;
 
@@ -79,33 +80,45 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void merge(final Object entity) {
-        Object entityId = getNotNullEntityId(entity);
-        Map<EntityColumn, Object> changedColumns = getSnapshot(entity, entityId).changedColumns(entity);
-        if (changedColumns.isEmpty()) {
-            return;
-        }
-        persistenceContext.addEntity(entityId, entity);
+        EntityColumn entityColumnId = metaModel.getEntityId(entity.getClass());
+        Map<EntityColumn, Object> changedColumns = getSnapshot(entity, entityColumnId);
         EventListener<MergeEventListener> listener = eventListenerRegistry.getListener(EventType.MERGE);
-        listener.fireJustRun(new MergeEvent<>(entity.getClass(), entityId, changedColumns), MergeEventListener::onMerge);
+        listener.fireJustRun(MergeEvent.createEvent(entity, entityColumnId, changedColumns), MergeEventListener::onMerge);
+        persistenceContext.addEntity(entityColumnId.getFieldValue(entity), entity);
     }
 
-    private Object getNotNullEntityId(final Object entity) {
-        Object entityId = metaModel.getEntityId(entity.getClass())
-                .getFieldValue(entity);
+    private Map<EntityColumn, Object> getSnapshot(final Object entity, final EntityColumn entityColumnId) {
+        Object entityId = entityColumnId.getFieldValue(entity);
         if (entityId == null) {
+            validateIdentityType(entityColumnId);
+            return null;
+        }
+        EntitySnapshot snapshot = persistenceContext.getDatabaseSnapshot(new EntityKey(entityId, entity));
+        if (snapshot == null) {
+            return parseChangedColumns(entity, entityId);
+        }
+        return snapshot.changedColumns(entity);
+    }
+
+    private static void validateIdentityType(final EntityColumn entityColumnId) {
+        if (entityColumnId.getGenerationType() != GenerationType.IDENTITY) {
             throw new IllegalStateException("id가 없는 entity는 merge할 수 없습니다.");
         }
-        return entityId;
     }
 
-    private EntitySnapshot getSnapshot(final Object entity, final Object entityId) {
-        EntityKey entityKey = new EntityKey(entityId, entity.getClass());
-        EntitySnapshot snapshot = persistenceContext.getDatabaseSnapshot(entityKey);
-        if (snapshot == null) {
-            find(entity.getClass(), entityId);
-            return persistenceContext.getDatabaseSnapshot(entityKey);
+    private Map<EntityColumn, Object> parseChangedColumns(final Object entity, final Object entityId) {
+        EventListener<LoadEventListener> listener = eventListenerRegistry.getListener(EventType.LOAD);
+        Object loadEntity = listener.fireWithReturn(new LoadEvent<>(entity.getClass(), entityId), LoadEventListener::onLoad);
+        if (loadEntity == null) {
+            return null;
         }
-        return snapshot;
+        return persistEntityAndGetChangedColumns(entity, entityId, loadEntity);
+    }
+
+    private Map<EntityColumn, Object> persistEntityAndGetChangedColumns(final Object entity, final Object entityId, final Object loadEntity) {
+        persistenceContext.addEntity(entityId, loadEntity, LOADING);
+        return persistenceContext.getDatabaseSnapshot(new EntityKey(entityId, entity))
+                .changedColumns(entity);
     }
 
     @Override
