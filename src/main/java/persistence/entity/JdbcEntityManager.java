@@ -1,27 +1,21 @@
 package persistence.entity;
 
-import java.sql.Connection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import persistence.entity.entry.EntityEntry;
 import persistence.entity.entry.EntityStatus;
 import persistence.entity.persistentcontext.EntityPersister;
-import persistence.entity.persistentcontext.JdbcEntityPersister;
 import persistence.entity.persistentcontext.PersistenceContext;
 import persistence.meta.model.MetaModel;
 
 public class JdbcEntityManager implements EntityManager {
 
-  private final Connection connection;
   private final PersistenceContext persistenceContext;
   private final EntityEntry entityEntry;
   private final MetaModel metaModel;
 
-  public JdbcEntityManager(Connection connection, PersistenceContext persistenceContext,
+  public JdbcEntityManager(PersistenceContext persistenceContext,
       EntityEntry entityEntry, MetaModel metaModel) {
-    this.connection = connection;
     this.persistenceContext = persistenceContext;
     this.entityEntry = entityEntry;
     this.metaModel = metaModel;
