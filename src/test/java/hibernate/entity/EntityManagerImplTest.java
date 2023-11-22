@@ -2,6 +2,7 @@ package hibernate.entity;
 
 import database.DatabaseServer;
 import database.H2;
+import hibernate.action.ActionQueue;
 import hibernate.ddl.CreateQueryBuilder;
 import hibernate.entity.entityentry.EntityEntry;
 import hibernate.entity.entityentry.EntityEntryContext;
@@ -10,6 +11,7 @@ import hibernate.entity.persistencecontext.EntityKey;
 import hibernate.entity.persistencecontext.EntitySnapshot;
 import hibernate.entity.persistencecontext.PersistenceContext;
 import hibernate.entity.persistencecontext.SimplePersistenceContext;
+import hibernate.event.EventListenerRegistry;
 import hibernate.metamodel.BasicMetaModel;
 import hibernate.metamodel.MetaModel;
 import hibernate.metamodel.MetaModelImpl;
@@ -49,7 +51,9 @@ class EntityManagerImplTest {
         PersistenceContext persistenceContext = new SimplePersistenceContext(persistenceContextEntities, persistenceContextSnapshotEntities, entityEntryContext);
         BasicMetaModel basicMetaModel = BasicMetaModel.createPackageMetaModel("hibernate.entity");
         MetaModel metaModel = MetaModelImpl.createPackageMetaModel(basicMetaModel, jdbcTemplate);
-        entityManager = new EntityManagerImpl(persistenceContext, metaModel);
+        ActionQueue actionQueue = new ActionQueue();
+        EventListenerRegistry eventListenerRegistry = EventListenerRegistry.createDefaultRegistry(metaModel, actionQueue);
+        entityManager = new EntityManagerImpl(persistenceContext, metaModel, eventListenerRegistry, actionQueue);
     }
 
     @BeforeAll
@@ -57,17 +61,34 @@ class EntityManagerImplTest {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
+        jdbcTemplate.execute(createQueryBuilder.generateQuery(new EntityClass<>(NoIdTestEntity.class)));
         jdbcTemplate.execute(createQueryBuilder.generateQuery(new EntityClass<>(TestEntity.class)));
+        jdbcTemplate.execute("CREATE TABLE orders (\n" +
+                "    id BIGINT PRIMARY KEY,\n" +
+                "    orderNumber VARCHAR\n" +
+                ");\n");
+        jdbcTemplate.execute("CREATE TABLE order_items (\n" +
+                "    id BIGINT PRIMARY KEY,\n" +
+                "    order_id BIGINT,\n" +
+                "    product VARCHAR,\n" +
+                "    quantity INTEGER\n" +
+                ");\n");
     }
 
     @AfterEach
     void afterEach() {
+        jdbcTemplate.execute("truncate table no_id_test_entity;");
         jdbcTemplate.execute("truncate table test_entity;");
+        jdbcTemplate.execute("truncate table orders;");
+        jdbcTemplate.execute("truncate table order_items;");
     }
 
     @AfterAll
     static void afterAll() {
+        jdbcTemplate.execute("drop table no_id_test_entity;");
         jdbcTemplate.execute("drop table test_entity;");
+        jdbcTemplate.execute("drop table orders;");
+        jdbcTemplate.execute("drop table order_items;");
         server.stop();
     }
 
@@ -105,16 +126,6 @@ class EntityManagerImplTest {
     @Test
     void eager로_잡힌_oneTomany를_검색한다() {
         // given
-        jdbcTemplate.execute("CREATE TABLE orders (\n" +
-                "    id BIGINT PRIMARY KEY,\n" +
-                "    orderNumber VARCHAR\n" +
-                ");\n");
-        jdbcTemplate.execute("CREATE TABLE order_items (\n" +
-                "    id BIGINT PRIMARY KEY,\n" +
-                "    order_id BIGINT,\n" +
-                "    product VARCHAR,\n" +
-                "    quantity INTEGER\n" +
-                ");\n");
         jdbcTemplate.execute("insert into orders (id, orderNumber) values (1, 'ABC123');");
         jdbcTemplate.execute("insert into order_items (id, order_id, product, quantity) values (1, 1, '라면', 3);");
         jdbcTemplate.execute("insert into order_items (id, order_id, product, quantity) values (2, 1, '김치', 2);");
@@ -147,10 +158,10 @@ class EntityManagerImplTest {
 
         // then
         assertAll(
-                () -> assertThat(actual.id).isEqualTo(1L),
+                () -> assertThat(actual.id).isNotNull(),
                 () -> assertThat(actual.name).isEqualTo(givenEntity.name),
                 () -> assertThat(actual.age).isEqualTo(givenEntity.age),
-                () -> assertThat(actualPersistenceContext.id).isEqualTo(1L)
+                () -> assertThat(actualPersistenceContext.id).isEqualTo(actual.id)
         );
     }
 
@@ -174,6 +185,7 @@ class EntityManagerImplTest {
 
         // when
         entityManager.remove(givenEntity);
+        entityManager.flush();
         Integer actual = jdbcTemplate.queryForObject("select count(*) from test_entity", new RowMapper<Integer>() {
             @Override
             public Integer mapRow(ResultSet resultSet) {
@@ -193,11 +205,21 @@ class EntityManagerImplTest {
     }
 
     @Test
-    void id가_없는_entity가_merge하는_경우_예외가_발생한다() {
-        TestEntity givenEntity = new TestEntity(null, "영진최", 19, "jinyoungchoi95@gmail.com");
+    void Identity가_아닌데_id가_없는_entity가_merge하는_경우_예외가_발생한다() {
+        NoIdTestEntity givenEntity = new NoIdTestEntity(null, "영진최");
         assertThatThrownBy(() -> entityManager.merge(givenEntity))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("id가 없는 entity는 merge할 수 없습니다.");
+    }
+
+    @Test
+    void Identity인데_id가_있는_경우_merge로_영속화한다() {
+        TestEntity givenEntity = new TestEntity(null, "영진최", 19, "jinyoungchoi95@gmail.com");
+        entityManager.merge(givenEntity);
+        assertAll(
+                () -> assertThat(givenEntity.id).isNotNull(),
+                () -> assertThat(persistenceContextEntities).containsValue(givenEntity)
+        );
     }
 
     @Test
@@ -208,6 +230,7 @@ class EntityManagerImplTest {
 
         // when
         entityManager.merge(givenEntity);
+        entityManager.flush();
         TestEntity actual = findTestEntity();
 
         // then
@@ -228,6 +251,7 @@ class EntityManagerImplTest {
 
         // when
         entityManager.merge(givenEntity);
+        entityManager.flush();
         TestEntity actual = findTestEntity();
 
         // then
@@ -235,7 +259,6 @@ class EntityManagerImplTest {
                 () -> assertThat(actual.id).isEqualTo(1L),
                 () -> assertThat(actual.name).isEqualTo("영진최"),
                 () -> assertThat(actual.age).isEqualTo(19),
-                () -> assertThat(persistenceContextEntities.values()).contains(givenEntity),
                 () -> assertThat(persistenceContextSnapshotEntities.values().stream().findAny().get().getSnapshot().values().contains("영진최")).isTrue()
         );
     }
@@ -251,6 +274,23 @@ class EntityManagerImplTest {
                 );
             }
         });
+    }
+
+    @Entity
+    @Table(name = "no_id_test_entity")
+    private static class NoIdTestEntity {
+        @Id
+        private Long id;
+
+        private String name;
+
+        public NoIdTestEntity() {
+        }
+
+        public NoIdTestEntity(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
     }
 
     @Entity

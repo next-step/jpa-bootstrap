@@ -33,3 +33,47 @@
     - 이미 현재 스레드에 EntityManager를 만들었는데 생성하려하는 경우 예외가 발생한다.
     - 현재 CurrentSessionContext에 보유중인 EntityManager를 반환한다.
     - 현재 열린 EntityManager가 없는데 반환하려하는 경우 예외가 발생한다.
+
+## 3단계 - Event
+### 요구사항 1 - EventType 을 활용해 리팩터링 해보기
+
+- EventType
+  - 어떤 이벤트인지 이름과 interface Listener를 가지고 있는다.
+  - 이후 EventListenerRegistry에 저장할 때 해당 interface listener를 상속받은 구현체만 저장할 수 있도록 한다.
+- EventListenerRegistry
+  - 모든 EventType을 받아서 각 타입에 맞는 Listener의 구현체를 받아 저장하고 있는다.
+  - 없는 EventType을 꺼내려하는 경우 예외가 발생한다.
+- EventListener
+  - LoadEventListener
+    - entityId와 해당 entity를 가져올 수 있는 Loader를 담은 LoadEvent를 받아 처리한다.
+    - load된 entity를 반환한다.
+  - PersistEventListener
+    - entity object와 해당 object를 저장할 수 있는 persister가 담긴 PersistEvent를 받아 처리한다.
+    - PersistEvent안에 있는 entity를 저장하며, 해당 entity는 id가 없는 경우 id가 담길 수 있다.
+  - MergeEventListener
+    - entity object와 해당 object를 업데이트할 수 있는 persister가 담긴 MergeEvent를 받아 처리한다.
+  - DeleteEventListener
+    - entity object와 해당 object를 제거할 수 있는 persister가 담긴 DeleteEvent를 받아 처리한다.
+  - 각 Listener는 Event객체를 받아 처리하고, Event 결과를 반환하거나 리턴하지 않는다.
+
+### 요구사항 2 - ActionQueue 를 활용해 쓰기 지연 구현해보기
+- EntitySource
+  - EntityManager의 데이터값만 반환할 수 있도록 추상화한 인터페이스
+- EntityListener
+  - 각 Listener가 persister를 호출하여 처리하는 것이 아닌 action queue에 모두 담는것으로 마무리 한다.
+- EntityAction
+  - 각 action은 개별로 실행가능하다. 따라서 각 action은 persister를 가지며 개별동작을 할 수 있다.
+  - EntityInsertAction
+    - EntityBasicInsertAction : id까지 insert하는 action
+    - EntityIdentityInsertAction : id의 전략이 identity인 action
+  - EntityUpdateAction
+    - PersistenceContext에 값이 없는 경우
+      - loader를 통해 실제 값을 가져오고 값이 있으면 넣은 후 update, 값이 없으면 insert한다.
+    - PersistenceContext에 값이 있는 경우
+      - update한다.
+  - EntityDeleteAction
+- ActionQueue
+  - 각 action에 맞는 queue에 저장한다.
+  - identity insert action이 들어오는 경우 insert queue를 모두 처리한다.
+  - 모든 action을 처리할 수 있다.
+  - EntityBasicInsertAction은 동일한 id값이 들어올 경우 중복저장하지 않는다.
