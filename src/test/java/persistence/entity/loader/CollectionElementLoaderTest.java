@@ -74,7 +74,7 @@ class CollectionElementLoaderTest {
   @DisplayName("Fetch Type이 EAGER인 엔티티를 LOAD할 때, element 엔티티들도 Load 됩니다.")
   void entityLoadCollection() {
     CollectionElementLoader<Order> Loader = (CollectionElementLoader<Order>) CollectionElementLoader.of(
-        Order.class, connection);
+        Order.class, jdbcTemplate);
     Order order = Loader.load(1L).get();
 
     assertThat(order.orderItems).hasSize(2);

@@ -17,8 +17,8 @@ public class JdbcEntityLoader<T> implements EntityLoader<T> {
   private final SelectQueryBuilder selectQueryBuilder = new SelectQueryBuilder();
   private final JdbcRowMapper<T> jdbcRowMapper;
 
-  public JdbcEntityLoader(Class<T> clazz, Connection connection) {
-    this.jdbcTemplate = new JdbcTemplate(connection);
+  public JdbcEntityLoader(Class<T> clazz, JdbcTemplate jdbcTemplate) {
+    this.jdbcTemplate = jdbcTemplate;
     this.metaEntity = MetaEntity.of(clazz);
     this.jdbcRowMapper = new JdbcRowMapper<>(metaEntity);
   }

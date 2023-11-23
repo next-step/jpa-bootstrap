@@ -2,10 +2,10 @@ package persistence.meta.model;
 
 import jakarta.persistence.Entity;
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import jdbc.JdbcTemplate;
 import persistence.entity.persistentcontext.EntityPersister;
 import persistence.entity.persistentcontext.JdbcEntityPersister;
 import persistence.meta.MetaEntity;
@@ -16,7 +16,7 @@ public class AnnotationBinder {
     this.componentScanner = componentScanner;
   }
 
-  public MetaModel buildMetaModel(Connection connection, String basePackage)
+  public MetaModel buildMetaModel(JdbcTemplate jdbcTemplate, String basePackage)
       throws IOException, ClassNotFoundException {
 
     List<Class<?>> clazzes = componentScanner.scan(basePackage)
@@ -25,7 +25,7 @@ public class AnnotationBinder {
         .collect(Collectors.toList());
 
     Map<Class<?>, EntityPersister<?>> persisterMapping = clazzes.stream()
-        .collect(Collectors.toMap(clazz -> clazz, clazz -> new JdbcEntityPersister(clazz, connection, MetaEntity.of(clazz))));
+        .collect(Collectors.toMap(clazz -> clazz, clazz -> new JdbcEntityPersister(clazz, jdbcTemplate, MetaEntity.of(clazz))));
 
     return new MetaModelImpl(persisterMapping);
   }

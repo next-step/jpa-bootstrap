@@ -28,9 +28,9 @@ public class CollectionElementLoader<T> implements RelationLoader<T> {
   private final CollectionRowMapper<?> elementRowMapper;
   private final Relation relation;
 
-  private CollectionElementLoader(Connection connection, MetaEntity<T> metaEntity,
+  private CollectionElementLoader(JdbcTemplate jdbcTemplate, MetaEntity<T> metaEntity,
       MetaEntity<?> elementEntity, Relation relation) {
-    this.jdbcTemplate = new JdbcTemplate(connection);
+    this.jdbcTemplate = jdbcTemplate;
     this.metaEntity = metaEntity;
     this.elementEntity = elementEntity;
     this.rowMapper = new JdbcRowMapper<>(metaEntity);
@@ -38,7 +38,7 @@ public class CollectionElementLoader<T> implements RelationLoader<T> {
     this.relation = relation;
   }
 
-  public static RelationLoader<?> of(Class<?> clazz, Connection connection) {
+  public static RelationLoader<?> of(Class<?> clazz, JdbcTemplate jdbcTemplate) {
 
     MetaEntity<?> entity = MetaEntity.of(clazz);
     Relation relation = entity.getRelation();
@@ -49,7 +49,7 @@ public class CollectionElementLoader<T> implements RelationLoader<T> {
 
     MetaEntity<?> elementEntity = relation.getMetaEntity();
 
-    return new CollectionElementLoader<>(connection, entity, elementEntity, relation);
+    return new CollectionElementLoader<>(jdbcTemplate, entity, elementEntity, relation);
   }
 
   @Override

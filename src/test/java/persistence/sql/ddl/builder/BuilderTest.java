@@ -56,7 +56,7 @@ public class BuilderTest {
     ComponentScanner componentScanner = new ComponentScanner();
 
     try {
-      metaModel = new AnnotationBinder(componentScanner).buildMetaModel(connection, "domain");
+      metaModel = new AnnotationBinder(componentScanner).buildMetaModel(jdbcTemplate, "domain");
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeException(e);
     }

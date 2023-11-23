@@ -5,27 +5,26 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import database.DatabaseServer;
 import database.H2;
-import domain.Department;
-import domain.Employee;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.entity.persistentcontext.EntityPersister;
 
 public class AnnotationBinderTest {
 
   public static DatabaseServer server;
   public static Connection connection;
-
+  public static JdbcTemplate jdbcTemplate;
   @BeforeAll
   static void setup() throws SQLException {
 
     server = new H2();
     server.start();
     connection = server.getConnection();
+    jdbcTemplate = new JdbcTemplate(connection);
 
   }
 
@@ -35,7 +34,7 @@ public class AnnotationBinderTest {
     ComponentScanner componentScanner = new ComponentScanner();
 
     MetaModel metaModel = new AnnotationBinder(componentScanner)
-        .buildMetaModel(connection, "domain");
+        .buildMetaModel(jdbcTemplate, "domain");
 
     assertAll(
         () -> assertThat(metaModel).isInstanceOf(MetaModelImpl.class)

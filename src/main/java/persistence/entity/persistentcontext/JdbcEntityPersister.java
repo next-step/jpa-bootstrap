@@ -22,11 +22,11 @@ public class JdbcEntityPersister<T> implements EntityPersister<T> {
   private final RelationLoader<T> relationLoader;
   private final DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
 
-  public JdbcEntityPersister(Class<T> clazz, Connection connection, MetaEntity<T> metaEntity) {
-    this.jdbcTemplate = new JdbcTemplate(connection);
+  public JdbcEntityPersister(Class<T> clazz, JdbcTemplate jdbcTemplate, MetaEntity<T> metaEntity) {
+    this.jdbcTemplate = jdbcTemplate;
     this.metaEntity = metaEntity;
-    this.entityLoader = new JdbcEntityLoader<T>(clazz, connection);
-    this.relationLoader = (RelationLoader<T>) CollectionElementLoader.of(clazz, connection);
+    this.entityLoader = new JdbcEntityLoader<T>(clazz, jdbcTemplate);
+    this.relationLoader = (RelationLoader<T>) CollectionElementLoader.of(clazz, jdbcTemplate);
   }
 
   @Override
