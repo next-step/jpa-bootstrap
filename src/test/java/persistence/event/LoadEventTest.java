@@ -16,7 +16,8 @@ class LoadEventTest {
 
         assertSoftly(softly->{
             softly.assertThat(loadEvent.getTargetClass()).isEqualTo(FixtureEntity.Person.class);
-            softly.assertThat(loadEvent.getTarget()).isEqualTo(1L);
+            softly.assertThat(loadEvent.getTargetId()).isEqualTo(1L);
+            softly.assertThat(loadEvent.getTarget()).isEqualTo(null);
         });
     }
 }

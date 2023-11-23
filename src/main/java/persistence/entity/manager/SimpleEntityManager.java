@@ -72,7 +72,7 @@ public class SimpleEntityManager implements EntityManager {
 
         persistenceContext.updateEntityEntryStatus(entity, Status.DELETED);
 
-        metaModel.getEventListener().onDelete(new DeleteEvent(entity));
+        metaModel.getEventDispatcher().dispatch(new DeleteEvent<>(entity, idValue));
     }
 
     @Override
@@ -94,7 +94,7 @@ public class SimpleEntityManager implements EntityManager {
     private <T> Object initEntity(final EntityMetadata<T> entityMetadata, final EntityKey entityKey) {
         final Object key = entityKey.getKey();
         final Object entityFromDatabase =
-                metaModel.getEventListener().onLoad(new LoadEvent<>(key, entityMetadata.getType()));
+                metaModel.getEventDispatcher().dispatch(new LoadEvent<>(key, entityMetadata.getType()));
         if(Objects.isNull(entityFromDatabase)) {
             return null;
         }
@@ -122,7 +122,7 @@ public class SimpleEntityManager implements EntityManager {
     private void processInsert(final Object entity) {
         persistenceContext.addEntityEntry(entity, Status.SAVING);
 
-        metaModel.getEventListener().onPersist(new PersistEvent(entity));
+        metaModel.getEventDispatcher().dispatch(new PersistEvent<>(entity));
 
         final Object idValue = extractId(entity);
         final EntityKey entityKey = entityKeyGenerator.generate(entity.getClass(), idValue);
@@ -140,7 +140,7 @@ public class SimpleEntityManager implements EntityManager {
 
         if (isDirty(entity)) {
             updateEntityEntry(foundEntity, entity);
-            metaModel.getEventListener().onMerge(new MergeEvent(entity));
+            metaModel.getEventDispatcher().dispatch(new MergeEvent<>(entity, idValue));
             persistenceContext.addEntity(entityKey, entity);
         }
     }

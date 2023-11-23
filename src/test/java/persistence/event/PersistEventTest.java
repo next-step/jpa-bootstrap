@@ -13,11 +13,12 @@ class PersistEventTest {
     @DisplayName("persist event 를 생성 할 수 있다.")
     void persistEventCreateTest() {
         final FixtureEntity.WithId entity = new FixtureEntity.WithId();
-        final PersistEvent persistEvent = new PersistEvent(entity);
+        final PersistEvent<FixtureEntity.WithId> persistEvent = new PersistEvent<>(entity);
 
         assertSoftly(softly -> {
             softly.assertThat(persistEvent.getTarget()).isEqualTo(entity);
             softly.assertThat(persistEvent.getTargetClass()).isEqualTo(FixtureEntity.WithId.class);
+            softly.assertThat(persistEvent.getTargetId()).isEqualTo(null);
         });
     }
 }

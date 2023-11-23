@@ -1,11 +1,6 @@
 package persistence.event;
 
 public interface EventListener {
-    void onPersist(PersistEvent persistEvent);
+    <T> T on(Event<T> event);
 
-    void onMerge(MergeEvent mergeEvent);
-
-    void onDelete(DeleteEvent deleteEvent);
-
-    <T> T onLoad(LoadEvent<T> loadEvent);
 }

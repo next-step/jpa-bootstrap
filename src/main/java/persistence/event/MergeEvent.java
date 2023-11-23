@@ -1,16 +1,32 @@
 package persistence.event;
 
-public class MergeEvent {
-    private final Object entity;
+public class MergeEvent<T> implements Event<T> {
+    private final T entity;
+    private final Object id;
 
-    public MergeEvent(final Object entity) {
+    public MergeEvent(final T entity, final Object id) {
         this.entity = entity;
+        this.id = id;
     }
 
-    public Class<?> getTargetClass() {
-        return entity.getClass();
+    @Override
+    @SuppressWarnings("unchecked")
+    public Class<T> getTargetClass() {
+        return (Class<T>) entity.getClass();
     }
-    public Object getTarget() {
+
+    @Override
+    public T getTarget() {
         return entity;
+    }
+
+    @Override
+    public Object getTargetId() {
+        return id;
+    }
+
+    @Override
+    public EventType getType() {
+        return EventType.MERGE;
     }
 }

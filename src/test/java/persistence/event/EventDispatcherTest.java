@@ -21,11 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-class DefaultEventListenerTest {
+class EventDispatcherTest {
 
     private static EntityMetadataProvider entityMetadataProvider;
 
-    private DefaultEventListener defaultEventListener;
+    private EventDispatcher eventDispatcher;
 
     @BeforeAll
     static void beforeAll() {
@@ -42,43 +42,43 @@ class DefaultEventListenerTest {
         rs.addRow(1L, "min", 30, "jongmin4943@gmail.com");
         final EntityPersisters entityPersisters = new EntityPersisters(entityMetadataProvider, new MockDmlGenerator(), new MockJdbcTemplate(rs));
         final EntityLoaders entityLoaders = new EntityLoaders(entityMetadataProvider, new MockDmlGenerator(), new MockJdbcTemplate(rs));
-        defaultEventListener = new DefaultEventListener(new ActionQueue(), entityPersisters, entityLoaders);
+        eventDispatcher = new EventDispatcher(new ActionQueue(), entityPersisters, entityLoaders);
     }
 
     @Test
-    @DisplayName("onPersist의 PersisEvent 정보를 이용해 entity 를 저장할 수 있다.")
-    void onPersistTest() {
+    @DisplayName("dispatch(PersisEvent) 정보를 이용해 entity 를 저장할 수 있다.")
+    void dispatchPersistTest() {
         final FixtureEntity.Person entity = new FixtureEntity.Person("종민", 30, "jongmin4943@gmail.com");
 
-        defaultEventListener.onPersist(new PersistEvent(entity));
+        eventDispatcher.dispatch(new PersistEvent<>(entity));
 
         assertThat(entity.getId()).isEqualTo(1L);
     }
 
     @Test
-    @DisplayName("onMerge의 MergeEvent 정보를 이용해 entity 를 변경할 수 있다.")
-    void onMergeTest() {
+    @DisplayName("dispatch(MergeEvent) 정보를 이용해 entity 를 변경할 수 있다.")
+    void dispatchMergeTest() {
         final FixtureEntity.Person entity = new FixtureEntity.Person("종민", 30, "jongmin4943@gmail.com");
 
         assertDoesNotThrow(() ->
-                defaultEventListener.onMerge(new MergeEvent(entity))
+                eventDispatcher.dispatch(new MergeEvent<>(entity, 1L))
         );
     }
 
     @Test
-    @DisplayName("onDelete의 DeleteEvent 정보를 이용해 entity 를 변경할 수 있다.")
-    void onDeleteTest() {
+    @DisplayName("dispatch(DeleteEvent) 정보를 이용해 entity 를 변경할 수 있다.")
+    void dispatchDeleteTest() {
         final FixtureEntity.Person entity = new FixtureEntity.Person("종민", 30, "jongmin4943@gmail.com");
 
         assertDoesNotThrow(() ->
-                defaultEventListener.onDelete(new DeleteEvent(entity))
+                eventDispatcher.dispatch(new DeleteEvent<>(entity, 1L))
         );
     }
 
     @Test
-    @DisplayName("onLoad 의 LoadEvent 정보를 이용해 entity 를 조회할 수 있다.")
-    void onLoadTest() {
-        final FixtureEntity.Person entity = defaultEventListener.onLoad(new LoadEvent<>(1L, FixtureEntity.Person.class));
+    @DisplayName("dispatch(LoadEvent) 정보를 이용해 entity 를 조회할 수 있다.")
+    void dispatchLoadTest() {
+        final FixtureEntity.Person entity = eventDispatcher.dispatch(new LoadEvent<>(1L, FixtureEntity.Person.class));
 
         assertSoftly(softly->{
             softly.assertThat(entity.getId()).isEqualTo(1L);
