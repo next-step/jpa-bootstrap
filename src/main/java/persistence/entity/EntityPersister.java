@@ -8,6 +8,9 @@ import jdbc.ResultMapper;
 import persistence.sql.common.instance.Values;
 import persistence.sql.common.meta.Columns;
 import persistence.sql.common.meta.JoinColumn;
+import persistence.sql.common.meta.MetaColumns;
+import persistence.sql.common.meta.MetaJoinColumn;
+import persistence.sql.common.meta.MetaTableName;
 import persistence.sql.common.meta.TableName;
 import persistence.sql.dml.Query;
 
@@ -23,12 +26,12 @@ public class EntityPersister<T> {
     public EntityPersister(JdbcTemplate jdbcTemplate, Class<T> tClass, Query query) {
         this.jdbcTemplate = jdbcTemplate;
 
-        this.tableName = TableName.of(tClass);
-        this.columns = Columns.of(tClass.getDeclaredFields());
+        this.tableName = MetaTableName.get(tClass);
+        this.columns = MetaColumns.get(tClass);
         this.query = query;
-        this.joinColumn = JoinColumn.of(tClass.getDeclaredFields());
+        this.joinColumn = MetaJoinColumn.get(tClass);
 
-        this.entityLoader = new EntityLoader<>(jdbcTemplate, tClass, query);
+        this.entityLoader = new EntityLoader<>(jdbcTemplate, tClass, query, new EntityMeta(tableName, columns, joinColumn));
     }
 
     public List<T> findAll() {

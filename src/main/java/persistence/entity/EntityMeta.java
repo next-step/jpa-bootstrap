@@ -5,24 +5,14 @@ import persistence.sql.common.meta.JoinColumn;
 import persistence.sql.common.meta.TableName;
 
 public class EntityMeta {
-    private Class<?> clazz;
-
+    private final TableName tableName;
+    private final Columns columns;
     private String methodName;
-    private TableName tableName;
-    private Columns columns;
     private JoinColumn joinColumn;
 
     public EntityMeta(TableName tableName, Columns columns) {
         this.tableName = tableName;
         this.columns = columns;
-    }
-
-    public EntityMeta(Class<?> clazz, String methodName, TableName tableName, Columns columns, JoinColumn joinColumn) {
-        this.clazz = clazz;
-        this.methodName = methodName;
-        this.tableName = tableName;
-        this.columns = columns;
-        this.joinColumn = joinColumn;
     }
 
     public EntityMeta(String methodName, TableName tableName, Columns columns, JoinColumn joinColumn) {
@@ -36,6 +26,12 @@ public class EntityMeta {
         this.methodName = methodName;
         this.tableName = tableName;
         this.columns = columns;
+    }
+
+    public EntityMeta(TableName tableName, Columns columns, JoinColumn joinColumn) {
+        this.tableName = tableName;
+        this.columns = columns;
+        this.joinColumn = joinColumn;
     }
 
     public static EntityMeta selectMeta(String methodName, TableName tableName, Columns columns,

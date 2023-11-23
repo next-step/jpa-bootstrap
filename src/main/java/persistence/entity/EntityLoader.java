@@ -19,16 +19,16 @@ public class EntityLoader<T> {
     private final Columns columns;
     private final JoinColumn joinColumn;
 
-    EntityLoader(JdbcTemplate jdbcTemplate, Class<T> tClass, Query query) {
+    EntityLoader(JdbcTemplate jdbcTemplate, Class<T> tClass, Query query, EntityMeta entityMeta) {
         this.query = query;
 
         this.clazz = tClass;
 
         this.jdbcTemplate = jdbcTemplate;
 
-        this.tableName = TableName.of(tClass);
-        this.columns = Columns.of(tClass.getDeclaredFields());
-        this.joinColumn = JoinColumn.of(tClass.getDeclaredFields());
+        this.tableName = entityMeta.getTableName();
+        this.columns = entityMeta.getColumns();
+        this.joinColumn = entityMeta.getJoinColumn();
     }
 
     public List<T> findAll() {

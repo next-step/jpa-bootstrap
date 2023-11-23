@@ -31,7 +31,7 @@ public class JoinColumn {
 
         Class<?> clazz = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
 
-        return new JoinColumn(TableName.of(clazz), Columns.of(clazz.getDeclaredFields()), Column.of(field), extractFetchType(field));
+        return new JoinColumn(MetaTableName.get(clazz), MetaColumns.get(clazz), Column.of(field), extractFetchType(field));
     }
 
     public static FetchType extractFetchType(Field field) {
