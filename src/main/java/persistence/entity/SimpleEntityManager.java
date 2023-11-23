@@ -9,7 +9,7 @@ import persistence.meta.MetaModel;
 
 
 public class SimpleEntityManager implements EntityManager {
-    private final EntityPersisteContext entityPersisterContenxt;
+    private final EntityPersisterContext entityPersisterContenxt;
     private final Connection connection;
     private final SimplePersistenceContext persistenceContext;
 
@@ -17,7 +17,7 @@ public class SimpleEntityManager implements EntityManager {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
         this.connection = connection;
         this.persistenceContext = new SimplePersistenceContext();
-        this.entityPersisterContenxt = EntityPersisteContext.create(metaModel, jdbcTemplate);
+        this.entityPersisterContenxt = EntityPersisterContext.create(metaModel, jdbcTemplate);
 
     }
 

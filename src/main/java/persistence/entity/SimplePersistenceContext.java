@@ -109,13 +109,13 @@ public class SimplePersistenceContext implements PersistenceContext {
         return findList;
     }
 
-    public void flush(EntityPersisteContext entityPersisterContenxt) {
+    public void flush(EntityPersisterContext entityPersisterContenxt) {
         deleteEntity(entityPersisterContenxt);
         dutyCheck(entityPersisterContenxt);
         clear();
     }
 
-    private void deleteEntity(EntityPersisteContext entityPersisterContenxt) {
+    private void deleteEntity(EntityPersisterContext entityPersisterContenxt) {
         entityEntryContext.getDeletedEntityKey()
                 .forEach((it) -> {
                     EntityPersister entityPersister = entityPersisterContenxt.getEntityPersister(it.getClazz());
@@ -127,7 +127,7 @@ public class SimplePersistenceContext implements PersistenceContext {
         entityEntryContext.clear();
     }
 
-    private void dutyCheck(EntityPersisteContext entityPersisterContenxt) {
+    private void dutyCheck(EntityPersisterContext entityPersisterContenxt) {
         getChangedEntity().forEach((it) -> {
             EntityPersister entityPersister = entityPersisterContenxt.getEntityPersister(it.getClass());
             entityPersister.update(it);

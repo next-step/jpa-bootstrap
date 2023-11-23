@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import persistence.dialect.Dialect;
 import persistence.entity.binder.EntityPersisterBinder;
 import persistence.entity.persister.EntityPersister;
+import persistence.entity.persister.SimpleEntityPersister;
 import persistence.fake.FakeDialect;
 import persistence.meta.EntityMeta;
 import persistence.sql.QueryGenerator;
@@ -180,8 +181,7 @@ class SimplePersistenceContextTest {
         Person person2 = new Person(2L, "이름", 30, "email@odna");
         SimplePersistenceContext simplePersistenceContext = new SimplePersistenceContext();
         final QueryGenerator queryGenerator = QueryGenerator.of(Person.class, dialect);
-        final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate, queryGenerator,
-                EntityMeta.from(person.getClass()));
+        final EntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate, queryGenerator, EntityMeta.from(person.getClass()));
 
         //when
         simplePersistenceContext.saving(entityPersister, person);
