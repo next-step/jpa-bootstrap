@@ -230,5 +230,14 @@ class EntityMetadataTest {
         assertThatIterable(entityMetadata.getEagerManyToOneColumns()).containsExactly(manyToOneColumn);
     }
 
+    @Test
+    @DisplayName("getColumnFieldNames 을 이용해 entity 의 필드 이름들을 반환 받을 수 있다.")
+    void getColumnFieldNamesTest() {
+        mockClass = FixtureAssociatedEntity.Order.class;
+
+        final EntityMetadata<?> entityMetadata = EntityMetadata.from(mockClass);
+
+        assertThatIterable(entityMetadata.getColumnFieldNames()).containsExactly("id", "orderNumber", "orderItems");
+    }
 
 }

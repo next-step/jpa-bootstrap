@@ -14,7 +14,6 @@ import java.util.List;
 public class EntityPersister {
     private final String tableName;
     private final EntityIdColumn idColumn;
-    private final EntityColumns columns;
     private final EntityColumns insertableColumns;
     private final DmlGenerator dmlGenerator;
     private final JdbcTemplate jdbcTemplate;
@@ -23,7 +22,6 @@ public class EntityPersister {
     private EntityPersister(final EntityMetadata<?> entityMetadata, final DmlGenerator dmlGenerator, final JdbcTemplate jdbcTemplate) {
         this.tableName = entityMetadata.getTableName();
         this.idColumn = entityMetadata.getIdColumn();
-        this.columns = entityMetadata.getColumns();
         this.insertableColumns = entityMetadata.toInsertableColumn();
         this.dmlGenerator = dmlGenerator;
         this.jdbcTemplate = jdbcTemplate;
@@ -65,26 +63,6 @@ public class EntityPersister {
     public String renderDelete(final Object entity) {
         final Object idValue = ReflectionUtils.getFieldValue(entity, idColumn.getFieldName());
         return dmlGenerator.delete(tableName, idColumn.getName(), idValue);
-    }
-
-    public List<String> getColumnNames() {
-        return columns.getNames();
-    }
-
-    public List<String> getColumnFieldNames() {
-        return columns.getFieldNames();
-    }
-
-    public int getColumnSize() {
-        return columns.size();
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getIdColumnFieldName() {
-        return idColumn.getFieldName();
     }
 
 }

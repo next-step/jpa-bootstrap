@@ -34,4 +34,8 @@ public class CustomJpaRepository<T, ID> {
 
         return Objects.isNull(idValue);
     }
+
+    public void flush() {
+        entityManager.flush();
+    }
 }
