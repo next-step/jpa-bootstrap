@@ -8,19 +8,18 @@ import persistence.meta.EntityMeta;
 import persistence.meta.MetaModel;
 import persistence.sql.QueryGenerator;
 
-public class AnnotationBinder {
-    private final MetaModel metaModel;
+public final class AnnotationBinder {
 
-    public AnnotationBinder(Set<Class<?>> classes, Dialect dialect) {
+    public static MetaModel bindMetaModel(Set<Class<?>> classes, Dialect dialect) {
         if (classes == null || classes.isEmpty()) {
             throw new IllegalArgumentException("bind할 클래스가 없습니다.");
         }
 
         final Map<Class<?>, EntityMeta> entityMetaMap = bindEntityMetaMap(classes);
-        metaModel = new MetaModel(entityMetaMap, bindQueryGeneratorMap(entityMetaMap, dialect));
+        return new MetaModel(entityMetaMap, bindQueryGeneratorMap(entityMetaMap, dialect));
     }
 
-    private Map<Class<?>, EntityMeta> bindEntityMetaMap(Set<Class<?>> classes) {
+    private static Map<Class<?>, EntityMeta> bindEntityMetaMap(Set<Class<?>> classes) {
         Map<Class<?>, EntityMeta> entityMetaMap = new ConcurrentHashMap<>();
         for (Class<?> clazz : classes) {
             entityMetaMap.put(clazz, EntityMeta.from(clazz));
@@ -28,16 +27,13 @@ public class AnnotationBinder {
         return entityMetaMap;
     }
 
-    private Map<Class<?>, QueryGenerator> bindQueryGeneratorMap(Map<Class<?>, EntityMeta> entityMetaMap, Dialect dialect) {
+    private static Map<Class<?>, QueryGenerator> bindQueryGeneratorMap(Map<Class<?>, EntityMeta> entityMetaMap,
+                                                                       Dialect dialect) {
         Map<Class<?>, QueryGenerator> queryGeneratorMap = new ConcurrentHashMap<>();
         entityMetaMap.forEach((clazz, entityMeta) -> {
             QueryGenerator queryGenerator = QueryGenerator.of(entityMeta, dialect);
             queryGeneratorMap.put(clazz, queryGenerator);
         });
         return queryGeneratorMap;
-    }
-
-    public MetaModel getMetaModel() {
-        return metaModel;
     }
 }

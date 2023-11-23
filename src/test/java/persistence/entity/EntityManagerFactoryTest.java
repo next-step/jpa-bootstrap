@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import persistence.entity.binder.AnnotationBinder;
 import persistence.fake.FakeDialect;
 import persistence.fake.MockConnection;
+import persistence.meta.MetaModel;
 
 class EntityManagerFactoryTest {
 
@@ -15,11 +16,12 @@ class EntityManagerFactoryTest {
     @DisplayName("엔티티 메니저를 생성한다.")
     void createEntityManager() throws Exception {
         //given
-        EntityScanner scanner = new EntityScanner();
-        final Set<Class<?>> scan = scanner.scan("persistence.testFixtures");
-        AnnotationBinder annotationBinder = new AnnotationBinder(scan, new FakeDialect());
-        EntityManagerFactory entityManagerFactory = EntityManagerFactory.create(annotationBinder.getMetaModel());
+        final Set<Class<?>> scanClass = ClassScanner.scan("persistence.testFixtures");
+        final Set<Class<?>> entityClasses = EntityClassFilter.entityFilter(scanClass);
+        MetaModel metaModel = AnnotationBinder.bindMetaModel(entityClasses, new FakeDialect());
+        EntityManagerFactory entityManagerFactory = EntityManagerFactory.create(metaModel);
 
+        //when
         EntityManager entityManager = entityManagerFactory.createEntityManager(new MockConnection());
 
         //then

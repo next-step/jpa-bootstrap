@@ -1,18 +1,21 @@
 package persistence.testFixtures;
 
 import java.util.Set;
+import persistence.entity.ClassScanner;
+import persistence.entity.EntityClassFilter;
 import persistence.entity.EntityManagerFactory;
-import persistence.entity.EntityScanner;
 import persistence.entity.binder.AnnotationBinder;
 import persistence.fake.FakeDialect;
+import persistence.meta.MetaModel;
 
 public class EntityManagerFactoryFixture {
 
     public static EntityManagerFactory getEntityManagerFactory() {
-        EntityScanner scanner = new EntityScanner();
-        final Set<Class<?>> scan = scanner.scan("persistence.testFixtures");
-        AnnotationBinder annotationBinder = new AnnotationBinder(scan, new FakeDialect());
-        return EntityManagerFactory.create(annotationBinder.getMetaModel());
+        final Set<Class<?>> entityClass = EntityClassFilter.entityFilter(ClassScanner.scan("persistence.testFixtures"));
+
+        MetaModel metaModel = AnnotationBinder.bindMetaModel(entityClass, new FakeDialect());
+
+        return EntityManagerFactory.create(metaModel);
     }
 
 
