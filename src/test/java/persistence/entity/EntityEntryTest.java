@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.dialect.Dialect;
-import persistence.entity.binder.EntityPersisterBinder;
 import persistence.entity.persister.EntityPersister;
 import persistence.entity.persister.SimpleEntityPersister;
 import persistence.exception.ObjectNotFoundException;
@@ -83,7 +82,7 @@ class EntityEntryTest {
         Person person = new Person(1L, "이름", 30, "email@odna");
         EntityEntry entityEntry = EntityEntry.loadingOf(EntityKey.of(person));
         final QueryGenerator queryGenerator = QueryGenerator.of(dialect);
-        final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate, queryGenerator, EntityMeta.from(person.getClass()));
+        final EntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate, queryGenerator, EntityMeta.from(person.getClass()));
 
         //when
         entityEntry.readOnly();
@@ -130,7 +129,7 @@ class EntityEntryTest {
         Person person = new Person(1L, "이름", 30, "email@odna");
         EntityEntry entityEntry = EntityEntry.loadingOf(EntityKey.of(person));
         final QueryGenerator queryGenerator = QueryGenerator.of(dialect);
-        final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate
+        final EntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate
                 , queryGenerator
                 , EntityMeta.from(person.getClass()));
 
