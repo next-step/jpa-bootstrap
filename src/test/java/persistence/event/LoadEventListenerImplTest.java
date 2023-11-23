@@ -14,7 +14,6 @@ import persistence.entity.manager.EntityManager;
 import persistence.entity.manager.EntityManagerFactory;
 import persistence.entity.manager.EntityManagerFactoryImpl;
 import persistence.listener.LoadEvent;
-import persistence.listener.LoadEventListener;
 import persistence.listener.LoadEventListenerImpl;
 import persistence.sql.dml.builder.InsertQueryBuilder;
 import persistence.sql.infra.H2SqlConverter;
@@ -61,7 +60,7 @@ class LoadEventListenerImplTest extends DatabaseTest {
                 //when
                 //then
                 assertDoesNotThrow(() -> loadEventListener.onLoad(new LoadEvent(
-                        entityAttribute.getClazz(), "1"), LoadEventListener.LOAD));
+                        entityAttribute.getClazz(), "1")));
             }
         }
     }

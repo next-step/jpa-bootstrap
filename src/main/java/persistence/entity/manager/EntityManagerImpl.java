@@ -21,7 +21,7 @@ public class EntityManagerImpl implements EntityManager {
     @Override
     public <T> T findById(Class<T> clazz, String id) {
         LoadEvent loadEvent = new LoadEvent(clazz, id);
-        fastSessionServices.eventListenerGroup_LOAD.fireEventOnEachListener(loadEvent, LoadEventListener.LOAD, LoadEventListener::onLoad);
+        fastSessionServices.eventListenerGroup_LOAD.fireEventOnEachListener(loadEvent, LoadEventListener::onLoad);
         return (T) loadEvent.getLoadedEntity();
     }
 

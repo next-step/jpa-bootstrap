@@ -1,9 +1,10 @@
 package persistence.listener;
 
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public interface EventListenerGroup<T> {
-    <U, X> void fireEventOnEachListener(final U event, X param, final EventActionWithParameter<T, U, X> actionOnEvent);
+    <U> void fireEventOnEachListener(final U event, final BiConsumer<T, U> actionOnEvent);
 
     <U, R> R fireEventOnEachListener(U event, Function<T, R> actionOnEvent);
 

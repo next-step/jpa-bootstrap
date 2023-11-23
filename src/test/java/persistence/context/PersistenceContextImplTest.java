@@ -320,9 +320,11 @@ class PersistenceContextImplTest extends DatabaseTest {
 
             entityManager.persist(sample);
 
+            PersistenceContext persistenceContext = entityManager.getPersistenceContext();
+
             //when
             //then
-            Assertions.assertDoesNotThrow(() -> entityManager.getPersistenceContext().flush());
+            Assertions.assertDoesNotThrow(persistenceContext::flush);
         }
     }
 }

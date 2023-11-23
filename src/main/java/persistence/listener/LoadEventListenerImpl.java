@@ -10,7 +10,7 @@ public class LoadEventListenerImpl implements LoadEventListener {
     }
 
     @Override
-    public void onLoad(LoadEvent event, LoadType loadType) {
+    public void onLoad(LoadEvent event) {
         Object entity = entityManager.getPersistenceContext().getEntity(event.getEntityType(), event.getEntityId());
         event.setLoadedEntity(entity);
     }

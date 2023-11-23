@@ -63,8 +63,7 @@ public class PersistenceContextImpl implements PersistenceContext {
             if (idAttribute.getGenerationType() == GenerationType.IDENTITY) {
                 return insert(instance, idAttribute);
             }
-            actionQueue.addAction(new EntityInsertAction(entityAttribute.getTableName(),
-                    idAttribute, null, instance, simpleEntityPersister, null));
+            actionQueue.addAction(new EntityInsertAction(instance, simpleEntityPersister, null));
 
             return instance;
         }
@@ -75,8 +74,7 @@ public class PersistenceContextImpl implements PersistenceContext {
         firstCaches.putFirstCache(instance, instanceId, entityAttribute);
         entityEntries.changeOrSetStatus(MANAGED, instance);
 
-        actionQueue.addAction(new EntityUpdateAction(entityAttribute.getTableName(),
-                idAttribute, instanceId, instance, simpleEntityPersister, snapshot));
+        actionQueue.addAction(new EntityUpdateAction(instance, simpleEntityPersister, snapshot));
 
         return instance;
     }

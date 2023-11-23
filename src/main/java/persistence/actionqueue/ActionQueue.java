@@ -1,10 +1,10 @@
 package persistence.actionqueue;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class ActionQueue {
-    private final List<EntityAction> actions = new ArrayList<>();
+    private final Queue<EntityAction> actions = new LinkedList<>();
 
     public void addAction(EntityAction action) {
         actions.add(action);

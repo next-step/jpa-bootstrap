@@ -1,5 +1,6 @@
 package persistence.listener;
 
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class EventListenerGroupImpl<T> implements EventListenerGroup<T> {
@@ -7,11 +8,11 @@ public class EventListenerGroupImpl<T> implements EventListenerGroup<T> {
     private T[] listeners;
 
     @Override
-    public <U, X> void fireEventOnEachListener(final U event, final X parameter, final EventActionWithParameter<T, U, X> actionOnEvent) {
+    public <U> void fireEventOnEachListener(final U event, final BiConsumer<T, U> actionOnEvent) {
         final T[] ls = listeners;
         if (ls != null) {
             for (T listener : ls) {
-                actionOnEvent.applyEventToListener(listener, event, parameter);
+                actionOnEvent.accept(listener, event);
             }
         }
     }
