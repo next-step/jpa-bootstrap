@@ -1,22 +1,22 @@
 package persistence.meta;
 
 import java.util.Map;
-import persistence.sql.QueryGenerator;
+import persistence.dialect.Dialect;
 
 public class MetaModel {
     private final Map<Class<?>, EntityMeta> entityMetaContext;
-    private final Map<Class<?>, QueryGenerator> queryGeneratorContext;
+    private final Dialect dialect;
 
-    public MetaModel(Map<Class<?>, EntityMeta> entityMetaContext, Map<Class<?>, QueryGenerator> queryGeneratorContext) {
+    public MetaModel(Map<Class<?>, EntityMeta> entityMetaContext, Dialect dialect) {
         this.entityMetaContext = entityMetaContext;
-        this.queryGeneratorContext = queryGeneratorContext;
+        this.dialect = dialect;
     }
 
     public Map<Class<?>, EntityMeta> getEntityMetaContext() {
         return entityMetaContext;
     }
 
-    public Map<Class<?>, QueryGenerator> getQueryGeneratorContext() {
-        return queryGeneratorContext;
+    public Dialect getDialect() {
+        return dialect;
     }
 }

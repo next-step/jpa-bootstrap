@@ -6,7 +6,7 @@ import persistence.meta.MetaModel;
 
 
 public class EntityManagerFactory {
-    private MetaModel metaModel;
+    private final MetaModel metaModel;
     private EntityManagerFactory(MetaModel metaModel) {
         this.metaModel = metaModel;
     }

@@ -16,7 +16,7 @@ public final class AnnotationBinder {
         }
 
         final Map<Class<?>, EntityMeta> entityMetaMap = bindEntityMetaMap(classes);
-        return new MetaModel(entityMetaMap, bindQueryGeneratorMap(entityMetaMap, dialect));
+        return new MetaModel(entityMetaMap, dialect);
     }
 
     private static Map<Class<?>, EntityMeta> bindEntityMetaMap(Set<Class<?>> classes) {
