@@ -1,6 +1,5 @@
 package persistence.entity;
 
-import jakarta.persistence.Entity;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,21 +7,22 @@ import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class EntityScanner {
-    public Set<Class<?>> scan(String packageName) {
+public final class ClassScanner {
+    private ClassScanner() {}
+
+    public static Set<Class<?>> scan(String packageName) {
         final InputStream packageNameWithResource = getPackageNameWithResource(packageName);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(packageNameWithResource))) {
             return reader.lines()
-                    .filter(this::isClassFile)
+                    .filter(ClassScanner::isClassFile)
                     .map(line -> getClass(line, packageName))
-                    .filter(this::isValidEntityClass)
                     .collect(Collectors.toSet());
         } catch (IOException e) {
             throw new RuntimeException("클래스를 읽을 수 없습니다.", e);
         }
     }
 
-    private InputStream getPackageNameWithResource(String packageName) {
+    private static InputStream getPackageNameWithResource(String packageName) {
         final String path = packageName.replaceAll("[.]", "/");
         final InputStream resourceAsStream = ClassLoader.getSystemClassLoader().getResourceAsStream(path);
         if (resourceAsStream == null) {
@@ -32,7 +32,7 @@ public class EntityScanner {
 
     }
 
-    private Class<?> getClass(String className, String packageName) {
+    private static Class<?> getClass(String className, String packageName) {
         try {
             return Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.')));
         } catch (ClassNotFoundException e) {
@@ -40,11 +40,9 @@ public class EntityScanner {
         }
     }
 
-    private boolean isClassFile(String line) {
+    private static boolean isClassFile(String line) {
         return line.endsWith(".class");
     }
 
-    private boolean isValidEntityClass(Class<?> clazz) {
-        return clazz != null && clazz.isAnnotationPresent(Entity.class);
-    }
+
 }
