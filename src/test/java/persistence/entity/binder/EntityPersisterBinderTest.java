@@ -28,7 +28,7 @@ class EntityPersisterBinderTest {
     void create(Class<?> entityType, Class<?> resultType) {
         //given
         EntityMeta entityMeta = EntityMeta.from(entityType);
-        final QueryGenerator queryGenerator = QueryGenerator.of(entityType, new FakeDialect());
+        final QueryGenerator queryGenerator = QueryGenerator.of(new FakeDialect());
 
         //when
         EntityPersister entityPersister =  EntityPersisterBinder.bind(new MockJdbcTemplate(), queryGenerator, entityMeta);

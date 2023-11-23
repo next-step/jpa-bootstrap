@@ -16,11 +16,12 @@ public class OneToManyEntityLoaderTest extends DataBaseTestSetUp {
     @DisplayName("oneToMany 엔터티를 로드한다.")
     void load() {
         //given
-        OneToManyEntityLoader loader = OneToManyEntityLoader.create(EntityMeta.from(Order.class));
+        final EntityMeta orderEntityMeta = EntityMeta.from(Order.class);
+        OneToManyEntityLoader loader = OneToManyEntityLoader.create(orderEntityMeta);
 
         //when
         final Order order = jdbcTemplate.queryForObject(
-                QueryGenerator.of(Order.class, dialect).select().findByIdOneToManyQuery(1L),
+                QueryGenerator.of(dialect).select().findByIdOneToManyQuery(orderEntityMeta, 1L),
                 (rs) -> loader.load(Order.class, rs));
 
         //then
@@ -35,11 +36,12 @@ public class OneToManyEntityLoaderTest extends DataBaseTestSetUp {
     @DisplayName("다건 oneToMany 엔터티를 로드한다.")
     void resultSetToOneToManyEntityMany() {
         //given
-        OneToManyEntityLoader loader = OneToManyEntityLoader.create(EntityMeta.from(Order.class));
-        QueryGenerator queryGenerator = QueryGenerator.of(Order.class, dialect);
+        final EntityMeta orderEntityMeta = EntityMeta.from(Order.class);
+        OneToManyEntityLoader loader = OneToManyEntityLoader.create(orderEntityMeta);
+        QueryGenerator queryGenerator = QueryGenerator.of(dialect);
 
         //when
-        final List<Order> orders = jdbcTemplate.queryForAll(queryGenerator.select().findAllOneToManyQuery(),
+        final List<Order> orders = jdbcTemplate.queryForAll(queryGenerator.select().findAllOneToManyQuery(orderEntityMeta),
                 (rs) -> loader.loadAll(Order.class, rs));
 
         //then

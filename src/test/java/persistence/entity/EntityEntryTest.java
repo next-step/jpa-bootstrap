@@ -37,7 +37,7 @@ class EntityEntryTest {
         server.start();
         dialect = new FakeDialect();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).create());
+        jdbcTemplate.execute(QueryGenerator.of(dialect).create().build(Person.class));
 
     }
 
@@ -48,7 +48,7 @@ class EntityEntryTest {
         //given
         Person person = new Person(1L, "이름", 30, "email@odna");
         final EntityMeta entityMeta = EntityMeta.from(person.getClass());
-        final QueryGenerator queryGenerator = QueryGenerator.of((entityMeta), new FakeDialect());
+        final QueryGenerator queryGenerator = QueryGenerator.of(new FakeDialect());
         final EntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate, queryGenerator,
                 entityMeta);
 
@@ -82,7 +82,7 @@ class EntityEntryTest {
         //given
         Person person = new Person(1L, "이름", 30, "email@odna");
         EntityEntry entityEntry = EntityEntry.loadingOf(EntityKey.of(person));
-        final QueryGenerator queryGenerator = QueryGenerator.of(Person.class, dialect);
+        final QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate, queryGenerator, EntityMeta.from(person.getClass()));
 
         //when
@@ -129,7 +129,7 @@ class EntityEntryTest {
         //given
         Person person = new Person(1L, "이름", 30, "email@odna");
         EntityEntry entityEntry = EntityEntry.loadingOf(EntityKey.of(person));
-        final QueryGenerator queryGenerator = QueryGenerator.of(Person.class, dialect);
+        final QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate
                 , queryGenerator
                 , EntityMeta.from(person.getClass()));
@@ -157,7 +157,7 @@ class EntityEntryTest {
 
     @AfterEach
     void tearDown() {
-        jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).drop());
+        jdbcTemplate.execute(QueryGenerator.of(dialect).drop().build(Person.class));
         server.stop();
     }
 

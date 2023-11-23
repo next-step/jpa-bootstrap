@@ -24,7 +24,7 @@ public class EntityMeta {
             throw new NoEntityException();
         }
         this.tableName = TableName.from(entityClass);
-        this.entityColumns = new EntityColumns(entityClass.getDeclaredFields());
+        this.entityColumns = EntityColumns.from(entityClass.getDeclaredFields());
         this.pkColumn = entityColumns.pkColumn();
         this.entityClass = entityClass;
 

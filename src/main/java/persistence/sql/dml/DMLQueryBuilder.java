@@ -1,16 +1,14 @@
 package persistence.sql.dml;
 
 import persistence.dialect.Dialect;
-import persistence.exception.FieldEmptyException;
 import persistence.meta.AbstractColumn;
 import persistence.meta.ColumnType;
 import persistence.meta.EntityColumn;
-import persistence.meta.EntityMeta;
 import persistence.sql.QueryBuilder;
 
 public class DMLQueryBuilder extends QueryBuilder {
-    protected DMLQueryBuilder(EntityMeta entityMeta, Dialect dialect) {
-        super(entityMeta, dialect);
+    protected DMLQueryBuilder(Dialect dialect) {
+        super(dialect);
     }
 
     protected String getFromTableQuery(String tableName) {
@@ -34,14 +32,6 @@ public class DMLQueryBuilder extends QueryBuilder {
             return dialect.whereId(columnName, "'" + id + "'");
         }
         return dialect.whereId(columnName, id.toString());
-    }
-
-    protected EntityColumn getPkColumn() {
-        return entityMeta.getEntityColumns()
-                .stream()
-                .filter(EntityColumn::isPk)
-                .findFirst()
-                .orElseThrow(() -> new FieldEmptyException("pk가 없습니다."));
     }
 
     protected String getColumnValueString(EntityColumn column, Object entity) {

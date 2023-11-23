@@ -34,7 +34,7 @@ class EntityPersisterTest {
         dialect = new FakeDialect();
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).create());
+        jdbcTemplate.execute(QueryGenerator.of(dialect).create().build(Person.class));
     }
 
     @Test
@@ -43,7 +43,7 @@ class EntityPersisterTest {
         Person person = new Person("이름", 3, "dsa@gmil.com");
 
         SimpleEntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate,
-                QueryGenerator.of(Person.class, dialect), EntityMeta.from(Person.class));
+                QueryGenerator.of(dialect), EntityMeta.from(Person.class));
 
         final Person result = entityPersister.insert(person);
 
@@ -60,7 +60,7 @@ class EntityPersisterTest {
         NoAutoIncrementPerson person = new NoAutoIncrementPerson(3L, "이름", 3, "dsa@gmil.com");
 
         SimpleEntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate
-                , QueryGenerator.of(Person.class, dialect)
+                , QueryGenerator.of(dialect)
                 , EntityMeta.from(NoAutoIncrementPerson.class));
 
         //when
@@ -79,7 +79,7 @@ class EntityPersisterTest {
         //given
         Person person = new Person(1L, "이름", 3, "dsa@gmil.com");
         SimpleEntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate
-                , QueryGenerator.of(Person.class, dialect)
+                , QueryGenerator.of(dialect)
                 , EntityMeta.from(Person.class));
 
         //when & then
@@ -92,7 +92,7 @@ class EntityPersisterTest {
     void entityDeleteByKey() {
         //given
         SimpleEntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate
-                , QueryGenerator.of(Person.class, dialect)
+                , QueryGenerator.of(dialect)
                 , EntityMeta.from(Person.class)
         );
         Person person = new Person(1L, "이름", 3, "dsa@gmil.com");
@@ -106,7 +106,9 @@ class EntityPersisterTest {
 
     @AfterEach
     void tearDown() {
-        jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).drop());
+        jdbcTemplate.execute(QueryGenerator.of(dialect)
+                .drop()
+                .build(Person.class));
         server.stop();
     }
 }

@@ -31,7 +31,7 @@ public class OneToManyLazyEntityPersister extends AbstractEntityPersister {
     public <T> T find(Class<T> tClass, Object id) {
         final String query = queryGenerator
                 .select()
-                .findByIdQuery(id);
+                .findByIdQuery(entityMeta ,id);
 
         log.debug(query);
 
@@ -43,7 +43,7 @@ public class OneToManyLazyEntityPersister extends AbstractEntityPersister {
     public <T> List<T> findAll(Class<T> tClass) {
         final String query = queryGenerator
                 .select()
-                .findAllQuery();
+                .findAllQuery(entityMeta);
 
         log.debug(query);
 

@@ -31,7 +31,7 @@ public final class AnnotationBinder {
                                                                        Dialect dialect) {
         Map<Class<?>, QueryGenerator> queryGeneratorMap = new ConcurrentHashMap<>();
         entityMetaMap.forEach((clazz, entityMeta) -> {
-            QueryGenerator queryGenerator = QueryGenerator.of(entityMeta, dialect);
+            QueryGenerator queryGenerator = QueryGenerator.of(dialect);
             queryGeneratorMap.put(clazz, queryGenerator);
         });
         return queryGeneratorMap;

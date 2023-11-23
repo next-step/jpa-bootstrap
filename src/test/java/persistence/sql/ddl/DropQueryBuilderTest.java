@@ -32,17 +32,17 @@ class DropQueryBuilderTest {
         @DisplayName("요구사항 4 - @Entity 어노테이션이 없는 경우 예외가 발생한다")
         void noEntity() {
             assertThatExceptionOfType(NoEntityException.class)
-                    .isThrownBy(() -> QueryGenerator.of(NoHasEntity.class, dialect).drop());
+                    .isThrownBy(() -> QueryGenerator.of(dialect).drop().build(NoHasEntity.class));
         }
 
         @Test
         @DisplayName("@Table 어노테이션이 없는 경우")
         void noTable() {
             //given
-            QueryGenerator ddl = QueryGenerator.of(PkHasPerson.class, dialect);
+            QueryGenerator ddl = QueryGenerator.of(dialect);
 
             //when
-            String sql = ddl.drop();
+            String sql = ddl.drop().build(PkHasPerson.class);
 
             //then
             assertThat(sql).isEqualTo("DROP TABLE PkHasPerson");
@@ -52,10 +52,10 @@ class DropQueryBuilderTest {
         @DisplayName("@Table 어노테이션이 있는 경우 이름을 치환한다.")
         void hasTable() {
             //given
-            QueryGenerator ddl = QueryGenerator.of(Person.class, dialect);
+            QueryGenerator ddl = QueryGenerator.of(dialect);
 
             //when
-            String sql = ddl.drop();
+            String sql = ddl.drop().build(Person.class);
 
             //then
             assertThat(sql).isEqualTo("DROP TABLE users");

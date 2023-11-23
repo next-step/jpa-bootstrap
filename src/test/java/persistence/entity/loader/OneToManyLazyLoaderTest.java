@@ -19,13 +19,13 @@ class OneToManyLazyLoaderTest extends DataBaseTestSetUp {
     void findLazy() {
         //given
         EntityMeta entityMeta = EntityMeta.from(LazyLoadOrder.class);
-        QueryGenerator queryGenerator = QueryGenerator.of(LazyLoadOrder.class, dialect);
+        QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         OneToManyEntityPersister persister = OneToManyEntityPersister.create(jdbcTemplate, queryGenerator,
                 entityMeta);
 
         OneToManyLazyLoader loader = OneToManyLazyLoader.create(EntityMeta.from(Order.class), persister);
         final String query = queryGenerator.select()
-                .findByIdQuery(1L);
+                .findByIdQuery(entityMeta,1L);
 
         //when
         final LazyLoadOrder order = jdbcTemplate.queryForObject(query,
@@ -45,12 +45,12 @@ class OneToManyLazyLoaderTest extends DataBaseTestSetUp {
     void resultSetToOneToManyEntity() {
         //given
         EntityMeta entityMeta = EntityMeta.from(LazyLoadOrder.class);
-        QueryGenerator queryGenerator = QueryGenerator.of(LazyLoadOrder.class, dialect);
+        QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         OneToManyEntityPersister persister = OneToManyEntityPersister.create(jdbcTemplate, queryGenerator,
                 entityMeta);
 
         OneToManyLazyLoader loader = OneToManyLazyLoader.create(EntityMeta.from(Order.class), persister);
-        final String query = queryGenerator.select().findAllQuery();
+        final String query = queryGenerator.select().findAllQuery(entityMeta);
 
         //when
         final List<LazyLoadOrder> orders = jdbcTemplate.query(query,

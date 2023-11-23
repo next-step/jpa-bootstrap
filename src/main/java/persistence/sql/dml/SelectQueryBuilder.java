@@ -7,27 +7,27 @@ import persistence.meta.EntityMeta;
 
 
 public class SelectQueryBuilder extends DMLQueryBuilder {
-    public SelectQueryBuilder(EntityMeta entityMeta, Dialect dialect) {
-        super(entityMeta, dialect);
+    public SelectQueryBuilder(Dialect dialect) {
+        super(dialect);
     }
 
-    public String findAllQuery() {
+    public String findAllQuery(EntityMeta entityMeta) {
         return selectQuery(selectColumn(entityMeta).collect(Collectors.joining(", ")))
                 + getFromTableQuery(entityMeta.getTableName(), tableNameSignature(entityMeta.getTableName()));
     }
 
-    public String findByIdQuery(Object id) {
+    public String findByIdQuery(EntityMeta entityMeta, Object id) {
         if (id == null) {
             throw new IllegalArgumentException("id가 비어 있으면 안 됩니다.");
         }
 
         return selectQuery(selectColumn(entityMeta).collect(Collectors.joining(", ")))
                 + getFromTableQuery(entityMeta.getTableName(), tableNameSignature(entityMeta.getTableName()))
-                + whereId(tableNameSignature(entityMeta.getTableName()), getPkColumn(), id);
+                + whereId(tableNameSignature(entityMeta.getTableName()), entityMeta.getPkColumn(), id);
     }
 
 
-    public String findByForeignerId(Object id) {
+    public String findByForeignerId(EntityMeta entityMeta, Object id) {
         if (id == null) {
             throw new IllegalArgumentException("id가 비어 있으면 안 됩니다.");
         }
@@ -40,22 +40,22 @@ public class SelectQueryBuilder extends DMLQueryBuilder {
                 + whereId(tableNameSignature(manyEntityMeta.getTableName()), manyEntityMeta.getForeignerColumn(), id);
     }
 
-    public String findAllOneToManyQuery() {
+    public String findAllOneToManyQuery(EntityMeta entityMeta) {
         return selectQuery(getColumnsString(entityMeta))
                 + getFromTableQuery(entityMeta.getTableName(), tableNameSignature(entityMeta.getTableName()))
-                + new OneToManyJoinQueryBuilder(entityMeta).build();
+                + new OneToManyJoinQueryBuilder(dialect).build(entityMeta);
 
     }
 
-    public String findByIdOneToManyQuery(Object id) {
+    public String findByIdOneToManyQuery(EntityMeta entityMeta, Object id) {
         if (id == null) {
             throw new IllegalArgumentException("id가 비어 있으면 안 됩니다.");
         }
 
         return selectQuery(getColumnsString(entityMeta))
                 + getFromTableQuery(entityMeta.getTableName(), tableNameSignature(entityMeta.getTableName()))
-                + new OneToManyJoinQueryBuilder(entityMeta).build()
-                + whereId(tableNameSignature(entityMeta.getTableName()), getPkColumn(), id);
+                + new OneToManyJoinQueryBuilder(dialect).build(entityMeta)
+                + whereId(tableNameSignature(entityMeta.getTableName()), entityMeta.getPkColumn(), id);
     }
 
 

@@ -34,8 +34,9 @@ class SimplePersistenceContextTest {
         server.start();
         dialect = new FakeDialect();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).create());
-
+        jdbcTemplate.execute(QueryGenerator.of(dialect)
+                        .create()
+                        .build(Person.class));
     }
 
     @Test
@@ -124,7 +125,7 @@ class SimplePersistenceContextTest {
         //given
         Person person = new Person(1L, "이름", 30, "email@odna");
         SimplePersistenceContext simplePersistenceContext = new SimplePersistenceContext();
-        EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate, QueryGenerator.of(Person.class, dialect)
+        EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate, QueryGenerator.of(dialect)
                 , EntityMeta.from(person.getClass()));
 
 
@@ -141,7 +142,7 @@ class SimplePersistenceContextTest {
         //given
         Person person = new Person(1L, "이름", 30, "email@odna");
         SimplePersistenceContext simplePersistenceContext = new SimplePersistenceContext();
-        final QueryGenerator queryGenerator = QueryGenerator.of(Person.class, dialect);
+        final QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate
                 , queryGenerator
                 , EntityMeta.from(person.getClass()));
@@ -160,7 +161,7 @@ class SimplePersistenceContextTest {
         //given
         Person person = new Person(1L, "이름", 30, "email@odna");
         SimplePersistenceContext simplePersistenceContext = new SimplePersistenceContext();
-        final QueryGenerator queryGenerator = QueryGenerator.of(Person.class, dialect);
+        final QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         final EntityPersister entityPersister = EntityPersisterBinder.bind(jdbcTemplate
                 , queryGenerator
                 , EntityMeta.from(person.getClass()));
@@ -180,7 +181,7 @@ class SimplePersistenceContextTest {
         Person person = new Person(1L, "이름", 30, "email@odna");
         Person person2 = new Person(2L, "이름", 30, "email@odna");
         SimplePersistenceContext simplePersistenceContext = new SimplePersistenceContext();
-        final QueryGenerator queryGenerator = QueryGenerator.of(Person.class, dialect);
+        final QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         final EntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate, queryGenerator, EntityMeta.from(person.getClass()));
 
         //when
@@ -194,7 +195,10 @@ class SimplePersistenceContextTest {
 
     @AfterEach
     void tearDown() {
-        jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).drop());
+        jdbcTemplate.execute(QueryGenerator.of(dialect)
+                .drop()
+                .build(Person.class));
+
         server.stop();
     }
 

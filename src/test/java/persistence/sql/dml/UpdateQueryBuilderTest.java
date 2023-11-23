@@ -18,8 +18,8 @@ class UpdateQueryBuilderTest {
         Person person = new Person(1L, "이름", 19, "sad@gmail.com");
 
         //when
-        String sql = QueryGenerator.of(Person.class, new FakeDialect())
-                .update()
+        String sql = QueryGenerator.of(new FakeDialect())
+                .update(Person.class)
                 .build(person);
 
         //then

@@ -18,7 +18,7 @@ class SimpleEntityPersiterTest extends DataBaseTestSetUp {
     void findAll() {
         //given
         EntityMeta entityMeta = EntityMeta.from(Person.class);
-        QueryGenerator queryGenerator = QueryGenerator.of(entityMeta, dialect);
+        QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         EntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate, queryGenerator, entityMeta);
 
         //when
@@ -40,7 +40,7 @@ class SimpleEntityPersiterTest extends DataBaseTestSetUp {
     void find() {
         //given
         EntityMeta entityMeta = EntityMeta.from(Person.class);
-        QueryGenerator queryGenerator = QueryGenerator.of(entityMeta, dialect);
+        QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         SimpleEntityPersister entityPersister = SimpleEntityPersister.create(jdbcTemplate, queryGenerator, entityMeta);
 
         Person person = new Person("이름", 19, "asd@gmail.com");
@@ -59,7 +59,7 @@ class SimpleEntityPersiterTest extends DataBaseTestSetUp {
     void noDataIsNull() {
         //given
         EntityMeta entityMeta = EntityMeta.from(Person.class);
-        QueryGenerator queryGenerator = QueryGenerator.of(entityMeta, dialect);
+        QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         SimpleEntityPersister entityLoader = SimpleEntityPersister.create(jdbcTemplate, queryGenerator, entityMeta);
 
         //when

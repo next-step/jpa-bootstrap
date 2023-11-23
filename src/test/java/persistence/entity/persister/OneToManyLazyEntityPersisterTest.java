@@ -18,7 +18,7 @@ class OneToManyLazyEntityPersisterTest extends DataBaseTestSetUp {
     void oneToManyLazy() {
         //given
         EntityMeta entityMeta = EntityMeta.from(Order.class);
-        QueryGenerator queryGenerator = QueryGenerator.of(Order.class, dialect);
+        QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         OneToManyLazyEntityPersister persister = OneToManyLazyEntityPersister.create(jdbcTemplate, queryGenerator,
                 entityMeta);
 
@@ -38,7 +38,7 @@ class OneToManyLazyEntityPersisterTest extends DataBaseTestSetUp {
     void oneToManyLazyAll() {
         //given
         EntityMeta entityMeta = EntityMeta.from(Order.class);
-        QueryGenerator queryGenerator = QueryGenerator.of(Order.class, dialect);
+        QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         OneToManyLazyEntityPersister persister = OneToManyLazyEntityPersister.create(jdbcTemplate, queryGenerator,
                 entityMeta);
 

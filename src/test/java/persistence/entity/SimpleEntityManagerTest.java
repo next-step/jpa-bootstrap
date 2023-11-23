@@ -36,8 +36,12 @@ class SimpleEntityManagerTest {
         dialect = new FakeDialect();
         connection = server.getConnection();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).create());
-        jdbcTemplate.execute(QueryGenerator.of(DifferentPerson.class, dialect).create());
+        jdbcTemplate.execute(QueryGenerator.of(dialect)
+                .create()
+                .build(Person.class));
+        jdbcTemplate.execute(QueryGenerator.of(dialect)
+                .create()
+                .build(DifferentPerson.class));
         entityManagerFactory = EntityManagerFactoryFixture.getEntityManagerFactory();
     }
 
@@ -168,8 +172,15 @@ class SimpleEntityManagerTest {
 
     @AfterEach
     void tearDown() {
-        jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).drop());
-        jdbcTemplate.execute(QueryGenerator.of(DifferentPerson.class, dialect).drop());
+        QueryGenerator query = QueryGenerator.of(dialect);
+        jdbcTemplate.execute(query
+                .drop()
+                .build(Person.class));
+
+        jdbcTemplate.execute(query
+                .drop()
+                .build(DifferentPerson.class));
+
         server.stop();
     }
 
