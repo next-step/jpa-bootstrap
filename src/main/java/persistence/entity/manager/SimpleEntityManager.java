@@ -72,8 +72,7 @@ public class SimpleEntityManager implements EntityManager {
 
         persistenceContext.updateEntityEntryStatus(entity, Status.DELETED);
 
-        metaModel.getEventListenerGroup(EventType.DELETE)
-                .fireEvent(new DeleteEvent(entity), DeleteEventListener::onDelete);
+        metaModel.getEventListener().onDelete(new DeleteEvent(entity));
     }
 
     @Override
@@ -95,8 +94,7 @@ public class SimpleEntityManager implements EntityManager {
     private <T> Object initEntity(final EntityMetadata<T> entityMetadata, final EntityKey entityKey) {
         final Object key = entityKey.getKey();
         final Object entityFromDatabase =
-                metaModel.getEventListenerGroup(EventType.LOAD)
-                        .fireEventReturn(new LoadEvent<>(key, entityMetadata.getType()), LoadEventListener::onLoad);
+                metaModel.getEventListener().onLoad(new LoadEvent<>(key, entityMetadata.getType()));
         if(Objects.isNull(entityFromDatabase)) {
             return null;
         }
@@ -124,7 +122,7 @@ public class SimpleEntityManager implements EntityManager {
     private void processInsert(final Object entity) {
         persistenceContext.addEntityEntry(entity, Status.SAVING);
 
-        metaModel.getEventListenerGroup(EventType.PERSIST).fireEvent(new PersistEvent(entity), PersistEventListener::onPersist);
+        metaModel.getEventListener().onPersist(new PersistEvent(entity));
 
         final Object idValue = extractId(entity);
         final EntityKey entityKey = entityKeyGenerator.generate(entity.getClass(), idValue);
@@ -142,7 +140,7 @@ public class SimpleEntityManager implements EntityManager {
 
         if (isDirty(entity)) {
             updateEntityEntry(foundEntity, entity);
-            metaModel.getEventListenerGroup(EventType.MERGE).fireEvent(new MergeEvent(entity), MergeEventListener::onMerge);
+            metaModel.getEventListener().onMerge(new MergeEvent(entity));
             persistenceContext.addEntity(entityKey, entity);
         }
     }

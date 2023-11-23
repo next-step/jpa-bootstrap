@@ -4,10 +4,8 @@ import persistence.action.ActionQueue;
 import persistence.entity.loader.EntityLoaders;
 import persistence.entity.persister.EntityPersisters;
 import persistence.entity.proxy.EntityProxyFactory;
+import persistence.event.DefaultEventListener;
 import persistence.event.EventListener;
-import persistence.event.EventListenerGroup;
-import persistence.event.EventListenerRegistry;
-import persistence.event.EventType;
 
 import java.util.Set;
 
@@ -17,7 +15,7 @@ public class MetaModelImpl implements MetaModel {
     private final EntityLoaders entityLoaders;
     private final EntityProxyFactory entityProxyFactory;
     private final ActionQueue actionQueue;
-    private final EventListenerRegistry eventListenerRegistry;
+    private final EventListener eventListener;
 
     public MetaModelImpl(final EntityMetadataProvider entityMetadataProvider, final EntityPersisters entityPersisters, final EntityLoaders entityLoaders) {
         this.entityMetadataProvider = entityMetadataProvider;
@@ -25,7 +23,7 @@ public class MetaModelImpl implements MetaModel {
         this.entityLoaders = entityLoaders;
         this.entityProxyFactory = new EntityProxyFactory(entityLoaders);
         this.actionQueue = new ActionQueue();
-        this.eventListenerRegistry = new EventListenerRegistry(actionQueue, entityPersisters, entityLoaders);
+        this.eventListener = new DefaultEventListener(actionQueue, entityPersisters, entityLoaders);
     }
 
     @Override
@@ -54,8 +52,8 @@ public class MetaModelImpl implements MetaModel {
     }
 
     @Override
-    public <T extends EventListener> EventListenerGroup<T> getEventListenerGroup(final EventType<T> type)  {
-        return eventListenerRegistry.getListener(type);
+    public EventListener getEventListener()  {
+        return this.eventListener;
     }
 
     @Override
