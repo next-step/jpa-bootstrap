@@ -4,21 +4,26 @@ import java.util.List;
 import java.util.stream.Collectors;
 import persistence.dialect.Dialect;
 import persistence.meta.EntityColumn;
-import persistence.meta.EntityMeta;
+import persistence.meta.EntityColumns;
+import persistence.meta.TableName;
 
 
 public class UpdateQueryBuilder extends DMLQueryBuilder {
 
     private static final String EQUAL = "=";
+    private final TableName tableName;
+    private final EntityColumns entityColumns;
 
-    public UpdateQueryBuilder(EntityMeta entityMeta, Dialect dialect) {
-        super(entityMeta, dialect);
+    public UpdateQueryBuilder(Dialect dialect, TableName tableName, EntityColumns entityColumns) {
+        super(dialect);
+        this.tableName = tableName;
+        this.entityColumns = entityColumns;
     }
 
     public String build(Object entity) {
-        return updateQuery(entityMeta.getTableName())
-                + updateValues(entityMeta.getEntityColumns(), entity)
-                + whereId(getPkColumn(), getPkColumn().getFieldValue(entity));
+        return updateQuery(tableName.getValue())
+                + updateValues(entityColumns.getEntityColumns(), entity)
+                + whereId(entityColumns.pkColumn(), entityColumns.pkColumn().getFieldValue(entity));
     }
 
     private String updateQuery(String tableName) {

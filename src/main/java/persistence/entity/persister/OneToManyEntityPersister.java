@@ -31,7 +31,7 @@ public class OneToManyEntityPersister extends AbstractEntityPersister {
     public <T> T find(Class<T> tClass, Object id) {
         final String query = queryGenerator
                 .select()
-                .findByIdOneToManyQuery(id);
+                .findByIdOneToManyQuery(EntityMeta.from(tClass), id);
 
         log.info(query);
 
@@ -43,7 +43,7 @@ public class OneToManyEntityPersister extends AbstractEntityPersister {
     public <T> List<T> findAll(Class<T> tClass) {
         final String query = queryGenerator
                 .select()
-                .findAllOneToManyQuery();
+                .findAllOneToManyQuery(entityMeta);
 
         log.info(query);
 
@@ -53,7 +53,7 @@ public class OneToManyEntityPersister extends AbstractEntityPersister {
     public <T> List<?> findMany(T instance, OneToManyAssociation oneToManyAssociation) {
         final String query = queryGenerator
                 .select()
-                .findByForeignerId(entityMeta.getPkValue(instance));
+                .findByForeignerId(entityMeta, entityMeta.getPkValue(instance));
 
         log.debug(query);
 

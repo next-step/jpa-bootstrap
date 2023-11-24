@@ -1,8 +1,8 @@
 package persistence.sql;
 
 import persistence.dialect.Dialect;
-import persistence.exception.NoEntityException;
-import persistence.meta.EntityMeta;
+import persistence.meta.EntityColumns;
+import persistence.meta.TableName;
 import persistence.sql.ddl.CreateQueryBuilder;
 import persistence.sql.ddl.DropQueryBuilder;
 import persistence.sql.dml.DeleteQueryBuilder;
@@ -11,47 +11,41 @@ import persistence.sql.dml.SelectQueryBuilder;
 import persistence.sql.dml.UpdateQueryBuilder;
 
 public class QueryGenerator {
-    private final EntityMeta entityMeta;
     private final Dialect dialect;
 
-    private QueryGenerator(EntityMeta entityMeta, Dialect dialect) {
-        if (entityMeta == null) {
-            throw new NoEntityException();
+    private QueryGenerator(Dialect dialect) {
+        if (dialect == null) {
+            throw new IllegalArgumentException("dialect 는 필수 입니다.");
         }
-        this.entityMeta = entityMeta;
         this.dialect = dialect;
     }
 
-    public static QueryGenerator of(Class<?> tClass, Dialect dialect) {
-        return of(EntityMeta.from(tClass), dialect);
+    public static QueryGenerator of(Dialect dialect) {
+        return new QueryGenerator(dialect);
     }
 
-    public static QueryGenerator of(EntityMeta entityMeta, Dialect dialect) {
-        return new QueryGenerator(entityMeta, dialect);
+    public CreateQueryBuilder create() {
+        return new CreateQueryBuilder(dialect);
     }
 
-    public String create() {
-        return new CreateQueryBuilder(entityMeta, dialect).create();
-    }
-
-    public String drop() {
-        return new DropQueryBuilder(entityMeta, dialect).drop();
+    public DropQueryBuilder drop() {
+        return new DropQueryBuilder(dialect);
     }
 
     public InsertQueryBuilder insert() {
-        return new InsertQueryBuilder(entityMeta, dialect);
+        return new InsertQueryBuilder(dialect);
     }
 
     public DeleteQueryBuilder delete() {
-        return new DeleteQueryBuilder(entityMeta, dialect);
+        return new DeleteQueryBuilder(dialect);
     }
 
     public SelectQueryBuilder select() {
-        return new SelectQueryBuilder(entityMeta, dialect);
+        return new SelectQueryBuilder(dialect);
     }
 
-    public UpdateQueryBuilder update() {
-        return new UpdateQueryBuilder(entityMeta, dialect);
+    public UpdateQueryBuilder update(Class<?> tClass) {
+        return new UpdateQueryBuilder(dialect, TableName.from(tClass), EntityColumns.from(tClass));
     }
 
 

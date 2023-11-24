@@ -1,21 +1,28 @@
 package persistence.entity;
 
 
+import java.sql.Connection;
 import java.util.List;
+import jdbc.JdbcTemplate;
 import persistence.entity.persister.EntityPersister;
+import persistence.meta.MetaModel;
 
 
 public class SimpleEntityManager implements EntityManager {
-    private final EntityPersisteContext entityPersisterContenxt;
+    private final EntityPersisterContext entityPersisterContenxt;
+    private final Connection connection;
     private final SimplePersistenceContext persistenceContext;
 
-    private SimpleEntityManager(EntityPersisteContext entityPersisterContenxt) {
+    private SimpleEntityManager(MetaModel metaModel, Connection connection) {
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
+        this.connection = connection;
         this.persistenceContext = new SimplePersistenceContext();
-        this.entityPersisterContenxt = entityPersisterContenxt;
+        this.entityPersisterContenxt = EntityPersisterContext.create(metaModel, jdbcTemplate);
+
     }
 
-    public static SimpleEntityManager create(EntityPersisteContext entityPersisterContenxt) {
-        return new SimpleEntityManager(entityPersisterContenxt);
+    public static SimpleEntityManager create(MetaModel metaModel, Connection connection) {
+        return new SimpleEntityManager(metaModel, connection);
     }
 
     @Override

@@ -12,11 +12,18 @@ import persistence.exception.FieldEmptyException;
 public class EntityColumns {
     private final List<EntityColumn> entityColumns;
 
-    public EntityColumns(Field[] fields) {
+    private EntityColumns(Field[] fields) {
         if (fields == null) {
             throw new FieldEmptyException();
         }
         this.entityColumns = extractColumns(fields);
+    }
+    public static EntityColumns from(Field[] fields) {
+        return new EntityColumns(fields);
+    }
+
+    public static EntityColumns from(Class<?> entityClass) {
+        return new EntityColumns(entityClass.getDeclaredFields());
     }
 
     private List<EntityColumn> extractColumns(Field[] fields) {

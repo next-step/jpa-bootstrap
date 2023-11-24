@@ -29,7 +29,8 @@ public abstract class AbstractEntityPersister implements EntityPersister {
     }
 
     public <T> T insert(T entity) {
-        final String query = queryGenerator.insert().build(entity);
+        final String query = queryGenerator.insert()
+                .build(entity.getClass(), entity);
 
         log.info(query);
 
@@ -52,7 +53,7 @@ public abstract class AbstractEntityPersister implements EntityPersister {
     }
 
     public boolean update(Object entity) {
-        final String query = queryGenerator.update().build(entity);
+        final String query = queryGenerator.update(entity.getClass()).build(entity);
 
         log.info(query);
         jdbcTemplate.execute(query);
@@ -62,7 +63,7 @@ public abstract class AbstractEntityPersister implements EntityPersister {
     public void deleteByKey(EntityKey entityKey) {
         final String query = queryGenerator
                 .delete()
-                .build(entityKey.getId());
+                .build(entityKey.getClazz(), entityKey.getId());
 
         log.info(query);
 

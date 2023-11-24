@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.dialect.Dialect;
 import persistence.fake.FakeDialect;
+import persistence.meta.EntityMeta;
 import persistence.sql.QueryGenerator;
 import persistence.testFixtures.Person;
 
@@ -26,10 +27,11 @@ class SelectQueryBuilderTest {
     @DisplayName("전체를 조회하는 구문을 생성한다.")
     void selectAll() {
         //given
-        SelectQueryBuilder select = QueryGenerator.of(Person.class, dialect).select();
+        SelectQueryBuilder select = QueryGenerator.of(dialect)
+                .select();
 
         //when
-        String sql = select.findAllQuery();
+        String sql = select.findAllQuery(EntityMeta.from(Person.class));
 
         //then
         assertThat(sql).isEqualTo("SELECT users_0.id as users_0_id"
@@ -43,10 +45,11 @@ class SelectQueryBuilderTest {
     @DisplayName("아이디를 기준으로 조회하는 구문을 생성한다.")
     void findById() {
         //given
-        SelectQueryBuilder select = QueryGenerator.of(Person.class, dialect).select();
+        SelectQueryBuilder select = QueryGenerator.of(dialect).select();
+
 
         //when
-        String sql = select.findByIdQuery(1L);
+        String sql = select.findByIdQuery(EntityMeta.from(Person.class), 1L);
 
         //then
         assertThat(sql).isEqualTo("SELECT users_0.id as users_0_id"
@@ -61,21 +64,21 @@ class SelectQueryBuilderTest {
     @DisplayName("아이디가 없으면 예외가 발생한다.")
     void findByIdException() {
         //given
-        SelectQueryBuilder select = QueryGenerator.of(Person.class, dialect).select();
+        SelectQueryBuilder select = QueryGenerator.of(dialect).select();
 
         //when & then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> select.findByIdQuery(null));
+                .isThrownBy(() -> select.findByIdQuery(EntityMeta.from(Person.class), null));
     }
 
     @Test
     @DisplayName("조인을 이용한 조회")
     void join() {
         //given
-        SelectQueryBuilder select = QueryGenerator.of(Order.class, dialect).select();
+        SelectQueryBuilder select = QueryGenerator.of(dialect).select();
 
         //when
-        String sql = select.findAllOneToManyQuery();
+        String sql = select.findAllOneToManyQuery(EntityMeta.from(Order.class));
 
         //then
         assertThat(sql).isEqualTo("SELECT "
@@ -94,10 +97,10 @@ class SelectQueryBuilderTest {
     @DisplayName("아이디를 기준으로 조인을 이용한 조회")
     void joinById() {
         //given
-        SelectQueryBuilder select = QueryGenerator.of(Order.class, dialect).select();
+        SelectQueryBuilder select = QueryGenerator.of(dialect).select();
 
         //when
-        String sql = select.findByIdOneToManyQuery(1L);
+        String sql = select.findByIdOneToManyQuery(EntityMeta.from(Order.class), 1L);
 
         //then
         assertThat(sql).isEqualTo("SELECT "
@@ -118,10 +121,10 @@ class SelectQueryBuilderTest {
     @DisplayName("외래키를 기준으로 조회")
     void findByForeignerId() {
         //given
-        SelectQueryBuilder select = QueryGenerator.of(Order.class, dialect).select();
+        SelectQueryBuilder select = QueryGenerator.of(dialect).select();
 
         //when
-        String sql = select.findByForeignerId(1L);
+        String sql = select.findByForeignerId(EntityMeta.from(Order.class), 1L);
 
         //then
         assertThat(sql).isEqualTo("SELECT order_items_0.order_id as order_items_0_order_id,"
@@ -135,11 +138,11 @@ class SelectQueryBuilderTest {
     @DisplayName("외래키의 ID가 없으면 예외가 발생한다.")
     void findByForeignerIdException() {
         //given
-        SelectQueryBuilder select = QueryGenerator.of(Order.class, dialect).select();
+        SelectQueryBuilder select = QueryGenerator.of(dialect).select();
 
         //when & then
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> select.findByForeignerId(null));
+                .isThrownBy(() -> select.findByForeignerId(EntityMeta.from(Order.class), null));
 
     }
 }

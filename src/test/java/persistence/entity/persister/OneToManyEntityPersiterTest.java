@@ -17,7 +17,7 @@ class OneToManyEntityPersiterTest extends DataBaseTestSetUp {
     void oneToMany() {
         //given
         EntityMeta entityMeta = EntityMeta.from(Order.class);
-        QueryGenerator queryGenerator = QueryGenerator.of(Order.class, dialect);
+        QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         OneToManyEntityPersister persister = OneToManyEntityPersister.create(jdbcTemplate, queryGenerator, entityMeta);
 
         //when
@@ -36,7 +36,7 @@ class OneToManyEntityPersiterTest extends DataBaseTestSetUp {
     void oneToManyFindAll() {
         //given
         EntityMeta entityMeta = EntityMeta.from(Order.class);
-        QueryGenerator queryGenerator = QueryGenerator.of(Order.class, dialect);
+        QueryGenerator queryGenerator = QueryGenerator.of(dialect);
         OneToManyEntityPersister persister = OneToManyEntityPersister.create(jdbcTemplate, queryGenerator, entityMeta);
 
         //when

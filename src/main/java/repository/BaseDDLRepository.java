@@ -11,12 +11,12 @@ public class BaseDDLRepository<T, ID> extends AbstractRepository<T, ID> implemen
     }
 
     public void createTable() {
-        final String sql = QueryGenerator.of(entityMeta, dialect).create();
+        final String sql = QueryGenerator.of(dialect).create().build(tClass);
         jdbcTemplate.execute(sql);
     }
 
     public void dropTable() {
-        final String sql = QueryGenerator.of(entityMeta, dialect).drop();
+        final String sql = QueryGenerator.of(dialect).drop().build(tClass);
         jdbcTemplate.execute(sql);
     }
 }

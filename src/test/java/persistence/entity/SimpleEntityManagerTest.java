@@ -5,6 +5,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import database.DatabaseServer;
 import database.H2;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import jdbc.JdbcTemplate;
@@ -16,6 +17,7 @@ import persistence.dialect.Dialect;
 import persistence.fake.FakeDialect;
 import persistence.sql.QueryGenerator;
 import persistence.testFixtures.DifferentPerson;
+import persistence.testFixtures.EntityManagerFactoryFixture;
 import persistence.testFixtures.NoAutoIncrementPerson;
 import persistence.testFixtures.Person;
 
@@ -25,15 +27,22 @@ class SimpleEntityManagerTest {
     private Dialect dialect;
     private EntityManagerFactory entityManagerFactory;
 
+    private Connection connection;
+
     @BeforeEach
     void setUp() throws SQLException {
         server = new H2();
         server.start();
         dialect = new FakeDialect();
+        connection = server.getConnection();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).create());
-        jdbcTemplate.execute(QueryGenerator.of(DifferentPerson.class, dialect).create());
-        entityManagerFactory = EntityManagerFactory.of("persistence.testFixtures", jdbcTemplate, dialect);
+        jdbcTemplate.execute(QueryGenerator.of(dialect)
+                .create()
+                .build(Person.class));
+        jdbcTemplate.execute(QueryGenerator.of(dialect)
+                .create()
+                .build(DifferentPerson.class));
+        entityManagerFactory = EntityManagerFactoryFixture.getEntityManagerFactory();
     }
 
 
@@ -42,7 +51,7 @@ class SimpleEntityManagerTest {
     void persist() {
         //given
         Person person = new Person("이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
 
         //when
         entityManager.persist(person);
@@ -57,7 +66,7 @@ class SimpleEntityManagerTest {
     void remove() {
         //given
         Person person = new Person("이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
 
         entityManager.persist(person);
 
@@ -76,7 +85,7 @@ class SimpleEntityManagerTest {
     void findById() {
         //given
         NoAutoIncrementPerson person = new NoAutoIncrementPerson(2L, "이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
         entityManager.persist(person);
 
         //when
@@ -93,7 +102,7 @@ class SimpleEntityManagerTest {
         Person person1 = new Person("이름", 19, "asd@gmail.com");
         Person person2 = new Person("이름", 19, "asd@gmail.com");
         Person person3 = new Person("이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
 
         //when
         final Person savePerson1 = entityManager.persist(person1);
@@ -115,7 +124,7 @@ class SimpleEntityManagerTest {
         //given
         final String CHANGE_EMAIL_STRING = "change23@gmail.com";
         Person person = new Person("이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
 
         final Person person1 = entityManager.persist(person);
         final Person person2 = entityManager.persist(person);
@@ -145,7 +154,7 @@ class SimpleEntityManagerTest {
         //given
         Person person = new Person("이름", 19, "asd@gmail.com");
         DifferentPerson noAutoIncrementPerson = new DifferentPerson(2L, "이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
 
         //when
         entityManager.persist(person);
@@ -163,8 +172,15 @@ class SimpleEntityManagerTest {
 
     @AfterEach
     void tearDown() {
-        jdbcTemplate.execute(QueryGenerator.of(Person.class, dialect).drop());
-        jdbcTemplate.execute(QueryGenerator.of(DifferentPerson.class, dialect).drop());
+        QueryGenerator query = QueryGenerator.of(dialect);
+        jdbcTemplate.execute(query
+                .drop()
+                .build(Person.class));
+
+        jdbcTemplate.execute(query
+                .drop()
+                .build(DifferentPerson.class));
+
         server.stop();
     }
 

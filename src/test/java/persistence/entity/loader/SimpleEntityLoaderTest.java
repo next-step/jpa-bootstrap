@@ -4,6 +4,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.meta.EntityMeta;
 import persistence.sql.QueryGenerator;
 import persistence.testFixtures.Person;
 import util.DataBaseTestSetUp;
@@ -14,11 +15,12 @@ class SimpleEntityLoaderTest extends DataBaseTestSetUp {
     @DisplayName("엔터티와 ResultSet을 맵핑한다.")
     void resultSetToEntity() {
         //given
+        final EntityMeta entityMeta = EntityMeta.from(Person.class);
         SimpleEntityLoader loader = SimpleEntityLoader.create();
 
         //when
         final Person person = jdbcTemplate.queryForObject(
-                QueryGenerator.of(Person.class, dialect).select().findByIdQuery(-1L),
+                QueryGenerator.of(dialect).select().findByIdQuery(entityMeta, -1L),
                 (rs) -> loader.resultSetToEntity(Person.class, rs));
 
         //then
@@ -34,11 +36,12 @@ class SimpleEntityLoaderTest extends DataBaseTestSetUp {
     @DisplayName("엔터티와 load 한다.")
     void load() {
         //given
-        SimpleEntityLoader loader = SimpleEntityLoader.create();
+        final EntityMeta entityMeta = EntityMeta.from(Person.class);
+        final SimpleEntityLoader loader = SimpleEntityLoader.create();
 
         //when
         final Person person = jdbcTemplate.queryForObject(
-                QueryGenerator.of(Person.class, dialect).select().findByIdQuery(-1L),
+                QueryGenerator.of(dialect).select().findByIdQuery(entityMeta,-1L),
                 (rs) -> loader.load(Person.class, rs));
 
         //then

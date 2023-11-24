@@ -4,24 +4,18 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import persistence.dialect.Dialect;
-import persistence.dialect.h2.H2Dialect;
-import persistence.meta.EntityMeta;
 
 
 public abstract class QueryBuilder {
     protected static final String DEFAULT_COLUMNS_BRACE = " (%s)";
     protected static final String MARGIN = " ";
     protected static final String EMPTY = "";
-    protected final EntityMeta entityMeta;
+
     protected final Dialect dialect;
 
-    protected QueryBuilder(EntityMeta entityMeta) {
-        this(entityMeta, new H2Dialect());
-    }
-
-    protected QueryBuilder(EntityMeta entityMeta, Dialect dialect) {
+    protected QueryBuilder(Dialect dialect) {
+        if (dialect == null) throw new IllegalArgumentException("dialect는 필수 입니다.");
         this.dialect = dialect;
-        this.entityMeta = entityMeta;
     }
 
     protected String brace(String... query) {

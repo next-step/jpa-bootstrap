@@ -1,25 +1,34 @@
 package persistence.sql.ddl;
 
+import jakarta.persistence.Entity;
 import java.util.List;
 import java.util.stream.Collectors;
 import persistence.dialect.Dialect;
+import persistence.exception.NoEntityException;
 import persistence.meta.ColumnType;
 import persistence.meta.EntityColumn;
-import persistence.meta.EntityMeta;
+import persistence.meta.EntityColumns;
+import persistence.meta.TableName;
 import persistence.sql.QueryBuilder;
 
 
 public class CreateQueryBuilder extends QueryBuilder {
 
-    public CreateQueryBuilder(EntityMeta entityMeta, Dialect dialect) {
-        super(entityMeta, dialect);
+    public CreateQueryBuilder(Dialect dialect) {
+        super(dialect);
     }
 
-    public String create() {
-        return queryCreate(entityMeta.getTableName())
-                + brace(columnsCreateQuery(entityMeta.getEntityColumns())
-                , primaryKeyConcentrate(entityMeta.getEntityColumns())
-        );
+    public String build(Class<?> clazz) {
+        if (clazz == null || clazz.getAnnotation(Entity.class) == null) {
+            throw new NoEntityException();
+        }
+
+        final TableName tableName = TableName.from(clazz);
+        final EntityColumns entityColumns = EntityColumns.from(clazz);
+
+        return queryCreate(tableName.getValue())
+                + brace(columnsCreateQuery(entityColumns.getEntityColumns())
+                , primaryKeyConcentrate(entityColumns.getEntityColumns()));
     }
 
     private String queryCreate(String tableName) {

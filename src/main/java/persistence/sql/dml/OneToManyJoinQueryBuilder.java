@@ -2,20 +2,22 @@ package persistence.sql.dml;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import persistence.dialect.Dialect;
 import persistence.entity.OneToManyAssociation;
 import persistence.meta.EntityColumn;
 import persistence.meta.EntityMeta;
 import persistence.sql.QueryBuilder;
 
 public class OneToManyJoinQueryBuilder extends QueryBuilder {
-    public OneToManyJoinQueryBuilder(EntityMeta entityMeta) {
-        super(entityMeta);
+    public OneToManyJoinQueryBuilder(Dialect dialect) {
+        super(dialect);
+
+    }
+    public String build(EntityMeta entityMeta) {
         if (!entityMeta.hasOneToManyAssociation()) {
             throw new IllegalArgumentException("해당 엔티티는 OneToMany 관계가 없습니다.");
         }
-    }
 
-    public String build() {
         return generateJoinQueryStream(entityMeta, 0)
                 .collect(Collectors.joining(""));
     }
