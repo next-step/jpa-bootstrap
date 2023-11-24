@@ -1,6 +1,5 @@
 package persistence.entity.persistentcontext;
 
-import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,8 +24,8 @@ public class JdbcEntityPersister<T> implements EntityPersister<T> {
   public JdbcEntityPersister(Class<T> clazz, JdbcTemplate jdbcTemplate, MetaEntity<T> metaEntity) {
     this.jdbcTemplate = jdbcTemplate;
     this.metaEntity = metaEntity;
-    this.entityLoader = new JdbcEntityLoader<T>(clazz, jdbcTemplate);
-    this.relationLoader = (RelationLoader<T>) CollectionElementLoader.of(clazz, jdbcTemplate);
+    this.entityLoader = new JdbcEntityLoader<T>(metaEntity, jdbcTemplate);
+    this.relationLoader = (RelationLoader<T>) CollectionElementLoader.of(metaEntity, jdbcTemplate);
   }
 
   @Override

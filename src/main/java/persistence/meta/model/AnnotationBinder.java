@@ -23,9 +23,10 @@ public class AnnotationBinder {
         .stream()
         .filter(clazz -> clazz.isAnnotationPresent(Entity.class))
         .collect(Collectors.toList());
-
+    Map<Class<?>, MetaEntity<?>> metaEntityMapping = clazzes.stream()
+        .collect(Collectors.toMap(clazz -> clazz, MetaEntity::of));
     Map<Class<?>, EntityPersister<?>> persisterMapping = clazzes.stream()
-        .collect(Collectors.toMap(clazz -> clazz, clazz -> new JdbcEntityPersister(clazz, jdbcTemplate, MetaEntity.of(clazz))));
+        .collect(Collectors.toMap(clazz -> clazz, clazz -> new JdbcEntityPersister(clazz, jdbcTemplate, metaEntityMapping.get(clazz))));
 
     return new MetaModelImpl(persisterMapping);
   }

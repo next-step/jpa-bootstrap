@@ -1,7 +1,6 @@
 package persistence.entity.loader;
 
 import jakarta.persistence.FetchType;
-import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,18 +37,17 @@ public class CollectionElementLoader<T> implements RelationLoader<T> {
     this.relation = relation;
   }
 
-  public static RelationLoader<?> of(Class<?> clazz, JdbcTemplate jdbcTemplate) {
+  public static <T> RelationLoader<?> of(MetaEntity<T> metaEntity, JdbcTemplate jdbcTemplate) {
 
-    MetaEntity<?> entity = MetaEntity.of(clazz);
-    Relation relation = entity.getRelation();
+    Relation relation = metaEntity.getRelation();
 
-    if (!entity.hasRelation()){
+    if (!metaEntity.hasRelation()){
       return new EmptyCollectionLoader<>();
     }
 
     MetaEntity<?> elementEntity = relation.getMetaEntity();
 
-    return new CollectionElementLoader<>(jdbcTemplate, entity, elementEntity, relation);
+    return new CollectionElementLoader<>(jdbcTemplate, metaEntity, elementEntity, relation);
   }
 
   @Override
@@ -67,9 +65,9 @@ public class CollectionElementLoader<T> implements RelationLoader<T> {
     if (relation.getFetchType() == FetchType.LAZY) {
 
       Enhancer enhancer = new Enhancer();
-      enhancer.setSuperclass(List.class); // 여기 relation 에서 타입 가져와야할듯.
+      enhancer.setSuperclass(List.class);
       enhancer.setCallback(new MethodLazyLoader(joinQuery, elementRowMapper));
-      List<Object> objects = (List<Object>) enhancer.create(); // 이부분에 타입만 잘정의하면 lazy loader 잘들어갈듯
+      List<Object> objects = (List<Object>) enhancer.create();
       relationColumn.setFieldValue(entity, objects);
 
       return Optional.ofNullable(entity);
