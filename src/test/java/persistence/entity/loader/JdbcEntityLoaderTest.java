@@ -33,7 +33,7 @@ public class JdbcEntityLoaderTest extends BuilderTest {
   @Test
   @DisplayName("Loader를 이용해서 find 합니다.")
   public void findEntity() {
-    JdbcEntityLoader<PersonFixtureStep3> jdbcEntityLoader = new JdbcEntityLoader<>(PersonFixtureStep3.class, jdbcTemplate);
+    JdbcEntityLoader<PersonFixtureStep3> jdbcEntityLoader = new JdbcEntityLoader<>(meta, jdbcTemplate);
     PersonFixtureStep3 person = jdbcEntityLoader.load(ID1).get();
 
     assertThat(person).isEqualTo(두번째사람);
@@ -42,7 +42,7 @@ public class JdbcEntityLoaderTest extends BuilderTest {
   @Test
   @DisplayName("Loader를 이용해서 findAll 합니다.")
   public void findAllEntity() {
-    JdbcEntityLoader<PersonFixtureStep3> jdbcEntityLoader = new JdbcEntityLoader<>(PersonFixtureStep3.class, jdbcTemplate);
+    JdbcEntityLoader<PersonFixtureStep3> jdbcEntityLoader = new JdbcEntityLoader<>(meta, jdbcTemplate);
 
     List<PersonFixtureStep3> people = jdbcEntityLoader.findAll();
 
