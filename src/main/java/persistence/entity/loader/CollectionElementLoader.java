@@ -65,10 +65,9 @@ public class CollectionElementLoader<T> implements RelationLoader<T> {
     if (relation.getFetchType() == FetchType.LAZY) {
 
       Enhancer enhancer = new Enhancer();
-      enhancer.setSuperclass(List.class);
+      enhancer.setSuperclass(relation.getCollectionType());
       enhancer.setCallback(new MethodLazyLoader(joinQuery, elementRowMapper));
-      List<Object> objects = (List<Object>) enhancer.create();
-      relationColumn.setFieldValue(entity, objects);
+      relationColumn.setFieldValue(entity, enhancer.create());
 
       return Optional.ofNullable(entity);
     }
@@ -96,13 +95,13 @@ public class CollectionElementLoader<T> implements RelationLoader<T> {
     if (relation.getFetchType() == FetchType.LAZY) {
 
       Enhancer enhancer = new Enhancer();
-      enhancer.setSuperclass(List.class);
+      Class<?> dsf = relation.getCollectionType().getDeclaringClass();
+      enhancer.setSuperclass(relation.getCollectionType());
       enhancer.setCallback(new MethodLazyLoader(joinQuery, elementRowMapper));
-      List<Object> objects = (List<Object>) enhancer.create();
 
       return entities.stream()
           .map(entity -> {
-            relationColumn.setFieldValue(entity, objects);
+            relationColumn.setFieldValue(entity, enhancer.create());
             return entity;
           })
           .collect(Collectors.toList());
