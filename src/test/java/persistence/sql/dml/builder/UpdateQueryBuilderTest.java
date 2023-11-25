@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.persistentcontext.JdbcPersistenceContext;
 import persistence.sql.ddl.builder.BuilderTest;
-import persistence.sql.fixture.PersonFixtureStep3;
+import domain.fixture.PersonFixtureStep3;
 
 public class UpdateQueryBuilderTest extends BuilderTest {
 

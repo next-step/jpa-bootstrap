@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.persistentcontext.JdbcPersistenceContext;
 import persistence.sql.ddl.builder.BuilderTest;
-import persistence.sql.fixture.PersonFixtureStep3;
+import domain.fixture.PersonFixtureStep3;
 
 @DisplayName("1.요구사항 Insert 구현하기")
 public class InsertQueryBuilderTest extends BuilderTest {

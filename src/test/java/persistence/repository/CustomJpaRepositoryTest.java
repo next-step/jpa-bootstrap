@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import persistence.entity.JdbcEntityManager;
 import persistence.entity.persistentcontext.JdbcPersistenceContext;
 import persistence.sql.ddl.builder.BuilderTest;
-import persistence.sql.fixture.PersonFixtureStep3;
+import domain.fixture.PersonFixtureStep3;
 
 public class CustomJpaRepositoryTest extends BuilderTest {
   public static final long ID = 80L;
@@ -27,8 +27,8 @@ public class CustomJpaRepositoryTest extends BuilderTest {
   @Test
   @DisplayName("entity를 저장합니다.")
   void saveEntity(){
-    customJpaRepository = new CustomJpaRepository<>(new JdbcEntityManager(connection, persistenceContext,
-        entityEntry));
+    customJpaRepository = new CustomJpaRepository<>(new JdbcEntityManager(persistenceContext,
+        entityEntry, metaModel));
     PersonFixtureStep3 person = customJpaRepository.save(세번째사람);
 
     PersonFixtureStep3 personFound = customJpaRepository.findById(person, person.getId());
@@ -40,8 +40,8 @@ public class CustomJpaRepositoryTest extends BuilderTest {
   @Test
   @DisplayName("영속화된 entity를 변경감지로 수정된 entity로 persist 합니다.")
   void persistUpdatedEntity(){
-    customJpaRepository = new CustomJpaRepository<>(new JdbcEntityManager(connection, persistenceContext,
-        entityEntry));
+    customJpaRepository = new CustomJpaRepository<>(new JdbcEntityManager(persistenceContext,
+        entityEntry, metaModel));
     PersonFixtureStep3 person = customJpaRepository.save(세번째사람);
 
     customJpaRepository.save(person);

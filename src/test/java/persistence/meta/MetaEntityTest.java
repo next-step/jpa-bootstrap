@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.sql.fixture.PersonFixture2;
+import domain.fixture.PersonFixture2;
 
 @DisplayName("1.2 MetaEntity를 Clazz에서 추출합니다.")
 public class MetaEntityTest {

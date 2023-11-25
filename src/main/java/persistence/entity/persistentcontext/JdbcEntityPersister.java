@@ -1,12 +1,10 @@
 package persistence.entity.persistentcontext;
 
-import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import jdbc.JdbcTemplate;
 import persistence.entity.loader.CollectionElementLoader;
-import persistence.entity.loader.EmptyCollectionLoader;
 import persistence.entity.loader.EntityLoader;
 import persistence.entity.loader.JdbcEntityLoader;
 import persistence.entity.loader.RelationLoader;
@@ -23,11 +21,11 @@ public class JdbcEntityPersister<T> implements EntityPersister<T> {
   private final RelationLoader<T> relationLoader;
   private final DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
 
-  public JdbcEntityPersister(Class<T> clazz, Connection connection) {
-    this.jdbcTemplate = new JdbcTemplate(connection);
-    this.metaEntity = MetaEntity.of(clazz);
-    this.entityLoader = new JdbcEntityLoader<T>(clazz, connection);
-    this.relationLoader = (RelationLoader<T>) CollectionElementLoader.of(clazz, connection);
+  public JdbcEntityPersister(Class<T> clazz, JdbcTemplate jdbcTemplate, MetaEntity<T> metaEntity) {
+    this.jdbcTemplate = jdbcTemplate;
+    this.metaEntity = metaEntity;
+    this.entityLoader = new JdbcEntityLoader<T>(metaEntity, jdbcTemplate);
+    this.relationLoader = (RelationLoader<T>) CollectionElementLoader.of(metaEntity, jdbcTemplate);
   }
 
   @Override

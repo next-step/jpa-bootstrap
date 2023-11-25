@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.loader.CollectionElementLoader;
+import persistence.meta.MetaEntity;
 
 
 public class CollectionElementLazyLoaderTest {
@@ -77,7 +78,7 @@ public class CollectionElementLazyLoaderTest {
   @DisplayName("Fetch Type이 EAGER인 엔티티를 LOAD할 때, element 엔티티들도 Load 됩니다.")
   void entityLoadByIdsCollection() {
     CollectionElementLoader<Order> Loader = (CollectionElementLoader<Order>) CollectionElementLoader.of(
-        Order.class, connection);
+        MetaEntity.of(Order.class), jdbcTemplate);
     List<Order> orders = Loader.loadByIds(List.of(1L, 2L));
 
     assertThat(orders).hasSize(1);
@@ -90,7 +91,7 @@ public class CollectionElementLazyLoaderTest {
   @DisplayName("Fetch Type이 Lazy인 엔티티를 LOAD할 때, element 엔티티들은 proxy가 됩니다.")
   void entityLoadByIdsLazyCollection() {
     CollectionElementLoader<Order> Loader = (CollectionElementLoader<Order>) CollectionElementLoader.of(
-        Order.class, connection);
+        MetaEntity.of(Order.class), jdbcTemplate);
     List<Order> orders = Loader.loadByIds(List.of(1L, 2L));
 
     assertThat(orders).hasSize(1);

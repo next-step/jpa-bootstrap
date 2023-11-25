@@ -1,35 +1,29 @@
 package persistence.entity;
 
-import java.sql.Connection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import persistence.entity.entry.EntityEntry;
 import persistence.entity.entry.EntityStatus;
 import persistence.entity.persistentcontext.EntityPersister;
-import persistence.entity.persistentcontext.JdbcEntityPersister;
 import persistence.entity.persistentcontext.PersistenceContext;
+import persistence.meta.model.MetaModel;
 
 public class JdbcEntityManager implements EntityManager {
 
-  private final Connection connection;
-  private final Map<Class<?>, EntityPersister> persisterMap = new ConcurrentHashMap<>();
   private final PersistenceContext persistenceContext;
   private final EntityEntry entityEntry;
+  private final MetaModel metaModel;
 
-  public JdbcEntityManager(Connection connection, PersistenceContext persistenceContext,
-      EntityEntry entityEntry) {
-    this.connection = connection;
+  public JdbcEntityManager(PersistenceContext persistenceContext,
+      EntityEntry entityEntry, MetaModel metaModel) {
     this.persistenceContext = persistenceContext;
     this.entityEntry = entityEntry;
+    this.metaModel = metaModel;
   }
 
   @Override
   public <T> T find(Class<T> clazz, Long id) {
-    EntityPersister<T> persister = persisterMap.getOrDefault(clazz,
-        new JdbcEntityPersister<>(clazz, connection));
-    persisterMap.putIfAbsent(clazz, persister);
+    EntityPersister<T> persister = metaModel.getPersister(clazz);
 
     Optional<T> entity = (Optional<T>) persistenceContext.getEntity(id, clazz);
 
@@ -48,9 +42,8 @@ public class JdbcEntityManager implements EntityManager {
 
   @Override
   public <T> void persist(T entity) {
-    EntityPersister<T> persister = persisterMap.getOrDefault(entity.getClass(),
-        new JdbcEntityPersister<>((Class<T>) entity.getClass(), connection));
-    persisterMap.putIfAbsent(entity.getClass(), persister);
+    EntityPersister<T> persister = (EntityPersister<T>) metaModel.getPersister(entity.getClass());
+
     entityEntry.putEntityEntryStatus(entity, EntityStatus.SAVING);
     Long assignedId = persister.getEntityId(entity).orElse(-1L);
 
@@ -69,10 +62,7 @@ public class JdbcEntityManager implements EntityManager {
 
   @Override
   public <T> void remove(T entity) {
-    EntityPersister<T> persister = persisterMap.getOrDefault(entity.getClass(),
-        new JdbcEntityPersister<>((Class<T>) entity.getClass(), connection));
-
-    persisterMap.putIfAbsent(entity.getClass(), persister);
+    EntityPersister<T> persister = (EntityPersister<T>) metaModel.getPersister(entity.getClass());
 
     removePersistenceContext(entity);
 

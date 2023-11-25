@@ -1,4 +1,4 @@
-package persistence.sql.fixture;
+package domain.fixture;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

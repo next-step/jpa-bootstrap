@@ -10,8 +10,8 @@ import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.sql.fixture.PersonFixtureStep3;
-import persistence.sql.fixture.PersonInstances;
+import domain.fixture.PersonFixtureStep3;
+import domain.fixture.PersonInstances;
 
 public class ProxyTest {
   @Test

@@ -6,10 +6,9 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.entity.loader.JdbcEntityLoader;
 import persistence.entity.persistentcontext.JdbcPersistenceContext;
 import persistence.sql.ddl.builder.BuilderTest;
-import persistence.sql.fixture.PersonFixtureStep3;
+import domain.fixture.PersonFixtureStep3;
 
 public class JdbcEntityLoaderTest extends BuilderTest {
 
@@ -34,7 +33,7 @@ public class JdbcEntityLoaderTest extends BuilderTest {
   @Test
   @DisplayName("Loader를 이용해서 find 합니다.")
   public void findEntity() {
-    JdbcEntityLoader<PersonFixtureStep3> jdbcEntityLoader = new JdbcEntityLoader<>(PersonFixtureStep3.class, connection);
+    JdbcEntityLoader<PersonFixtureStep3> jdbcEntityLoader = new JdbcEntityLoader<>(meta, jdbcTemplate);
     PersonFixtureStep3 person = jdbcEntityLoader.load(ID1).get();
 
     assertThat(person).isEqualTo(두번째사람);
@@ -43,7 +42,7 @@ public class JdbcEntityLoaderTest extends BuilderTest {
   @Test
   @DisplayName("Loader를 이용해서 findAll 합니다.")
   public void findAllEntity() {
-    JdbcEntityLoader<PersonFixtureStep3> jdbcEntityLoader = new JdbcEntityLoader<>(PersonFixtureStep3.class, connection);
+    JdbcEntityLoader<PersonFixtureStep3> jdbcEntityLoader = new JdbcEntityLoader<>(meta, jdbcTemplate);
 
     List<PersonFixtureStep3> people = jdbcEntityLoader.findAll();
 

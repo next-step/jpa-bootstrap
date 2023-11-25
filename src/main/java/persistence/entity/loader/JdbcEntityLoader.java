@@ -1,6 +1,5 @@
 package persistence.entity.loader;
 
-import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,9 +16,9 @@ public class JdbcEntityLoader<T> implements EntityLoader<T> {
   private final SelectQueryBuilder selectQueryBuilder = new SelectQueryBuilder();
   private final JdbcRowMapper<T> jdbcRowMapper;
 
-  public JdbcEntityLoader(Class<T> clazz, Connection connection) {
-    this.jdbcTemplate = new JdbcTemplate(connection);
-    this.metaEntity = MetaEntity.of(clazz);
+  public JdbcEntityLoader(MetaEntity<T> metaEntity, JdbcTemplate jdbcTemplate) {
+    this.jdbcTemplate = jdbcTemplate;
+    this.metaEntity = metaEntity;
     this.jdbcRowMapper = new JdbcRowMapper<>(metaEntity);
   }
 

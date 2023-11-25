@@ -2,6 +2,7 @@ package persistence.sql.ddl.builder;
 
 import database.DatabaseServer;
 import database.H2;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import jdbc.JdbcTemplate;
@@ -14,10 +15,13 @@ import persistence.entity.entry.JdbcEntityEntry;
 import persistence.entity.persistentcontext.JdbcPersistenceContext;
 import persistence.entity.persistentcontext.PersistenceContext;
 import persistence.meta.MetaEntity;
+import persistence.meta.model.AnnotationBinder;
+import persistence.meta.model.ComponentScanner;
+import persistence.meta.model.MetaModel;
 import persistence.sql.dml.builder.InsertQueryBuilder;
 import persistence.sql.dml.builder.read.SelectQueryBuilder;
-import persistence.sql.fixture.PersonFixtureStep3;
-import persistence.sql.fixture.PersonInstances;
+import domain.fixture.PersonFixtureStep3;
+import domain.fixture.PersonInstances;
 
 public class BuilderTest {
 
@@ -32,7 +36,7 @@ public class BuilderTest {
   public static PersistenceContext persistenceContext;
   public static EntityEntry entityEntry;
   public static String DELIMITER = ",";
-
+  public static MetaModel metaModel;
   @BeforeAll
   static void setup() throws SQLException {
     person = PersonFixtureStep3.class;
@@ -48,6 +52,14 @@ public class BuilderTest {
     selectQueryBuilder = new SelectQueryBuilder();
     String query = createQueryBuilder.createIfNotExistsCreateQuery(meta.getTableName(), meta.getColumns());
     jdbcTemplate.execute(query);
+
+    ComponentScanner componentScanner = new ComponentScanner();
+
+    try {
+      metaModel = new AnnotationBinder(componentScanner).buildMetaModel(jdbcTemplate, "domain");
+    } catch (IOException | ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @BeforeEach

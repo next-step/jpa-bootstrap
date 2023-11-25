@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.loader.CollectionElementLoader;
+import persistence.meta.MetaEntity;
 
 class CollectionElementLoaderTest {
 
@@ -74,7 +75,7 @@ class CollectionElementLoaderTest {
   @DisplayName("Fetch Type이 EAGER인 엔티티를 LOAD할 때, element 엔티티들도 Load 됩니다.")
   void entityLoadCollection() {
     CollectionElementLoader<Order> Loader = (CollectionElementLoader<Order>) CollectionElementLoader.of(
-        Order.class, connection);
+        MetaEntity.of(Order.class), jdbcTemplate);
     Order order = Loader.load(1L).get();
 
     assertThat(order.orderItems).hasSize(2);
