@@ -16,4 +16,6 @@ public interface Relation {
   Class<?> getRelation();
 
   String getFieldName();
+
+  Class<?> getCollectionType();
 }
