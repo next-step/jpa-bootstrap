@@ -6,22 +6,22 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import persistence.sql.dialect.H2ColumnType;
+import registry.EntityMetaRegistry;
 
 @DisplayName("UPDATE 쿼리 생성 테스트")
 class UpdateStatementBuilderTest {
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
-
     @Test
     @DisplayName("엔티티 객체의 업데이트 쿼리를 생성할 수 있다.")
     void canCreateUpdateQuery() {
+        final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry.addEntityMeta(UpdateStateBuilderFixture.class);
+
         final UpdateStateBuilderFixture fixture = new UpdateStateBuilderFixture(1L, "updatedJames", "updated@gamil.com");
 
         final String updateSql = UpdateStatementBuilder.builder()
-            .update(fixture, new H2ColumnType())
+            .update(fixture, entityMetaRegistry.getEntityMeta(UpdateStateBuilderFixture.class))
             .equalById()
             .build();
 

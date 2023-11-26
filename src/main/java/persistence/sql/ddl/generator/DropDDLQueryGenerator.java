@@ -7,7 +7,7 @@ public class DropDDLQueryGenerator {
 
     public static final String DROP_TABLE_FORMAT = "DROP TABLE %s;";
 
-    public DropDDLQueryGenerator(ColumnType columnType) {
+    public DropDDLQueryGenerator() {
     }
 
     public String drop(Class<?> entityClazz) {

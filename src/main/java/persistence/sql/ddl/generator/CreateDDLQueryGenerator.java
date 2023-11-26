@@ -6,17 +6,12 @@ import persistence.sql.schema.meta.EntityClassMappingMeta;
 
 public class CreateDDLQueryGenerator {
 
-    private final ColumnType columnType;
-
     public static final String CREATE_TABLE_FORMAT = "CREATE TABLE %s (%s);";
 
-    public CreateDDLQueryGenerator(ColumnType columnType) {
-        this.columnType = columnType;
+    public CreateDDLQueryGenerator() {
     }
 
-    public String create(Class<?> entityClazz) {
-        final EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of(entityClazz, columnType);
-
+    public String create(EntityClassMappingMeta entityClassMappingMeta) {
         return String.format(CREATE_TABLE_FORMAT, entityClassMappingMeta.tableClause(), entityClassMappingMeta.fieldClause());
     }
 }

@@ -19,6 +19,8 @@ import persistence.sql.dialect.H2ColumnType;
 import persistence.sql.dml.clause.operator.EqualOperator;
 import persistence.sql.dml.clause.predicate.OnPredicate;
 import persistence.sql.dml.clause.predicate.WherePredicate;
+import persistence.sql.schema.meta.EntityClassMappingMeta;
+import registry.EntityMetaRegistry;
 
 @DisplayName("SELECT 문 생성 테스트")
 class SelectJoinStatementBuilderTest {
@@ -26,8 +28,12 @@ class SelectJoinStatementBuilderTest {
     @Test
     @DisplayName("Join절을 통해 Select 문을 생성할 수 있다.")
     void canBuildSelectStatementJoin() {
+        final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry.addEntityMeta(SelectJoinStatementEntity.class);
+        final EntityClassMappingMeta entityClassMappingMeta = entityMetaRegistry.getEntityMeta(SelectJoinStatementEntity.class);
+
         final String selectStatement = SelectStatementBuilder.builder()
-            .selectFrom(SelectJoinStatementEntity.class, new H2ColumnType())
+            .selectFrom(entityClassMappingMeta)
             .leftJoin(OrderItem.class, OnPredicate.of("orders.id", "order_items.order_id", new EqualOperator()), new H2ColumnType())
             .where(WherePredicate.of("id", 1L, new EqualOperator()))
             .or(WherePredicate.of("nick_name", "test_person", new EqualOperator()))

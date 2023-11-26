@@ -1,11 +1,11 @@
 package persistence.sql.dml.statement;
 
 import java.util.stream.Collectors;
-import persistence.sql.dialect.ColumnType;
 import persistence.sql.dml.clause.builder.WhereClauseBuilder;
 import persistence.sql.dml.clause.operator.EqualOperator;
 import persistence.sql.dml.clause.predicate.WherePredicate;
-import persistence.sql.exception.ClassMappingException;
+import persistence.sql.exception.EntityMappingException;
+import persistence.sql.schema.meta.EntityClassMappingMeta;
 import persistence.sql.schema.meta.EntityObjectMappingMeta;
 
 public class UpdateStatementBuilder {
@@ -26,15 +26,15 @@ public class UpdateStatementBuilder {
         return new UpdateStatementBuilder();
     }
 
-    public UpdateStatementBuilder update(Object entity, ColumnType columnType) {
+    public UpdateStatementBuilder update(Object entity, EntityClassMappingMeta entityClassMappingMeta) {
         if (updateStatementBuilder.length() > 0) {
-            throw ClassMappingException.duplicateCallMethod("update()");
+            throw EntityMappingException.duplicateCallMethod("update()");
         }
 
-        entityObjectMappingMeta = EntityObjectMappingMeta.of(entity, columnType);
+        entityObjectMappingMeta = EntityObjectMappingMeta.of(entity, entityClassMappingMeta);
 
         updateStatementBuilder.append(
-            String.format(UPDATE_FORMAT, entityObjectMappingMeta.tableClause(), formatColumnWithUpdatedValue(entityObjectMappingMeta)));
+            String.format(UPDATE_FORMAT, entityClassMappingMeta.tableClause(), formatColumnWithUpdatedValue(entityObjectMappingMeta)));
         return this;
     }
 
@@ -54,7 +54,7 @@ public class UpdateStatementBuilder {
 
     public UpdateStatementBuilder and(WherePredicate predicate) {
         if (this.whereClauseBuilder == null) {
-            throw ClassMappingException.preconditionRequired("where()");
+            throw EntityMappingException.preconditionRequired("where()");
         }
 
         this.whereClauseBuilder.and(predicate);
@@ -63,7 +63,7 @@ public class UpdateStatementBuilder {
 
     public UpdateStatementBuilder or(WherePredicate predicate) {
         if (this.whereClauseBuilder == null) {
-            throw ClassMappingException.preconditionRequired("where()");
+            throw EntityMappingException.preconditionRequired("where()");
         }
 
         this.whereClauseBuilder.or(predicate);
@@ -72,7 +72,7 @@ public class UpdateStatementBuilder {
 
     public String build() {
         if (updateStatementBuilder.length() == 0) {
-            throw ClassMappingException.preconditionRequired("update()");
+            throw EntityMappingException.preconditionRequired("update()");
         }
 
         if (this.whereClauseBuilder == null) {
