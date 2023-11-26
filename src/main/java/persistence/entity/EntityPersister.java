@@ -1,10 +1,7 @@
 package persistence.entity;
 
 import jakarta.persistence.Transient;
-import java.util.Arrays;
-import java.util.List;
 import jdbc.JdbcTemplate;
-import jdbc.ResultMapper;
 import persistence.sql.common.instance.Values;
 import persistence.sql.common.meta.Columns;
 import persistence.sql.common.meta.JoinColumn;
@@ -13,6 +10,9 @@ import persistence.sql.common.meta.MetaJoinColumn;
 import persistence.sql.common.meta.MetaTableName;
 import persistence.sql.common.meta.TableName;
 import persistence.sql.dml.Query;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class EntityPersister<T> {
     private final Query query;
@@ -31,7 +31,8 @@ public class EntityPersister<T> {
         this.query = query;
         this.joinColumn = MetaJoinColumn.get(tClass);
 
-        this.entityLoader = new EntityLoader<>(jdbcTemplate, tClass, query, new EntityMeta(tableName, columns, joinColumn));
+        this.entityLoader = new EntityLoader<>(
+                jdbcTemplate, tClass, query, EntityMeta.makeWithJoinColumn(tableName, columns, joinColumn));
     }
 
     public List<T> findAll() {
@@ -39,7 +40,7 @@ public class EntityPersister<T> {
     }
 
     public <I> T findById(I input) {
-        if(joinColumn != null && joinColumn.isEager()) {
+        if (joinColumn != null && joinColumn.isEager()) {
             return entityLoader.findById(input);
         }
 
@@ -51,7 +52,7 @@ public class EntityPersister<T> {
     }
 
     public <I> boolean update(I input, Object arg) {
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
         try {
             String q = query.update(entityMeta, getValues(input), arg);
 
@@ -63,14 +64,14 @@ public class EntityPersister<T> {
     }
 
     public <I> void insert(I input) {
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
         String q = query.insert(entityMeta, getValues(input));
 
         jdbcTemplate.execute(q);
     }
 
     public void delete(Object arg) {
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
         String q = query.delete(entityMeta, arg);
 
         jdbcTemplate.execute(q);
@@ -93,15 +94,15 @@ public class EntityPersister<T> {
         }
 
         Arrays.stream(input.getClass().getDeclaredFields())
-            .filter(field -> !field.isAnnotationPresent(Transient.class))
-            .forEach(field -> {
-                field.setAccessible(true);
-                try {
-                    field.set(destination, field.get(input));
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+                .filter(field -> !field.isAnnotationPresent(Transient.class))
+                .forEach(field -> {
+                    field.setAccessible(true);
+                    try {
+                        field.set(destination, field.get(input));
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
         return destination;
     }

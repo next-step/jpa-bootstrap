@@ -159,13 +159,13 @@ class DatabaseImplTest {
         final Columns columns = Columns을_생성함(t);
         final Values values = Values을_생성함(t);
 
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
         database.execute(query.insert(entityMeta, values));
     }
 
     private void delete(TableName tableName, Columns columns, Object args) throws SQLException {
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
         database.execute(query.delete(entityMeta, args));
     }
 
@@ -173,7 +173,7 @@ class DatabaseImplTest {
         final TableName tableName = TableName을_생성함(tClass);
         final Columns columns = Columns을_생성함(tClass);
 
-        final EntityMeta entityMeta = new EntityMeta(methodName, tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.makeWithMethodName(methodName, tableName, columns);
 
         return database.executeQuery(query.selectAll(entityMeta));
     }
@@ -183,7 +183,7 @@ class DatabaseImplTest {
         final Columns columns = Columns을_생성함(tClass);
         final JoinColumn joinColumn = JoinColumn을_생성함(tClass);
 
-        final EntityMeta entityMeta = new EntityMeta(methodName, tableName, columns, joinColumn);
+        final EntityMeta entityMeta = EntityMeta.makeWithJoinColumn(methodName, tableName, columns, joinColumn);
 
         return database.executeQuery(query.select(entityMeta, arg));
     }

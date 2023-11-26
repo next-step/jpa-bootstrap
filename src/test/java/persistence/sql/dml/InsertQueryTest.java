@@ -31,7 +31,7 @@ class InsertQueryTest {
         final Columns columns = Columns을_생성함(person);
         final Values values = Values을_생성함(person);
 
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
         //when
         String q = query.insert(entityMeta, values);
@@ -55,7 +55,7 @@ class InsertQueryTest {
         final Columns columns = Columns을_생성함(person);
         final Values values = Values을_생성함(person);
 
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
         //when
         String q = query.insert(entityMeta, values);

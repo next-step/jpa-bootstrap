@@ -76,7 +76,7 @@ class QueryDmlTest {
             final Columns columns = Columns을_생성함(person);
             final Values values = Values을_생성함(person);
 
-            final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+            final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
             //when
             String q = query.insert(entityMeta, values);
@@ -191,7 +191,7 @@ class QueryDmlTest {
             final TableName tableName = TableName을_생성함(clazz);
             final Columns columns = Columns을_생성함(clazz);
 
-            final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+            final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
             //when
             String q = query.delete(entityMeta, id);
@@ -241,7 +241,7 @@ class QueryDmlTest {
             final Columns columns = Columns을_생성함(clazz);
             final Values values = Values을_생성함(expected);
 
-            final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+            final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
             //when
             String q = query.update(entityMeta, values, id);
@@ -270,7 +270,7 @@ class QueryDmlTest {
     }
 
     private String getSelectAllQuery(String methodName, TableName tableName, Columns columns) {
-        final EntityMeta entityMeta = new EntityMeta(methodName, tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.makeWithMethodName(methodName, tableName, columns);
 
         return query.selectAll(entityMeta);
     }
@@ -280,7 +280,7 @@ class QueryDmlTest {
         final Columns columns = Columns을_생성함(tClass);
         final JoinColumn joinColumn = JoinColumn을_생성함(tClass);
 
-        final EntityMeta entityMeta = new EntityMeta(methodName, tableName, columns, joinColumn);
+        final EntityMeta entityMeta = EntityMeta.makeWithJoinColumn(methodName, tableName, columns, joinColumn);
 
         return query.select(entityMeta, arg);
     }
@@ -297,7 +297,7 @@ class QueryDmlTest {
         final Columns columns = Columns을_생성함(t);
         final Values values = Values.of(t);
 
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
         jdbcTemplate.execute(query.insert(entityMeta, values));
     }

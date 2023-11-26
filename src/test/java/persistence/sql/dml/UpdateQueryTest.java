@@ -31,7 +31,7 @@ class UpdateQueryTest {
         final Columns columns = Columns을_생성함(clazz);
         final Values values = Values을_생성함(person);
 
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
         //when
         String result = query.update(entityMeta, values, 3L);
@@ -52,7 +52,7 @@ class UpdateQueryTest {
         final Columns columns = Columns을_생성함(clazz);
         final Values values = Values을_생성함(person);
 
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
         //when
         String result = query.update(entityMeta, values, 3L);
@@ -73,7 +73,7 @@ class UpdateQueryTest {
         final Columns columns = Columns을_생성함(clazz);
         final Values values = Values을_생성함(person);
 
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
         //when
         String result = query.update(entityMeta, values, 3L);
