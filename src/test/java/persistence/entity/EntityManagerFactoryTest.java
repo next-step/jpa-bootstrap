@@ -24,5 +24,4 @@ class EntityManagerFactoryTest {
         //then
         assertNotNull(entityManager);
     }
-
 }
