@@ -12,21 +12,23 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.sql.dialect.ColumnType;
 import persistence.sql.dialect.H2ColumnType;
 import persistence.sql.schema.meta.EntityObjectMappingMeta;
+import registry.EntityMetaRegistry;
 
 @DisplayName("EntityObjectMappingMeta 테스트")
 class EntityObjectMappingMetaTest {
 
-    private final ColumnType columnType = new H2ColumnType();
-
     @Test
     @DisplayName("Object에 대해 매핑되는 EntityObjectMappingMeta에서 대응되는 필드와 값을 확인할 수 있다.")
     void canReadObjectMappingMetaFieldAndValue() {
+        final Class<ObjectMappingTestFixture> testClazz = ObjectMappingTestFixture.class;
+        final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry.addEntityMeta(testClazz);
+
         ObjectMappingTestFixture objectMappingTestFixture = new ObjectMappingTestFixture("james", "james@gmail.com");
 
-        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(objectMappingTestFixture, columnType);
+        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(objectMappingTestFixture, entityMetaRegistry.getEntityMeta(testClazz));
 
         final Map<String, Object> valueMapByColumnName = objectMappingMeta.getValueMapByColumnName();
 

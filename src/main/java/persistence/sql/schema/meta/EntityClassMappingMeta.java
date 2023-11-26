@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import persistence.sql.dialect.ColumnType;
-import persistence.sql.exception.ClassMappingException;
+import persistence.sql.exception.EntityMappingException;
 import persistence.sql.schema.constraint.PrimaryKeyConstraint;
 
 public class EntityClassMappingMeta {
@@ -85,7 +85,7 @@ public class EntityClassMappingMeta {
             .filter(entry -> PrimaryKeyConstraint.isPrimaryKey(entry.getKey()))
             .map(Entry::getValue)
             .findAny()
-            .orElseThrow(() -> ClassMappingException.requiredAnnotation(getTableMeta().getType(), "@Id"));
+            .orElseThrow(() -> EntityMappingException.requiredAnnotation(getTableMeta().getType(), "@Id"));
     }
 
     public String getIdFieldColumnName() {
@@ -100,7 +100,7 @@ public class EntityClassMappingMeta {
         return Arrays.stream(tableMeta.getType().getDeclaredConstructors())
             .filter(constructor -> constructor.getParameterCount() == 0)
             .findAny()
-            .orElseThrow(ClassMappingException::defaultConstructorRequired);
+            .orElseThrow(EntityMappingException::defaultConstructorRequired);
     }
 
     private static Map<Field, ColumnMeta> getColumnMetasFromEntity(Class<?> entityClazz, ColumnType columnType) {
@@ -117,7 +117,7 @@ public class EntityClassMappingMeta {
 
     private static void validateEntityAnnotationIsPresent(Class<?> entityClazz) {
         if (entityClazz.isAnnotationPresent(Entity.class) == Boolean.FALSE) {
-            throw ClassMappingException.requiredAnnotation(entityClazz, "@Entity");
+            throw EntityMappingException.requiredAnnotation(entityClazz, "@Entity");
         }
     }
 
@@ -126,7 +126,7 @@ public class EntityClassMappingMeta {
             .anyMatch(PrimaryKeyConstraint::isPrimaryKey);
 
         if (!hasIdAnnotation) {
-            throw ClassMappingException.requiredAnnotation(entityClazz, "@Id");
+            throw EntityMappingException.requiredAnnotation(entityClazz, "@Id");
         }
     }
 }
