@@ -19,7 +19,7 @@ class EntityManagerFactoryTest {
         EntityManagerFactory entityManagerFactory = new EntityManagerFactory(metaModel);
 
         //when
-        EntityManager entityManager = entityManagerFactory.createEntityManager(new MockConnection());
+        EntityManager entityManager = entityManagerFactory.openSession(new MockConnection());
 
         //then
         assertNotNull(entityManager);

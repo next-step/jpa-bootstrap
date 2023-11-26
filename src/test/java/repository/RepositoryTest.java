@@ -53,7 +53,7 @@ public class RepositoryTest {
     Stream<DynamicNode> testFactory() {
         final DDLRepository<Person> ddlRepository = new BaseDDLRepository<>(jdbcTemplate, Person.class, dialect);
         final SimpleCrudRepository<Person, Long> crudRepository = new SimpleCrudRepository<>(
-                entityManagerFactory.createEntityManager(connection), Person.class);
+                entityManagerFactory.openSession(connection), Person.class);
 
         return Stream.of(
                 dynamicContainer("테이블이", Stream.of(

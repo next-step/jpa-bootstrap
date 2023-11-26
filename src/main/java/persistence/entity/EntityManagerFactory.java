@@ -6,13 +6,14 @@ import persistence.meta.MetaModel;
 
 
 public class EntityManagerFactory {
+
     private final MetaModel metaModel;
 
     public EntityManagerFactory(MetaModel metaModel) {
         this.metaModel = metaModel;
     }
 
-    public EntityManager createEntityManager(Connection connection) {
+    public EntityManager openSession(Connection connection) {
         return new SimpleEntityManager(metaModel, connection);
     }
 }
