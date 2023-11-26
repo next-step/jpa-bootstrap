@@ -4,17 +4,13 @@ import persistence.entity.EventSource;
 import persistence.entity.impl.event.EntityEvent;
 import persistence.entity.impl.event.EntityEventListener;
 import persistence.entity.impl.retrieve.EntityLoader;
-import persistence.sql.dialect.ColumnType;
-import persistence.sql.schema.meta.EntityObjectMappingMeta;
 
 public class LoadEntityEventListenerImpl implements EntityEventListener {
 
     private final EntityLoader entityLoader;
-    private final ColumnType columnType;
 
-    public LoadEntityEventListenerImpl(EntityLoader entityLoader, ColumnType columnType) {
+    public LoadEntityEventListenerImpl(EntityLoader entityLoader) {
         this.entityLoader = entityLoader;
-        this.columnType = columnType;
     }
 
     @Override
@@ -24,7 +20,7 @@ public class LoadEntityEventListenerImpl implements EntityEventListener {
 
     @Override
     public <T> T onEvent(Class<T> clazz, EntityEvent entityEvent) {
-        final T loadedEntity = entityLoader.load(clazz, entityEvent.getId(), columnType);
+        final T loadedEntity = entityLoader.load(clazz, entityEvent.getId());
         final EventSource eventSource = entityEvent.getEventSource();
         eventSource.loading(loadedEntity);
 
@@ -34,8 +30,6 @@ public class LoadEntityEventListenerImpl implements EntityEventListener {
 
     @Override
     public void syncPersistenceContext(EventSource eventSource, Object entity) {
-        final EntityObjectMappingMeta savedObjectMappingMeta = EntityObjectMappingMeta.of(entity, columnType);
-
-        eventSource.putEntity(savedObjectMappingMeta.getIdValue(), entity);
+        eventSource.putEntity(entity);
     }
 }

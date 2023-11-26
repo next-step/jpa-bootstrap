@@ -5,16 +5,13 @@ import persistence.entity.EventSource;
 import persistence.entity.impl.event.EntityEvent;
 import persistence.entity.impl.event.EntityEventListener;
 import persistence.entity.impl.store.EntityPersister;
-import persistence.sql.dialect.ColumnType;
 
 public class DeleteEntityEventListenerImpl implements EntityEventListener {
 
     private final EntityPersister entityPersister;
-    private final ColumnType columnType;
 
-    public DeleteEntityEventListenerImpl(EntityPersister entityPersister, ColumnType columnType) {
+    public DeleteEntityEventListenerImpl(EntityPersister entityPersister) {
         this.entityPersister = entityPersister;
-        this.columnType = columnType;
     }
 
     @Override
@@ -27,7 +24,7 @@ public class DeleteEntityEventListenerImpl implements EntityEventListener {
             throw new RuntimeException("해당 Entity는 삭제될 수 없습니다.");
         }
 
-        entityPersister.delete(entity, columnType);
+        entityPersister.delete(entity);
 
         eventSource.deleted(entity);
 

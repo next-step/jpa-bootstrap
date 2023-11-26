@@ -5,17 +5,14 @@ import persistence.entity.EventSource;
 import persistence.entity.impl.event.EntityEvent;
 import persistence.entity.impl.event.EntityEventListener;
 import persistence.entity.impl.store.EntityPersister;
-import persistence.sql.dialect.ColumnType;
 import persistence.sql.schema.meta.EntityObjectMappingMeta;
 
 public class MergeEntityEventListenerImpl implements EntityEventListener {
 
     private final EntityPersister entityPersister;
-    private final ColumnType columnType;
 
-    public MergeEntityEventListenerImpl(EntityPersister entityPersister, ColumnType columnType) {
+    public MergeEntityEventListenerImpl(EntityPersister entityPersister) {
         this.entityPersister = entityPersister;
-        this.columnType = columnType;
     }
 
     @Override
@@ -33,15 +30,13 @@ public class MergeEntityEventListenerImpl implements EntityEventListener {
             throw new RuntimeException("해당 Entity는 변경될 수 없습니다.");
         }
 
-        entityPersister.update(entity, columnType);
+        entityPersister.update(entity);
         syncPersistenceContext(eventSource, entity);
         return clazz.cast(entity);
     }
 
     @Override
     public void syncPersistenceContext(EventSource eventSource, Object entity) {
-        final EntityObjectMappingMeta savedObjectMappingMeta = EntityObjectMappingMeta.of(entity, columnType);
-
-        eventSource.putEntity(savedObjectMappingMeta.getIdValue(), entity);
+        eventSource.putEntity(entity);
     }
 }

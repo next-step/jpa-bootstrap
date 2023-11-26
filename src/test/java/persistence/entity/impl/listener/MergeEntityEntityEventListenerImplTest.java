@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,13 +38,10 @@ import persistence.sql.ddl.generator.DropDDLQueryGenerator;
 import persistence.sql.dialect.H2ColumnType;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.JdbcTemplate;
+import registry.EntityMetaRegistry;
 
 @DisplayName("MergeEventListener 테스트")
 class MergeEntityEntityEventListenerImplTest {
-
-    private DatabaseServer server;
-
-    private Database jdbcTemplate;
 
     private EventSource eventSource;
 
@@ -51,40 +49,48 @@ class MergeEntityEntityEventListenerImplTest {
 
     private EntityManager entityManager;
 
-    @BeforeEach
-    void setUp() throws SQLException {
+    private static DatabaseServer server;
+    private static EntityMetaRegistry entityMetaRegistry;
+    private static final Class<?> testClazz = MergeEventEntity.class;
+    private static Database jdbcTemplate;
+    private static Connection connection;
+
+    @BeforeAll
+    static void setServer() throws SQLException {
         server = new H2();
         server.start();
+        connection = server.getConnection();
+        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry.addEntityMeta(testClazz);
+    }
 
-        Connection connection = server.getConnection();
+    @BeforeEach
+    void setUp() {
+        final EntityPersisterImpl persister = new EntityPersisterImpl(connection, entityMetaRegistry);
+        final EntityLoaderImpl loader = new EntityLoaderImpl(connection, entityMetaRegistry);
+        final DefaultPersistenceContext persistenceContext = new DefaultPersistenceContext(entityMetaRegistry);
 
-        final EntityPersisterImpl persister = new EntityPersisterImpl(connection);
-        final EntityLoaderImpl loader = new EntityLoaderImpl(connection);
-        final H2ColumnType columnType = new H2ColumnType();
-        mergeEntityEventListener = new MergeEntityEventListenerImpl(persister, columnType);
-        final DefaultPersistenceContext persistenceContext = new DefaultPersistenceContext(columnType);
+        mergeEntityEventListener = new MergeEntityEventListenerImpl(persister);
         eventSource = persistenceContext;
 
         EntityEventDispatcher entityEventDispatcher = new EntityEventDispatcherImpl(
-            new LoadEntityEventListenerImpl(loader, columnType),
+            new LoadEntityEventListenerImpl(loader),
             mergeEntityEventListener,
-            new PersistEntityEventListenerImpl(persister, columnType),
-            new DeleteEntityEventListenerImpl(persister, columnType)
+            new PersistEntityEventListenerImpl(persister),
+            new DeleteEntityEventListenerImpl(persister)
         );
         EntityEventPublisher entityEventPublisher = new EntityEventPublisherImpl(entityEventDispatcher);
 
-        entityManager = new EntityManagerImpl(connection, columnType, persistenceContext, entityEventPublisher);
+        entityManager = new EntityManagerImpl(connection, persistenceContext, entityEventPublisher, entityMetaRegistry);
         jdbcTemplate = new JdbcTemplate(connection);
-        CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator(columnType);
-        jdbcTemplate.execute(createDDLQueryGenerator.create(MergeEventEntity.class));
+        CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
+        jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));
     }
 
     @AfterEach
-    void tearDown() throws Exception {
-        DropDDLQueryGenerator dropDDLQueryGenerator = new DropDDLQueryGenerator(new H2ColumnType());
+    void tearDown() {
+        DropDDLQueryGenerator dropDDLQueryGenerator = new DropDDLQueryGenerator();
         jdbcTemplate.execute(dropDDLQueryGenerator.drop(MergeEventEntity.class));
-        entityManager.close();
-        server.stop();
     }
 
     @Test
