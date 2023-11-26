@@ -5,13 +5,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import persistence.dialect.Dialect;
 import persistence.entity.ClassScanner;
 import persistence.meta.EntityMeta;
 import persistence.meta.MetaModel;
 
 public final class AnnotationBinder {
 
-    public static MetaModel bindMetaModel(String pakageName) {
+    public static MetaModel bindMetaModel(String pakageName, Dialect dialect) {
         final Set<Class<?>> classes = entityFilter(ClassScanner.scan(pakageName));
 
         if (classes == null || classes.isEmpty()) {
@@ -19,7 +20,7 @@ public final class AnnotationBinder {
         }
 
         final Map<Class<?>, EntityMeta> entityMetaMap = bindEntityMetaMap(classes);
-        return new MetaModel(entityMetaMap);
+        return new MetaModel(entityMetaMap, dialect);
     }
 
     private static Map<Class<?>, EntityMeta> bindEntityMetaMap(Set<Class<?>> classes) {

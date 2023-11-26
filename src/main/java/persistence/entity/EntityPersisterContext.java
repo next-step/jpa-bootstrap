@@ -19,13 +19,13 @@ public class EntityPersisterContext {
 
     }
 
-    public static EntityPersisterContext create(MetaModel metaModel, JdbcTemplate jdbcTemplate,
-                                                QueryGenerator queryGenerator) {
+    public static EntityPersisterContext create(MetaModel metaModel, JdbcTemplate jdbcTemplate) {
         final Map<Class<?>, EntityPersister> context = new ConcurrentHashMap<>();
         final Map<Class<?>, EntityMeta> entityMetaContext = metaModel.getEntityMetaContext();
 
         entityMetaContext.forEach((clazz, entityMeta) -> {
-            EntityPersister entityPersister = genrateEntityPersister(jdbcTemplate, queryGenerator, entityMeta);
+            EntityPersister entityPersister = genrateEntityPersister(jdbcTemplate, metaModel.getQueryGenerator(),
+                    entityMeta);
             context.put(clazz, entityPersister);
         });
 

@@ -19,7 +19,7 @@ class UpdateQueryBuilderTest {
 
         //when
         String sql = QueryGenerator.of(new FakeDialect())
-                .update(Person.class)
+                .update()
                 .build(person);
 
         //then

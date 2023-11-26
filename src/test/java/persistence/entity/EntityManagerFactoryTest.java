@@ -15,8 +15,8 @@ class EntityManagerFactoryTest {
     @DisplayName("엔티티 메니저를 생성한다.")
     void createEntityManager() throws Exception {
         //given
-        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures");
-        EntityManagerFactory entityManagerFactory = EntityManagerFactory.create(metaModel, new FakeDialect());
+        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures", new FakeDialect());
+        EntityManagerFactory entityManagerFactory = new EntityManagerFactory(metaModel);
 
         //when
         EntityManager entityManager = entityManagerFactory.createEntityManager(new MockConnection());

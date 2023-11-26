@@ -8,7 +8,7 @@ import persistence.meta.MetaModel;
 public class EntityManagerFactoryFixture {
 
     public static EntityManagerFactory getEntityManagerFactory() {
-        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures");
-        return EntityManagerFactory.create(metaModel, new FakeDialect());
+        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures", new FakeDialect());
+        return new EntityManagerFactory(metaModel);
     }
 }

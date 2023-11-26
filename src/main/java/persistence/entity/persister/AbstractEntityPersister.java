@@ -53,7 +53,7 @@ public abstract class AbstractEntityPersister implements EntityPersister {
     }
 
     public boolean update(Object entity) {
-        final String query = queryGenerator.update(entity.getClass()).build(entity);
+        final String query = queryGenerator.update().build(entity);
 
         log.info(query);
         jdbcTemplate.execute(query);

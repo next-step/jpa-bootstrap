@@ -1,8 +1,6 @@
 package persistence.sql;
 
 import persistence.dialect.Dialect;
-import persistence.meta.EntityColumns;
-import persistence.meta.TableName;
 import persistence.sql.ddl.CreateQueryBuilder;
 import persistence.sql.ddl.DropQueryBuilder;
 import persistence.sql.dml.DeleteQueryBuilder;
@@ -44,8 +42,8 @@ public class QueryGenerator {
         return new SelectQueryBuilder(dialect);
     }
 
-    public UpdateQueryBuilder update(Class<?> tClass) {
-        return new UpdateQueryBuilder(dialect, TableName.from(tClass), EntityColumns.from(tClass));
+    public UpdateQueryBuilder update() {
+        return new UpdateQueryBuilder(dialect);
     }
 
 
