@@ -8,21 +8,31 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import persistence.entity.PersistenceContext;
 import persistence.sql.dialect.H2ColumnType;
+import registry.EntityMetaRegistry;
 
 @DisplayName("PersistenceContext 테스트")
 class DefaultPersistenceContextTest {
 
     private PersistenceContext defaultPersistenceContext;
 
+    private static EntityMetaRegistry entityMetaRegistry;
+
+    @BeforeAll
+    static void setMetaRegistry() {
+        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry.addEntityMeta(PersistenceContextEntityTest.class);
+    }
+
     @BeforeEach
     void setUp() {
-        defaultPersistenceContext = new DefaultPersistenceContext(new H2ColumnType());
+        defaultPersistenceContext = new DefaultPersistenceContext(entityMetaRegistry);
     }
 
     @TestFactory

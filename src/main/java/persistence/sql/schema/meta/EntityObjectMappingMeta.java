@@ -9,29 +9,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import persistence.entity.impl.EntityIdentifier;
-import persistence.sql.dialect.ColumnType;
 import persistence.sql.dialect.H2ColumnType;
-import persistence.sql.exception.ClassMappingException;
+import persistence.sql.exception.EntityMappingException;
 import persistence.sql.exception.FieldException;
 
 public class EntityObjectMappingMeta {
 
     private final Map<ColumnMeta, ValueMeta> objectValueMap = new LinkedHashMap<>();
-    private final EntityClassMappingMeta entityClassMappingMeta;
     private final EntityIdentifier entityIdentifier;
 
     private EntityObjectMappingMeta(
-        EntityClassMappingMeta entityClassMappingMeta, EntityIdentifier entityIdentifier, Map<ColumnMeta, ValueMeta> valueMap
+        EntityIdentifier entityIdentifier, Map<ColumnMeta, ValueMeta> valueMap
     ) {
-        this.entityClassMappingMeta = entityClassMappingMeta;
         this.entityIdentifier = entityIdentifier;
         this.objectValueMap.putAll(valueMap);
     }
 
-    public static EntityObjectMappingMeta of(Object instance, ColumnType columnType) {
+    public static EntityObjectMappingMeta of(Object instance, EntityClassMappingMeta entityClassMappingMeta) {
         final Map<ColumnMeta, ValueMeta> valueMap = new LinkedHashMap<>();
-
-        final EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of(instance.getClass(), columnType);
 
         entityClassMappingMeta.getMappingFieldList().forEach(field ->
             valueMap.put(entityClassMappingMeta.getColumnMeta(field), getFieldValueAsObject(field, instance))
@@ -39,7 +34,7 @@ public class EntityObjectMappingMeta {
 
         final EntityIdentifier entityIdentifier = initEntityIdentifier(new ArrayList<>(valueMap.entrySet()));
 
-        return new EntityObjectMappingMeta(entityClassMappingMeta, entityIdentifier, valueMap);
+        return new EntityObjectMappingMeta(entityIdentifier, valueMap);
     }
 
     public List<ColumnMeta> getColumnMetaList() {
@@ -63,7 +58,7 @@ public class EntityObjectMappingMeta {
         final ColumnMeta idColumnMeta = objectValueMap.keySet().stream()
             .filter(ColumnMeta::isPrimaryKey)
             .findAny()
-            .orElseThrow(() -> ClassMappingException.columnNotFound("Id"));
+            .orElseThrow(() -> EntityMappingException.columnNotFound("Id"));
 
         return idColumnMeta.getColumnName();
     }
@@ -73,13 +68,13 @@ public class EntityObjectMappingMeta {
             .filter(entry -> entry.getKey().isPrimaryKey())
             .map(Entry::getValue)
             .findAny()
-            .orElseThrow(() -> ClassMappingException.columnNotFound("Id"));
+            .orElseThrow(() -> EntityMappingException.columnNotFound("Id"));
 
         return idValueMeta.getValue();
     }
 
-    public static <T> boolean isNew(T t) {
-        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(t, new H2ColumnType());
+    public static <T> boolean isNew(T t, EntityClassMappingMeta entityClassMappingMeta) {
+        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(t, entityClassMappingMeta);
 
         return objectMappingMeta.getIdValue() == null;
     }
@@ -100,19 +95,11 @@ public class EntityObjectMappingMeta {
             .filter(entry -> entry.getKey().isPrimaryKey())
             .map(entry -> EntityIdentifier.fromIdColumnMetaWithValueMeta(entry.getKey(), entry.getValue()))
             .findAny()
-            .orElseThrow(() -> ClassMappingException.columnNotFound("Id"));
+            .orElseThrow(() -> EntityMappingException.columnNotFound("Id"));
     }
 
     public EntityIdentifier getEntityIdentifier() {
         return entityIdentifier;
-    }
-
-    public Object tableClause() {
-        return entityClassMappingMeta.tableClause();
-    }
-
-    public EntityClassMappingMeta getEntityClassMappingMeta() {
-        return entityClassMappingMeta;
     }
 
     public List<Entry<ColumnMeta, ValueMeta>> getDifferMetaEntryList(EntityObjectMappingMeta objectMappingMeta) {

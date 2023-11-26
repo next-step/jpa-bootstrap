@@ -4,38 +4,40 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import persistence.entity.impl.EntityIdentifier;
-import persistence.sql.dialect.ColumnType;
 import persistence.sql.schema.meta.EntityClassMappingMeta;
 import persistence.sql.schema.meta.EntityObjectMappingMeta;
+import registry.EntityMetaRegistry;
 
 public class PersistenceCacheContext {
 
-    private final ColumnType columnType;
     private final Map<EntityIdentifier, Object> contextCacheMap;
+    private final EntityMetaRegistry entityMetaRegistry;
 
-    private PersistenceCacheContext(ColumnType columnType, Map<EntityIdentifier, Object> contextCacheMap) {
-        this.columnType = columnType;
+    private PersistenceCacheContext(EntityMetaRegistry entityMetaRegistry, Map<EntityIdentifier, Object> contextCacheMap) {
+        this.entityMetaRegistry = entityMetaRegistry;
         this.contextCacheMap = contextCacheMap;
     }
 
-    public static PersistenceCacheContext of(ColumnType columnType) {
-        return new PersistenceCacheContext(columnType, new HashMap<>());
+    public static PersistenceCacheContext of(EntityMetaRegistry entityMetaRegistry) {
+        return new PersistenceCacheContext(entityMetaRegistry, new HashMap<>());
     }
 
     public Optional<Object> tryGetEntityCache(Class<?> entityClazz, Object id) {
-        final EntityClassMappingMeta classMappingMeta = EntityClassMappingMeta.of(entityClazz, columnType);
-        final EntityIdentifier identifier = EntityIdentifier.fromIdColumnMetaWithValue(classMappingMeta.getIdColumnMeta(), id);
+        final EntityClassMappingMeta entityClassMappingMeta = entityMetaRegistry.getEntityMeta(entityClazz);
+        final EntityIdentifier identifier = EntityIdentifier.fromIdColumnMetaWithValue(entityClassMappingMeta.getIdColumnMeta(), id);
         return Optional.ofNullable(contextCacheMap.get(identifier));
     }
 
     public void putEntityCache(Object entity) {
-        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(entity, columnType);
+        final EntityClassMappingMeta entityClassMappingMeta = entityMetaRegistry.getEntityMeta(entity.getClass());
+        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(entity, entityClassMappingMeta);
         EntityIdentifier identifier = objectMappingMeta.getEntityIdentifier();
         contextCacheMap.put(identifier, entity);
     }
 
     public void purgeEntityCache(Object entity) {
-        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(entity, columnType);
+        final EntityClassMappingMeta entityClassMappingMeta = entityMetaRegistry.getEntityMeta(entity.getClass());
+        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(entity, entityClassMappingMeta);
         EntityIdentifier identifier = objectMappingMeta.getEntityIdentifier();
 
         contextCacheMap.remove(identifier);

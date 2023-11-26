@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,15 +14,24 @@ import persistence.entity.EntityEntry;
 import persistence.entity.EventSource;
 import persistence.entity.type.EntityStatus;
 import persistence.sql.dialect.H2ColumnType;
+import registry.EntityMetaRegistry;
 
 @DisplayName("EventSource 테스트")
 class EntityEventSourceTest {
 
+    private static EntityMetaRegistry entityMetaRegistry;
+
     private EventSource eventSource;
+
+    @BeforeAll
+    static void setMetaRegistry() {
+        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry.addEntityMeta(EventSourceTestEntity.class);
+    }
 
     @BeforeEach
     void setUp() {
-        eventSource = new DefaultPersistenceContext(new H2ColumnType());
+        eventSource = new DefaultPersistenceContext(entityMetaRegistry);
     }
 
     @Test

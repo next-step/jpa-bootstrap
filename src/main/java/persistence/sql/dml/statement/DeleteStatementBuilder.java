@@ -1,9 +1,8 @@
 package persistence.sql.dml.statement;
 
-import persistence.sql.dialect.ColumnType;
 import persistence.sql.dml.clause.builder.WhereClauseBuilder;
 import persistence.sql.dml.clause.predicate.WherePredicate;
-import persistence.sql.exception.ClassMappingException;
+import persistence.sql.exception.EntityMappingException;
 import persistence.sql.schema.meta.EntityClassMappingMeta;
 
 public class DeleteStatementBuilder {
@@ -22,14 +21,13 @@ public class DeleteStatementBuilder {
         return new DeleteStatementBuilder();
     }
 
-    public DeleteStatementBuilder delete(Class<?> clazz, ColumnType columnType) {
-        final EntityClassMappingMeta classMappingMeta = EntityClassMappingMeta.of(clazz, columnType);
+    public DeleteStatementBuilder delete(EntityClassMappingMeta entityClassMappingMeta) {
 
         if (deleteStatementBuilder.length() > 0) {
-            throw ClassMappingException.duplicateCallMethod("delete() 메서드");
+            throw EntityMappingException.duplicateCallMethod("delete() 메서드");
         }
 
-        deleteStatementBuilder.append(String.format(DELETE_FORMAT, classMappingMeta.tableClause()));
+        deleteStatementBuilder.append(String.format(DELETE_FORMAT, entityClassMappingMeta.tableClause()));
         return this;
     }
 
@@ -40,7 +38,7 @@ public class DeleteStatementBuilder {
 
     public DeleteStatementBuilder and(WherePredicate predicate) {
         if (this.whereClauseBuilder == null) {
-            throw ClassMappingException.preconditionRequired("where()");
+            throw EntityMappingException.preconditionRequired("where()");
         }
 
         this.whereClauseBuilder.and(predicate);
@@ -49,7 +47,7 @@ public class DeleteStatementBuilder {
 
     public DeleteStatementBuilder or(WherePredicate predicate) {
         if (this.whereClauseBuilder == null) {
-            throw ClassMappingException.preconditionRequired("where()");
+            throw EntityMappingException.preconditionRequired("where()");
         }
 
         this.whereClauseBuilder.or(predicate);
@@ -58,7 +56,7 @@ public class DeleteStatementBuilder {
 
     public String build() {
         if (deleteStatementBuilder.length() == 0) {
-            throw ClassMappingException.preconditionRequired("delete()");
+            throw EntityMappingException.preconditionRequired("delete()");
         }
 
         if (this.whereClauseBuilder == null) {

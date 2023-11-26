@@ -10,7 +10,7 @@ import persistence.sql.dialect.H2ColumnType;
 @DisplayName("DROP DDL 생성 테스트")
 class DropDDLQueryGeneratorTest {
 
-    private final DropDDLQueryGenerator dropDDLQueryGenerator = new DropDDLQueryGenerator(new H2ColumnType());
+    private final DropDDLQueryGenerator dropDDLQueryGenerator = new DropDDLQueryGenerator();
 
     @Test
     @DisplayName("엔티티에 대한 DROP DDL을 생성할 수 있다.")

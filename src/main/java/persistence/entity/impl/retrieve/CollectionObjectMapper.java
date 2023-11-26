@@ -1,7 +1,7 @@
 package persistence.entity.impl.retrieve;
 
 import java.lang.reflect.Field;
-import persistence.sql.exception.ClassMappingException;
+import persistence.sql.exception.EntityMappingException;
 import persistence.sql.schema.meta.ColumnMeta;
 
 public class CollectionObjectMapper {
@@ -12,7 +12,7 @@ public class CollectionObjectMapper {
             field.setAccessible(true);
             field.set(instance, loadedRelation);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw ClassMappingException.mappingFail(columnMeta.getFieldName());
+            throw EntityMappingException.mappingFail(columnMeta.getFieldName());
         }
     }
 }

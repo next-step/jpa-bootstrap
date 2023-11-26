@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import persistence.sql.dialect.ColumnType;
 import persistence.sql.schema.meta.ColumnMeta;
+import persistence.sql.schema.meta.EntityClassMappingMeta;
 import persistence.sql.schema.meta.EntityObjectMappingMeta;
 
 public class InsertStatementBuilder {
@@ -11,27 +12,24 @@ public class InsertStatementBuilder {
     private static final String INSERT_FORMAT = "INSERT INTO %s (%s) values (%s)";
     private static final String INSERT_RETURNING_FORMAT = "SELECT * FROM FINAL TABLE (%s)";
 
-    private final ColumnType columnType;
-
-    public InsertStatementBuilder(ColumnType columnType) {
-        this.columnType = columnType;
+    public InsertStatementBuilder() {
     }
 
-    public String insert(Object object) {
-        final EntityObjectMappingMeta entityObjectMappingMeta = EntityObjectMappingMeta.of(object, columnType);
+    public String insert(Object object, EntityClassMappingMeta entityClassMappingMeta) {
+        final EntityObjectMappingMeta entityObjectMappingMeta = EntityObjectMappingMeta.of(object, entityClassMappingMeta);
 
         return String.format(INSERT_FORMAT,
-            entityObjectMappingMeta.tableClause(),
+            entityClassMappingMeta.tableClause(),
             columnClause(entityObjectMappingMeta),
             valueClause(entityObjectMappingMeta)
         );
     }
 
-    public String insertReturning(Object object) {
-        final EntityObjectMappingMeta entityObjectMappingMeta = EntityObjectMappingMeta.of(object, columnType);
+    public String insertReturning(Object object, EntityClassMappingMeta entityClassMappingMeta) {
+        final EntityObjectMappingMeta entityObjectMappingMeta = EntityObjectMappingMeta.of(object, entityClassMappingMeta);
 
         final String insertSql = String.format(INSERT_FORMAT,
-            entityObjectMappingMeta.tableClause(),
+            entityClassMappingMeta.tableClause(),
             columnClause(entityObjectMappingMeta),
             valueClause(entityObjectMappingMeta)
         );

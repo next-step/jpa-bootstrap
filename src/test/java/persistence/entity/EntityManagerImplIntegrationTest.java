@@ -8,7 +8,9 @@ import database.DatabaseServer;
 import database.H2;
 import java.sql.Connection;
 import java.sql.SQLException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,54 +22,63 @@ import persistence.sql.dialect.H2ColumnType;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.JdbcTemplate;
 import persistence.sql.dml.statement.InsertStatementBuilder;
+import persistence.sql.schema.meta.EntityClassMappingMeta;
+import registry.EntityMetaRegistry;
 
 @DisplayName("EntityManager 통합 테스트")
 class EntityManagerImplIntegrationTest {
 
-    private DatabaseServer server;
-
-    private Database jdbcTemplate;
-
+    private static DatabaseServer server;
+    private static EntityManagerFactory entityManagerFactory;
+    private static EntityMetaRegistry entityMetaRegistry;
+    private static final Class<?> testClazz = PersonV3.class;
+    private static Database jdbcTemplate;
     private EntityManager entityManager;
+
+    @BeforeAll
+    static void setServer() throws SQLException {
+        server = new H2();
+        server.start();
+        Connection connection = server.getConnection();
+        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry.addEntityMeta(testClazz);
+        entityManagerFactory = new EntityManagerFactory(connection, entityMetaRegistry);
+    }
+
+    @AfterAll
+    static void closeServer() {
+        server.stop();
+    }
 
     @BeforeEach
     void setUp() throws SQLException {
-        server = new H2();
-        server.start();
-
-        Connection connection = server.getConnection();
-
-        final H2ColumnType columnType = new H2ColumnType();
-        final EntityManagerFactory emf = new EntityManagerFactory(connection, columnType);
-        entityManager = emf.createEntityManager();
-
+        entityManager = entityManagerFactory.createEntityManager();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator(columnType);
-        jdbcTemplate.execute(createDDLQueryGenerator.create(PersonV3.class));
+        CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
+        jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));
     }
 
     @AfterEach
-    void tearDown() throws Exception {
-        DropDDLQueryGenerator dropDDLQueryGenerator = new DropDDLQueryGenerator(new H2ColumnType());
+    void tearDown() {
+        DropDDLQueryGenerator dropDDLQueryGenerator = new DropDDLQueryGenerator();
         jdbcTemplate.execute(dropDDLQueryGenerator.drop(PersonV3.class));
-        entityManager.close();
-        server.stop();
     }
 
     @Test
     @DisplayName("EntityManager를 통해 ID로 원하는 Entity를 갖고 올 수 있다.")
     void selectFindById() {
         //given
-        InsertStatementBuilder insertStatementBuilder = new InsertStatementBuilder(new H2ColumnType());
+        InsertStatementBuilder insertStatementBuilder = new InsertStatementBuilder();
         PersonV3 person1 = new PersonV3("유저1", 20, "user1@jpa.com", 1);
         PersonV3 person2 = new PersonV3("유저2", 21, "user2@jpa.com", 2);
         PersonV3 person3 = new PersonV3("유저3", 25, "user3@jpa.com", 3);
         PersonV3 person4 = new PersonV3("유저4", 29, "user4@jpa.com", 4);
 
-        final String person1Insert = insertStatementBuilder.insert(person1);
-        final String person2Insert = insertStatementBuilder.insert(person2);
-        final String person3Insert = insertStatementBuilder.insert(person3);
-        final String person4Insert = insertStatementBuilder.insert(person4);
+        final EntityClassMappingMeta entityClassMappingMeta = entityMetaRegistry.getEntityMeta(testClazz);
+        final String person1Insert = insertStatementBuilder.insert(person1, entityClassMappingMeta);
+        final String person2Insert = insertStatementBuilder.insert(person2, entityClassMappingMeta);
+        final String person3Insert = insertStatementBuilder.insert(person3, entityClassMappingMeta);
+        final String person4Insert = insertStatementBuilder.insert(person4, entityClassMappingMeta);
 
         jdbcTemplate.execute(person1Insert);
         jdbcTemplate.execute(person2Insert);

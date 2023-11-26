@@ -5,22 +5,32 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.sql.dialect.H2ColumnType;
+import registry.EntityMetaRegistry;
 
 @DisplayName("SnapShot 테스트")
 class SnapShotTest {
+
+    private static EntityMetaRegistry entityMetaRegistry;
+
+    @BeforeAll
+    static void setMetaRegistry() {
+        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry.addEntityMeta(SnapShotTestEntity.class);
+    }
 
     @Test
     @DisplayName("SnapShot과 같은지 비교할 수 있다.")
     void snapShotCompareOtherEntity() {
         final SnapShotTestEntity entity1 = new SnapShotTestEntity(1L, "snapshot", "snapshot@gmail.com");
         final SnapShotTestEntity entity2 = new SnapShotTestEntity(1L, "snapshot", "snapshot@gmail.com");
-        final SnapShot snapShot = new SnapShot(entity1, new H2ColumnType());
+        final SnapShot snapShot = new SnapShot(entity1, entityMetaRegistry.getEntityMeta(entity1.getClass()));
 
         assertAll(
-            () -> assertThat(snapShot.isSameWith(entity2)).isTrue()
+            () -> assertThat(snapShot.isSameWith(entity2, entityMetaRegistry.getEntityMeta(entity2.getClass()))).isTrue()
         );
     }
 
@@ -29,10 +39,10 @@ class SnapShotTest {
     void snapShotCompareMeta() {
         final SnapShotTestEntity entity1 = new SnapShotTestEntity(1L, "snapshot@gmail.com", "snapshot");
         final SnapShotTestEntity entity2 = new SnapShotTestEntity(1L, "snapshot", "snapshot@gmail.com");
-        final SnapShot snapShot = new SnapShot(entity1, new H2ColumnType());
+        final SnapShot snapShot = new SnapShot(entity1, entityMetaRegistry.getEntityMeta(entity1.getClass()));
 
         assertAll(
-            () -> assertThat(snapShot.isSameWith(entity2)).isFalse()
+            () -> assertThat(snapShot.isSameWith(entity2, entityMetaRegistry.getEntityMeta(entity2.getClass()))).isFalse()
         );
     }
 

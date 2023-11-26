@@ -19,7 +19,7 @@ public class CustomJpaRepository<T, ID> implements JpaRepository<T, ID> {
             throw new RuntimeException("Entity cannot be null");
         }
 
-        if (EntityObjectMappingMeta.isNew(t)) {
+        if (EntityObjectMappingMeta.isNew(t, entityManager.getEntityMeta(t.getClass()))) {
             return clazz.cast(entityManager.persist(t));
         }
 

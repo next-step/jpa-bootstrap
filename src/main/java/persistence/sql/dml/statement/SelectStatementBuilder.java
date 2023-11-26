@@ -8,7 +8,7 @@ import persistence.sql.dml.clause.builder.FromClauseBuilder;
 import persistence.sql.dml.clause.builder.WhereClauseBuilder;
 import persistence.sql.dml.clause.predicate.OnPredicate;
 import persistence.sql.dml.clause.predicate.WherePredicate;
-import persistence.sql.exception.ClassMappingException;
+import persistence.sql.exception.EntityMappingException;
 import persistence.sql.exception.FieldException;
 import persistence.sql.schema.meta.ColumnMeta;
 import persistence.sql.schema.meta.EntityClassMappingMeta;
@@ -32,15 +32,14 @@ public class SelectStatementBuilder {
         return new SelectStatementBuilder();
     }
 
-    public SelectStatementBuilder selectFrom(Class<?> clazz, ColumnType columnType, String... targetFieldNames) {
+    public SelectStatementBuilder selectFrom(EntityClassMappingMeta entityClassMappingMeta, String... targetFieldNames) {
         if (selectStatementBuilder.length() > 0) {
-            throw ClassMappingException.duplicateCallMethod("select()");
+            throw EntityMappingException.duplicateCallMethod("select()");
         }
 
-        final EntityClassMappingMeta classMappingMeta = EntityClassMappingMeta.of(clazz, columnType);
-        validateSelectTargetField(classMappingMeta, targetFieldNames);
+        validateSelectTargetField(entityClassMappingMeta, targetFieldNames);
 
-        fromClauseBuilder = FromClauseBuilder.builder(classMappingMeta.tableClause());
+        fromClauseBuilder = FromClauseBuilder.builder(entityClassMappingMeta.tableClause());
         if (targetFieldNames.length == 0) {
             selectStatementBuilder.append(String.format(SELECT_FORMAT, SELECT_ALL_FIELD));
             return this;
@@ -63,7 +62,7 @@ public class SelectStatementBuilder {
 
     public SelectStatementBuilder and(WherePredicate predicate) {
         if (this.whereClauseBuilder == null) {
-            throw ClassMappingException.preconditionRequired("where()");
+            throw EntityMappingException.preconditionRequired("where()");
         }
 
         this.whereClauseBuilder.and(predicate);
@@ -72,7 +71,7 @@ public class SelectStatementBuilder {
 
     public SelectStatementBuilder or(WherePredicate predicate) {
         if (this.whereClauseBuilder == null) {
-            throw ClassMappingException.preconditionRequired("where()");
+            throw EntityMappingException.preconditionRequired("where()");
         }
 
         this.whereClauseBuilder.or(predicate);
@@ -82,7 +81,7 @@ public class SelectStatementBuilder {
     public String build() {
         final StringBuilder selectClause = selectStatementBuilder;
         if (selectClause.length() == 0) {
-            throw ClassMappingException.preconditionRequired("select()");
+            throw EntityMappingException.preconditionRequired("select()");
         }
 
         final String fromClause = this.fromClauseBuilder.build();

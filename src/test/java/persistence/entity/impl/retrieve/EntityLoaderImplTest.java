@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,43 +20,44 @@ import persistence.entity.EntityManager;
 import persistence.entity.impl.EntityManagerFactory;
 import persistence.sql.ddl.generator.CreateDDLQueryGenerator;
 import persistence.sql.ddl.generator.DropDDLQueryGenerator;
-import persistence.sql.dialect.ColumnType;
 import persistence.sql.dialect.H2ColumnType;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.JdbcTemplate;
+import registry.EntityMetaRegistry;
 
 @DisplayName("EntityLoader 테스트")
 class EntityLoaderImplTest {
 
-    private DatabaseServer server;
-
-    private Database jdbcTemplate;
-
     private EntityManager entityManager;
 
-    private ColumnType columnType;
+    private static DatabaseServer server;
+    private static EntityMetaRegistry entityMetaRegistry;
+    private static final Class<?> testClazz = EntityLoaderEntity.class;
+    private static Database jdbcTemplate;
+    private static Connection connection;
 
-    @BeforeEach
-    void setUp() throws SQLException {
+    @BeforeAll
+    static void setServer() throws SQLException {
         server = new H2();
         server.start();
+        connection = server.getConnection();
+        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry.addEntityMeta(testClazz);
+    }
 
-        Connection connection = server.getConnection();
-
-        columnType = new H2ColumnType();
-        final EntityManagerFactory emf = new EntityManagerFactory(connection, columnType);
+    @BeforeEach
+    void setUp() {
+        final EntityManagerFactory emf = new EntityManagerFactory(connection, entityMetaRegistry);
         entityManager = emf.createEntityManager();
         jdbcTemplate = new JdbcTemplate(connection);
-        CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator(columnType);
-        jdbcTemplate.execute(createDDLQueryGenerator.create(EntityLoaderEntity.class));
+        CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
+        jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));
     }
 
     @AfterEach
-    void tearDown() throws Exception {
-        DropDDLQueryGenerator dropDDLQueryGenerator = new DropDDLQueryGenerator(new H2ColumnType());
-        jdbcTemplate.execute(dropDDLQueryGenerator.drop(EntityLoaderEntity.class));
-        entityManager.close();
-        server.stop();
+    void tearDown() {
+        DropDDLQueryGenerator dropDDLQueryGenerator = new DropDDLQueryGenerator();
+        jdbcTemplate.execute(dropDDLQueryGenerator.drop(testClazz));
     }
 
     @Test
@@ -64,9 +66,9 @@ class EntityLoaderImplTest {
         final EntityLoaderEntity entity = new EntityLoaderEntity();
         final EntityLoaderEntity loadedEntity = (EntityLoaderEntity) entityManager.persist(entity);
 
-        final EntityLoaderImpl entityLoader = new EntityLoaderImpl(server.getConnection());
+        final EntityLoaderImpl entityLoader = new EntityLoaderImpl(server.getConnection(), entityMetaRegistry);
 
-        final EntityLoaderEntity load = entityLoader.load(EntityLoaderEntity.class, loadedEntity.getId(), columnType);
+        final EntityLoaderEntity load = entityLoader.load(EntityLoaderEntity.class, loadedEntity.getId());
         assertAll(
             () -> assertThat(load.getId()).isEqualTo(loadedEntity.getId())
         );

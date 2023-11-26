@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import persistence.sql.dml.clause.operator.LogicalOperator;
 import persistence.sql.dml.clause.predicate.OnPredicate;
-import persistence.sql.exception.ClassMappingException;
+import persistence.sql.exception.EntityMappingException;
 
 public class JoinClauseBuilder {
 
@@ -18,7 +18,7 @@ public class JoinClauseBuilder {
 
     private JoinClauseBuilder(String joinTable, JoinOnClause joinOnClause) {
         if (joinTable == null) {
-            throw ClassMappingException.preconditionRequired("Join 테이블명");
+            throw EntityMappingException.preconditionRequired("Join 테이블명");
         }
 
         this.joinTable = joinTable;

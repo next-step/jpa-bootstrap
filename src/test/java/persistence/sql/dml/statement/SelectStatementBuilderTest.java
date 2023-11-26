@@ -10,22 +10,31 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.sql.dialect.H2ColumnType;
 import persistence.sql.dml.clause.operator.EqualOperator;
 import persistence.sql.dml.clause.predicate.WherePredicate;
 import persistence.sql.exception.FieldException;
+import persistence.sql.schema.meta.EntityClassMappingMeta;
 
 @DisplayName("SELECT 문 생성 테스트")
 class SelectStatementBuilderTest {
 
 
+    private EntityClassMappingMeta entityClassMappingMeta;
+
+    @BeforeEach
+    void setUp() {
+        entityClassMappingMeta = EntityClassMappingMeta.of(SelectStatementEntity.class, new H2ColumnType());
+    }
+
     @Test
     @DisplayName("Select 문을 생성할 수 있다.")
     void canBuildSelectStatement() {
         final String selectStatement = SelectStatementBuilder.builder()
-            .selectFrom(SelectStatementEntity.class, new H2ColumnType())
+            .selectFrom(entityClassMappingMeta)
             .build();
 
         assertThat(selectStatement).isEqualTo("SELECT * FROM USERS;");
@@ -35,7 +44,7 @@ class SelectStatementBuilderTest {
     @DisplayName("원하는 필드만 갖고 오는 Select 문을 생성할 수 있다.")
     void canBuildSelectStatementSpecificField() {
         final String selectStatement = SelectStatementBuilder.builder()
-            .selectFrom(SelectStatementEntity.class, new H2ColumnType(), "id")
+            .selectFrom(entityClassMappingMeta, "id")
             .build();
 
         assertThat(selectStatement).isEqualTo("SELECT id FROM USERS;");
@@ -46,7 +55,7 @@ class SelectStatementBuilderTest {
     void cannotBuildSelectStatementUndefinedField() {
         assertThatThrownBy(() -> {
             SelectStatementBuilder.builder()
-                .selectFrom(SelectStatementEntity.class, new H2ColumnType(), "phone_number")
+                .selectFrom(entityClassMappingMeta, "phone_number")
                 .build();
         }).isInstanceOf(RuntimeException.class)
             .hasMessage(FieldException.undefinedField("[phone_number]").getMessage());
@@ -56,7 +65,7 @@ class SelectStatementBuilderTest {
     @DisplayName("Where절을 통해 조건이 있는 Select 문을 생성할 수 있다.")
     void canBuildSelectStatementWhere() {
         final String selectStatement = SelectStatementBuilder.builder()
-            .selectFrom(SelectStatementEntity.class, new H2ColumnType())
+            .selectFrom(entityClassMappingMeta)
             .where(WherePredicate.of("id", 1L, new EqualOperator()))
             .build();
 
@@ -67,7 +76,7 @@ class SelectStatementBuilderTest {
     @DisplayName("Where절에 AND 조건으로 Select 문을 생성할 수 있다.")
     void canBuildSelectStatementWhereWithAnd() {
         final String selectStatement = SelectStatementBuilder.builder()
-            .selectFrom(SelectStatementEntity.class, new H2ColumnType())
+            .selectFrom(entityClassMappingMeta)
             .where(WherePredicate.of("id", 1L, new EqualOperator()))
             .and(WherePredicate.of("nick_name", "test_person", new EqualOperator()))
             .build();
@@ -79,7 +88,7 @@ class SelectStatementBuilderTest {
     @DisplayName("Where절에 OR 조건으로 Select 문을 생성할 수 있다.")
     void canBuildSelectStatementWhereWithOr() {
         final String selectStatement = SelectStatementBuilder.builder()
-            .selectFrom(SelectStatementEntity.class, new H2ColumnType())
+            .selectFrom(entityClassMappingMeta)
             .where(WherePredicate.of("id", 1L, new EqualOperator()))
             .or(WherePredicate.of("nick_name", "test_person", new EqualOperator()))
             .build();
@@ -91,7 +100,7 @@ class SelectStatementBuilderTest {
     @DisplayName("Join절을 통해 Select 문을 생성할 수 있다.")
     void canBuildSelectStatementJoin() {
         final String selectStatement = SelectStatementBuilder.builder()
-            .selectFrom(SelectStatementEntity.class, new H2ColumnType())
+            .selectFrom(entityClassMappingMeta)
             .where(WherePredicate.of("id", 1L, new EqualOperator()))
             .or(WherePredicate.of("nick_name", "test_person", new EqualOperator()))
             .build();

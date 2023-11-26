@@ -9,7 +9,7 @@ import persistence.sql.exception.impl.PreconditionRequiredException;
 import persistence.sql.exception.impl.RequiredAnnotationException;
 import persistence.sql.exception.impl.UnrecognizedGeneratedValueException;
 
-public final class ClassMappingException {
+public final class EntityMappingException {
 
     public static ColumnNotFoundException columnNotFound(String columnName) {
         return new ColumnNotFoundException(String.format("[%s] 컬럼을(를) 찾을 수 없습니다.", columnName));

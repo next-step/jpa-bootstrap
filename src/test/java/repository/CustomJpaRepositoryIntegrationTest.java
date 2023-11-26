@@ -12,7 +12,9 @@ import jakarta.persistence.Id;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,52 +36,64 @@ import persistence.sql.ddl.generator.DropDDLQueryGenerator;
 import persistence.sql.dialect.H2ColumnType;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.JdbcTemplate;
+import registry.EntityMetaRegistry;
 
 @DisplayName("Repository 통합 테스트")
 class CustomJpaRepositoryIntegrationTest {
 
-    private DatabaseServer server;
 
-    private Database jdbcTemplate;
-
+    private static DatabaseServer server;
+    private static EntityMetaRegistry entityMetaRegistry;
+    private static final Class<?> testClazz = TestEntity.class;
+    private static Database jdbcTemplate;
+    private static Connection connection;
     private EntityManager entityManager;
-
     private JpaRepository<TestEntity, Long> jpaRepository;
+
+    @BeforeAll
+    static void setServer() throws SQLException {
+        server = new H2();
+        server.start();
+        connection = server.getConnection();
+        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry.addEntityMeta(testClazz);
+    }
+
+    @AfterAll
+    static void stopServer() {
+        server.stop();
+    }
 
     @BeforeEach
     void setUp() throws SQLException {
-        server = new H2();
-        server.start();
-
-        Connection connection = server.getConnection();
-
-        final H2ColumnType columnType = new H2ColumnType();
-        final EntityPersisterImpl persister = new EntityPersisterImpl(connection);
-        final EntityLoaderImpl loader = new EntityLoaderImpl(connection);
+        final EntityPersisterImpl persister = new EntityPersisterImpl(connection, entityMetaRegistry);
+        final EntityLoaderImpl loader = new EntityLoaderImpl(connection, entityMetaRegistry);
 
         EntityEventDispatcher entityEventDispatcher = new EntityEventDispatcherImpl(
-            new LoadEntityEventListenerImpl(loader, columnType),
-            new MergeEntityEventListenerImpl(persister, columnType),
-            new PersistEntityEventListenerImpl(persister, columnType),
-            new DeleteEntityEventListenerImpl(persister, columnType)
+            new LoadEntityEventListenerImpl(loader),
+            new MergeEntityEventListenerImpl(persister),
+            new PersistEntityEventListenerImpl(persister),
+            new DeleteEntityEventListenerImpl(persister)
         );
         EntityEventPublisher entityEventPublisher = new EntityEventPublisherImpl(entityEventDispatcher);
 
-        entityManager = new EntityManagerImpl(connection, columnType, new DefaultPersistenceContext(columnType), entityEventPublisher);
+        entityManager = new EntityManagerImpl(connection,
+            new DefaultPersistenceContext(entityMetaRegistry),
+            entityEventPublisher,
+            entityMetaRegistry
+        );
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator(columnType);
-        jdbcTemplate.execute(createDDLQueryGenerator.create(TestEntity.class));
+        CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
+        jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));
 
         jpaRepository = new CustomJpaRepository<>(entityManager, TestEntity.class);
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        DropDDLQueryGenerator dropDDLQueryGenerator = new DropDDLQueryGenerator(new H2ColumnType());
-        jdbcTemplate.execute(dropDDLQueryGenerator.drop(TestEntity.class));
-        entityManager.close();
-        server.stop();
+        DropDDLQueryGenerator dropDDLQueryGenerator = new DropDDLQueryGenerator();
+        jdbcTemplate.execute(dropDDLQueryGenerator.drop(testClazz));
     }
 
     @Test

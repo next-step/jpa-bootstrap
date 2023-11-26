@@ -4,17 +4,13 @@ import persistence.entity.EventSource;
 import persistence.entity.impl.event.EntityEvent;
 import persistence.entity.impl.event.EntityEventListener;
 import persistence.entity.impl.store.EntityPersister;
-import persistence.sql.dialect.ColumnType;
-import persistence.sql.schema.meta.EntityObjectMappingMeta;
 
 public class PersistEntityEventListenerImpl implements EntityEventListener {
 
     private final EntityPersister entityPersister;
-    private final ColumnType columnType;
 
-    public PersistEntityEventListenerImpl(EntityPersister entityPersister, ColumnType columnType) {
+    public PersistEntityEventListenerImpl(EntityPersister entityPersister) {
         this.entityPersister = entityPersister;
-        this.columnType = columnType;
     }
 
     @Override
@@ -24,7 +20,7 @@ public class PersistEntityEventListenerImpl implements EntityEventListener {
 
     @Override
     public <T> T onEvent(Class<T> clazz, EntityEvent entityEvent) {
-        final Object savedEntity = entityPersister.store(entityEvent.getEntity(), columnType);
+        final Object savedEntity = entityPersister.store(entityEvent.getEntity());
         final EventSource eventSource = entityEvent.getEventSource();
         eventSource.saving(savedEntity);
 
@@ -34,8 +30,6 @@ public class PersistEntityEventListenerImpl implements EntityEventListener {
 
     @Override
     public void syncPersistenceContext(EventSource eventSource, Object entity) {
-        final EntityObjectMappingMeta savedObjectMappingMeta = EntityObjectMappingMeta.of(entity, columnType);
-
-        eventSource.putEntity(savedObjectMappingMeta.getIdValue(), entity);
+        eventSource.putEntity(entity);
     }
 }

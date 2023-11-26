@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import persistence.sql.exception.ClassMappingException;
+import persistence.sql.exception.EntityMappingException;
 
 /**
  * @http://www.h2database.com/html/datatypes.html
@@ -38,7 +38,7 @@ public class H2ColumnType implements ColumnType {
 
         final String fieldType = typeMap.get(field.getType());
         if (fieldType == null) {
-            throw ClassMappingException.notSupportedType(field.getType());
+            throw EntityMappingException.notSupportedType(field.getType());
         }
 
         return fieldType;

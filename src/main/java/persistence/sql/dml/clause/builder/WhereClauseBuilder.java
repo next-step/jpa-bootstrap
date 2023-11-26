@@ -7,7 +7,7 @@ import persistence.sql.dml.clause.operator.AndOperator;
 import persistence.sql.dml.clause.operator.LogicalOperator;
 import persistence.sql.dml.clause.operator.OrOperator;
 import persistence.sql.dml.clause.predicate.WherePredicate;
-import persistence.sql.exception.ClassMappingException;
+import persistence.sql.exception.EntityMappingException;
 
 public class WhereClauseBuilder {
 
@@ -21,7 +21,7 @@ public class WhereClauseBuilder {
 
     private WhereClauseBuilder(WhereClause whereClause) {
         if (whereClause == null) {
-            throw ClassMappingException.preconditionRequired("Where절");
+            throw EntityMappingException.preconditionRequired("Where절");
         }
         this.whereClauseList = new ArrayList<>(List.of(whereClause));
     }

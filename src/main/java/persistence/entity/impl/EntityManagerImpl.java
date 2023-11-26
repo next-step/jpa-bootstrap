@@ -13,24 +13,25 @@ import persistence.entity.impl.event.type.DeleteEntityEvent;
 import persistence.entity.impl.event.type.LoadEntityEvent;
 import persistence.entity.impl.event.type.MergeEntityEvent;
 import persistence.entity.impl.event.type.PersistEntityEvent;
-import persistence.sql.dialect.ColumnType;
+import persistence.sql.schema.meta.EntityClassMappingMeta;
 import persistence.sql.schema.meta.EntityObjectMappingMeta;
+import registry.EntityMetaRegistry;
 
 public class EntityManagerImpl implements EntityManager {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final ColumnType columnType;
     private final Connection connection;
     private final PersistenceContext persistenceContext;
     private final EntityEventPublisher entityEventPublisher;
+    private final EntityMetaRegistry entityMetaRegistry;
 
-    public EntityManagerImpl(Connection connection, ColumnType columnType, PersistenceContext persistenceContext,
-        EntityEventPublisher eventPublisher) {
+    public EntityManagerImpl(Connection connection, PersistenceContext persistenceContext,
+        EntityEventPublisher eventPublisher, EntityMetaRegistry entityMetaRegistry) {
         this.connection = connection;
-        this.columnType = columnType;
         this.entityEventPublisher = eventPublisher;
         this.persistenceContext = persistenceContext;
+        this.entityMetaRegistry = entityMetaRegistry;
     }
 
     @Override
@@ -46,7 +47,8 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public Object persist(Object entity) {
-        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(entity, columnType);
+        final EntityClassMappingMeta entityClassMappingMeta = entityMetaRegistry.getEntityMeta(entity.getClass());
+        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(entity, entityClassMappingMeta);
 
         final Optional<Object> cachedEntity = persistenceContext.getEntity(entity.getClass(), objectMappingMeta.getIdValue());
 
@@ -62,10 +64,11 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <T> T merge(Class<T> clazz, T entity) {
-        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(entity, columnType);
+        final EntityClassMappingMeta entityClassMappingMeta = entityMetaRegistry.getEntityMeta(clazz);
+        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(entity, entityClassMappingMeta);
 
         final SnapShot snapShot = persistenceContext.getSnapShot(entity.getClass(), objectMappingMeta.getIdValue());
-        if (snapShot.isSameWith(objectMappingMeta)) {
+        if (snapShot.isSameWith(objectMappingMeta, entityClassMappingMeta)) {
             return entity;
         }
 
@@ -97,5 +100,10 @@ public class EntityManagerImpl implements EntityManager {
             log.error("EntityManager connection not closed", e);
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public EntityClassMappingMeta getEntityMeta(Class<?> clazz) {
+        return this.entityMetaRegistry.getEntityMeta(clazz);
     }
 }
