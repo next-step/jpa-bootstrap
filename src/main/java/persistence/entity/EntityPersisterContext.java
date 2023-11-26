@@ -16,14 +16,15 @@ public class EntityPersisterContext {
 
     private EntityPersisterContext(Map<Class<?>, EntityPersister> context) {
         this.context = context;
+
     }
 
-    public static EntityPersisterContext create(MetaModel metaModel, JdbcTemplate jdbcTemplate) {
-        Map<Class<?>, EntityPersister> context = new ConcurrentHashMap<>();
+    public static EntityPersisterContext create(MetaModel metaModel, JdbcTemplate jdbcTemplate,
+                                                QueryGenerator queryGenerator) {
+        final Map<Class<?>, EntityPersister> context = new ConcurrentHashMap<>();
         final Map<Class<?>, EntityMeta> entityMetaContext = metaModel.getEntityMetaContext();
 
         entityMetaContext.forEach((clazz, entityMeta) -> {
-            QueryGenerator queryGenerator = QueryGenerator.of(metaModel.getDialect());
             EntityPersister entityPersister = genrateEntityPersister(jdbcTemplate, queryGenerator, entityMeta);
             context.put(clazz, entityPersister);
         });
@@ -32,7 +33,7 @@ public class EntityPersisterContext {
     }
 
     private static EntityPersister genrateEntityPersister(JdbcTemplate jdbcTemplate, QueryGenerator queryGenerator,
-                                       EntityMeta entityMeta) {
+                                                          EntityMeta entityMeta) {
         if (entityMeta.hasLazyOneToMayAssociation()) {
             return OneToManyLazyEntityPersister.create(jdbcTemplate, queryGenerator, entityMeta);
         }
