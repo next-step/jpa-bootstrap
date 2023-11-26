@@ -7,13 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.entity.impl.EntityRowMapper;
 import persistence.entity.proxy.CollectionProxyWrapper;
-import persistence.sql.dialect.ColumnType;
 import persistence.sql.dml.clause.operator.EqualOperator;
 import persistence.sql.dml.clause.predicate.WherePredicate;
 import persistence.sql.dml.statement.SelectStatementBuilder;
 import persistence.sql.schema.meta.ColumnMeta;
 import persistence.sql.schema.meta.EntityClassMappingMeta;
 import persistence.sql.schema.meta.EntityObjectMappingMeta;
+import registry.EntityMetaRegistry;
 
 public class EntityCollectionLoader {
 
@@ -21,52 +21,56 @@ public class EntityCollectionLoader {
     private final JdbcTemplate jdbcTemplate;
     private final CollectionObjectMapper collectionObjectMapper;
     private final CollectionProxyWrapper collectionProxyWrapper;
+    private final EntityMetaRegistry entityMetaRegistry;
 
-    public EntityCollectionLoader(Connection connection) {
+    public EntityCollectionLoader(Connection connection, EntityMetaRegistry entityMetaRegistry) {
         this.jdbcTemplate = new JdbcTemplate(connection);
+        this.entityMetaRegistry = entityMetaRegistry;
         this.collectionObjectMapper = new CollectionObjectMapper();
         this.collectionProxyWrapper = new CollectionProxyWrapper();
     }
 
-    public <T> T loadCollection(Class<T> clazz, Object instance, ColumnType columnType) {
-        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(instance, columnType);
-        final EntityClassMappingMeta classMappingMeta = objectMappingMeta.getEntityClassMappingMeta();
-        final List<ColumnMeta> relationColumnMetaList = classMappingMeta.getRelationColumnMetaList();
+    public <T> T loadCollection(Class<T> clazz, Object instance) {
+        final EntityClassMappingMeta entityClassMappingMeta = entityMetaRegistry.getEntityMeta(clazz);
+        final EntityObjectMappingMeta objectMappingMeta = EntityObjectMappingMeta.of(instance, entityClassMappingMeta);
+        final List<ColumnMeta> relationColumnMetaList = entityClassMappingMeta.getRelationColumnMetaList();
 
         for (ColumnMeta columnMeta : relationColumnMetaList) {
-            load(instance, columnType, objectMappingMeta, columnMeta);
+            load(instance, objectMappingMeta, columnMeta);
         }
 
         return clazz.cast(instance);
     }
 
-    private void load(Object instance, ColumnType columnType, EntityObjectMappingMeta objectMappingMeta, ColumnMeta columnMeta) {
+    private void load(Object instance, EntityObjectMappingMeta objectMappingMeta, ColumnMeta columnMeta) {
         if (columnMeta.isEagerLoading()) {
-            eagerLoad(instance, columnMeta, objectMappingMeta, columnType);
+            eagerLoad(instance, columnMeta, objectMappingMeta);
             return;
         }
 
-        lazyLoad(instance, columnMeta, objectMappingMeta, columnType);
+        lazyLoad(instance, columnMeta, objectMappingMeta);
     }
 
-    private void eagerLoad(Object instance, ColumnMeta columnMeta, EntityObjectMappingMeta objectMappingMeta, ColumnType columnType) {
-        final List<?> loadedChildList = selectRelation(columnMeta, objectMappingMeta, columnType);
+    private void eagerLoad(Object instance, ColumnMeta columnMeta, EntityObjectMappingMeta objectMappingMeta) {
+        final List<?> loadedChildList = selectRelation(columnMeta, objectMappingMeta);
 
         collectionObjectMapper.mappingFieldRelation(instance, columnMeta, loadedChildList);
     }
 
-    private void lazyLoad(Object instance, ColumnMeta columnMeta, EntityObjectMappingMeta objectMappingMeta, ColumnType columnType) {
+    private void lazyLoad(Object instance, ColumnMeta columnMeta, EntityObjectMappingMeta objectMappingMeta) {
         final Object collectionProxy = collectionProxyWrapper.wrap(
             columnMeta.getColumnType(),
-            () -> selectRelation(columnMeta, objectMappingMeta, columnType)
+            () -> selectRelation(columnMeta, objectMappingMeta)
         );
 
         collectionObjectMapper.mappingFieldRelation(instance, columnMeta, collectionProxy);
     }
 
-    private List<?> selectRelation(ColumnMeta columnMeta, EntityObjectMappingMeta objectMappingMeta, ColumnType columnType) {
+    private List<?> selectRelation(ColumnMeta columnMeta, EntityObjectMappingMeta objectMappingMeta) {
+        final EntityClassMappingMeta joinEntityClassMappingMeta = entityMetaRegistry.getEntityMeta(columnMeta.getJoinColumnTableType());
+
         final String selectRelationSql = SelectStatementBuilder.builder()
-            .selectFrom(columnMeta.getJoinColumnTableType(), columnType)
+            .selectFrom(joinEntityClassMappingMeta)
             .where(WherePredicate.of(columnMeta.getJoinColumnName(), objectMappingMeta.getIdValue(), new EqualOperator()))
             .build();
 
@@ -74,7 +78,7 @@ public class EntityCollectionLoader {
 
         return jdbcTemplate.query(
             selectRelationSql,
-            new EntityRowMapper<>(columnMeta.getJoinColumnTableType(), columnType)
+            new EntityRowMapper<>(columnMeta.getJoinColumnTableType(), entityMetaRegistry)
         );
     }
 }

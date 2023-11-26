@@ -6,18 +6,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import jdbc.RowMapper;
-import persistence.sql.dialect.ColumnType;
-import persistence.sql.exception.ClassMappingException;
+import persistence.sql.exception.EntityMappingException;
 import persistence.sql.schema.meta.EntityClassMappingMeta;
+import registry.EntityMetaRegistry;
 
 public class EntityRowMapper<T> implements RowMapper<T> {
 
     private final Class<T> type;
     private final EntityClassMappingMeta entityClassMappingMeta;
 
-    public EntityRowMapper(Class<T> type, ColumnType columnType) {
+    public EntityRowMapper(Class<T> type, EntityMetaRegistry entityMetaRegistry) {
         this.type = type;
-        this.entityClassMappingMeta = EntityClassMappingMeta.of(type, columnType);
+        this.entityClassMappingMeta = entityMetaRegistry.getEntityMeta(type);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class EntityRowMapper<T> implements RowMapper<T> {
             field.setAccessible(true);
             field.set(object, resultSet.getObject(entityClassMappingMeta.getMappingColumnName(field)));
         } catch (IllegalAccessException | SQLException e) {
-            throw ClassMappingException.mappingFail(field.getName());
+            throw EntityMappingException.mappingFail(field.getName());
         }
     }
 }

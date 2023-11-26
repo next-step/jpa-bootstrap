@@ -2,6 +2,7 @@ package persistence.entity.impl;
 
 import java.sql.Connection;
 import persistence.entity.EntityManager;
+import persistence.entity.PersistenceContext;
 import persistence.entity.impl.context.DefaultPersistenceContext;
 import persistence.entity.impl.event.EntityEventDispatcher;
 import persistence.entity.impl.event.dispatcher.EntityEventDispatcherImpl;
@@ -14,7 +15,7 @@ import persistence.entity.impl.retrieve.EntityLoader;
 import persistence.entity.impl.retrieve.EntityLoaderImpl;
 import persistence.entity.impl.store.EntityPersister;
 import persistence.entity.impl.store.EntityPersisterImpl;
-import persistence.sql.dialect.ColumnType;
+import registry.EntityMetaRegistry;
 
 /**
  * EntityManagerFactory는 JPA의 EntityManagerFactory 인터페이스를 구현예정입니다.
@@ -22,18 +23,23 @@ import persistence.sql.dialect.ColumnType;
 public class EntityManagerFactory {
 
     private final Connection connection;
-    private final ColumnType columnType;
+    private final EntityMetaRegistry entityMetaRegistry;
 
-    public EntityManagerFactory(Connection connection, ColumnType columnType) {
+    public EntityManagerFactory(Connection connection, EntityMetaRegistry entityMetaRegistry) {
         this.connection = connection;
-        this.columnType = columnType;
+        this.entityMetaRegistry = entityMetaRegistry;
     }
 
     public EntityManager createEntityManager() {
         final EntityEventDispatcher entityEventDispatcher = initEventDispatcher(connection);
-        final DefaultPersistenceContext persistenceContext = new DefaultPersistenceContext(columnType);
+        final PersistenceContext persistenceContext = new DefaultPersistenceContext(entityMetaRegistry);
 
-        return new EntityManagerImpl(connection, columnType, persistenceContext, initEventPublisher(entityEventDispatcher));
+        return new EntityManagerImpl(
+            connection,
+            persistenceContext,
+            initEventPublisher(entityEventDispatcher),
+            entityMetaRegistry
+        );
     }
 
     private EntityEventPublisherImpl initEventPublisher(EntityEventDispatcher entityEventDispatcher) {
@@ -41,14 +47,14 @@ public class EntityManagerFactory {
     }
 
     private EntityEventDispatcherImpl initEventDispatcher(Connection connection) {
-        final EntityLoader entityLoader = new EntityLoaderImpl(connection);
-        final EntityPersister entityPersister = new EntityPersisterImpl(connection);
+        final EntityLoader entityLoader = new EntityLoaderImpl(connection, entityMetaRegistry);
+        final EntityPersister entityPersister = new EntityPersisterImpl(connection, entityMetaRegistry);
 
         return new EntityEventDispatcherImpl(
-            new LoadEntityEventListenerImpl(entityLoader, columnType),
-            new MergeEntityEventListenerImpl(entityPersister, columnType),
-            new PersistEntityEventListenerImpl(entityPersister, columnType),
-            new DeleteEntityEventListenerImpl(entityPersister, columnType)
+            new LoadEntityEventListenerImpl(entityLoader),
+            new MergeEntityEventListenerImpl(entityPersister),
+            new PersistEntityEventListenerImpl(entityPersister),
+            new DeleteEntityEventListenerImpl(entityPersister)
         );
     }
 

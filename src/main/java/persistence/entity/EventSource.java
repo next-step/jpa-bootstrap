@@ -2,7 +2,7 @@ package persistence.entity;
 
 public interface EventSource {
 
-    void putEntity(Object id, Object entity);
+    void putEntity(Object entity);
 
     void purgeEntity(Object entity);
 

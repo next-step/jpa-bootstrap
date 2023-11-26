@@ -5,17 +5,20 @@ import persistence.entity.EntityEntry;
 import persistence.entity.EventSource;
 import persistence.entity.PersistenceContext;
 import persistence.entity.impl.SnapShot;
-import persistence.sql.dialect.ColumnType;
+import persistence.sql.schema.meta.EntityObjectMappingMeta;
+import registry.EntityMetaRegistry;
 
 public class DefaultPersistenceContext implements PersistenceContext, EventSource {
 
+    private final EntityMetaRegistry entityMetaRegistry;
     private final PersistenceCacheContext persistenceCacheContext;
     private final SnapShotCacheContext snapShotCacheContext;
     private final EntityEntryContext entityEntryContext;
 
-    public DefaultPersistenceContext(ColumnType columnType) {
-        this.persistenceCacheContext = PersistenceCacheContext.of(columnType);
-        this.snapShotCacheContext = SnapShotCacheContext.of(columnType);
+    public DefaultPersistenceContext(EntityMetaRegistry entityMetaRegistry) {
+        this.entityMetaRegistry = entityMetaRegistry;
+        this.persistenceCacheContext = PersistenceCacheContext.of(entityMetaRegistry);
+        this.snapShotCacheContext = SnapShotCacheContext.of(entityMetaRegistry);
         this.entityEntryContext = new EntityEntryContext();
     }
 
@@ -61,9 +64,14 @@ public class DefaultPersistenceContext implements PersistenceContext, EventSourc
      */
 
     @Override
-    public void putEntity(Object id, Object entity) {
+    public void putEntity(Object entity) {
+        final EntityObjectMappingMeta entityObjectMappingMeta = EntityObjectMappingMeta.of(
+            entity,
+            entityMetaRegistry.getEntityMeta(entity.getClass())
+        );
+
         this.addEntity(entity);
-        this.getDatabaseSnapshot(id, entity);
+        this.getDatabaseSnapshot(entityObjectMappingMeta.getIdValue(), entity);
         this.managed(entity);
     }
 
