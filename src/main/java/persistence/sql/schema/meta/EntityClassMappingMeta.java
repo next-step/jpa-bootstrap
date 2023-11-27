@@ -21,11 +21,11 @@ public class EntityClassMappingMeta {
 
     private final TableMeta tableMeta;
 
-    private final Map<Field, ColumnMeta> columnMetaMap = new LinkedHashMap<>();
+    private final Map<Field, ColumnMeta> columnMetaMap;
 
     private EntityClassMappingMeta(TableMeta tableMeta, Map<Field, ColumnMeta> columnMetaMap) {
         this.tableMeta = tableMeta;
-        this.columnMetaMap.putAll(columnMetaMap);
+        this.columnMetaMap = columnMetaMap;
     }
 
     public static EntityClassMappingMeta of(Class<?> entityClazz, Dialect dialect) {
