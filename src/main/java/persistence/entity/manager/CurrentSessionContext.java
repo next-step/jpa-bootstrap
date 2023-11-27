@@ -5,8 +5,11 @@ public class CurrentSessionContext {
 
     public static void clearSession() {
         EntityManager entityManager = entityManagerThreadLocal.get();
-        entityManagerThreadLocal.remove();
+        if (entityManager != null) {
+            entityManagerThreadLocal.remove();
+        }
     }
+
 
     public EntityManager getSession() {
         return entityManagerThreadLocal.get();

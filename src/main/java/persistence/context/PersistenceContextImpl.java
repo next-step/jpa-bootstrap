@@ -1,5 +1,9 @@
 package persistence.context;
 
+import jakarta.persistence.GenerationType;
+import persistence.actionqueue.ActionQueue;
+import persistence.actionqueue.EntityInsertAction;
+import persistence.actionqueue.EntityUpdateAction;
 import persistence.entity.attribute.EntityAttribute;
 import persistence.entity.attribute.EntityAttributes;
 import persistence.entity.attribute.id.IdAttribute;
@@ -17,6 +21,7 @@ public class PersistenceContextImpl implements PersistenceContext {
     private final EntityEntries entityEntries = new EntityEntries();
     private final FirstCaches firstCaches = new FirstCaches();
     private final SnapShots snapShots = new SnapShots();
+    private final ActionQueue actionQueue = new ActionQueue();
 
     public PersistenceContextImpl(EntityPersister simpleEntityPersister, EntityAttributes entityAttributes) {
         this.simpleEntityPersister = simpleEntityPersister;
@@ -55,17 +60,23 @@ public class PersistenceContextImpl implements PersistenceContext {
         String instanceId = getInstanceIdAsString(instance, idField);
 
         if (isNewInstance(instanceId)) {
-            return insert(instance, idAttribute);
+            if (idAttribute.getGenerationType() == GenerationType.IDENTITY) {
+                return insert(instance, idAttribute);
+            }
+            actionQueue.addAction(new EntityInsertAction(instance, simpleEntityPersister, null));
+
+            return instance;
         }
 
         T snapshot = getDatabaseSnapshot(instance, instanceId);
-        T updated = simpleEntityPersister.update(snapshot, instance); // 나중에 쓰기지연 구현
 
         snapShots.putSnapShot(instance, instanceId);
         firstCaches.putFirstCache(instance, instanceId, entityAttribute);
         entityEntries.changeOrSetStatus(MANAGED, instance);
 
-        return updated;
+        actionQueue.addAction(new EntityUpdateAction(instance, simpleEntityPersister, snapshot));
+
+        return instance;
     }
 
     @Override
@@ -96,6 +107,11 @@ public class PersistenceContextImpl implements PersistenceContext {
             return newSnapShot;
         }
         return (T) snapshot;
+    }
+
+    @Override
+    public void flush() {
+        actionQueue.executeActions();
     }
 
     private boolean isNewInstance(String instanceId) {

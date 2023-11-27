@@ -1,6 +1,7 @@
 package persistence.context;
 
 
+import database.H2;
 import entity.Order;
 import entity.OrderItem;
 import entity.SampleOneWithValidAnnotation;
@@ -13,6 +14,9 @@ import persistence.DatabaseTest;
 import persistence.entity.attribute.EntityAttributes;
 import persistence.entity.loader.EntityLoader;
 import persistence.entity.loader.SimpleEntityLoader;
+import persistence.entity.manager.EntityManager;
+import persistence.entity.manager.EntityManagerFactory;
+import persistence.entity.manager.EntityManagerFactoryImpl;
 import persistence.entity.persister.SimpleEntityPersister;
 import persistence.sql.infra.H2SqlConverter;
 
@@ -294,6 +298,33 @@ class PersistenceContextImplTest extends DatabaseTest {
                     assertThat(notInsertedOrder).isEqualTo(null);
                 }
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("flush 메소드는")
+    class flush {
+
+        @Test
+        @DisplayName("쓰기지연소의 액션들을 실행한다")
+        void executeActions() throws SQLException {
+            //given
+            setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
+
+            SampleOneWithValidAnnotation sample =
+                    new SampleOneWithValidAnnotation("민준", 29);
+
+            EntityManagerFactory entityManagerFactory = new EntityManagerFactoryImpl(new H2());
+            entityManagerFactory.openSession();
+            EntityManager entityManager = entityManagerFactory.getSession();
+
+            entityManager.persist(sample);
+
+            PersistenceContext persistenceContext = entityManager.getPersistenceContext();
+
+            //when
+            //then
+            Assertions.assertDoesNotThrow(persistenceContext::flush);
         }
     }
 }

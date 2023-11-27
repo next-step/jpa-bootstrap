@@ -1,5 +1,6 @@
 package persistence.entity.manager;
 
+import database.H2;
 import entity.SampleOneWithValidAnnotation;
 import entity.SampleTwoWithValidAnnotation;
 import jdbc.JdbcTemplate;
@@ -159,6 +160,30 @@ public class EntityManagerTest extends DatabaseTest {
                 //then
                 Assertions.assertDoesNotThrow(() -> entityManager.remove(inserted));
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("flush 메소드는")
+    public class flush {
+        @Test
+        @DisplayName("쓰기지연소의 액션들을 실행한다")
+        void executeActions() throws SQLException {
+            //given
+            setUpFixtureTable(SampleOneWithValidAnnotation.class, new H2SqlConverter());
+
+            SampleOneWithValidAnnotation sample =
+                    new SampleOneWithValidAnnotation("민준", 29);
+
+            EntityManagerFactory entityManagerFactory = new EntityManagerFactoryImpl(new H2());
+            entityManagerFactory.openSession();
+            EntityManager entityManager = entityManagerFactory.getSession();
+
+            entityManager.persist(sample);
+
+            //when
+            //then
+            Assertions.assertDoesNotThrow(() -> entityManager.flush());
         }
     }
 }
