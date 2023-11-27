@@ -20,7 +20,7 @@ import persistence.entity.EntityManager;
 import persistence.entity.impl.EntityManagerFactory;
 import persistence.sql.ddl.generator.CreateDDLQueryGenerator;
 import persistence.sql.ddl.generator.DropDDLQueryGenerator;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.JdbcTemplate;
 import registry.EntityMetaRegistry;
@@ -41,7 +41,7 @@ class EntityLoaderImplTest {
         server = new H2();
         server.start();
         connection = server.getConnection();
-        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(testClazz);
     }
 

@@ -1,8 +1,6 @@
 package persistence.entity;
 
-import persistence.sql.dialect.ColumnType;
 import persistence.sql.schema.meta.EntityClassMappingMeta;
-import registry.EntityMetaRegistry;
 
 public interface EntityManager extends AutoCloseable {
 

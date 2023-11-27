@@ -12,7 +12,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import persistence.sql.schema.meta.EntityObjectMappingMeta;
 import registry.EntityMetaRegistry;
 
@@ -23,7 +23,7 @@ class EntityObjectMappingMetaTest {
     @DisplayName("Object에 대해 매핑되는 EntityObjectMappingMeta에서 대응되는 필드와 값을 확인할 수 있다.")
     void canReadObjectMappingMetaFieldAndValue() {
         final Class<ObjectMappingTestFixture> testClazz = ObjectMappingTestFixture.class;
-        final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(testClazz);
 
         ObjectMappingTestFixture objectMappingTestFixture = new ObjectMappingTestFixture("james", "james@gmail.com");

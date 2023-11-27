@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import persistence.sql.dialect.ColumnType;
+import persistence.sql.dialect.Dialect;
 import persistence.sql.schema.constraint.Constraint;
 import persistence.sql.schema.constraint.NotNullConstraint;
 import persistence.sql.schema.constraint.PrimaryKeyConstraint;
@@ -47,15 +47,15 @@ public class ColumnMeta {
         this.relation = relation;
     }
 
-    public static ColumnMeta of(Field field, ColumnType columnType) {
+    public static ColumnMeta of(Field field, Dialect dialect) {
         return new ColumnMeta(
             field,
             getColumnName(field),
-            columnType.getFieldType(field),
-            joiningConstraint(new PrimaryKeyConstraint(field, columnType), new NotNullConstraint(field)),
+            dialect.getFieldType(field),
+            joiningConstraint(new PrimaryKeyConstraint(field, dialect), new NotNullConstraint(field)),
             PrimaryKeyConstraint.isPrimaryKey(field),
             field.getType(),
-            Relation.of(field, columnType)
+            Relation.of(field, dialect)
         );
     }
 

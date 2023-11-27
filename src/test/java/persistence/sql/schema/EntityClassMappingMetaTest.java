@@ -7,7 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import persistence.sql.exception.EntityMappingException;
 import persistence.sql.exception.impl.RequiredAnnotationException;
 import persistence.sql.schema.meta.EntityClassMappingMeta;
@@ -19,7 +19,7 @@ class EntityClassMappingMetaTest {
     @DisplayName("@Entity 어노테이션은 필수입니다.")
     void requireEntityAnnotation() {
         assertThatThrownBy(
-            () -> EntityClassMappingMeta.of(EntityMappingMetaFixtureWithNoEntityAnnotation.class, new H2ColumnType())
+            () -> EntityClassMappingMeta.of(EntityMappingMetaFixtureWithNoEntityAnnotation.class, new H2Dialect())
         )
             .isInstanceOf(RequiredAnnotationException.class)
             .hasMessage(
@@ -29,7 +29,7 @@ class EntityClassMappingMetaTest {
     @Test
     @DisplayName("Entity의 클래스명의 대문자와 Table명은 매칭됩니다.")
     void matchEntityClassNameUppercaseIsMatchedWithTableName() {
-        final EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of(EntityMappingMetaFixture.class, new H2ColumnType());
+        final EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of(EntityMappingMetaFixture.class, new H2Dialect());
         final String tableClause = entityClassMappingMeta.tableClause();
 
         assertThat(tableClause).isEqualTo(EntityMappingMetaFixture.class.getSimpleName().toUpperCase());
@@ -38,7 +38,7 @@ class EntityClassMappingMetaTest {
     @Test
     @DisplayName("Entity의 필드명의 소문자와 타입은 Table 컬럼명과 타입, 제약조건에 매칭됩니다.")
     void matchEntityFieldNameLowercaseIsMatchedWithFieldName() {
-        final EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of(EntityMappingMetaFixture.class, new H2ColumnType());
+        final EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of(EntityMappingMetaFixture.class, new H2Dialect());
         final String fieldClause = entityClassMappingMeta.fieldClause();
 
         assertThat(fieldClause).isEqualTo("id bigint PRIMARY KEY, name varchar, index integer");

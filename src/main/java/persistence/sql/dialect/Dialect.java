@@ -2,7 +2,7 @@ package persistence.sql.dialect;
 
 import java.lang.reflect.Field;
 
-public interface ColumnType {
+public interface Dialect {
 
     String generationIdentity();
 

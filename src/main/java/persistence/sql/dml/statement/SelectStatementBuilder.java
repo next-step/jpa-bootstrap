@@ -3,7 +3,7 @@ package persistence.sql.dml.statement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import persistence.sql.dialect.ColumnType;
+import persistence.sql.dialect.Dialect;
 import persistence.sql.dml.clause.builder.FromClauseBuilder;
 import persistence.sql.dml.clause.builder.WhereClauseBuilder;
 import persistence.sql.dml.clause.predicate.OnPredicate;
@@ -49,8 +49,8 @@ public class SelectStatementBuilder {
         return this;
     }
 
-    public SelectStatementBuilder leftJoin(Class<?> clazz, OnPredicate predicate, ColumnType columnType) {
-        final EntityClassMappingMeta classMappingMeta = EntityClassMappingMeta.of(clazz, columnType);
+    public SelectStatementBuilder leftJoin(Class<?> clazz, OnPredicate predicate, Dialect dialect) {
+        final EntityClassMappingMeta classMappingMeta = EntityClassMappingMeta.of(clazz, dialect);
         this.fromClauseBuilder = fromClauseBuilder.innerJoin(classMappingMeta.tableClause(), predicate);
         return this;
     }

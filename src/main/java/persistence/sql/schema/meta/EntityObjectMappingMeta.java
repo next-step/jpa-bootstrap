@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import persistence.entity.impl.EntityIdentifier;
-import persistence.sql.dialect.H2ColumnType;
 import persistence.sql.exception.EntityMappingException;
 import persistence.sql.exception.FieldException;
 

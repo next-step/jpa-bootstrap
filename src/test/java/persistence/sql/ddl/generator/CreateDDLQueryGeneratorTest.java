@@ -16,14 +16,14 @@ import persistence.sql.ddl.generator.fixture.PersonV2WithNotNullConstraint;
 import persistence.sql.ddl.generator.fixture.PersonV3;
 import persistence.sql.ddl.generator.fixture.PersonV3WithTable;
 import persistence.sql.ddl.generator.fixture.PersonV3WithTransient;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import registry.EntityMetaRegistry;
 
 @DisplayName("CREATE DDL 생성 테스트")
 class CreateDDLQueryGeneratorTest {
 
     private final CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
-    private static final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+    private static final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
 
     @BeforeAll
     static void setUp() {

@@ -7,7 +7,7 @@ import jakarta.persistence.OneToMany;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import persistence.sql.dialect.ColumnType;
+import persistence.sql.dialect.Dialect;
 import persistence.sql.exception.impl.PreconditionRequiredException;
 import persistence.sql.schema.meta.EntityClassMappingMeta;
 import persistence.sql.schema.meta.TableMeta;
@@ -33,13 +33,13 @@ public class Relation {
         this.hasRelation = false;
     }
 
-    public static Relation of(Field field, ColumnType columnType) {
+    public static Relation of(Field field, Dialect dialect) {
         if (field.isAnnotationPresent(OneToMany.class)) {
-            return createOneToManyRelation(field, columnType);
+            return createOneToManyRelation(field, dialect);
         }
 
         if (field.isAnnotationPresent(ManyToOne.class)) {
-            return createManyToOneRelation(field, columnType);
+            return createManyToOneRelation(field, dialect);
         }
 
         return new Relation();
@@ -65,11 +65,11 @@ public class Relation {
         return joinColumnName;
     }
 
-    private static Relation createManyToOneRelation(Field field, ColumnType columnType) {
+    private static Relation createManyToOneRelation(Field field, Dialect dialect) {
         final Type genericType = field.getGenericType();
         if (genericType instanceof ParameterizedType) {
             final Type actualTypeArgument = getParameterizedType((ParameterizedType) genericType);
-            EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of(actualTypeArgument.getClass(), columnType);
+            EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of(actualTypeArgument.getClass(), dialect);
             final ManyToOne annotation = field.getAnnotation(ManyToOne.class);
 
             return new Relation(
@@ -82,11 +82,11 @@ public class Relation {
         return new Relation();
     }
 
-    private static Relation createOneToManyRelation(Field field, ColumnType columnType) {
+    private static Relation createOneToManyRelation(Field field, Dialect dialect) {
         final Type genericType = field.getGenericType();
         if (genericType instanceof ParameterizedType) {
             final Type actualTypeArgument = getParameterizedType((ParameterizedType) genericType);
-            EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of((Class<?>) actualTypeArgument, columnType);
+            EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of((Class<?>) actualTypeArgument, dialect);
             final OneToMany annotation = field.getAnnotation(OneToMany.class);
 
             return new Relation(

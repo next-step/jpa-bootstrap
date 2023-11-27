@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import persistence.sql.ddl.generator.CreateDDLQueryGenerator;
 import persistence.sql.ddl.generator.DropDDLQueryGenerator;
 import persistence.sql.ddl.generator.fixture.PersonV3;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.JdbcTemplate;
 import persistence.sql.schema.meta.EntityClassMappingMeta;
@@ -32,7 +32,7 @@ class InsertStatementBuilderIntegrationTest {
     static void setServer() throws SQLException {
         server = new H2();
         server.start();
-        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(testClazz);
     }
 

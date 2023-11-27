@@ -14,7 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import persistence.entity.PersistenceContext;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import registry.EntityMetaRegistry;
 
 @DisplayName("PersistenceContext 테스트")
@@ -26,7 +26,7 @@ class DefaultPersistenceContextTest {
 
     @BeforeAll
     static void setMetaRegistry() {
-        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(PersistenceContextEntityTest.class);
     }
 

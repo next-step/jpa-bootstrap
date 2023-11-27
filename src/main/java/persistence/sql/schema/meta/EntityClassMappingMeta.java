@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import persistence.sql.dialect.ColumnType;
+import persistence.sql.dialect.Dialect;
 import persistence.sql.exception.EntityMappingException;
 import persistence.sql.schema.constraint.PrimaryKeyConstraint;
 
@@ -28,11 +28,11 @@ public class EntityClassMappingMeta {
         this.columnMetaMap.putAll(columnMetaMap);
     }
 
-    public static EntityClassMappingMeta of(Class<?> entityClazz, ColumnType columnType) {
+    public static EntityClassMappingMeta of(Class<?> entityClazz, Dialect dialect) {
         validateEntityAnnotationIsPresent(entityClazz);
         validateHasIdAnnotation(entityClazz);
 
-        return new EntityClassMappingMeta(TableMeta.of(entityClazz), getColumnMetasFromEntity(entityClazz, columnType));
+        return new EntityClassMappingMeta(TableMeta.of(entityClazz), getColumnMetasFromEntity(entityClazz, dialect));
     }
 
     public TableMeta getTableMeta() {
@@ -103,12 +103,12 @@ public class EntityClassMappingMeta {
             .orElseThrow(EntityMappingException::defaultConstructorRequired);
     }
 
-    private static Map<Field, ColumnMeta> getColumnMetasFromEntity(Class<?> entityClazz, ColumnType columnType) {
+    private static Map<Field, ColumnMeta> getColumnMetasFromEntity(Class<?> entityClazz, Dialect dialect) {
         return Arrays.stream(entityClazz.getDeclaredFields())
             .collect(
                 Collectors.toMap(
                     field -> field,
-                    field -> ColumnMeta.of(field, columnType),
+                    field -> ColumnMeta.of(field, dialect),
                     (v1, v2) -> v2,
                     LinkedHashMap::new
                 )

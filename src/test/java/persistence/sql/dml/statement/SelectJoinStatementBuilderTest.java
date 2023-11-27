@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import persistence.sql.dml.clause.operator.EqualOperator;
 import persistence.sql.dml.clause.predicate.OnPredicate;
 import persistence.sql.dml.clause.predicate.WherePredicate;
@@ -28,13 +28,13 @@ class SelectJoinStatementBuilderTest {
     @Test
     @DisplayName("Join절을 통해 Select 문을 생성할 수 있다.")
     void canBuildSelectStatementJoin() {
-        final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(SelectJoinStatementEntity.class);
         final EntityClassMappingMeta entityClassMappingMeta = entityMetaRegistry.getEntityMeta(SelectJoinStatementEntity.class);
 
         final String selectStatement = SelectStatementBuilder.builder()
             .selectFrom(entityClassMappingMeta)
-            .leftJoin(OrderItem.class, OnPredicate.of("orders.id", "order_items.order_id", new EqualOperator()), new H2ColumnType())
+            .leftJoin(OrderItem.class, OnPredicate.of("orders.id", "order_items.order_id", new EqualOperator()), new H2Dialect())
             .where(WherePredicate.of("id", 1L, new EqualOperator()))
             .or(WherePredicate.of("nick_name", "test_person", new EqualOperator()))
             .build();

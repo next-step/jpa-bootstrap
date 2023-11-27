@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import persistence.sql.schema.meta.EntityClassMappingMeta;
 import persistence.sql.schema.meta.EntityObjectMappingMeta;
 import registry.EntityMetaRegistry;
@@ -20,7 +20,7 @@ class EntityIdentifierTest {
 
     @BeforeAll
     static void setMetaRegistry() {
-        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(EntityIdentifierTestEntity.class);
     }
 
