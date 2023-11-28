@@ -24,6 +24,7 @@ import persistence.entity.EntityManagerFactory;
 import persistence.entity.binder.AnnotationBinder;
 import persistence.fake.FakeDialect;
 import persistence.meta.MetaModel;
+import persistence.sql.QueryGenerator;
 import persistence.testFixtures.Person;
 
 
@@ -44,8 +45,8 @@ public class RepositoryTest {
         connection = server.getConnection();
         jdbcTemplate = new JdbcTemplate(connection);
         dialect = new FakeDialect();
-        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures", new FakeDialect());
-        entityManagerFactory = new EntityManagerFactory(metaModel);
+        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures");
+        entityManagerFactory = new EntityManagerFactory(metaModel, QueryGenerator.of(dialect));
     }
 
     @TestFactory

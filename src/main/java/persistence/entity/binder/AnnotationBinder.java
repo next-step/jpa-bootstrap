@@ -5,22 +5,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import persistence.dialect.Dialect;
+import persistence.entity.ClassPackageScanner;
 import persistence.entity.ClassScanner;
 import persistence.meta.EntityMeta;
 import persistence.meta.MetaModel;
 
 public final class AnnotationBinder {
 
-    public static MetaModel bindMetaModel(String pakageName, Dialect dialect) {
-        final Set<Class<?>> classes = entityFilter(ClassScanner.scan(pakageName));
+
+    public static MetaModel bindMetaModel(String pakageName) {
+        ClassScanner scanner = new ClassPackageScanner(pakageName);
+        final Set<Class<?>> classes = entityFilter(scanner.scan());
 
         if (classes == null || classes.isEmpty()) {
             throw new IllegalArgumentException("bind할 클래스가 없습니다.");
         }
 
         final Map<Class<?>, EntityMeta> entityMetaMap = bindEntityMetaMap(classes);
-        return new MetaModel(entityMetaMap, dialect);
+        return new MetaModel(entityMetaMap);
     }
 
     private static Map<Class<?>, EntityMeta> bindEntityMetaMap(Set<Class<?>> classes) {
