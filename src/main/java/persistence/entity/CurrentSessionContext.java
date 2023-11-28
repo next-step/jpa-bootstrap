@@ -1,21 +1,10 @@
 package persistence.entity;
 
-public class CurrentSessionContext {
-    private final ThreadLocal<EntityManager> entityManagerThreadLocal;
+public interface CurrentSessionContext {
+    void bind(EntityManager entityManager);
 
-    public CurrentSessionContext() {
-        entityManagerThreadLocal = new ThreadLocal<>();
-    }
+    EntityManager currentSession();
 
-    public void bind(EntityManager entityManager) {
-        entityManagerThreadLocal.set(entityManager);
-    }
-    public EntityManager currentSession() {
-        return entityManagerThreadLocal.get();
-    }
-
-    public void closeCurrentSession() {
-        entityManagerThreadLocal.remove();
-    }
+    void closeCurrentSession();
 
 }

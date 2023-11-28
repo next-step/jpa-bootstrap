@@ -8,16 +8,18 @@ import persistence.entity.binder.AnnotationBinder;
 import persistence.fake.FakeDialect;
 import persistence.fake.MockConnection;
 import persistence.meta.MetaModel;
+import persistence.sql.QueryGenerator;
 
-class CurrentSessionContextTest {
+class ThreadLocalSessionContextTest {
 
     @Test
     @DisplayName("현재 세션을 반환한다.")
     void currentSession() {
         //given
-        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures", new FakeDialect());
-        CurrentSessionContext currentSessionContext = new CurrentSessionContext();
-        EntityManager entityManager = new SimpleEntityManager(metaModel, new MockConnection());
+        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures");
+        CurrentSessionContext currentSessionContext = new ThreadLocalSessionContext();
+        EntityManager entityManager = new SimpleEntityManager(metaModel, QueryGenerator.of(new FakeDialect()),
+                new MockConnection());
         currentSessionContext.bind(entityManager);
 
         //when
@@ -31,9 +33,10 @@ class CurrentSessionContextTest {
     @DisplayName("세션을 지운다")
     void removeSession() {
         //given
-        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures", new FakeDialect());
-        CurrentSessionContext currentSessionContext = new CurrentSessionContext();
-        EntityManager entityManager = new SimpleEntityManager(metaModel, new MockConnection());
+        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures");
+        CurrentSessionContext currentSessionContext = new ThreadLocalSessionContext();
+        EntityManager entityManager = new SimpleEntityManager(metaModel, QueryGenerator.of(new FakeDialect()),
+                new MockConnection());
         currentSessionContext.bind(entityManager);
 
         //when

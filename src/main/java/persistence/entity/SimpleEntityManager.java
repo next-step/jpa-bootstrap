@@ -14,11 +14,11 @@ public class SimpleEntityManager implements EntityManager {
     private final Connection connection;
     private final SimplePersistenceContext persistenceContext;
 
-    public SimpleEntityManager(MetaModel metaModel, Connection connection) {
+    public SimpleEntityManager(MetaModel metaModel, QueryGenerator queryGenerator, Connection connection) {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
         this.connection = connection;
         this.persistenceContext = new SimplePersistenceContext();
-        this.entityPersisterContenxt = EntityPersisterContext.create(metaModel, jdbcTemplate);
+        this.entityPersisterContenxt = EntityPersisterContext.create(metaModel, jdbcTemplate, queryGenerator);
 
     }
 

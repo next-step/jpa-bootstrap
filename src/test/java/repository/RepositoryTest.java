@@ -21,6 +21,7 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 import persistence.dialect.Dialect;
 import persistence.entity.EntityManagerFactory;
+import persistence.entity.ThreadLocalSessionContext;
 import persistence.entity.binder.AnnotationBinder;
 import persistence.fake.FakeDialect;
 import persistence.meta.MetaModel;
@@ -46,7 +47,7 @@ public class RepositoryTest {
         jdbcTemplate = new JdbcTemplate(connection);
         dialect = new FakeDialect();
         MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures");
-        entityManagerFactory = new EntityManagerFactory(metaModel, QueryGenerator.of(dialect));
+        entityManagerFactory = new EntityManagerFactory(metaModel, QueryGenerator.of(dialect), new ThreadLocalSessionContext());
     }
 
     @TestFactory
