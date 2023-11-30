@@ -16,7 +16,7 @@ class ThreadLocalSessionContextTest {
     @DisplayName("현재 세션을 반환한다.")
     void currentSession() {
         //given
-        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures");
+        MetaModel metaModel = AnnotationBinder.bindMetaModel(new ClassPackageScanner("persistence.testFixtures"));
         CurrentSessionContext currentSessionContext = new ThreadLocalSessionContext();
         EntityManager entityManager = new SimpleEntityManager(metaModel, QueryGenerator.of(new FakeDialect()),
                 new MockConnection());
@@ -33,7 +33,7 @@ class ThreadLocalSessionContextTest {
     @DisplayName("세션을 지운다")
     void removeSession() {
         //given
-        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures");
+        MetaModel metaModel = AnnotationBinder.bindMetaModel(new ClassPackageScanner("persistence.testFixtures"));
         CurrentSessionContext currentSessionContext = new ThreadLocalSessionContext();
         EntityManager entityManager = new SimpleEntityManager(metaModel, QueryGenerator.of(new FakeDialect()),
                 new MockConnection());

@@ -2,6 +2,7 @@ package persistence.entity.binder;
 
 import jakarta.persistence.Entity;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -12,9 +13,7 @@ import persistence.meta.MetaModel;
 
 public final class AnnotationBinder {
 
-
-    public static MetaModel bindMetaModel(String pakageName) {
-        ClassScanner scanner = new ClassPackageScanner(pakageName);
+    public static MetaModel bindMetaModel(ClassScanner scanner) {
         final Set<Class<?>> classes = entityFilter(scanner.scan());
 
         if (classes == null || classes.isEmpty()) {

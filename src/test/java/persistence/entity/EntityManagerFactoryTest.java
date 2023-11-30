@@ -20,7 +20,7 @@ class EntityManagerFactoryTest {
     @DisplayName("엔티티 메니저를 생성한다.")
     void createEntityManager() throws Exception {
         //given
-        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures");
+        MetaModel metaModel = AnnotationBinder.bindMetaModel(new ClassPackageScanner("persistence.testFixtures"));
         QueryGenerator queryGenerator = QueryGenerator.of(new FakeDialect());
         EntityManagerFactory entityManagerFactory = new EntityManagerFactory(metaModel, queryGenerator, new ThreadLocalSessionContext());
 
@@ -36,7 +36,7 @@ class EntityManagerFactoryTest {
     void externalEntityManager() throws Exception {
         //given
         ExecutorService executorService = Executors.newFixedThreadPool(3);
-        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures");
+        MetaModel metaModel = AnnotationBinder.bindMetaModel(new ClassPackageScanner("persistence.testFixtures"));
         QueryGenerator queryGenerator = QueryGenerator.of(new FakeDialect());
         EntityManagerFactory entityManagerFactory = new EntityManagerFactory(metaModel, queryGenerator, new ThreadLocalSessionContext());
 
@@ -57,7 +57,7 @@ class EntityManagerFactoryTest {
     @DisplayName("세션을 종료하고 다시 열면 다른 엔터티 매니저이다.")
     void reopenSession() throws Exception {
         //given
-        MetaModel metaModel = AnnotationBinder.bindMetaModel("persistence.testFixtures");
+        MetaModel metaModel = AnnotationBinder.bindMetaModel(new ClassPackageScanner("persistence.testFixtures"));
         QueryGenerator queryGenerator = QueryGenerator.of(new FakeDialect());
         EntityManagerFactory entityManagerFactory = new EntityManagerFactory(metaModel, queryGenerator, new ThreadLocalSessionContext());
 
