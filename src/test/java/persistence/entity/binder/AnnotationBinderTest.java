@@ -19,7 +19,7 @@ class AnnotationBinderTest {
     @DisplayName("바인드 할 엔터티가 없으면 예외가 발생한다.")
     void noEntity() {
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> bindMetaModel(new ClassPackageScanner("persistence.testFixtures")));
+                .isThrownBy(() -> bindMetaModel(new ClassPackageScanner("nOpersistence.testFixtures")));
     }
 
     @Test

@@ -47,8 +47,10 @@ public class RepositoryTest {
         connection = server.getConnection();
         jdbcTemplate = new JdbcTemplate(connection);
         dialect = new FakeDialect();
-        MetaModel metaModel = AnnotationBinder.bindMetaModel(new ClassPackageScanner("persistence.testFixtures"));
-        entityManagerFactory = new EntityManagerFactory(metaModel, QueryGenerator.of(dialect), new ThreadLocalSessionContext());
+        dialect = new FakeDialect();
+        entityManagerFactory = EntityManagerFactory
+                .genrateThreadLocalEntityManagerFactory(new ClassPackageScanner("persistence.testFixtures"), new FakeDialect());
+
     }
 
     @TestFactory

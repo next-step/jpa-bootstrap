@@ -11,7 +11,7 @@ import persistence.sql.QueryGenerator;
 public class EntityManagerFactoryFixture {
 
     public static EntityManagerFactory getEntityManagerFactory() {
-        MetaModel metaModel = AnnotationBinder.bindMetaModel(new ClassPackageScanner("persistence.testFixtures"));
-        return new EntityManagerFactory(metaModel, QueryGenerator.of(new FakeDialect()), new ThreadLocalSessionContext());
+        return EntityManagerFactory.genrateThreadLocalEntityManagerFactory(
+                new ClassPackageScanner("persistence.testFixtures"), new FakeDialect());
     }
 }
