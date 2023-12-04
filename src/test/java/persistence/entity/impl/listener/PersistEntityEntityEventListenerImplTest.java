@@ -77,7 +77,7 @@ class PersistEntityEntityEventListenerImplTest {
         );
         EntityEventPublisher entityEventPublisher = new EntityEventPublisherImpl(entityEventDispatcher);
 
-        entityManager = new EntityManagerImpl(connection, persistenceContext, entityEventPublisher, entityMetaRegistry);
+        entityManager = EntityManagerImpl.of(connection, persistenceContext, entityEventPublisher, entityMetaRegistry);
         jdbcTemplate = new JdbcTemplate(connection);
         CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
         jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));

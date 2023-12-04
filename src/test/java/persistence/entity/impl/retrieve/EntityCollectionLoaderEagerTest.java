@@ -56,7 +56,7 @@ class EntityCollectionLoaderEagerTest {
 
     @BeforeEach
     void setUp() {
-        entityManager = entityManagerFactory.createEntityManager();
+        entityManager = entityManagerFactory.openSession();
         jdbcTemplate = new JdbcTemplate(connection);
         CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
         jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));

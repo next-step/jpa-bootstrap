@@ -77,7 +77,8 @@ class CustomJpaRepositoryIntegrationTest {
         );
         EntityEventPublisher entityEventPublisher = new EntityEventPublisherImpl(entityEventDispatcher);
 
-        entityManager = new EntityManagerImpl(connection,
+        entityManager = EntityManagerImpl.of(
+            connection,
             new DefaultPersistenceContext(entityMetaRegistry),
             entityEventPublisher,
             entityMetaRegistry

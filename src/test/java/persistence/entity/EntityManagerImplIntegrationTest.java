@@ -52,7 +52,7 @@ class EntityManagerImplIntegrationTest {
 
     @BeforeEach
     void setUp() throws SQLException {
-        entityManager = entityManagerFactory.createEntityManager();
+        entityManager = entityManagerFactory.openSession();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
         jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));

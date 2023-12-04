@@ -56,7 +56,7 @@ class EntityManagerImplRelationIntegrationTest {
 
     @BeforeEach
     void setUp() throws SQLException {
-        entityManager = entityManagerFactory.createEntityManager();
+        entityManager = entityManagerFactory.openSession();
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();

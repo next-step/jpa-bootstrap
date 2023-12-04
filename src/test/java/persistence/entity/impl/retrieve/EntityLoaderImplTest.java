@@ -48,7 +48,7 @@ class EntityLoaderImplTest {
     @BeforeEach
     void setUp() {
         final EntityManagerFactory emf = new EntityManagerFactory(connection, entityMetaRegistry);
-        entityManager = emf.createEntityManager();
+        entityManager = emf.openSession();
         jdbcTemplate = new JdbcTemplate(connection);
         CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
         jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));
