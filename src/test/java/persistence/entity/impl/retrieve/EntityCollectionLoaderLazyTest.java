@@ -27,7 +27,7 @@ import persistence.entity.EntityManager;
 import persistence.entity.impl.EntityManagerFactory;
 import persistence.sql.ddl.generator.CreateDDLQueryGenerator;
 import persistence.sql.ddl.generator.DropDDLQueryGenerator;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.JdbcTemplate;
 import registry.EntityMetaRegistry;
@@ -50,7 +50,7 @@ class EntityCollectionLoaderLazyTest {
         server.start();
         connection = server.getConnection();
 
-        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(EntityLoaderEntity.class);
         entityMetaRegistry.addEntityMeta(ChildEntity.class);
 
@@ -59,7 +59,7 @@ class EntityCollectionLoaderLazyTest {
 
     @BeforeEach
     void setUp() {
-        entityManager = entityManagerFactory.createEntityManager();
+        entityManager = entityManagerFactory.openSession();
         jdbcTemplate = new JdbcTemplate(connection);
         CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
         jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));

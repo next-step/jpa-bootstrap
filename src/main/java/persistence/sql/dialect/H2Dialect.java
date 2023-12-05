@@ -9,7 +9,7 @@ import persistence.sql.exception.EntityMappingException;
 /**
  * @http://www.h2database.com/html/datatypes.html
  */
-public class H2ColumnType implements ColumnType {
+public class H2Dialect implements Dialect {
 
     private final Map<Class<?>, String> typeMap = new HashMap<>();
 
@@ -18,7 +18,7 @@ public class H2ColumnType implements ColumnType {
     private static final HashMap.Entry<Class<?>, String> integerType = Map.entry(Integer.class, "integer");
     private static final HashMap.Entry<Class<?>, String> booleanType = Map.entry(Boolean.class, "boolean");
 
-    public H2ColumnType() {
+    public H2Dialect() {
         typeMap.put(longType.getKey(), longType.getValue());
         typeMap.put(stringType.getKey(), stringType.getValue());
         typeMap.put(integerType.getKey(), integerType.getValue());

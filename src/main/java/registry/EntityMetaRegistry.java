@@ -1,6 +1,6 @@
 package registry;
 
-import persistence.sql.dialect.ColumnType;
+import persistence.sql.dialect.Dialect;
 import persistence.sql.exception.EntityMappingException;
 import persistence.sql.schema.meta.EntityClassMappingMeta;
 import registry.context.MetaModelContext;
@@ -8,19 +8,19 @@ import registry.context.MetaModelContext;
 public class EntityMetaRegistry {
 
     private final MetaModelContext metaModelContext;
-    private final ColumnType columnType;
+    private final Dialect dialect;
 
-    private EntityMetaRegistry(ColumnType columnType) {
+    private EntityMetaRegistry(Dialect dialect) {
         this.metaModelContext = new MetaModelContext();
-        this.columnType = columnType;
+        this.dialect = dialect;
     }
 
-    public static EntityMetaRegistry of(ColumnType columnType) {
-        return new EntityMetaRegistry(columnType);
+    public static EntityMetaRegistry of(Dialect dialect) {
+        return new EntityMetaRegistry(dialect);
     }
 
     public void addEntityMeta(Class<?> clazz) {
-        final EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of(clazz, columnType);
+        final EntityClassMappingMeta entityClassMappingMeta = EntityClassMappingMeta.of(clazz, dialect);
         this.metaModelContext.putEntityMeta(clazz, entityClassMappingMeta);
     }
 

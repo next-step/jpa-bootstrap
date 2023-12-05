@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import persistence.entity.EntityEntry;
 import persistence.entity.EventSource;
 import persistence.entity.type.EntityStatus;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import registry.EntityMetaRegistry;
 
 @DisplayName("EventSource 테스트")
@@ -25,7 +25,7 @@ class EntityEventSourceTest {
 
     @BeforeAll
     static void setMetaRegistry() {
-        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(EventSourceTestEntity.class);
     }
 

@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import persistence.entity.impl.EntityManagerFactory;
 import persistence.sql.ddl.generator.CreateDDLQueryGenerator;
 import persistence.sql.ddl.generator.DropDDLQueryGenerator;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.JdbcTemplate;
 import persistence.sql.dml.statement.InsertStatementBuilder;
@@ -48,7 +48,7 @@ class EntityManagerImplRelationIntegrationTest {
         server = new H2();
         server.start();
         Connection connection = server.getConnection();
-        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(testClazz);
         entityMetaRegistry.addEntityMeta(OrderItem.class);
         entityManagerFactory = new EntityManagerFactory(connection, entityMetaRegistry);
@@ -56,7 +56,7 @@ class EntityManagerImplRelationIntegrationTest {
 
     @BeforeEach
     void setUp() throws SQLException {
-        entityManager = entityManagerFactory.createEntityManager();
+        entityManager = entityManagerFactory.openSession();
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();

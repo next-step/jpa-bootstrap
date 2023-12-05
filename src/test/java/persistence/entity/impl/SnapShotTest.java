@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import registry.EntityMetaRegistry;
 
 @DisplayName("SnapShot 테스트")
@@ -18,7 +18,7 @@ class SnapShotTest {
 
     @BeforeAll
     static void setMetaRegistry() {
-        entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(SnapShotTestEntity.class);
     }
 

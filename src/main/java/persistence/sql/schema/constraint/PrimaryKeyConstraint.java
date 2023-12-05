@@ -5,7 +5,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.lang.reflect.Field;
 import java.util.Objects;
-import persistence.sql.dialect.ColumnType;
+import persistence.sql.dialect.Dialect;
 import persistence.sql.exception.EntityMappingException;
 
 public class PrimaryKeyConstraint implements Constraint {
@@ -15,8 +15,8 @@ public class PrimaryKeyConstraint implements Constraint {
 
     private final String constraint;
 
-    public PrimaryKeyConstraint(Field field, ColumnType columnType) {
-        this.constraint = extractGeneratedValueStrategy(field, columnType);
+    public PrimaryKeyConstraint(Field field, Dialect dialect) {
+        this.constraint = extractGeneratedValueStrategy(field, dialect);
     }
 
     @Override
@@ -24,7 +24,7 @@ public class PrimaryKeyConstraint implements Constraint {
         return constraint;
     }
 
-    private String extractGeneratedValueStrategy(Field field, ColumnType columnType) {
+    private String extractGeneratedValueStrategy(Field field, Dialect dialect) {
         if (!isPrimaryKey(field)) {
             return "";
         }
@@ -36,7 +36,7 @@ public class PrimaryKeyConstraint implements Constraint {
         final GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
 
         if (Objects.requireNonNull(generatedValue.strategy()) == GenerationType.IDENTITY) {
-            return String.format(PRIMARY_KEY_FORMAT, columnType.generationIdentity(), PRIMARY_KEY);
+            return String.format(PRIMARY_KEY_FORMAT, dialect.generationIdentity(), PRIMARY_KEY);
         }
 
         throw EntityMappingException.unrecognizedGeneratedValue(generatedValue.strategy().name());

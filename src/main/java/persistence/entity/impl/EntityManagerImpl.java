@@ -26,12 +26,18 @@ public class EntityManagerImpl implements EntityManager {
     private final EntityEventPublisher entityEventPublisher;
     private final EntityMetaRegistry entityMetaRegistry;
 
-    public EntityManagerImpl(Connection connection, PersistenceContext persistenceContext,
+    private EntityManagerImpl(Connection connection, PersistenceContext persistenceContext,
         EntityEventPublisher eventPublisher, EntityMetaRegistry entityMetaRegistry) {
         this.connection = connection;
         this.entityEventPublisher = eventPublisher;
         this.persistenceContext = persistenceContext;
         this.entityMetaRegistry = entityMetaRegistry;
+    }
+
+    public static EntityManager of(Connection connection, PersistenceContext persistenceContext,
+        EntityEventPublisher eventPublisher, EntityMetaRegistry entityMetaRegistry) {
+
+        return new EntityManagerImpl(connection, persistenceContext, eventPublisher, entityMetaRegistry);
     }
 
     @Override

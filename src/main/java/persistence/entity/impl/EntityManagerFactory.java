@@ -3,8 +3,11 @@ package persistence.entity.impl;
 import java.sql.Connection;
 import persistence.entity.EntityManager;
 import persistence.entity.PersistenceContext;
+import persistence.entity.SessionContext;
 import persistence.entity.impl.context.DefaultPersistenceContext;
+import persistence.entity.impl.context.ThreadLocalSessionContext;
 import persistence.entity.impl.event.EntityEventDispatcher;
+import persistence.entity.impl.event.EntityEventPublisher;
 import persistence.entity.impl.event.dispatcher.EntityEventDispatcherImpl;
 import persistence.entity.impl.event.listener.DeleteEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.LoadEntityEventListenerImpl;
@@ -22,31 +25,46 @@ import registry.EntityMetaRegistry;
  */
 public class EntityManagerFactory {
 
+    private final SessionContext sessionContext;
     private final Connection connection;
     private final EntityMetaRegistry entityMetaRegistry;
 
     public EntityManagerFactory(Connection connection, EntityMetaRegistry entityMetaRegistry) {
         this.connection = connection;
         this.entityMetaRegistry = entityMetaRegistry;
+        this.sessionContext = initSessionContext(connection, entityMetaRegistry);
     }
 
-    public EntityManager createEntityManager() {
-        final EntityEventDispatcher entityEventDispatcher = initEventDispatcher(connection);
-        final PersistenceContext persistenceContext = new DefaultPersistenceContext(entityMetaRegistry);
-
-        return new EntityManagerImpl(
-            connection,
-            persistenceContext,
-            initEventPublisher(entityEventDispatcher),
-            entityMetaRegistry
+    private SessionContext initSessionContext(Connection connection, EntityMetaRegistry entityMetaRegistry) {
+        return ThreadLocalSessionContext.init(this, entityManagerFactory ->
+            buildEntityManager(connection, entityMetaRegistry)
         );
     }
 
-    private EntityEventPublisherImpl initEventPublisher(EntityEventDispatcher entityEventDispatcher) {
+    public EntityManager openSession() {
+        final EntityManager entityManager = sessionContext.getEntityManager(this);
+        if (entityManager != null) {
+            return entityManager;
+        }
+
+        return sessionContext.bindEntityManager(this, entityManagerFactory ->
+            buildEntityManager(connection, entityMetaRegistry)
+        );
+    }
+
+    private EntityManager buildEntityManager(Connection connection, EntityMetaRegistry entityMetaRegistry) {
+        final EntityEventDispatcher entityEventDispatcher = initEventDispatcher(connection);
+        final EntityEventPublisher entityEventPublisher = initEventPublisher(entityEventDispatcher);
+        final PersistenceContext persistenceContext = new DefaultPersistenceContext(entityMetaRegistry);
+
+        return EntityManagerImpl.of(connection, persistenceContext, entityEventPublisher, entityMetaRegistry);
+    }
+
+    private EntityEventPublisher initEventPublisher(EntityEventDispatcher entityEventDispatcher) {
         return new EntityEventPublisherImpl(entityEventDispatcher);
     }
 
-    private EntityEventDispatcherImpl initEventDispatcher(Connection connection) {
+    private EntityEventDispatcher initEventDispatcher(Connection connection) {
         final EntityLoader entityLoader = new EntityLoaderImpl(connection, entityMetaRegistry);
         final EntityPersister entityPersister = new EntityPersisterImpl(connection, entityMetaRegistry);
 

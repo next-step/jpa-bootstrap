@@ -13,7 +13,7 @@ import jakarta.persistence.Transient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import persistence.sql.dml.clause.operator.EqualOperator;
 import persistence.sql.dml.clause.predicate.WherePredicate;
 import persistence.sql.exception.FieldException;
@@ -27,7 +27,7 @@ class SelectStatementBuilderTest {
 
     @BeforeEach
     void setUp() {
-        entityClassMappingMeta = EntityClassMappingMeta.of(SelectStatementEntity.class, new H2ColumnType());
+        entityClassMappingMeta = EntityClassMappingMeta.of(SelectStatementEntity.class, new H2Dialect());
     }
 
     @Test

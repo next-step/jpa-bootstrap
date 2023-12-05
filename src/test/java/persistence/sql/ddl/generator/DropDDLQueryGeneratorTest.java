@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.sql.ddl.generator.fixture.PersonV3;
-import persistence.sql.dialect.H2ColumnType;
 
 @DisplayName("DROP DDL 생성 테스트")
 class DropDDLQueryGeneratorTest {

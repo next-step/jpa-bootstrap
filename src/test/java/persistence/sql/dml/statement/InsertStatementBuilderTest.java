@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.sql.ddl.generator.fixture.PersonV3;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import registry.EntityMetaRegistry;
 
 @DisplayName("INSERT 문 생성 테스트")
@@ -17,7 +17,7 @@ class InsertStatementBuilderTest {
         InsertStatementBuilder insertStatementBuilder = new InsertStatementBuilder();
 
         PersonV3 personV3 = new PersonV3("test_person", 25, "test@test.com", 5);
-        final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(PersonV3.class);
         
         final String insert = insertStatementBuilder.insert(personV3, entityMetaRegistry.getEntityMeta(PersonV3.class));

@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.sql.ddl.generator.fixture.PersonV3;
-import persistence.sql.dialect.H2ColumnType;
+import persistence.sql.dialect.H2Dialect;
 import persistence.sql.dml.clause.operator.EqualOperator;
 import persistence.sql.dml.clause.predicate.WherePredicate;
 import registry.EntityMetaRegistry;
@@ -16,7 +16,7 @@ class DeleteStatementBuilderTest {
     @Test
     @DisplayName("Where절을 통해 조건이 있는 DELETE 문을 생성할 수 있다.")
     void canBuildSelectStatementWhere() {
-        final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2ColumnType());
+        final EntityMetaRegistry entityMetaRegistry = EntityMetaRegistry.of(new H2Dialect());
         entityMetaRegistry.addEntityMeta(PersonV3.class);
 
         final String selectStatement = DeleteStatementBuilder.builder()
