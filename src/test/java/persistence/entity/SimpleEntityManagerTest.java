@@ -51,7 +51,7 @@ class SimpleEntityManagerTest {
     void persist() {
         //given
         Person person = new Person("이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
+        EntityManager entityManager = entityManagerFactory.openSession(connection);
 
         //when
         entityManager.persist(person);
@@ -66,7 +66,7 @@ class SimpleEntityManagerTest {
     void remove() {
         //given
         Person person = new Person("이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
+        EntityManager entityManager = entityManagerFactory.openSession(connection);
 
         entityManager.persist(person);
 
@@ -85,7 +85,7 @@ class SimpleEntityManagerTest {
     void findById() {
         //given
         NoAutoIncrementPerson person = new NoAutoIncrementPerson(2L, "이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
+        EntityManager entityManager = entityManagerFactory.openSession(connection);
         entityManager.persist(person);
 
         //when
@@ -102,7 +102,7 @@ class SimpleEntityManagerTest {
         Person person1 = new Person("이름", 19, "asd@gmail.com");
         Person person2 = new Person("이름", 19, "asd@gmail.com");
         Person person3 = new Person("이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
+        EntityManager entityManager = entityManagerFactory.openSession(connection);
 
         //when
         final Person savePerson1 = entityManager.persist(person1);
@@ -124,7 +124,7 @@ class SimpleEntityManagerTest {
         //given
         final String CHANGE_EMAIL_STRING = "change23@gmail.com";
         Person person = new Person("이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
+        EntityManager entityManager = entityManagerFactory.openSession(connection);
 
         final Person person1 = entityManager.persist(person);
         final Person person2 = entityManager.persist(person);
@@ -154,7 +154,7 @@ class SimpleEntityManagerTest {
         //given
         Person person = new Person("이름", 19, "asd@gmail.com");
         DifferentPerson noAutoIncrementPerson = new DifferentPerson(2L, "이름", 19, "asd@gmail.com");
-        EntityManager entityManager = entityManagerFactory.createEntityManager(connection);
+        EntityManager entityManager = entityManagerFactory.openSession(connection);
 
         //when
         entityManager.persist(person);

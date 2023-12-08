@@ -12,7 +12,6 @@ import database.H2;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
@@ -21,12 +20,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 import persistence.dialect.Dialect;
-import persistence.entity.ClassScanner;
-import persistence.entity.EntityClassFilter;
+import persistence.entity.ClassPackageScanner;
 import persistence.entity.EntityManagerFactory;
+import persistence.entity.ThreadLocalSessionContext;
 import persistence.entity.binder.AnnotationBinder;
 import persistence.fake.FakeDialect;
 import persistence.meta.MetaModel;
+import persistence.sql.QueryGenerator;
 import persistence.testFixtures.Person;
 
 
@@ -47,19 +47,18 @@ public class RepositoryTest {
         connection = server.getConnection();
         jdbcTemplate = new JdbcTemplate(connection);
         dialect = new FakeDialect();
-        Set<Class<?>> classes = ClassScanner.scan("persistence.testFixtures");
-        MetaModel metaModel = AnnotationBinder.bindMetaModel(EntityClassFilter.entityFilter(classes), dialect);
-        entityManagerFactory = EntityManagerFactory.create(metaModel);
+        dialect = new FakeDialect();
+        entityManagerFactory = EntityManagerFactory
+                .genrateThreadLocalEntityManagerFactory(new ClassPackageScanner("persistence.testFixtures"), new FakeDialect());
 
     }
 
     @TestFactory
     @DisplayName("레포지토리를 관리 한다.")
     Stream<DynamicNode> testFactory() {
-
         final DDLRepository<Person> ddlRepository = new BaseDDLRepository<>(jdbcTemplate, Person.class, dialect);
         final SimpleCrudRepository<Person, Long> crudRepository = new SimpleCrudRepository<>(
-                entityManagerFactory.createEntityManager(connection), Person.class);
+                entityManagerFactory.openSession(connection), Person.class);
 
         return Stream.of(
                 dynamicContainer("테이블이", Stream.of(

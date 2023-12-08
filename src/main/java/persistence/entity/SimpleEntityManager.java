@@ -6,6 +6,7 @@ import java.util.List;
 import jdbc.JdbcTemplate;
 import persistence.entity.persister.EntityPersister;
 import persistence.meta.MetaModel;
+import persistence.sql.QueryGenerator;
 
 
 public class SimpleEntityManager implements EntityManager {
@@ -13,16 +14,12 @@ public class SimpleEntityManager implements EntityManager {
     private final Connection connection;
     private final SimplePersistenceContext persistenceContext;
 
-    private SimpleEntityManager(MetaModel metaModel, Connection connection) {
+    public SimpleEntityManager(MetaModel metaModel, QueryGenerator queryGenerator, Connection connection) {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
         this.connection = connection;
         this.persistenceContext = new SimplePersistenceContext();
-        this.entityPersisterContenxt = EntityPersisterContext.create(metaModel, jdbcTemplate);
+        this.entityPersisterContenxt = EntityPersisterContext.create(metaModel, jdbcTemplate, queryGenerator);
 
-    }
-
-    public static SimpleEntityManager create(MetaModel metaModel, Connection connection) {
-        return new SimpleEntityManager(metaModel, connection);
     }
 
     @Override

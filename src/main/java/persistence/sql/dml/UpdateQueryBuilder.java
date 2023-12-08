@@ -11,16 +11,15 @@ import persistence.meta.TableName;
 public class UpdateQueryBuilder extends DMLQueryBuilder {
 
     private static final String EQUAL = "=";
-    private final TableName tableName;
-    private final EntityColumns entityColumns;
 
-    public UpdateQueryBuilder(Dialect dialect, TableName tableName, EntityColumns entityColumns) {
+    public UpdateQueryBuilder(Dialect dialect) {
         super(dialect);
-        this.tableName = tableName;
-        this.entityColumns = entityColumns;
     }
 
     public String build(Object entity) {
+        final TableName tableName = TableName.from(entity.getClass());
+        final EntityColumns entityColumns = EntityColumns.from(entity.getClass());
+
         return updateQuery(tableName.getValue())
                 + updateValues(entityColumns.getEntityColumns(), entity)
                 + whereId(entityColumns.pkColumn(), entityColumns.pkColumn().getFieldValue(entity));
