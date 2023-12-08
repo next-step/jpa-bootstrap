@@ -21,7 +21,7 @@ public class JdbcEntityPersister<T> implements EntityPersister<T> {
   private final RelationLoader<T> relationLoader;
   private final DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
 
-  public JdbcEntityPersister(Class<T> clazz, JdbcTemplate jdbcTemplate, MetaEntity<T> metaEntity) {
+  public JdbcEntityPersister(JdbcTemplate jdbcTemplate, MetaEntity<T> metaEntity) {
     this.jdbcTemplate = jdbcTemplate;
     this.metaEntity = metaEntity;
     this.entityLoader = new JdbcEntityLoader<T>(metaEntity, jdbcTemplate);

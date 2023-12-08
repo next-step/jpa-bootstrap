@@ -15,14 +15,16 @@ public class MetaDataColumnRelation implements Relation {
   private final FetchType fetchType;
   private final MetaEntity<?> metaEntity;
   private final Class<?> relation;
+  private Class<?> collectionType;
 
   public MetaDataColumnRelation(String fieldName, String dbName, FetchType fetchType,
-      MetaEntity<?> metaEntity, Class<?> relation) {
+      MetaEntity<?> metaEntity, Class<?> relation, Class<?> collectionType) {
     this.fieldName = fieldName;
     this.dbName = dbName;
     this.fetchType = fetchType;
     this.metaEntity = metaEntity;
     this.relation = relation;
+    this.collectionType = collectionType;
   }
 
   public static MetaDataColumnRelation of(Field field) {
@@ -30,12 +32,11 @@ public class MetaDataColumnRelation implements Relation {
     String dbName = field.getAnnotation(JoinColumn.class).name();
     FetchType fetchType = field.getAnnotation(OneToMany.class).fetch();
     Class<?> relation = OneToMany.class;
-
     Type type = field.getGenericType();
     Type actualTypeArgument = ((ParameterizedType) type).getActualTypeArguments()[0];
 
     return new MetaDataColumnRelation(field.getName(), dbName, fetchType,
-        MetaEntity.of((Class<?>) actualTypeArgument), relation);
+        MetaEntity.of((Class<?>) actualTypeArgument), relation, field.getType());
   }
 
   @Override
@@ -66,6 +67,11 @@ public class MetaDataColumnRelation implements Relation {
   @Override
   public String getFieldName() {
     return fieldName;
+  }
+
+  @Override
+  public Class<?> getCollectionType() {
+    return collectionType;
   }
 
 

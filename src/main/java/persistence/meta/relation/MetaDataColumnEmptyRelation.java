@@ -37,4 +37,9 @@ public class MetaDataColumnEmptyRelation implements Relation {
   public String getFieldName() {
     throw new IllegalStateException("relation이 존재하지 않는 Column 입니다.");
   }
+
+  @Override
+  public Class<?> getCollectionType() {
+    throw new IllegalStateException("relation이 존재하지 않는 Column 입니다.");
+  }
 }
