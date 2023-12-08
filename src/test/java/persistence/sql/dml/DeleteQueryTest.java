@@ -26,7 +26,7 @@ class DeleteQueryTest {
         final TableName tableName = TableName을_생성함(clazz);
         final Columns columns = Columns을_생성함(clazz);
 
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
         //when
         String q = query.delete(entityMeta, 3L);
@@ -46,7 +46,7 @@ class DeleteQueryTest {
         final TableName tableName = TableName을_생성함(clazz);
         final Columns columns = Columns을_생성함(clazz);
 
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
         //when
         String q = query.delete(entityMeta, 3L);

@@ -36,7 +36,7 @@ class SelectQueryTest {
         final TableName tableName = TableName을_생성함(aClass);
         final Columns columns = Columns을_생성함(aClass);
 
-        final EntityMeta entityMeta = new EntityMeta(methodName, tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.makeWithMethodName(methodName, tableName, columns);
 
         String wildcardPattern = "SELECT .*\\.id, .*\\.nick_name, .*\\.old, .*\\.email FROM NonExistentTablePerson .*";
 
@@ -60,7 +60,7 @@ class SelectQueryTest {
 
         String expectedQuery = "SELECT .*\\.id, .*\\.order_number, .*\\.id, .*\\.product, .*\\.quantity FROM orders .* JOIN order_items .* ON .*\\.id = .*\\.order_id WHERE .*\\.id = 1";
 
-        final EntityMeta entityMeta = new EntityMeta(methodName, tableName, columns, joinColumn);
+        final EntityMeta entityMeta = EntityMeta.makeWithJoinColumn(methodName, tableName, columns, joinColumn);
 
         //when
         String q = query.select(entityMeta, 1);
@@ -80,8 +80,8 @@ class SelectQueryTest {
 
         String wildcardPattern = "SELECT .*\\.id, .*\\.nick_name, .*\\.old, .*\\.email FROM users .*";
 
-        final EntityMeta entityMeta = new EntityMeta(new Object() {
-        }.getClass().getEnclosingMethod().getName(), tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.makeWithMethodName(new Object() {}.getClass().getEnclosingMethod().getName()
+                , tableName, columns);
 
         //when
         String q = query.selectAll(entityMeta);
@@ -101,7 +101,7 @@ class SelectQueryTest {
 
         String wildcardPattern = "SELECT .*\\.select_person_id, .*\\.nick_name, .*\\.old, .*\\.email FROM selectPerson .* WHERE .*\\.select_person_id = 1";
 
-        final EntityMeta entityMeta = new EntityMeta("findById", tableName, columns, joinColumn);
+        final EntityMeta entityMeta = EntityMeta.makeWithJoinColumn("findById", tableName, columns, joinColumn);
 
         //when
         String q = query.select(entityMeta, 1L);

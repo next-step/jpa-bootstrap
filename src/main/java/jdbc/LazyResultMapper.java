@@ -5,6 +5,9 @@ import net.sf.cglib.proxy.Enhancer;
 import persistence.sql.common.meta.Column;
 import persistence.sql.common.meta.Columns;
 import persistence.sql.common.meta.JoinColumn;
+import persistence.sql.common.meta.MetaColumns;
+import persistence.sql.common.meta.MetaJoinColumn;
+import persistence.sql.common.meta.MetaTableName;
 import persistence.sql.common.meta.TableName;
 
 import java.lang.reflect.Field;
@@ -39,10 +42,10 @@ public class LazyResultMapper<T> implements RowMapper<T> {
         try {
             if (isTypeEquals(field, List.class)) {
                 Class<?> aClazz = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                JoinColumn joinColumn = JoinColumn.of(tClass.getDeclaredFields());
+                JoinColumn joinColumn = MetaJoinColumn.get(tClass);
 
-                TableName tableName = TableName.of(tClass);
-                Columns columns = Columns.of(tClass.getDeclaredFields());
+                TableName tableName = MetaTableName.get(tClass);
+                Columns columns = MetaColumns.get(tClass);
 
                 Object value = resultSet.getObject(String.join(".", tableName.getName(), columns.getIdName()));
 
@@ -68,7 +71,7 @@ public class LazyResultMapper<T> implements RowMapper<T> {
         Arrays.stream(clazz.getDeclaredFields())
                 .filter(field -> !field.isAnnotationPresent(Transient.class))
                 .forEach(field -> {
-                    TableName tableName = TableName.of(object.getClass());
+                    TableName tableName = MetaTableName.get(object.getClass());
                     Column column = Column.of(field);
 
                     field.setAccessible(true);

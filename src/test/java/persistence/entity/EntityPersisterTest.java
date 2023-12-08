@@ -201,7 +201,7 @@ class EntityPersisterTest {
         final Columns columns = Columns을_생성함(clazz);
         final JoinColumn joinColumn = JoinColumn을_생성함(clazz);
 
-        final EntityMeta entityMeta = new EntityMeta("findById", tableName, columns, joinColumn);
+        final EntityMeta entityMeta = EntityMeta.makeWithJoinColumn("findById", tableName, columns, joinColumn);
 
         return query.select(entityMeta, id);
     }
@@ -211,7 +211,7 @@ class EntityPersisterTest {
         final Columns columns = Columns을_생성함(t);
         final Values values = Values을_생성함(t);
 
-        final EntityMeta entityMeta = new EntityMeta(tableName, columns);
+        final EntityMeta entityMeta = EntityMeta.make(tableName, columns);
 
         jdbcTemplate.execute(query.insert(entityMeta, values));
     }

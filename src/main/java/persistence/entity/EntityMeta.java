@@ -5,42 +5,43 @@ import persistence.sql.common.meta.JoinColumn;
 import persistence.sql.common.meta.TableName;
 
 public class EntityMeta {
-    private Class<?> clazz;
-
+    private final TableName tableName;
+    private final Columns columns;
     private String methodName;
-    private TableName tableName;
-    private Columns columns;
     private JoinColumn joinColumn;
 
-    public EntityMeta(TableName tableName, Columns columns) {
+    private EntityMeta(TableName tableName, Columns columns) {
         this.tableName = tableName;
         this.columns = columns;
     }
 
-    public EntityMeta(Class<?> clazz, String methodName, TableName tableName, Columns columns, JoinColumn joinColumn) {
-        this.clazz = clazz;
-        this.methodName = methodName;
-        this.tableName = tableName;
-        this.columns = columns;
-        this.joinColumn = joinColumn;
+    public static EntityMeta make(TableName tableName, Columns columns) {
+        return new EntityMeta(tableName, columns);
     }
 
-    public EntityMeta(String methodName, TableName tableName, Columns columns, JoinColumn joinColumn) {
-        this.methodName = methodName;
-        this.tableName = tableName;
-        this.columns = columns;
-        this.joinColumn = joinColumn;
+    public static EntityMeta makeWithJoinColumn(TableName tableName, Columns columns, JoinColumn joinColumn) {
+        EntityMeta entityMeta = new EntityMeta(tableName, columns);
+
+        entityMeta.joinColumn = joinColumn;
+
+        return entityMeta;
     }
 
-    public EntityMeta(String methodName, TableName tableName, Columns columns) {
-        this.methodName = methodName;
-        this.tableName = tableName;
-        this.columns = columns;
+    public static EntityMeta makeWithJoinColumn(String methodName, TableName tableName, Columns columns, JoinColumn joinColumn) {
+        EntityMeta entityMeta = new EntityMeta(tableName, columns);
+
+        entityMeta.methodName = methodName;
+        entityMeta.joinColumn = joinColumn;
+
+        return entityMeta;
     }
 
-    public static EntityMeta selectMeta(String methodName, TableName tableName, Columns columns,
-        JoinColumn joinColumn) {
-        return new EntityMeta(methodName, tableName, columns, joinColumn);
+    public static EntityMeta makeWithMethodName(String methodName, TableName tableName, Columns columns) {
+        EntityMeta entityMeta = new EntityMeta(tableName, columns);
+
+        entityMeta.methodName = methodName;
+
+        return entityMeta;
     }
 
     public String getMethodName() {

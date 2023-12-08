@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import persistence.sql.common.meta.Column;
+import persistence.sql.common.meta.MetaTableName;
 import persistence.sql.common.meta.TableName;
 
 public class ResultMapper<T> implements RowMapper<T> {
@@ -80,7 +81,7 @@ public class ResultMapper<T> implements RowMapper<T> {
 
     private void setFieldData(ResultSet resultSet, Field field, Object object) {
         try {
-            TableName tableName = TableName.of(object.getClass());
+            TableName tableName = MetaTableName.get(object.getClass());
             Column column = Column.of(field);
 
             field.set(object,
