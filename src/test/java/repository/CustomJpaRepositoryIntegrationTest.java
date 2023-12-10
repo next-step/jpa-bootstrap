@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import database.DatabaseServer;
 import database.H2;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,6 +26,7 @@ import persistence.entity.impl.event.EntityEventDispatcher;
 import persistence.entity.impl.event.EntityEventPublisher;
 import persistence.entity.impl.event.dispatcher.EntityEventDispatcherImpl;
 import persistence.entity.impl.event.listener.DeleteEntityEventListenerImpl;
+import persistence.entity.impl.event.listener.FlushEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.LoadEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.MergeEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.PersistEntityEventListenerImpl;
@@ -40,7 +42,6 @@ import registry.EntityMetaRegistry;
 
 @DisplayName("Repository 통합 테스트")
 class CustomJpaRepositoryIntegrationTest {
-
 
     private static DatabaseServer server;
     private static EntityMetaRegistry entityMetaRegistry;
@@ -73,7 +74,8 @@ class CustomJpaRepositoryIntegrationTest {
             new LoadEntityEventListenerImpl(loader),
             new MergeEntityEventListenerImpl(persister),
             new PersistEntityEventListenerImpl(persister),
-            new DeleteEntityEventListenerImpl(persister)
+            new DeleteEntityEventListenerImpl(persister),
+            new FlushEntityEventListenerImpl()
         );
         EntityEventPublisher entityEventPublisher = new EntityEventPublisherImpl(entityEventDispatcher);
 
@@ -81,7 +83,8 @@ class CustomJpaRepositoryIntegrationTest {
             connection,
             new DefaultPersistenceContext(entityMetaRegistry),
             entityEventPublisher,
-            entityMetaRegistry
+            entityMetaRegistry,
+            FlushModeType.AUTO
         );
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());

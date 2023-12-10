@@ -1,11 +1,12 @@
 package persistence.entity.impl.event.listener;
 
 import persistence.entity.EntityEntry;
+import persistence.entity.ContextSource;
 import persistence.entity.EventSource;
 import persistence.entity.impl.event.EntityEvent;
 import persistence.entity.impl.event.EntityEventListener;
+import persistence.entity.impl.event.action.UpdateAction;
 import persistence.entity.impl.store.EntityPersister;
-import persistence.sql.schema.meta.EntityObjectMappingMeta;
 
 public class MergeEntityEventListenerImpl implements EntityEventListener {
 
@@ -23,20 +24,26 @@ public class MergeEntityEventListenerImpl implements EntityEventListener {
     @Override
     public <T> T onEvent(Class<T> clazz, EntityEvent entityEvent) {
         final Object entity = entityEvent.getEntity();
-
         final EventSource eventSource = entityEvent.getEventSource();
-        final EntityEntry entityEntry = eventSource.getEntityEntry(entity);
+        final ContextSource contextSource = entityEvent.getContextSource();
+
+        final EntityEntry entityEntry = contextSource.getEntityEntry(entity);
         if (entityEntry.isReadOnly()) {
             throw new RuntimeException("해당 Entity는 변경될 수 없습니다.");
         }
 
-        entityPersister.update(entity);
-        syncPersistenceContext(eventSource, entity);
+        syncEventSource(eventSource, entity);
+        syncContextSource(contextSource, entity);
         return clazz.cast(entity);
     }
 
     @Override
-    public void syncPersistenceContext(EventSource eventSource, Object entity) {
-        eventSource.putEntity(entity);
+    public void syncContextSource(ContextSource contextSource, Object entity) {
+        contextSource.putEntity(entity);
+    }
+
+    @Override
+    public void syncEventSource(EventSource eventSource, Object entity) {
+        eventSource.addAction(new UpdateAction(() -> entityPersister.update(entity)));
     }
 }

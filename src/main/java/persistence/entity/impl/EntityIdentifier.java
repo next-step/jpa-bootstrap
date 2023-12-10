@@ -22,6 +22,10 @@ public class EntityIdentifier {
         return fromIdColumnMetaWithValueMeta(columnMeta, ValueMeta.of(id));
     }
 
+    public boolean isEmptyId() {
+        return valueIdentifier.getValue() == null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

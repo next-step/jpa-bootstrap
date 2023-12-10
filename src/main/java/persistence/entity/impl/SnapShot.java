@@ -13,6 +13,6 @@ public class SnapShot {
 
     public boolean isSameWith(Object entity, EntityClassMappingMeta entityClassMappingMeta) {
         EntityObjectMappingMeta targetObjectMappingMeta = EntityObjectMappingMeta.of(entity, entityClassMappingMeta);
-        return this.snapShotObjectMappingMeta.getDifferMetaEntryList(targetObjectMappingMeta).size() == 0;
+        return this.snapShotObjectMappingMeta.getDifferMetaEntryList(targetObjectMappingMeta).isEmpty();
     }
 }

@@ -1,9 +1,12 @@
 package persistence.entity.impl.event.listener;
 
 import persistence.entity.EntityEntry;
+import persistence.entity.ContextSource;
 import persistence.entity.EventSource;
 import persistence.entity.impl.event.EntityEvent;
 import persistence.entity.impl.event.EntityEventListener;
+import persistence.entity.impl.event.action.DeleteAction;
+import persistence.entity.impl.event.action.UpdateAction;
 import persistence.entity.impl.store.EntityPersister;
 
 public class DeleteEntityEventListenerImpl implements EntityEventListener {
@@ -17,18 +20,18 @@ public class DeleteEntityEventListenerImpl implements EntityEventListener {
     @Override
     public void onEvent(EntityEvent entityEvent) {
         final Object entity = entityEvent.getEntity();
+        final ContextSource contextSource = entityEvent.getContextSource();
         final EventSource eventSource = entityEvent.getEventSource();
 
-        final EntityEntry entityEntry = eventSource.getEntityEntry(entity);
+        final EntityEntry entityEntry = contextSource.getEntityEntry(entity);
         if (entityEntry.isReadOnly()) {
             throw new RuntimeException("해당 Entity는 삭제될 수 없습니다.");
         }
 
-        entityPersister.delete(entity);
+        contextSource.deleted(entity);
 
-        eventSource.deleted(entity);
-
-        syncPersistenceContext(eventSource, entity);
+        syncEventSource(eventSource, entity);
+        syncContextSource(contextSource, entity);
     }
 
     @Override
@@ -37,7 +40,12 @@ public class DeleteEntityEventListenerImpl implements EntityEventListener {
     }
 
     @Override
-    public void syncPersistenceContext(EventSource eventSource, Object entity) {
-        eventSource.purgeEntity(entity);
+    public void syncContextSource(ContextSource contextSource, Object entity) {
+        contextSource.purgeEntity(entity);
+    }
+
+    @Override
+    public void syncEventSource(EventSource eventSource, Object entity) {
+        eventSource.addAction(new DeleteAction(() -> entityPersister.delete(entity)));
     }
 }

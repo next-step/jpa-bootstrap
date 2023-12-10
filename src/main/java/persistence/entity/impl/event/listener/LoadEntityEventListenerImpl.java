@@ -1,5 +1,6 @@
 package persistence.entity.impl.event.listener;
 
+import persistence.entity.ContextSource;
 import persistence.entity.EventSource;
 import persistence.entity.impl.event.EntityEvent;
 import persistence.entity.impl.event.EntityEventListener;
@@ -21,15 +22,20 @@ public class LoadEntityEventListenerImpl implements EntityEventListener {
     @Override
     public <T> T onEvent(Class<T> clazz, EntityEvent entityEvent) {
         final T loadedEntity = entityLoader.load(clazz, entityEvent.getId());
-        final EventSource eventSource = entityEvent.getEventSource();
-        eventSource.loading(loadedEntity);
+        final ContextSource contextSource = entityEvent.getContextSource();
+        contextSource.loading(loadedEntity);
 
-        syncPersistenceContext(eventSource, loadedEntity);
+        syncContextSource(contextSource, loadedEntity);
         return loadedEntity;
     }
 
     @Override
-    public void syncPersistenceContext(EventSource eventSource, Object entity) {
-        eventSource.putEntity(entity);
+    public void syncContextSource(ContextSource contextSource, Object entity) {
+        contextSource.putEntity(entity);
+    }
+
+    @Override
+    public void syncEventSource(EventSource eventSource, Object entity) {
+        throw new RuntimeException("EventSource 동기화 대상이 아닙니다.");
     }
 }
