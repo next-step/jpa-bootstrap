@@ -2,13 +2,13 @@ package persistence.entity.impl.context;
 
 import java.util.Optional;
 import persistence.entity.EntityEntry;
-import persistence.entity.EventSource;
+import persistence.entity.ContextSource;
 import persistence.entity.PersistenceContext;
 import persistence.entity.impl.SnapShot;
 import persistence.sql.schema.meta.EntityObjectMappingMeta;
 import registry.EntityMetaRegistry;
 
-public class DefaultPersistenceContext implements PersistenceContext, EventSource {
+public class DefaultPersistenceContext implements PersistenceContext, ContextSource {
 
     private final EntityMetaRegistry entityMetaRegistry;
     private final PersistenceCacheContext persistenceCacheContext;
