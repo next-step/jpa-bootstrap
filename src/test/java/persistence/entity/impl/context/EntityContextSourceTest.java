@@ -11,17 +11,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.EntityEntry;
-import persistence.entity.EventSource;
+import persistence.entity.ContextSource;
 import persistence.entity.type.EntityStatus;
 import persistence.sql.dialect.H2Dialect;
 import registry.EntityMetaRegistry;
 
 @DisplayName("EventSource 테스트")
-class EntityEventSourceTest {
+class EntityContextSourceTest {
 
     private static EntityMetaRegistry entityMetaRegistry;
 
-    private EventSource eventSource;
+    private ContextSource contextSource;
 
     @BeforeAll
     static void setMetaRegistry() {
@@ -31,7 +31,7 @@ class EntityEventSourceTest {
 
     @BeforeEach
     void setUp() {
-        eventSource = new DefaultPersistenceContext(entityMetaRegistry);
+        contextSource = new DefaultPersistenceContext(entityMetaRegistry);
     }
 
     @Test
@@ -41,10 +41,10 @@ class EntityEventSourceTest {
         final EventSourceTestEntity entity = new EventSourceTestEntity(1L, "test");
 
         //when
-        eventSource.managed(entity);
+        contextSource.managed(entity);
 
         //then
-        final EntityEntry entityEntry = eventSource.getEntityEntry(entity);
+        final EntityEntry entityEntry = contextSource.getEntityEntry(entity);
         assertThat(entityEntry.getStatus()).isEqualTo(EntityStatus.MANAGED);
     }
 
@@ -55,10 +55,10 @@ class EntityEventSourceTest {
         final EventSourceTestEntity entity = new EventSourceTestEntity(1L, "test");
 
         //when
-        eventSource.gone(entity);
+        contextSource.gone(entity);
 
         //then
-        final EntityEntry entityEntry = eventSource.getEntityEntry(entity);
+        final EntityEntry entityEntry = contextSource.getEntityEntry(entity);
         assertThat(entityEntry.getStatus()).isEqualTo(EntityStatus.GONE);
     }
 
@@ -69,10 +69,10 @@ class EntityEventSourceTest {
         final EventSourceTestEntity entity = new EventSourceTestEntity(1L, "test");
 
         //when
-        eventSource.deleted(entity);
+        contextSource.deleted(entity);
 
         //then
-        final EntityEntry entityEntry = eventSource.getEntityEntry(entity);
+        final EntityEntry entityEntry = contextSource.getEntityEntry(entity);
         assertThat(entityEntry.getStatus()).isEqualTo(EntityStatus.DELETED);
     }
 
@@ -83,10 +83,10 @@ class EntityEventSourceTest {
         final EventSourceTestEntity entity = new EventSourceTestEntity(1L, "test");
 
         //when
-        eventSource.saving(entity);
+        contextSource.saving(entity);
 
         //then
-        final EntityEntry entityEntry = eventSource.getEntityEntry(entity);
+        final EntityEntry entityEntry = contextSource.getEntityEntry(entity);
         assertThat(entityEntry.getStatus()).isEqualTo(EntityStatus.SAVING);
     }
 
@@ -97,10 +97,10 @@ class EntityEventSourceTest {
         final EventSourceTestEntity entity = new EventSourceTestEntity(1L, "test");
 
         //when
-        eventSource.loading(entity);
+        contextSource.loading(entity);
 
         //then
-        final EntityEntry entityEntry = eventSource.getEntityEntry(entity);
+        final EntityEntry entityEntry = contextSource.getEntityEntry(entity);
         assertThat(entityEntry.getStatus()).isEqualTo(EntityStatus.LOADING);
     }
 
@@ -111,10 +111,10 @@ class EntityEventSourceTest {
         final EventSourceTestEntity entity = new EventSourceTestEntity(1L, "test");
 
         //when
-        eventSource.readOnly(entity);
+        contextSource.readOnly(entity);
 
         //then
-        final EntityEntry entityEntry = eventSource.getEntityEntry(entity);
+        final EntityEntry entityEntry = contextSource.getEntityEntry(entity);
         assertThat(entityEntry.getStatus()).isEqualTo(EntityStatus.READ_ONLY);
     }
 

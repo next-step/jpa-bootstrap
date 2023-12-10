@@ -1,4 +1,4 @@
-package persistence.entity.impl.listener;
+package persistence.entity.impl.event.listener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import database.DatabaseServer;
 import database.H2;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,8 +17,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.entity.ContextSource;
 import persistence.entity.EntityManager;
-import persistence.entity.EventSource;
 import persistence.entity.impl.EntityManagerImpl;
 import persistence.entity.impl.context.DefaultPersistenceContext;
 import persistence.entity.impl.event.EntityEventDispatcher;
@@ -25,6 +26,7 @@ import persistence.entity.impl.event.EntityEventListener;
 import persistence.entity.impl.event.EntityEventPublisher;
 import persistence.entity.impl.event.dispatcher.EntityEventDispatcherImpl;
 import persistence.entity.impl.event.listener.DeleteEntityEventListenerImpl;
+import persistence.entity.impl.event.listener.FlushEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.LoadEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.MergeEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.PersistEntityEventListenerImpl;
@@ -37,6 +39,7 @@ import persistence.sql.ddl.generator.DropDDLQueryGenerator;
 import persistence.sql.dialect.H2Dialect;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.JdbcTemplate;
+import persistence.sql.schema.meta.EntityObjectMappingMeta;
 import registry.EntityMetaRegistry;
 
 @DisplayName("PersistEventListener 테스트")
@@ -44,7 +47,7 @@ class PersistEntityEntityEventListenerImplTest {
 
     private EntityEventListener persistEntityEventListener;
     private EntityManager entityManager;
-    private EventSource eventSource;
+    private ContextSource contextSource;
 
     private static DatabaseServer server;
     private static EntityMetaRegistry entityMetaRegistry;
@@ -67,17 +70,18 @@ class PersistEntityEntityEventListenerImplTest {
         final EntityLoaderImpl loader = new EntityLoaderImpl(connection, entityMetaRegistry);
         persistEntityEventListener = new PersistEntityEventListenerImpl(persister);
         final DefaultPersistenceContext persistenceContext = new DefaultPersistenceContext(entityMetaRegistry);
-        eventSource = persistenceContext;
+        contextSource = persistenceContext;
 
         EntityEventDispatcher entityEventDispatcher = new EntityEventDispatcherImpl(
             new LoadEntityEventListenerImpl(loader),
             new MergeEntityEventListenerImpl(persister),
             persistEntityEventListener,
-            new DeleteEntityEventListenerImpl(persister)
+            new DeleteEntityEventListenerImpl(persister),
+            new FlushEntityEventListenerImpl()
         );
         EntityEventPublisher entityEventPublisher = new EntityEventPublisherImpl(entityEventDispatcher);
 
-        entityManager = EntityManagerImpl.of(connection, persistenceContext, entityEventPublisher, entityMetaRegistry);
+        entityManager = EntityManagerImpl.of(connection, persistenceContext, entityEventPublisher, entityMetaRegistry, FlushModeType.AUTO);
         jdbcTemplate = new JdbcTemplate(connection);
         CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
         jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));
@@ -96,7 +100,11 @@ class PersistEntityEntityEventListenerImplTest {
     void persistEvent() {
         // given
         final PersistEventEntity persistEventEntity = new PersistEventEntity();
-        final PersistEntityEvent persistEvent = PersistEntityEvent.of(persistEventEntity, eventSource);
+        final EntityObjectMappingMeta entityObjectMappingMeta = EntityObjectMappingMeta.of(persistEventEntity,
+            entityMetaRegistry.getEntityMeta(testClazz));
+
+        final PersistEntityEvent persistEvent = PersistEntityEvent.of(persistEventEntity, entityObjectMappingMeta.getEntityIdentifier(),
+            contextSource, entityManager);
 
         // when
         final PersistEventEntity persistedEntity = persistEntityEventListener.onEvent(PersistEventEntity.class, persistEvent);
