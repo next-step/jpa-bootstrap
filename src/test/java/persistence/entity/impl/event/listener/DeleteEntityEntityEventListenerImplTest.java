@@ -1,4 +1,4 @@
-package persistence.entity.impl.listener;
+package persistence.entity.impl.event.listener;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import database.DatabaseServer;
 import database.H2;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,7 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.EntityManager;
-import persistence.entity.EventSource;
+import persistence.entity.ContextSource;
 import persistence.entity.impl.EntityManagerImpl;
 import persistence.entity.impl.context.DefaultPersistenceContext;
 import persistence.entity.impl.event.EntityEvent;
@@ -26,6 +27,7 @@ import persistence.entity.impl.event.EntityEventListener;
 import persistence.entity.impl.event.EntityEventPublisher;
 import persistence.entity.impl.event.dispatcher.EntityEventDispatcherImpl;
 import persistence.entity.impl.event.listener.DeleteEntityEventListenerImpl;
+import persistence.entity.impl.event.listener.FlushEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.LoadEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.MergeEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.PersistEntityEventListenerImpl;
@@ -43,7 +45,7 @@ import registry.EntityMetaRegistry;
 @DisplayName("DeleteEventListener 통합 테스트")
 class DeleteEntityEntityEventListenerImplTest {
 
-    private EventSource eventSource;
+    private ContextSource contextSource;
     private EntityManager entityManager;
     private EntityEventListener deleteEntityEventListener;
 
@@ -71,17 +73,18 @@ class DeleteEntityEntityEventListenerImplTest {
         final EntityLoaderImpl loader = new EntityLoaderImpl(connection, entityMetaRegistry);
         deleteEntityEventListener = new DeleteEntityEventListenerImpl(persister);
         final DefaultPersistenceContext persistenceContext = new DefaultPersistenceContext(entityMetaRegistry);
-        eventSource = persistenceContext;
+        contextSource = persistenceContext;
 
         EntityEventDispatcher entityEventDispatcher = new EntityEventDispatcherImpl(
             new LoadEntityEventListenerImpl(loader),
             new MergeEntityEventListenerImpl(persister),
             new PersistEntityEventListenerImpl(persister),
-            deleteEntityEventListener
+            deleteEntityEventListener,
+            new FlushEntityEventListenerImpl()
         );
         EntityEventPublisher entityEventPublisher = new EntityEventPublisherImpl(entityEventDispatcher);
 
-        entityManager = EntityManagerImpl.of(connection, persistenceContext, entityEventPublisher, entityMetaRegistry);
+        entityManager = EntityManagerImpl.of(connection, persistenceContext, entityEventPublisher, entityMetaRegistry, FlushModeType.AUTO);
         jdbcTemplate = new JdbcTemplate(connection);
         CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
         jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));
@@ -100,7 +103,7 @@ class DeleteEntityEntityEventListenerImplTest {
         final DeleteEventEntity deleteEventEntity = new DeleteEventEntity();
         final Object savedEntity = entityManager.persist(deleteEventEntity);
 
-        EntityEvent deleteEntityEvent = DeleteEntityEvent.of(savedEntity, eventSource);
+        EntityEvent deleteEntityEvent = DeleteEntityEvent.of(savedEntity, contextSource, entityManager);
 
         // expect
         assertThatCode(() -> deleteEntityEventListener.onEvent(deleteEntityEvent))
@@ -114,10 +117,10 @@ class DeleteEntityEntityEventListenerImplTest {
         final DeleteEventEntity deleteEventEntity = new DeleteEventEntity();
         final Object savedEntity = entityManager.persist(deleteEventEntity);
 
-        EntityEvent deleteEntityEvent = DeleteEntityEvent.of(savedEntity, eventSource);
+        EntityEvent deleteEntityEvent = DeleteEntityEvent.of(savedEntity, contextSource, entityManager);
 
         // when
-        eventSource.readOnly(savedEntity);
+        contextSource.readOnly(savedEntity);
 
         // then
         assertThatThrownBy(() -> deleteEntityEventListener.onEvent(deleteEntityEvent))

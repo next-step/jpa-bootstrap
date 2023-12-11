@@ -16,17 +16,12 @@ public class ThreadLocalSessionContext implements SessionContext {
 
     public static ThreadLocalSessionContext init(EntityManagerFactory entityManagerFactory, Function<EntityManagerFactory, EntityManager> generateEntityManagerFunction) {
         final ThreadLocalSessionContext threadLocalSessionContext = new ThreadLocalSessionContext();
-        threadLocalSessionContext.bindEntityManager(entityManagerFactory, generateEntityManagerFunction);
+        threadLocalSessionContext.tryBindEntityManager(entityManagerFactory, generateEntityManagerFunction);
         return threadLocalSessionContext;
     }
 
     @Override
-    public EntityManager getEntityManager(EntityManagerFactory entityManagerFactory) {
-        return getEntityManagerMap().get(entityManagerFactory);
-    }
-
-    @Override
-    public EntityManager bindEntityManager(EntityManagerFactory entityManagerFactory, Function<EntityManagerFactory, EntityManager> generateEntityManagerFunction) {
+    public EntityManager tryBindEntityManager(EntityManagerFactory entityManagerFactory, Function<EntityManagerFactory, EntityManager> generateEntityManagerFunction) {
         if (generateEntityManagerFunction == null) {
             throw new RuntimeException("EntityManagerFactory에 해당하는 EntityManager를 매핑할 수 없습니다.");
         }

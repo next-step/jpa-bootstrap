@@ -1,4 +1,4 @@
-package persistence.entity.impl.listener;
+package persistence.entity.impl.event.listener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import database.DatabaseServer;
 import database.H2;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.EntityManager;
-import persistence.entity.EventSource;
+import persistence.entity.ContextSource;
 import persistence.entity.impl.EntityManagerImpl;
 import persistence.entity.impl.context.DefaultPersistenceContext;
 import persistence.entity.impl.event.EntityEventDispatcher;
@@ -26,6 +27,7 @@ import persistence.entity.impl.event.EntityEventListener;
 import persistence.entity.impl.event.EntityEventPublisher;
 import persistence.entity.impl.event.dispatcher.EntityEventDispatcherImpl;
 import persistence.entity.impl.event.listener.DeleteEntityEventListenerImpl;
+import persistence.entity.impl.event.listener.FlushEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.LoadEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.MergeEntityEventListenerImpl;
 import persistence.entity.impl.event.listener.PersistEntityEventListenerImpl;
@@ -43,7 +45,7 @@ import registry.EntityMetaRegistry;
 @DisplayName("MergeEventListener 테스트")
 class MergeEntityEntityEventListenerImplTest {
 
-    private EventSource eventSource;
+    private ContextSource contextSource;
 
     private EntityEventListener mergeEntityEventListener;
 
@@ -71,17 +73,18 @@ class MergeEntityEntityEventListenerImplTest {
         final DefaultPersistenceContext persistenceContext = new DefaultPersistenceContext(entityMetaRegistry);
 
         mergeEntityEventListener = new MergeEntityEventListenerImpl(persister);
-        eventSource = persistenceContext;
+        contextSource = persistenceContext;
 
         EntityEventDispatcher entityEventDispatcher = new EntityEventDispatcherImpl(
             new LoadEntityEventListenerImpl(loader),
             mergeEntityEventListener,
             new PersistEntityEventListenerImpl(persister),
-            new DeleteEntityEventListenerImpl(persister)
+            new DeleteEntityEventListenerImpl(persister),
+            new FlushEntityEventListenerImpl()
         );
         EntityEventPublisher entityEventPublisher = new EntityEventPublisherImpl(entityEventDispatcher);
 
-        entityManager = EntityManagerImpl.of(connection, persistenceContext, entityEventPublisher, entityMetaRegistry);
+        entityManager = EntityManagerImpl.of(connection, persistenceContext, entityEventPublisher, entityMetaRegistry, FlushModeType.AUTO);
         jdbcTemplate = new JdbcTemplate(connection);
         CreateDDLQueryGenerator createDDLQueryGenerator = new CreateDDLQueryGenerator();
         jdbcTemplate.execute(createDDLQueryGenerator.create(entityMetaRegistry.getEntityMeta(testClazz)));
@@ -102,7 +105,7 @@ class MergeEntityEntityEventListenerImplTest {
         final MergeEventEntity savedMergeEventEntity = (MergeEventEntity) savedEntity;
         savedMergeEventEntity.setName("merged");
 
-        final MergeEntityEvent mergeEvent = MergeEntityEvent.of(savedMergeEventEntity, eventSource);
+        final MergeEntityEvent mergeEvent = MergeEntityEvent.of(savedMergeEventEntity, contextSource, entityManager);
 
         // when
         final MergeEventEntity mergeEventResultEvent = mergeEntityEventListener.onEvent(MergeEventEntity.class, mergeEvent);
@@ -125,10 +128,10 @@ class MergeEntityEntityEventListenerImplTest {
         final MergeEventEntity savedMergeEventEntity = (MergeEventEntity) savedEntity;
         savedMergeEventEntity.setName("merged");
 
-        final MergeEntityEvent mergeEvent = MergeEntityEvent.of(savedMergeEventEntity, eventSource);
+        final MergeEntityEvent mergeEvent = MergeEntityEvent.of(savedMergeEventEntity, contextSource, entityManager);
 
         // when
-        eventSource.readOnly(savedMergeEventEntity);
+        contextSource.readOnly(savedMergeEventEntity);
 
         // then
         assertThatThrownBy(

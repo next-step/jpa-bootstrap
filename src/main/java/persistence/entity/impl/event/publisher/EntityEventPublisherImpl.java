@@ -3,6 +3,7 @@ package persistence.entity.impl.event.publisher;
 import persistence.entity.impl.event.EntityEventDispatcher;
 import persistence.entity.impl.event.EntityEventPublisher;
 import persistence.entity.impl.event.type.DeleteEntityEvent;
+import persistence.entity.impl.event.type.FlushEntityEvent;
 import persistence.entity.impl.event.type.LoadEntityEvent;
 import persistence.entity.impl.event.type.MergeEntityEvent;
 import persistence.entity.impl.event.type.PersistEntityEvent;
@@ -22,7 +23,12 @@ public class EntityEventPublisherImpl implements EntityEventPublisher {
 
     @Override
     public Object onPersist(PersistEntityEvent event) {
-        return entityEventDispatcher.handle(event.getClazz(), event);
+        if (event.isDelayedInsert()) {
+            return entityEventDispatcher.handle(event.getClazz(), event);
+        }
+
+        entityEventDispatcher.handle(event);
+        return event.getEntity();
     }
 
     @Override
@@ -32,6 +38,11 @@ public class EntityEventPublisherImpl implements EntityEventPublisher {
 
     @Override
     public void onDelete(DeleteEntityEvent event) {
+        entityEventDispatcher.handle(event);
+    }
+
+    @Override
+    public void onFlush(FlushEntityEvent event) {
         entityEventDispatcher.handle(event);
     }
 }

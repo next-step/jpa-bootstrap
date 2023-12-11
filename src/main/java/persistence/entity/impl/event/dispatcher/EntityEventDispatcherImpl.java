@@ -7,6 +7,7 @@ import persistence.entity.impl.event.EntityEvent;
 import persistence.entity.impl.event.EntityEventDispatcher;
 import persistence.entity.impl.event.EntityEventListener;
 import persistence.entity.impl.event.type.DeleteEntityEvent;
+import persistence.entity.impl.event.type.FlushEntityEvent;
 import persistence.entity.impl.event.type.LoadEntityEvent;
 import persistence.entity.impl.event.type.MergeEntityEvent;
 import persistence.entity.impl.event.type.PersistEntityEvent;
@@ -19,12 +20,14 @@ public class EntityEventDispatcherImpl implements EntityEventDispatcher {
         EntityEventListener loadEntityEventListener,
         EntityEventListener mergeEntityEventListener,
         EntityEventListener persistEntityEventListener,
-        EntityEventListener deleteEntityEventListener
+        EntityEventListener deleteEntityEventListener,
+        EntityEventListener flushEntityEventListener
     ) {
         eventListenerMap.put(LoadEntityEvent.class, loadEntityEventListener);
         eventListenerMap.put(MergeEntityEvent.class, mergeEntityEventListener);
         eventListenerMap.put(PersistEntityEvent.class, persistEntityEventListener);
         eventListenerMap.put(DeleteEntityEvent.class, deleteEntityEventListener);
+        eventListenerMap.put(FlushEntityEvent.class, flushEntityEventListener);
     }
 
     @Override

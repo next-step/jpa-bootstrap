@@ -4,20 +4,18 @@ import persistence.entity.ContextSource;
 import persistence.entity.EventSource;
 import persistence.entity.impl.event.EntityEvent;
 
-public class DeleteEntityEvent implements EntityEvent {
+public class FlushEntityEvent implements EntityEvent {
 
-    private final Object entity;
     private final ContextSource contextSource;
     private final EventSource eventSource;
 
-    private DeleteEntityEvent(Object entity, ContextSource contextSource, EventSource eventSource) {
-        this.entity = entity;
+    private FlushEntityEvent(ContextSource contextSource, EventSource eventSource) {
         this.contextSource = contextSource;
         this.eventSource = eventSource;
     }
 
-    public static DeleteEntityEvent of(Object entity, ContextSource contextSource, EventSource eventSource) {
-        return new DeleteEntityEvent(entity, contextSource, eventSource);
+    public static FlushEntityEvent of(ContextSource contextSource, EventSource eventSource) {
+        return new FlushEntityEvent(contextSource, eventSource);
     }
 
     @Override
@@ -32,11 +30,11 @@ public class DeleteEntityEvent implements EntityEvent {
 
     @Override
     public Object getEntity() {
-        return entity;
+        throw new RuntimeException("FlushEvent는 대상 Entity가 필요하지 않습니다.");
     }
 
     @Override
     public Object getId() {
-        throw new UnsupportedOperationException();
+        throw new RuntimeException("FlushEvent는 대상 Entity Id가 필요하지 않습니다.");
     }
 }
