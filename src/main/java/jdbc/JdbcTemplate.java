@@ -1,5 +1,7 @@
 package jdbc;
 
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -14,8 +16,30 @@ public class JdbcTemplate {
     }
 
     public void execute(final String sql) {
+        System.out.println(sql);
         try (final Statement statement = connection.createStatement()) {
             statement.execute(sql);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Object executeInsert(final String sql) {
+        System.out.println(sql);
+        try (final Statement statement = connection.createStatement()) {
+            statement.executeUpdate(sql, RETURN_GENERATED_KEYS);
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            generatedKeys.next();
+            return generatedKeys.getObject(1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int executeUpdate(final String sql) {
+        System.out.println(sql);
+        try (final Statement statement = connection.createStatement()) {
+            return statement.executeUpdate(sql);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -30,6 +54,7 @@ public class JdbcTemplate {
     }
 
     public <T> List<T> query(final String sql, final RowMapper<T> rowMapper) {
+        System.out.println(sql);
         try (final ResultSet resultSet = connection.prepareStatement(sql).executeQuery()) {
             final List<T> result = new ArrayList<>();
             while (resultSet.next()) {
