@@ -11,28 +11,30 @@ import persistence.sql.meta.Table;
 
 import java.util.List;
 
-public class MyEntityLoader implements EntityLoader {
+public class MyEntityLoader<T> implements EntityLoader {
 
     private final JdbcTemplate jdbcTemplate;
+    private final EntityMeta<T> entityMeta;
     private final SelectQueryBuilder selectQueryBuilder;
     private final ProxyFactory proxyFactory;
 
-    public MyEntityLoader(JdbcTemplate jdbcTemplate) {
+    public MyEntityLoader(JdbcTemplate jdbcTemplate, EntityMeta<T> entityMeta) {
         this.jdbcTemplate = jdbcTemplate;
+        this.entityMeta = entityMeta;
         this.selectQueryBuilder = SelectQueryBuilder.getInstance();
         this.proxyFactory = new MyProxyFactory(jdbcTemplate);
     }
 
     @Override
-    public <T> T find(Class<T> clazz, Object Id) {
-        Table table = Table.from(clazz);
+    public T find(Object Id) {
+        Table table = entityMeta.getTable();
         if (!table.containsAssociation()) {
             String query = selectQueryBuilder.build(table, Id);
-            RowMapper<T> rowMapper = RowMapperFactory.create(clazz);
+            RowMapper<T> rowMapper = RowMapperFactory.create(entityMeta.getClazz());
             return jdbcTemplate.queryForObject(query, rowMapper);
         }
         String query = selectQueryBuilder.buildWithJoin(table, Id);
-        RowMapper<T> rowMapper = RowMapperFactory.create(clazz);
+        RowMapper<T> rowMapper = RowMapperFactory.create(entityMeta.getClazz());
         T object = jdbcTemplate.queryForObject(query, rowMapper);
         if (table.containsLazyAssociation()) {
             setProxyForLazyAssociationTables(table.getAssociationTables(), object);
@@ -40,13 +42,13 @@ public class MyEntityLoader implements EntityLoader {
         return object;
     }
 
-    private <T> void setProxyForLazyAssociationTables(List<AssociationTable> associationTables, T object) {
+    private void setProxyForLazyAssociationTables(List<AssociationTable> associationTables, T object) {
         for (AssociationTable associationTable : associationTables) {
             setProxy(associationTable, object);
         }
     }
 
-    private <T> void setProxy(AssociationTable associationTable, T object) {
+    private void setProxy(AssociationTable associationTable, T object) {
         try {
             Object proxy = proxyFactory.createProxy(associationTable.getClazz());
             associationTable.getField().setAccessible(true);

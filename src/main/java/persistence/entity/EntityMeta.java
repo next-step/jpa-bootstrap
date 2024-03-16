@@ -6,7 +6,7 @@ import persistence.sql.meta.Table;
 import utils.ValueExtractor;
 import utils.ValueInjector;
 
-public class EntityMeta {
+public class EntityMeta<T> {
     private final Table table;
     private final IdColumn id;
 
@@ -15,11 +15,18 @@ public class EntityMeta {
         this.id = id;
     }
 
-    public static <T> EntityMeta from(T entity) {
+    public static <T> EntityMeta<T> from(T entity) {
         Table table = Table.from(entity.getClass());
         IdColumn id = table.getIdColumn();
-        return new EntityMeta(table, id);
+        return new EntityMeta<T>(table, id);
     }
+
+    public static <T> EntityMeta<T> from(Class<?> clazz) {
+        Table table = Table.from(clazz);
+        IdColumn id = table.getIdColumn();
+        return new EntityMeta<T>(table, id);
+    }
+
 
     public EntityKey getEntityKey(Object entity) {
         return new EntityKey(getId(entity), table.getClazz());
@@ -35,5 +42,13 @@ public class EntityMeta {
 
     public void injectId(Object entity, Object generatedId) {
         ValueInjector.inject(entity, id, generatedId);
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public Class<T> getClazz() {
+        return (Class<T>) table.getClazz();
     }
 }

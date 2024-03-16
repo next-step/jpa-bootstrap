@@ -1,5 +1,7 @@
 package persistence.entity;
 
+import boot.MetaModel;
+import boot.MyMetaModel;
 import jdbc.JdbcTemplate;
 import persistence.persistencecontext.EntitySnapshot;
 import persistence.persistencecontext.MyPersistenceContext;
@@ -9,13 +11,11 @@ import java.util.List;
 
 public class MyEntityManager implements EntityManager {
 
+    private final MetaModel metaModel;
     private final PersistenceContext persistenceContext;
-    private final EntityPersister entityPersister;
-    private final EntityLoader entityLoader;
 
     public MyEntityManager(JdbcTemplate jdbcTemplate) {
-        this.entityPersister = new MyEntityPersister(jdbcTemplate);
-        this.entityLoader = new MyEntityLoader(jdbcTemplate);
+        this.metaModel = new MyMetaModel(jdbcTemplate);
         this.persistenceContext = new MyPersistenceContext();
     }
 
@@ -23,7 +23,8 @@ public class MyEntityManager implements EntityManager {
     public <T> T find(Class<T> clazz, Long id) {
         return (T) persistenceContext.getEntity(clazz, id)
                 .orElseGet(() -> {
-                    T foundEntity = entityLoader.find(clazz, id);
+                    EntityLoader<T> entityLoader = metaModel.getEntityLoader(clazz);
+                    T foundEntity = entityLoader.find(id);
                     addToCache(foundEntity);
                     return foundEntity;
                 });
@@ -32,8 +33,9 @@ public class MyEntityManager implements EntityManager {
     @Override
     public <T> T persist(T entity) {
         persistenceContext.addEntityEntry(entity, EntityEntryStatus.SAVING);
+        EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
         Object generatedId = entityPersister.insert(entity);
-        EntityMeta entityMeta = EntityMeta.from(entity);
+        EntityMeta<T> entityMeta = EntityMeta.from(entity);
         entityMeta.injectId(entity, generatedId);
         addToCache(entity);
         return entity;
@@ -42,6 +44,7 @@ public class MyEntityManager implements EntityManager {
     @Override
     public void remove(Object entity) {
         persistenceContext.removeEntity(entity);
+        EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
         entityPersister.delete(entity);
     }
 
@@ -58,6 +61,7 @@ public class MyEntityManager implements EntityManager {
     public void flush() {
         List<Object> entities = persistenceContext.getDirtyEntities();
         for (Object entity : entities) {
+            EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
             entityPersister.update(entity);
             persistenceContext.addEntityEntry(entity, EntityEntryStatus.GONE);
         }

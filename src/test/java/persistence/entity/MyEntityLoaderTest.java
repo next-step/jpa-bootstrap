@@ -1,13 +1,13 @@
 package persistence.entity;
 
+import database.dialect.H2Dialect;
+import domain.Person;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import domain.Person;
 import persistence.sql.ddl.CreateQueryBuilder;
 import persistence.sql.ddl.DropQueryBuilder;
-import database.dialect.H2Dialect;
 import persistence.support.DatabaseSetup;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,12 +36,12 @@ class MyEntityLoaderTest {
     void find() {
         //given
         MyEntityManager entityManager = new MyEntityManager(jdbcTemplate);
-        EntityLoader entityLoader = new MyEntityLoader(jdbcTemplate);
+        EntityLoader entityLoader = new MyEntityLoader(jdbcTemplate, EntityMeta.from(Person.class));
         String expectName = "ABC";
         entityManager.persist(new Person(1L, expectName, 10, "ABC@email.com", 10));
 
         //when
-        Person actual = entityLoader.find(Person.class, 1L);
+        Person actual = (Person) entityLoader.find(1L);
 
         //then
         assertThat(actual).extracting("name")

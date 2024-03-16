@@ -5,15 +5,17 @@ import persistence.sql.dml.DeleteQueryBuilder;
 import persistence.sql.dml.InsertQueryBuilder;
 import persistence.sql.dml.UpdateQueryBuilder;
 
-public class MyEntityPersister implements EntityPersister {
+public class MyEntityPersister<T> implements EntityPersister {
 
     private final JdbcTemplate jdbcTemplate;
+    private final EntityMeta<T> entityMeta;
     private final InsertQueryBuilder insertQueryBuilder;
     private final UpdateQueryBuilder updateQueryBuilder;
     private final DeleteQueryBuilder deleteQueryBuilder;
 
-    public MyEntityPersister(JdbcTemplate jdbcTemplate) {
+    public MyEntityPersister(JdbcTemplate jdbcTemplate, EntityMeta<T> entityMeta) {
         this.jdbcTemplate = jdbcTemplate;
+        this.entityMeta = entityMeta;
         this.insertQueryBuilder = InsertQueryBuilder.getInstance();
         this.updateQueryBuilder = UpdateQueryBuilder.getInstance();
         this.deleteQueryBuilder = DeleteQueryBuilder.getInstance();
