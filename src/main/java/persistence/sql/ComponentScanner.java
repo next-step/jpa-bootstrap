@@ -1,14 +1,19 @@
-package persistence.sql.meta;
+package persistence.sql;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ComponentScanner {
+
+
+    private static final Map<String, List<Class<?>>> clazzCache = new ConcurrentHashMap<>();
 
     private ComponentScanner() {
     }
@@ -18,7 +23,15 @@ public class ComponentScanner {
     private static final String EMPTY = "";
     private static final String PACKAGE_SEPARATOR = "/";
 
-    public static List<Class<?>> scan(String basePackage) {
+    public static List<Class<?>> getClasses(String basePackage){
+        return clazzCache.computeIfAbsent(basePackage, k -> scan(basePackage));
+    }
+
+    private static List<Class<?>> scan(String basePackage) {
+        if (clazzCache.containsKey(basePackage)) {
+            return clazzCache.get(basePackage);
+        }
+
         String packagePath = basePackage.replace(DOT, PACKAGE_SEPARATOR);
 
         URL resource = Thread.currentThread().getContextClassLoader().getResource(packagePath);
