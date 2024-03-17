@@ -39,7 +39,7 @@ class MyEntityPersisterTest {
     @Test
     void insert() {
         //given
-        EntityPersister entityPersister = new MyEntityPersister(jdbcTemplate, EntityMeta.from(Person.class));
+        EntityPersister<Person> entityPersister = new MyEntityPersister<>(jdbcTemplate, EntityMeta.from(Person.class));
 
         //when
         Person person = new Person(1L, "ABC", 10, "ABC@email.com", 10);
@@ -56,7 +56,7 @@ class MyEntityPersisterTest {
     @Test
     void update() {
         //given
-        EntityPersister entityPersister = new MyEntityPersister(jdbcTemplate, EntityMeta.from(Person.class));
+        EntityPersister<Person> entityPersister = new MyEntityPersister<>(jdbcTemplate, EntityMeta.from(Person.class));
 
         //when
         Person person = new Person(1L, "ABC", 10, "ABC@email.com", 10);
@@ -80,7 +80,7 @@ class MyEntityPersisterTest {
     @Test
     void delete() {
         //given
-        EntityPersister entityPersister = new MyEntityPersister(jdbcTemplate, EntityMeta.from(Person.class));
+        EntityPersister<Person> entityPersister = new MyEntityPersister<>(jdbcTemplate, EntityMeta.from(Person.class));
 
         //when
         Person person = new Person(1L, "ABC", 10, "ABC@email.com", 10);

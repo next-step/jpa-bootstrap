@@ -23,8 +23,7 @@ public class InsertQueryBuilder {
     }
 
 
-    public String build(Object object) {
-        Table table = Table.from(object.getClass());
+    public String build(Object object, Table table) {
         List<Column> columns = table.getColumns();
         Map<String, String> clause = getClause(object, columns);
         String columnsClause = String.join(CLAUSE_DELIMITER, clause.keySet());

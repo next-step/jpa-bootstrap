@@ -23,9 +23,7 @@ public class UpdateQueryBuilder {
     }
 
 
-    public String build(Object object) {
-        Table table = Table.from(object.getClass());
-        IdColumn idColumn = table.getIdColumn();
+    public String build(Object object, Table table, IdColumn idColumn) {
         String updateClause = getUpdateClause(object, table.getColumns());
         Object keyValue = ValueExtractor.extract(object, idColumn);
         return String.format(UPDATE_QUERY_TEMPLATE, table.getName(), updateClause, idColumn.getName(), keyValue);

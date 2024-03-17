@@ -3,6 +3,7 @@ package persistence.sql.dml;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import domain.Person;
+import persistence.sql.meta.Table;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -13,7 +14,8 @@ class UpdateQueryBuilderTest {
     void buildUpdateQuery() {
         UpdateQueryBuilder updateQueryBuilder = UpdateQueryBuilder.getInstance();
         Person name = new Person(1L, "name", 10, "email.com", 1);
-        String query = updateQueryBuilder.build(name);
+        Table table = Table.from(Person.class);
+        String query = updateQueryBuilder.build(name, table, table.getIdColumn());
         assertThat(query).isEqualTo("UPDATE users SET nick_name = 'name', old = 10, email = 'email.com' WHERE id = 1");
     }
 }

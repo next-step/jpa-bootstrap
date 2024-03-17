@@ -8,23 +8,23 @@ import utils.ValueInjector;
 
 public class EntityMeta<T> {
     private final Table table;
-    private final IdColumn id;
+    private final IdColumn idColumn;
 
-    public EntityMeta(Table table, IdColumn id) {
+    public EntityMeta(Table table, IdColumn idColumn) {
         this.table = table;
-        this.id = id;
+        this.idColumn = idColumn;
     }
 
     public static <T> EntityMeta<T> from(T entity) {
         Table table = Table.from(entity.getClass());
-        IdColumn id = table.getIdColumn();
-        return new EntityMeta<T>(table, id);
+        IdColumn idColumn = table.getIdColumn();
+        return new EntityMeta<>(table, idColumn);
     }
 
     public static <T> EntityMeta<T> from(Class<?> clazz) {
         Table table = Table.from(clazz);
         IdColumn id = table.getIdColumn();
-        return new EntityMeta<T>(table, id);
+        return new EntityMeta<>(table, id);
     }
 
 
@@ -36,16 +36,20 @@ public class EntityMeta<T> {
         return getId(entity) == null;
     }
 
-    private Object getId(Object entity) {
-        return ValueExtractor.extract(entity, id);
+    public Object getId(Object entity) {
+        return ValueExtractor.extract(entity, idColumn);
     }
 
     public void injectId(Object entity, Object generatedId) {
-        ValueInjector.inject(entity, id, generatedId);
+        ValueInjector.inject(entity, idColumn, generatedId);
     }
 
     public Table getTable() {
         return table;
+    }
+
+    public IdColumn getIdColumn() {
+        return idColumn;
     }
 
     public Class<T> getClazz() {
