@@ -11,7 +11,7 @@ import persistence.sql.meta.Table;
 
 import java.util.List;
 
-public class MyEntityLoader<T> implements EntityLoader {
+public class MyEntityLoader<T> implements EntityLoader<T> {
 
     private final JdbcTemplate jdbcTemplate;
     private final EntityMeta<T> entityMeta;

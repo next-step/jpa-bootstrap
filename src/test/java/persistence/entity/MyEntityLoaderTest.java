@@ -36,12 +36,12 @@ class MyEntityLoaderTest {
     void find() {
         //given
         MyEntityManager entityManager = new MyEntityManager(jdbcTemplate);
-        EntityLoader entityLoader = new MyEntityLoader(jdbcTemplate, EntityMeta.from(Person.class));
+        MyEntityLoader<Person> entityLoader = new MyEntityLoader<>(jdbcTemplate, EntityMeta.from(Person.class));
         String expectName = "ABC";
         entityManager.persist(new Person(1L, expectName, 10, "ABC@email.com", 10));
 
         //when
-        Person actual = (Person) entityLoader.find(1L);
+        Person actual = entityLoader.find(1L);
 
         //then
         assertThat(actual).extracting("name")
