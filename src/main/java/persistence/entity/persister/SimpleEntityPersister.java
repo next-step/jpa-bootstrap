@@ -6,27 +6,29 @@ import jdbc.JdbcTemplate;
 import persistence.sql.dml.DmlGenerator;
 import persistence.sql.meta.Table;
 
-public class SimpleEntityPersister implements EntityPersister {
+public class SimpleEntityPersister<T> implements EntityPersister<T> {
 
     private final DmlGenerator dmlGenerator;
     private final JdbcTemplate jdbcTemplate;
+    private final Class<T> type;
 
-    private SimpleEntityPersister(JdbcTemplate jdbcTemplate) {
+    private SimpleEntityPersister(JdbcTemplate jdbcTemplate, Class<T> type) {
         this.dmlGenerator = DmlGenerator.getInstance();
         this.jdbcTemplate = jdbcTemplate;
+        this.type = type;
     }
 
-    public static SimpleEntityPersister from(JdbcTemplate jdbcTemplate) {
-        return new SimpleEntityPersister(jdbcTemplate);
+    public static <T> SimpleEntityPersister<T> of(JdbcTemplate jdbcTemplate, Class<T> type) {
+        return new SimpleEntityPersister<>(jdbcTemplate, type);
     }
 
     @Override
-    public boolean update(Object entity) {
+    public boolean update(T entity) {
         return jdbcTemplate.executeUpdate(dmlGenerator.generateUpdateQuery(entity)) > 0;
     }
 
     @Override
-    public void insert(Object entity) {
+    public void insert(T entity) {
         Object id = jdbcTemplate.executeInsert(dmlGenerator.generateInsertQuery(entity));
         Table table = Table.getInstance(entity.getClass());
         table.setIdValue(entity, id);
@@ -34,7 +36,7 @@ public class SimpleEntityPersister implements EntityPersister {
     }
 
     @Override
-    public void delete(Object entity) {
+    public void delete(T entity) {
         jdbcTemplate.executeUpdate(dmlGenerator.generateDeleteQuery(entity));
     }
 

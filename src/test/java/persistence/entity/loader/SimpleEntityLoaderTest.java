@@ -53,11 +53,11 @@ class SimpleEntityLoaderTest {
         @Test
         void testFind() {
             // given
-            SimpleEntityLoader loader = SimpleEntityLoader.from(jdbcTemplate);
+            SimpleEntityLoader<Person> loader = SimpleEntityLoader.of(jdbcTemplate, Person.class);
             Person sample = PersonFixture.createPerson();
             jdbcTemplate.execute(dmlGenerator.generateInsertQuery(sample));
             // when
-            Person person = loader.find(Person.class, 1L);
+            Person person = loader.find(1L);
 
             // then
             assertAll(

@@ -28,10 +28,8 @@ import persistence.sql.dml.DmlGenerator;
 class SimpleEntityPersisterTest {
 
     private DatabaseServer server;
-
     private JdbcTemplate jdbcTemplate;
     private DdlGenerator ddlGenerator;
-    private EntityPersister entityPersister;
     private DmlGenerator dmlGenerator;
 
     @BeforeEach
@@ -42,7 +40,6 @@ class SimpleEntityPersisterTest {
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
         dmlGenerator = DmlGenerator.getInstance();
-        entityPersister = SimpleEntityPersister.from(jdbcTemplate);
         jdbcTemplate.execute(ddlGenerator.generateCreateQuery(Person.class));
         jdbcTemplate.execute(ddlGenerator.generateCreateQuery(Order.class));
         jdbcTemplate.execute(ddlGenerator.generateCreateQuery(OrderItem.class));
@@ -62,6 +59,7 @@ class SimpleEntityPersisterTest {
         @DisplayName("Person Entity를 저장한다.")
         @Test
         void insertTest() {
+            EntityPersister<Person> entityPersister = SimpleEntityPersister.of(jdbcTemplate, Person.class);
             //given
             Person person = PersonFixture.createPerson();
 
@@ -81,6 +79,8 @@ class SimpleEntityPersisterTest {
         @DisplayName("Order Entity를 저장한다.")
         @Test
         void insertTest_whenOrder() {
+            EntityPersister<Order> entityPersister = SimpleEntityPersister.of(jdbcTemplate, Order.class);
+
             //given
             Order order = OrderFixture.createOrder();
             order.addOrderItem(OrderFixture.createOrderItem());
@@ -109,6 +109,7 @@ class SimpleEntityPersisterTest {
         @Test
         void updateTest() {
             //given
+            EntityPersister<Person> entityPersister = SimpleEntityPersister.of(jdbcTemplate, Person.class);
             Person person = PersonFixture.createPerson();
             entityPersister.insert(person);
             person = findPerson(1L);
@@ -130,6 +131,7 @@ class SimpleEntityPersisterTest {
         @Test
         void deleteTest() {
             //given
+            EntityPersister<Person> entityPersister = SimpleEntityPersister.of(jdbcTemplate, Person.class);
             Person person = PersonFixture.createPerson();
             entityPersister.insert(person);
             person = findPerson(1L);

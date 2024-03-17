@@ -17,7 +17,7 @@ public class SimplePersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public Object getEntity(Class<?> clazz, Object id) {
+    public <T> Object getEntity(Class<T> clazz, Object id) {
         EntityKey key = EntityKey.of(clazz, id);
         if (entities.containsKey(key)) {
             return entities.get(key);
@@ -26,13 +26,13 @@ public class SimplePersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public void addEntity(Object entity) {
+    public <T> void addEntity(T entity) {
         EntityKey key = EntityKey.from(entity);
         entities.put(key, entity);
     }
 
     @Override
-    public void removeEntity(Object entity) {
+    public <T> void removeEntity(T entity) {
         EntityKey key = EntityKey.from(entity);
 
         entities.remove(key);
@@ -49,12 +49,12 @@ public class SimplePersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public void setEntityEntry(Object entity, EntityEntry entityEntry) {
+    public <T> void setEntityEntry(T entity, EntityEntry entityEntry) {
         entityEntryMap.put(EntityKey.from(entity), entityEntry);
     }
 
     @Override
-    public EntityEntry getEntityEntry(Object entity) {
+    public <T> EntityEntry getEntityEntry(T entity) {
         return entityEntryMap.get(EntityKey.from(entity));
     }
 }

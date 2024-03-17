@@ -37,7 +37,7 @@ class SimpleEntityManagerTest {
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
-        entityManager = SimpleEntityManager.from(jdbcTemplate);
+        entityManager = SimpleEntityManager.of(jdbcTemplate, "domain");
         jdbcTemplate.execute(ddlGenerator.generateCreateQuery(Person.class));
         jdbcTemplate.execute(ddlGenerator.generateCreateQuery(Order.class));
         jdbcTemplate.execute(ddlGenerator.generateCreateQuery(OrderItem.class));
@@ -123,10 +123,8 @@ class SimpleEntityManagerTest {
             entityManager.persist(order);
 
             // when
-            EntityManager manager = SimpleEntityManager.from(jdbcTemplate);
+            EntityManager manager = SimpleEntityManager.of(jdbcTemplate, "domain");
             Order foundOrder = manager.find(Order.class, 1L);
-
-            System.out.println(foundOrder.getOrderItems());
 
             // then
             assertAll(
