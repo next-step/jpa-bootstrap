@@ -2,7 +2,6 @@ package persistence.entity;
 
 import database.dialect.H2Dialect;
 import domain.Order;
-import domain.OrderItem;
 import domain.Person;
 import jdbc.JdbcTemplate;
 import org.assertj.core.api.Assertions;
@@ -13,9 +12,8 @@ import org.junit.jupiter.api.Test;
 import persistence.sql.ddl.CreateQueryBuilder;
 import persistence.sql.ddl.DropQueryBuilder;
 import persistence.sql.dml.InsertQueryBuilder;
+import persistence.sql.meta.Table;
 import persistence.support.DatabaseSetup;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -47,7 +45,7 @@ class MyEntityManagerTest {
         MyEntityManager entityManager = new MyEntityManager(jdbcTemplate);
         Long id = 1L;
         Person expected = new Person(id, "John", 25, "qwer@asdf.com", 1);
-        String insertQuery = new InsertQueryBuilder().build(expected);
+        String insertQuery = new InsertQueryBuilder().build(expected, Table.from(Person.class));
         jdbcTemplate.execute(insertQuery);
 
         // when

@@ -35,7 +35,7 @@ public class MyEntityManager implements EntityManager {
         persistenceContext.addEntityEntry(entity, EntityEntryStatus.SAVING);
         EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
         Object generatedId = entityPersister.insert(entity);
-        EntityMeta<T> entityMeta = EntityMeta.from(entity);
+        EntityMeta<T> entityMeta = metaModel.getEntityMetaFrom(entity);
         entityMeta.injectId(entity, generatedId);
         addToCache(entity);
         return entity;
@@ -65,6 +65,11 @@ public class MyEntityManager implements EntityManager {
             entityPersister.update(entity);
             persistenceContext.addEntityEntry(entity, EntityEntryStatus.GONE);
         }
+    }
+
+    @Override
+    public <T> EntityMeta<T> getEntityMetaFrom(T entity) {
+        return metaModel.getEntityMetaFrom(entity);
     }
 
     private void addToCache(Object entity) {

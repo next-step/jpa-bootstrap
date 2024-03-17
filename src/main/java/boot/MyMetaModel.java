@@ -21,10 +21,6 @@ public class MyMetaModel implements MetaModel {
                 .collect(Collectors.toMap(clazz -> clazz, clazz -> new MyEntityLoader<>(jdbcTemplate, EntityMeta.from(clazz))));
     }
 
-    public Map<Class<?>, EntityMeta> getModels() {
-        return models;
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public <T> EntityPersister<T> getEntityPersister(Class<T> clazz) {
@@ -35,5 +31,11 @@ public class MyMetaModel implements MetaModel {
     @SuppressWarnings("unchecked")
     public <T> EntityLoader<T> getEntityLoader(Class<T> clazz) {
         return (EntityLoader<T>) loaders.get(clazz);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> EntityMeta<T> getEntityMetaFrom(T entity) {
+        return (EntityMeta<T>) models.get(entity.getClass());
     }
 }
