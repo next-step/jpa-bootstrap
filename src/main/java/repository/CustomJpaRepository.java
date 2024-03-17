@@ -11,7 +11,7 @@ public class CustomJpaRepository<T, ID> implements JpaRepository<T, ID> {
     }
 
     public T save(T entity) {
-        EntityMeta entityMeta = EntityMeta.from(entity);
+        EntityMeta<T> entityMeta = entityManager.getEntityMetaFrom(entity);
         if (entityMeta.isNew(entity)) {
             return entityManager.persist(entity);
         }

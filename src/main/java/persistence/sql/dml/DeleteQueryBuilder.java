@@ -1,10 +1,7 @@
 package persistence.sql.dml;
 
-import persistence.sql.meta.Column;
 import persistence.sql.meta.IdColumn;
 import persistence.sql.meta.Table;
-
-import java.lang.reflect.Field;
 
 public class DeleteQueryBuilder {
     private static final String DELETE_QUERY_TEMPLATE = "DELETE FROM %s";
@@ -18,21 +15,9 @@ public class DeleteQueryBuilder {
         return InstanceHolder.INSTANCE;
     }
 
-    public String build(Object object) {
-        Table table = Table.from(object.getClass());
-        IdColumn idColumn = table.getIdColumn();
+    public String build(Table table, IdColumn idColumn, Object id) {
         String deleteQuery = String.format(DELETE_QUERY_TEMPLATE, table.getName());
-        String whereClause = String.format(WHERE_CLAUSE_TEMPLATE, idColumn.getName(), getObject(object, idColumn));
+        String whereClause = String.format(WHERE_CLAUSE_TEMPLATE, idColumn.getName(), id);
         return deleteQuery + whereClause;
-    }
-
-    private Object getObject(Object object, Column column) {
-        try {
-            Field field = column.getField();
-            field.setAccessible(true);
-            return field.get(object);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Failed to access field: " + column.getName(), e);
-        }
     }
 }

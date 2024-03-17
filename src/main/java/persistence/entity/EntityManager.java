@@ -10,4 +10,6 @@ public interface EntityManager {
     <T> T merge(T entity);
 
     void flush();
+
+    <T> EntityMeta<T> getEntityMetaFrom(T entity);
 }

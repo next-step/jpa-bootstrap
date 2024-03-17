@@ -1,6 +1,6 @@
 package persistence.entity;
 
-public interface EntityPersister {
+public interface EntityPersister<T> {
 
     boolean update(Object entity);
 

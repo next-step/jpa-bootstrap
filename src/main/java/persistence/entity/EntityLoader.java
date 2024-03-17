@@ -1,6 +1,6 @@
 package persistence.entity;
 
-public interface EntityLoader {
+public interface EntityLoader<T> {
 
-    <T> T find(Class<T> clazz, Object Id);
+    T find(Object Id);
 }

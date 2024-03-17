@@ -3,6 +3,7 @@ package persistence.sql.dml;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import domain.Person;
+import persistence.sql.meta.Table;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,7 +17,7 @@ class InsertQueryBuilderTest {
         InsertQueryBuilder insertQueryBuilder = InsertQueryBuilder.getInstance();
 
         //when
-        String query = insertQueryBuilder.build(person);
+        String query = insertQueryBuilder.build(person, Table.from(Person.class));
 
         //then
         assertThat(query).isEqualTo("INSERT INTO users (nick_name, old, email) VALUES ('name', 1, 'email')");
