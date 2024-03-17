@@ -7,14 +7,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MyMetaModel implements MetaModel {
-    private static final String BASE_PACKAGE = "domain";
-
-    private final Map<Class<?>, EntityMeta> models;
-    private final Map<Class<?>, EntityPersister> persisters;
-    private final Map<Class<?>, EntityLoader> loaders;
+    private final Map<Class<?>, EntityMeta<?>> models;
+    private final Map<Class<?>, EntityPersister<?>> persisters;
+    private final Map<Class<?>, EntityLoader<?>> loaders;
 
     public MyMetaModel(JdbcTemplate jdbcTemplate) {
-        this.models = EntityBinder.bind(BASE_PACKAGE);
+        this.models = EntityBinder.bind();
         this.persisters = models.keySet()
                 .stream()
                 .collect(Collectors.toMap(clazz -> clazz, clazz -> new MyEntityPersister<>(jdbcTemplate, EntityMeta.from(clazz))));

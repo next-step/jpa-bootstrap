@@ -7,15 +7,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EntityBinder {
+    private static final String BASE_PACKAGE = "domain";
 
     private EntityBinder() {
         throw new IllegalStateException("Utility Class cannot be instantiated");
     }
 
-    public static Map<Class<?>, EntityMeta> bind(String basePackage) {
+    public static Map<Class<?>, EntityMeta<?>> bind() {
         try {
             ComponentScanner scanner = new ComponentScanner();
-            return scanner.scan(basePackage).stream()
+            return scanner.scan(BASE_PACKAGE).stream()
                     .filter(it -> it.isAnnotationPresent(Entity.class))
                     .collect(Collectors.toMap(clazz -> clazz, EntityMeta::from));
         } catch (Exception e) {
