@@ -2,10 +2,13 @@ package persistence.entity;
 
 import database.DatabaseServer;
 import database.H2;
+import domain.Department;
+import domain.Employee;
 import domain.Order;
 import domain.OrderItem;
 import domain.Person;
 import java.sql.SQLException;
+import java.util.List;
 import jdbc.JdbcTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -18,6 +21,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import persistence.fixture.OrderFixture;
 import persistence.fixture.PersonFixture;
+import persistence.sql.ComponentScanner;
 import persistence.sql.ddl.DdlGenerator;
 import persistence.sql.dialect.h2.H2Dialect;
 
@@ -25,6 +29,7 @@ import persistence.sql.dialect.h2.H2Dialect;
 class SimpleEntityManagerTest {
 
     private DatabaseServer server;
+    List<Class<?>> entityClass = ComponentScanner.getClasses("domain");
 
     private JdbcTemplate jdbcTemplate;
     private DdlGenerator ddlGenerator;
@@ -37,17 +42,13 @@ class SimpleEntityManagerTest {
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
+        entityClass.forEach(clazz -> jdbcTemplate.execute(ddlGenerator.generateCreateQuery(clazz)));
         entityManager = SimpleEntityManager.of(jdbcTemplate, "domain");
-        jdbcTemplate.execute(ddlGenerator.generateCreateQuery(Person.class));
-        jdbcTemplate.execute(ddlGenerator.generateCreateQuery(Order.class));
-        jdbcTemplate.execute(ddlGenerator.generateCreateQuery(OrderItem.class));
     }
 
     @AfterEach
     void tearDown() {
-        jdbcTemplate.execute(ddlGenerator.generateDropQuery(Person.class));
-        jdbcTemplate.execute(ddlGenerator.generateDropQuery(Order.class));
-        jdbcTemplate.execute(ddlGenerator.generateDropQuery(OrderItem.class));
+        entityClass.forEach(clazz -> jdbcTemplate.execute(ddlGenerator.generateDropQuery(clazz)));
         server.stop();
     }
 
@@ -132,6 +133,30 @@ class SimpleEntityManagerTest {
                 () -> assertEquals(foundOrder.getId(), order.getId()),
                 () -> assertEquals(foundOrder.getOrderNumber(), order.getOrderNumber()),
                 () -> assertEquals(foundOrder.getOrderItems().size(), order.getOrderItems().size())
+            );
+        }
+
+        @DisplayName("department 조회시 employee도 같이 조회한다.")
+        @Test
+        void findTest_whenDepartment() {
+            // given
+            Department department = new Department("IT");
+            department.addEmployee(new Employee("user1"));
+            department.addEmployee(new Employee("user2"));
+            department.addEmployee(new Employee("user3"));
+
+            entityManager.persist(department);
+
+            // when
+            EntityManager manager = SimpleEntityManager.of(jdbcTemplate, "domain");
+            Department foundDepartment = manager.find(Department.class, 1L);
+
+            // then
+            assertAll(
+                () -> assertEquals(foundDepartment, department),
+                () -> assertEquals(foundDepartment.getId(), department.getId()),
+                () -> assertEquals(foundDepartment.getName(), department.getName()),
+                () -> assertEquals(foundDepartment.getEmployees().size(), department.getEmployees().size())
             );
         }
     }

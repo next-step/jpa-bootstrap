@@ -22,7 +22,7 @@ class ComponentScannerTest {
             List<Class<?>> entityList = ComponentScanner.getClasses("domain");
 
             // Then
-            assertEquals(3, entityList.size());
+            assertEquals(5, entityList.size());
         }
     }
 }
