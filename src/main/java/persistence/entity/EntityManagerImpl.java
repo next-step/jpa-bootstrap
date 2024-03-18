@@ -49,8 +49,6 @@ public class EntityManagerImpl implements EntityManager {
         GenerationType generationType = idColumn.getIdGeneratedStrategy(dialect).getGenerationType();
         EntityPersister entityPersister = metaModel.getEntityPersisterMap().get(entity.getClass());
 
-        System.out.println("entityPersister:" + entityPersister);
-
         if (dialect.getIdGeneratedStrategy(generationType).isAutoIncrement()) {
             long id = entityPersister.insertByGeneratedKey(entity);
             savePersistence(entity, id);
