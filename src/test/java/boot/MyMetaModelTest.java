@@ -1,21 +1,22 @@
 package boot;
 
+import boot.metamodel.MyMetaModel;
 import domain.Department;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import persistence.support.DatabaseSetup;
+import persistence.support.FakeDatabaseServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@DatabaseSetup
+
 class MyMetaModelTest {
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
-    void setUp(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    void setUp() {
+        this.jdbcTemplate = new JdbcTemplate(new FakeDatabaseServer().getConnection());
     }
 
     @Test

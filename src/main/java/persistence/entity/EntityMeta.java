@@ -1,6 +1,5 @@
 package persistence.entity;
 
-import persistence.persistencecontext.EntityKey;
 import persistence.sql.meta.IdColumn;
 import persistence.sql.meta.Table;
 import utils.ValueExtractor;
@@ -25,11 +24,6 @@ public class EntityMeta<T> {
         Table table = Table.from(clazz);
         IdColumn id = table.getIdColumn();
         return new EntityMeta<>(table, id);
-    }
-
-
-    public EntityKey getEntityKey(Object entity) {
-        return new EntityKey(getId(entity), table.getClazz());
     }
 
     public boolean isNew(Object entity) {

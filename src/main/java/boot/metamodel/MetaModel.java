@@ -1,4 +1,4 @@
-package boot;
+package boot.metamodel;
 
 import persistence.entity.EntityLoader;
 import persistence.entity.EntityMeta;

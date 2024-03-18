@@ -1,16 +1,18 @@
 package repository;
 
+import boot.metamodel.MyMetaModel;
+import database.dialect.H2Dialect;
+import domain.Person;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.EntityManager;
+import persistence.entity.EntityMeta;
 import persistence.entity.MyEntityManager;
-import domain.Person;
 import persistence.sql.ddl.CreateQueryBuilder;
 import persistence.sql.ddl.DropQueryBuilder;
-import database.dialect.H2Dialect;
 import persistence.support.DatabaseSetup;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,8 +40,9 @@ class CustomJpaRepositoryTest {
     @DisplayName("save 메서드는 값을 저장한다.")
     void save_persist() {
         //given
-        EntityManager entityManager = new MyEntityManager(jdbcTemplate);
-        CustomJpaRepository<Person, Long> repository = new CustomJpaRepository<Person, Long>(entityManager);
+        MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
+        EntityManager entityManager = new MyEntityManager(metaModel);
+        CustomJpaRepository<Person, Long> repository = new CustomJpaRepository<>(entityManager, EntityMeta.from(Person.class));
         Person person = new Person(null, "ABC", 20, "email.com", 10);
 
         //when
@@ -54,8 +57,9 @@ class CustomJpaRepositoryTest {
     @DisplayName("save 메서드는 영속화된 엔티티의 경우 값을 수정한다.")
     void save_merge() {
         //given
-        EntityManager entityManager = new MyEntityManager(jdbcTemplate);
-        CustomJpaRepository<Person, Long> repository = new CustomJpaRepository<Person, Long>(entityManager);
+        MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
+        EntityManager entityManager = new MyEntityManager(metaModel);
+        CustomJpaRepository<Person, Long> repository = new CustomJpaRepository<>(entityManager, EntityMeta.from(Person.class));
         Person person = new Person(null, "ABC", 20, "email.com", 10);
         repository.save(person);
 

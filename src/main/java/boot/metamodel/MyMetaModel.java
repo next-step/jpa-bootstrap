@@ -1,5 +1,6 @@
-package boot;
+package boot.metamodel;
 
+import boot.EntityBinder;
 import jdbc.JdbcTemplate;
 import persistence.entity.*;
 
@@ -15,10 +16,10 @@ public class MyMetaModel implements MetaModel {
         this.models = EntityBinder.bind();
         this.persisters = models.keySet()
                 .stream()
-                .collect(Collectors.toMap(clazz -> clazz, clazz -> new MyEntityPersister<>(jdbcTemplate, EntityMeta.from(clazz))));
+                .collect(Collectors.toMap(clazz -> clazz, clazz -> new MyEntityPersister<>(jdbcTemplate, models.get(clazz))));
         this.loaders = models.keySet()
                 .stream()
-                .collect(Collectors.toMap(clazz -> clazz, clazz -> new MyEntityLoader<>(jdbcTemplate, EntityMeta.from(clazz))));
+                .collect(Collectors.toMap(clazz -> clazz, clazz -> new MyEntityLoader<>(jdbcTemplate, models.get(clazz))));
     }
 
     @Override
