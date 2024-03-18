@@ -1,6 +1,7 @@
 package persistence;
 
-import boot.metamodel.MyMetaModel;
+import boot.EntityManagerFactory;
+import boot.MyEntityManagerFactory;
 import database.DatabaseServer;
 import database.H2;
 import database.dialect.H2Dialect;
@@ -8,7 +9,7 @@ import domain.Person;
 import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import persistence.entity.MyEntityManager;
+import persistence.entity.EntityManager;
 import persistence.sql.ddl.CreateQueryBuilder;
 import persistence.sql.ddl.DropQueryBuilder;
 import repository.CustomJpaRepository;
@@ -28,7 +29,8 @@ public class Application {
 
             Person person = new Person(null, "John", 25, "email", 1);
             Person person2 = new Person(1L, "James", 45, "james@asdf.com", 10);
-            MyEntityManager entityManager = new MyEntityManager(new MyMetaModel(jdbcTemplate));
+            EntityManagerFactory entityManagerFactory = new MyEntityManagerFactory(jdbcTemplate);
+            EntityManager entityManager = entityManagerFactory.openSession();
             CustomJpaRepository<Person, Long> personLongCustomJpaRepository = new CustomJpaRepository<Person, Long>(entityManager);
             personLongCustomJpaRepository.save(person);
             personLongCustomJpaRepository.save(person2);
