@@ -1,7 +1,6 @@
 package persistence.persistencecontext;
 
 import persistence.entity.EntityEntry;
-import persistence.entity.EntityMeta;
 import persistence.entity.EntityEntryStatus;
 
 import java.util.HashMap;
@@ -23,32 +22,26 @@ public class MyPersistenceContext implements PersistenceContext {
 
     @Override
     public void addEntity(Object entity) {
-        EntityMeta entityMeta = EntityMeta.from(entity);
         entries.put(entity, new EntityEntry(EntityEntryStatus.MANAGED));
-        entities.put(entityMeta.getEntityKey(entity), entity);
+        entities.put(EntityKey.from(entity), entity);
     }
 
     @Override
     public void removeEntity(Object entity) {
-        EntityMeta entityMeta = EntityMeta.from(entity);
         EntityEntry entityEntry = entries.get(entity);
         entityEntry.updateStatus(EntityEntryStatus.DELETED);
-        entities.remove(entityMeta.getEntityKey(entity));
+        entities.remove(EntityKey.from(entity));
         entityEntry.updateStatus(EntityEntryStatus.GONE);
     }
 
     @Override
     public EntitySnapshot getDatabaseSnapshot(Object entity) {
-        EntityMeta entityMeta = EntityMeta.from(entity);
-        EntityKey entityKey = entityMeta.getEntityKey(entity);
-        return snapshots.put(entityKey, EntitySnapshot.from(entity));
+        return snapshots.put(EntityKey.from(entity), EntitySnapshot.from(entity));
     }
 
     @Override
     public EntitySnapshot getCachedDatabaseSnapshot(Object entity) {
-        EntityMeta entityMeta = EntityMeta.from(entity);
-        EntityKey entityKey = entityMeta.getEntityKey(entity);
-        return snapshots.get(entityKey);
+        return snapshots.get(EntityKey.from(entity));
     }
 
     @Override
