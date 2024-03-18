@@ -23,5 +23,4 @@ public class EntityBinder {
             throw new IllegalStateException("Failed to Scan MetaModels", e);
         }
     }
-
 }

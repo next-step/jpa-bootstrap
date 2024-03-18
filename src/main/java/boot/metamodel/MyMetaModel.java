@@ -1,5 +1,6 @@
-package boot;
+package boot.metamodel;
 
+import boot.EntityBinder;
 import jdbc.JdbcTemplate;
 import persistence.entity.*;
 
