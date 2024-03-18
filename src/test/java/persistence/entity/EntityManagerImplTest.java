@@ -3,6 +3,7 @@ package persistence.entity;
 import bootstrap.MetaModelImpl;
 import database.DatabaseServer;
 import database.H2;
+import domain.Department;
 import domain.Person;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
@@ -50,10 +51,10 @@ class EntityManagerImplTest {
 			new MetaModelImpl(jdbcTemplate, dialect, "domain")
 		);
 
-		createTable(personEntity);
+		createAllTable(personEntity);
 	}
 
-	private void createTable(Class<Person> personEntity) {
+	private void createAllTable(Class<Person> personEntity) {
 		Columns columns = new Columns(personEntity.getDeclaredFields());
 		IdColumn idColumn = new IdColumn(personEntity.getDeclaredFields());
 
@@ -241,5 +242,39 @@ class EntityManagerImplTest {
 			() -> assertThat(findPerson.getId()).isEqualTo(1L),
 			() -> assertThat(findPerson.getName()).isEqualTo("John2")
 		);
+	}
+
+	@DisplayName("department 조회시 employee도 같이 조회한다.")
+	@Test
+	void departTest() {
+		//given
+		createAllTable();
+
+		jdbcTemplate.execute("insert into department (id, name) values (1, 'depart123')");
+		jdbcTemplate.execute("insert into employee (id, name, department_id) values (1, 'hong', 1)");
+		jdbcTemplate.execute("insert into employee (id, name, department_id) values (2, 'kim', 1)");
+
+
+		// when
+		entityManager.flush();
+		Department department = entityManager.find(Department.class, 1L);
+
+		// then
+		assertAll(
+				() -> assertThat(department.getId()).isEqualTo(1L),
+				() -> assertThat(department.getName()).isEqualTo("depart123"),
+				() -> assertThat(department.getEmployees()).hasSize(2),
+				() -> assertThat(department.getEmployees().get(0).getId()).isEqualTo(1),
+				() -> assertThat(department.getEmployees().get(0).getName()).isEqualTo("hong"),
+				() -> assertThat(department.getEmployees().get(1).getId()).isEqualTo(2),
+				() -> assertThat(department.getEmployees().get(1).getName()).isEqualTo("kim")
+		);
+	}
+
+	private void createAllTable() {
+		jdbcTemplate.execute("create table department (id bigint auto_increment, name varchar(255), primary key (id))");
+		jdbcTemplate.execute("create table Employee (id bigint auto_increment, name varchar(255), department_id bigint, FOREIGN KEY (department_id) REFERENCES department(id), primary key (id))");
+		jdbcTemplate.execute("create table orders (id bigint auto_increment, order_number varchar(255), primary key (id))");
+		jdbcTemplate.execute("create table order_items (id bigint auto_increment, product varchar(255), quantity int, order_id bigint, FOREIGN KEY (order_id) REFERENCES orders(id), primary key (id))");
 	}
 }

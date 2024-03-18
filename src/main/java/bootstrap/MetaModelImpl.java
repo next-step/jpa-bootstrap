@@ -14,16 +14,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MetaModelImpl implements MetaModel {
     private final Map<Class<?>, EntityPersister> entityPersisterMap = new ConcurrentHashMap<>();
     private final Map<Class<?>, EntityLoader> entityLoaderMap = new ConcurrentHashMap<>();
-    private final Binder binder;
 
     public MetaModelImpl(JdbcTemplate jdbcTemplate, Dialect dialect, String basePackage){
-        this.binder = new EntityBinder();
+        Binder binder = new EntityBinder();
         List<Class<?>> classes = binder.bind(basePackage);
 
-        classes.stream()
-                .map(clazz -> {
+        classes.forEach(clazz -> {
                     entityPersisterMap.put(clazz, new EntityPersisterImpl(jdbcTemplate, dialect));
-                    return entityLoaderMap.put(clazz, new EntityLoaderImpl(jdbcTemplate));
+                    entityLoaderMap.put(clazz, new EntityLoaderImpl(jdbcTemplate));
                 });
     }
 

@@ -1,8 +1,6 @@
 package bootstrap;
 
-import domain.Order;
-import domain.OrderItem;
-import domain.Person;
+import domain.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,7 +21,7 @@ class EntityBinderTest {
         Binder binder = new EntityBinder();
         List<Class<?>> classes = binder.bind("domain");
 
-        assertThat(classes).contains(Order.class, OrderItem.class, Person.class);
+        assertThat(classes).contains(Order.class, OrderItem.class, Person.class, Department.class, Employee.class);
     }
 
     @DisplayName("@Entity가 없으면 빈 리스트를 반환한다. ")
