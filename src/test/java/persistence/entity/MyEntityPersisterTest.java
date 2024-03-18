@@ -1,5 +1,6 @@
 package persistence.entity;
 
+import boot.metamodel.MyMetaModel;
 import jdbc.JdbcTemplate;
 import jdbc.RowMapperFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -68,7 +69,8 @@ class MyEntityPersisterTest {
         entityPersister.update(updatePerson);
 
         //then
-        EntityManager entityManager = new MyEntityManager(jdbcTemplate);
+        MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
+        EntityManager entityManager = new MyEntityManager(metaModel);
         Person result = entityManager.find(Person.class, 1L);
         assertAll(
                 () -> assertThat(result).extracting("name").isEqualTo(updateName),

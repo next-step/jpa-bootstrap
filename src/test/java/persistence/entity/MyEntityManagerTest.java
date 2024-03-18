@@ -1,5 +1,6 @@
 package persistence.entity;
 
+import boot.metamodel.MyMetaModel;
 import database.dialect.H2Dialect;
 import domain.Order;
 import domain.Person;
@@ -42,7 +43,8 @@ class MyEntityManagerTest {
     @DisplayName("find 메서드는 주어진 클래스와 id에 해당하는 엔티티를 반환한다")
     void find() {
         // given
-        MyEntityManager entityManager = new MyEntityManager(jdbcTemplate);
+        MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
+        MyEntityManager entityManager = new MyEntityManager(metaModel);
         Long id = 1L;
         Person expected = new Person(id, "John", 25, "qwer@asdf.com", 1);
         String insertQuery = new InsertQueryBuilder().build(expected, Table.from(Person.class));
@@ -66,7 +68,8 @@ class MyEntityManagerTest {
         jdbcTemplate.execute("INSERT INTO order_items (id, order_id, product, quantity) VALUES (1, 1,'상품A', 1);");
         jdbcTemplate.execute("INSERT INTO order_items (id, order_id, product, quantity) VALUES (2, 1,'상품B', 2);");
         jdbcTemplate.execute("INSERT INTO orders (id, orderNumber) VALUES (1, '주문번호1');");
-        MyEntityManager entityManager = new MyEntityManager(jdbcTemplate);
+        MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
+        MyEntityManager entityManager = new MyEntityManager(metaModel);
 
         //when
         Order order = entityManager.find(Order.class, 1L);
@@ -79,7 +82,8 @@ class MyEntityManagerTest {
     @DisplayName("persist 메서드는 주어진 객체를 저장한다.")
     void persist() {
         // given
-        MyEntityManager entityManager = new MyEntityManager(jdbcTemplate);
+        MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
+        MyEntityManager entityManager = new MyEntityManager(metaModel);
         Long id = 1L;
         String expectedName = "John";
         Person expected = new Person(id, expectedName, 25, "qwer@asdf.com", 1);
@@ -97,7 +101,8 @@ class MyEntityManagerTest {
     @DisplayName("remove 메서드는 주어진 객체를 삭제한다.")
     void remove() {
         //given
-        MyEntityManager entityManager = new MyEntityManager(jdbcTemplate);
+        MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
+        MyEntityManager entityManager = new MyEntityManager(metaModel);
         Person expected = new Person(1L, "name", 25, "qwer@asdf.com", 1);
         entityManager.persist(expected);
 
@@ -113,7 +118,8 @@ class MyEntityManagerTest {
     @DisplayName("flush 메서드는 변경된 객체를 업데이트 한다.")
     void flush() {
         //given
-        MyEntityManager entityManager = new MyEntityManager(jdbcTemplate);
+        MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
+        MyEntityManager entityManager = new MyEntityManager(metaModel);
         Person person = new Person(1L, "name", 25, "qwer@asdf.com", 1);
         entityManager.persist(person);
         String updatedName = "ABC";

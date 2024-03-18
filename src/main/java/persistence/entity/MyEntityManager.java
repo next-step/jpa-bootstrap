@@ -1,8 +1,6 @@
 package persistence.entity;
 
-import boot.MetaModel;
-import boot.MyMetaModel;
-import jdbc.JdbcTemplate;
+import boot.metamodel.MetaModel;
 import persistence.persistencecontext.EntitySnapshot;
 import persistence.persistencecontext.MyPersistenceContext;
 import persistence.persistencecontext.PersistenceContext;
@@ -14,8 +12,8 @@ public class MyEntityManager implements EntityManager {
     private final MetaModel metaModel;
     private final PersistenceContext persistenceContext;
 
-    public MyEntityManager(JdbcTemplate jdbcTemplate) {
-        this.metaModel = new MyMetaModel(jdbcTemplate);
+    public MyEntityManager(MetaModel metaModel) {
+        this.metaModel = metaModel;
         this.persistenceContext = new MyPersistenceContext();
     }
 

@@ -1,5 +1,6 @@
 package boot;
 
+import boot.metamodel.MyMetaModel;
 import domain.Department;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.BeforeEach;

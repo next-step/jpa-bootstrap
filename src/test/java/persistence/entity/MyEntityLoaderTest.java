@@ -1,5 +1,6 @@
 package persistence.entity;
 
+import boot.metamodel.MyMetaModel;
 import database.dialect.H2Dialect;
 import domain.Person;
 import jdbc.JdbcTemplate;
@@ -35,7 +36,8 @@ class MyEntityLoaderTest {
     @Test
     void find() {
         //given
-        MyEntityManager entityManager = new MyEntityManager(jdbcTemplate);
+        MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
+        MyEntityManager entityManager = new MyEntityManager(metaModel);
         MyEntityLoader<Person> entityLoader = new MyEntityLoader<>(jdbcTemplate, EntityMeta.from(Person.class));
         String expectName = "ABC";
         entityManager.persist(new Person(1L, expectName, 10, "ABC@email.com", 10));
