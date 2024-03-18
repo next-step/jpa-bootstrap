@@ -10,6 +10,7 @@ import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.entity.EntityManager;
+import persistence.entity.EntityMeta;
 import persistence.sql.ddl.CreateQueryBuilder;
 import persistence.sql.ddl.DropQueryBuilder;
 import repository.CustomJpaRepository;
@@ -31,7 +32,7 @@ public class Application {
             Person person2 = new Person(1L, "James", 45, "james@asdf.com", 10);
             EntityManagerFactory entityManagerFactory = new MyEntityManagerFactory(jdbcTemplate);
             EntityManager entityManager = entityManagerFactory.openSession();
-            CustomJpaRepository<Person, Long> personLongCustomJpaRepository = new CustomJpaRepository<Person, Long>(entityManager);
+            CustomJpaRepository<Person, Long> personLongCustomJpaRepository = new CustomJpaRepository<>(entityManager, EntityMeta.from(Person.class));
             personLongCustomJpaRepository.save(person);
             personLongCustomJpaRepository.save(person2);
 

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.EntityManager;
+import persistence.entity.EntityMeta;
 import persistence.entity.MyEntityManager;
 import persistence.sql.ddl.CreateQueryBuilder;
 import persistence.sql.ddl.DropQueryBuilder;
@@ -41,7 +42,7 @@ class CustomJpaRepositoryTest {
         //given
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
         EntityManager entityManager = new MyEntityManager(metaModel);
-        CustomJpaRepository<Person, Long> repository = new CustomJpaRepository<Person, Long>(entityManager);
+        CustomJpaRepository<Person, Long> repository = new CustomJpaRepository<>(entityManager, EntityMeta.from(Person.class));
         Person person = new Person(null, "ABC", 20, "email.com", 10);
 
         //when
@@ -58,7 +59,7 @@ class CustomJpaRepositoryTest {
         //given
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
         EntityManager entityManager = new MyEntityManager(metaModel);
-        CustomJpaRepository<Person, Long> repository = new CustomJpaRepository<Person, Long>(entityManager);
+        CustomJpaRepository<Person, Long> repository = new CustomJpaRepository<>(entityManager, EntityMeta.from(Person.class));
         Person person = new Person(null, "ABC", 20, "email.com", 10);
         repository.save(person);
 
