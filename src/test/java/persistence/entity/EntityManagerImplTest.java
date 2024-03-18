@@ -1,5 +1,6 @@
 package persistence.entity;
 
+import bootstrap.MetaModelImpl;
 import database.DatabaseServer;
 import database.H2;
 import domain.Person;
@@ -46,8 +47,7 @@ class EntityManagerImplTest {
 		entityManager = new EntityManagerImpl(
 			dialect,
 			persistContext,
-			new EntityPersisterImpl(jdbcTemplate, dialect),
-			entityLoader
+			new MetaModelImpl(jdbcTemplate, dialect, "domain")
 		);
 
 		createTable(personEntity);

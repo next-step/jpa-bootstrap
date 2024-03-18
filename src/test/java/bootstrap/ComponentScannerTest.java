@@ -1,30 +1,34 @@
 package bootstrap;
 
+import database.DataSourceProperties;
+import database.DatabaseServer;
+import database.H2;
 import domain.Order;
 import domain.OrderItem;
 import domain.Person;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class ComponentScannerTest {
 
     @DisplayName("패키지안의 클래스를 찾는다.")
     @Test
-    void componentScannerTest() throws IOException, ClassNotFoundException {
+    void componentScannerTest() {
         //given
-        ComponentScanner scanner = new ComponentScanner();
         //when
-        List<Class<?>> persistence = scanner.scan("domain");
+        List<Class<?>> domainClazz = ComponentScanner.scan("domain");
+        List<Class<?>> databaseClazz = ComponentScanner.scan("database");
 
         //then
-        assertThat(persistence).contains(Order.class, OrderItem.class, Person.class);
+        assertAll(
+                () ->assertThat(domainClazz).contains(Order.class, OrderItem.class, Person.class),
+                () -> assertThat(databaseClazz).contains(DatabaseServer.class, DataSourceProperties.class, H2.class)
+        );
     }
 
 }
