@@ -31,7 +31,7 @@ public class Application {
             Person person = new Person(null, "John", 25, "email", 1);
             Person person2 = new Person(1L, "James", 45, "james@asdf.com", 10);
             EntityManagerFactory entityManagerFactory = new MyEntityManagerFactory(jdbcTemplate);
-            EntityManager entityManager = entityManagerFactory.openSession();
+            EntityManager entityManager = entityManagerFactory.openEntityManager();
             CustomJpaRepository<Person, Long> personLongCustomJpaRepository = new CustomJpaRepository<>(entityManager, EntityMeta.from(Person.class));
             personLongCustomJpaRepository.save(person);
             personLongCustomJpaRepository.save(person2);

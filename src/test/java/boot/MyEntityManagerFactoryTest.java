@@ -25,10 +25,10 @@ class MyEntityManagerFactoryTest {
     void openSession() {
         //given
         MyEntityManagerFactory entityManagerFactory = new MyEntityManagerFactory(jdbcTemplate);
-        entityManagerFactory.openSession();
+        entityManagerFactory.openEntityManager();
 
         //when & then
-        assertThatThrownBy(entityManagerFactory::openSession)
+        assertThatThrownBy(entityManagerFactory::openEntityManager)
                 .isInstanceOf(IllegalStateException.class);
     }
 
@@ -37,10 +37,10 @@ class MyEntityManagerFactoryTest {
     void getCurrentSession() {
         //given
         MyEntityManagerFactory entityManagerFactory = new MyEntityManagerFactory(jdbcTemplate);
-        EntityManager expected = entityManagerFactory.openSession();
+        EntityManager expected = entityManagerFactory.openEntityManager();
 
         //when
-        EntityManager actual = entityManagerFactory.getCurrentSession();
+        EntityManager actual = entityManagerFactory.getCurrentEntityManager();
 
         //then
         assertThat(actual).isEqualTo(expected);
@@ -53,7 +53,7 @@ class MyEntityManagerFactoryTest {
         MyEntityManagerFactory entityManagerFactory = new MyEntityManagerFactory(jdbcTemplate);
 
         //when & then
-        assertThatThrownBy(entityManagerFactory::getCurrentSession)
+        assertThatThrownBy(entityManagerFactory::getCurrentEntityManager)
                 .isInstanceOf(IllegalStateException.class);
     }
 }

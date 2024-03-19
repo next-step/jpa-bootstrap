@@ -7,29 +7,29 @@ import persistence.entity.EntityManager;
 import persistence.entity.MyEntityManager;
 
 public class MyEntityManagerFactory implements EntityManagerFactory {
-    private final CurrentSessionContext currentSessionContext;
+    private final EntityManagerContext entityManagerContext;
     private final MetaModel metaModel;
 
     public MyEntityManagerFactory(JdbcTemplate jdbcTemplate) {
-        this.currentSessionContext = new MyCurrentSessionContext();
+        this.entityManagerContext = new MyEntityManagerContext();
         this.metaModel = new MyMetaModel(jdbcTemplate);
     }
 
     @Override
-    public EntityManager openSession() {
-        if (currentSessionContext.currentSession() != null) {
+    public EntityManager openEntityManager() {
+        if (entityManagerContext.currentEntityManager() != null) {
             throw new IllegalStateException("CurrentSessionContext exists already");
         }
         MyEntityManager entityManager = new MyEntityManager(metaModel);
-        currentSessionContext.bindSession(entityManager);
+        entityManagerContext.bindEntityManager(entityManager);
         return entityManager;
     }
 
     @Override
-    public EntityManager getCurrentSession() {
-        if (currentSessionContext.currentSession() == null) {
+    public EntityManager getCurrentEntityManager() {
+        if (entityManagerContext.currentEntityManager() == null) {
             throw new IllegalStateException("No CurrentSessionContext configured");
         }
-        return currentSessionContext.currentSession();
+        return entityManagerContext.currentEntityManager();
     }
 }
