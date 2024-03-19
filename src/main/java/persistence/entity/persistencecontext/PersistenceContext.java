@@ -4,17 +4,17 @@ import persistence.entity.EntityEntry;
 
 public interface PersistenceContext {
 
-    Object getEntity(Class<?> clazz, Object id);
+    <T> Object getEntity(Class<T> clazz, Object id);
 
-    void addEntity(Object entity);
+    <T> void addEntity(T entity);
 
-    void removeEntity(Object entity);
+    <T> void removeEntity(T entity);
 
-    EntitySnapshot getCachedDatabaseSnapshot(Object entity);
+    <T> EntitySnapshot getCachedDatabaseSnapshot(T entity);
 
-    EntitySnapshot getDatabaseSnapshot(Object entity);
+    <T> EntitySnapshot getDatabaseSnapshot(T entity);
 
-    void setEntityEntry(Object entity, EntityEntry entityEntry);
+    <T> void setEntityEntry(T entity, EntityEntry entityEntry);
 
-    EntityEntry getEntityEntry(Object entity);
+    <T> EntityEntry getEntityEntry(T entity);
 }

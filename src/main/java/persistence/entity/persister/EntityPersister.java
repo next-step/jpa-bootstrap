@@ -1,8 +1,8 @@
 package persistence.entity.persister;
 
-public interface EntityPersister {
+public interface EntityPersister<T> {
 
-    boolean update(Object entity);
-    void insert(Object entity);
-    void delete(Object entity);
+    boolean update(T entity);
+    void insert(T entity);
+    void delete(T entity);
 }

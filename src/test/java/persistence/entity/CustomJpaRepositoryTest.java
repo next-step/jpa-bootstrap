@@ -32,7 +32,7 @@ class CustomJpaRepositoryTest {
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
-        entityManager = SimpleEntityManager.from(jdbcTemplate);
+        entityManager = SimpleEntityManager.of(jdbcTemplate, "domain");
         jdbcTemplate.execute(ddlGenerator.generateCreateQuery(Person.class));
 
         customJpaRepository = new CustomJpaRepository(entityManager);
