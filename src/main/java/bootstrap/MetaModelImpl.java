@@ -26,12 +26,12 @@ public class MetaModelImpl implements MetaModel {
     }
 
     @Override
-    public Map<Class<?>, EntityPersister> getEntityPersisterMap() {
-        return entityPersisterMap;
+    public EntityPersister getEntityPersister(Class<?> clazz) {
+        return entityPersisterMap.get(clazz);
     }
 
     @Override
-    public Map<Class<?>, EntityLoader> getEntityLoaderMap() {
-        return entityLoaderMap;
+    public EntityLoader getEntityLoader(Class<?> clazz) {
+        return entityLoaderMap.get(clazz);
     }
 }

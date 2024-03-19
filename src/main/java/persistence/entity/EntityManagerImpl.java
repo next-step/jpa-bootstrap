@@ -32,7 +32,7 @@ public class EntityManagerImpl implements EntityManager {
     @Override
     public <T> T find(Class<T> clazz, Long id) {
         EntityMetaData entityMetaData = new EntityMetaData(clazz, new Columns(clazz.getDeclaredFields()));
-        EntityLoader entityLoader = metaModel.getEntityLoaderMap().get(clazz);
+        EntityLoader entityLoader = metaModel.getEntityLoader(clazz);
         Object entity = persistContext.getEntity(clazz, id)
                 .orElseGet(() -> {
                     T findEntity = entityLoader.find(clazz, id);
@@ -47,7 +47,7 @@ public class EntityManagerImpl implements EntityManager {
     public <T> T persist(Object entity) {
         IdColumn idColumn = new IdColumn(entity);
         GenerationType generationType = idColumn.getIdGeneratedStrategy(dialect).getGenerationType();
-        EntityPersister entityPersister = metaModel.getEntityPersisterMap().get(entity.getClass());
+        EntityPersister entityPersister = metaModel.getEntityPersister(entity.getClass());
 
         if (dialect.getIdGeneratedStrategy(generationType).isAutoIncrement()) {
             long id = entityPersister.insertByGeneratedKey(entity);
@@ -111,12 +111,12 @@ public class EntityManagerImpl implements EntityManager {
     public void flush() {
         persistContext.getUpdateActionQueue()
                 .forEach(event -> {
-                    EntityPersister entityPersister = metaModel.getEntityPersisterMap().get(event.getEntity().getClass());
+                    EntityPersister entityPersister = metaModel.getEntityPersister(event.getEntity().getClass());
                     entityPersister.update(event.getEntity(), event.getId());
                 });
         persistContext.getDeleteActionQueue()
             .forEach(event -> {
-                EntityPersister entityPersister = metaModel.getEntityPersisterMap().get(event.getEntity().getClass());
+                EntityPersister entityPersister = metaModel.getEntityPersister(event.getEntity().getClass());
                 entityPersister.delete(event.getEntity(), event.getId());
                 persistContext.updateEntityEntryToGone(event.getEntity(), event.getId());
             });
