@@ -1,6 +1,6 @@
-package persistence.entity;
+package persistence.entity.entitymanager;
 
-public interface EntityManager {
+public interface EntityManager extends AutoCloseable {
 
     <T> T find(Class<T> clazz, Long id);
 
@@ -9,4 +9,6 @@ public interface EntityManager {
     <T> void remove(T entity);
 
     <T> T merge(T entity);
+
+    void close();
 }

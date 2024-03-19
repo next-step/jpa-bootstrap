@@ -2,7 +2,7 @@ package persistence.entity.persistencecontext;
 
 import java.util.HashMap;
 import java.util.Map;
-import persistence.entity.EntityEntry;
+import persistence.entity.entitymanager.EntityEntry;
 
 public class SimplePersistenceContext implements PersistenceContext {
 

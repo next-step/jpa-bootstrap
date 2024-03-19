@@ -4,6 +4,8 @@ import domain.Order;
 import domain.OrderItem;
 import domain.Person;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,7 @@ class SimpleMetaModelTest {
             String basePackage = "domain";
 
             // When
-            SimpleMetaModel metaModel = SimpleMetaModel.of(null, basePackage);
+            SimpleMetaModel metaModel = SimpleMetaModel.of(null, List.of(Order.class, OrderItem.class, Person.class));
 
             // Then
             assertNotNull(metaModel);
@@ -36,7 +38,7 @@ class SimpleMetaModelTest {
             String basePackage = "notExist";
 
             // When & Then
-            assertThrows(IllegalArgumentException.class, () -> SimpleMetaModel.of(null, basePackage));
+            assertThrows(IllegalArgumentException.class, () -> SimpleMetaModel.of(null, List.of()));
         }
     }
 
@@ -47,7 +49,7 @@ class SimpleMetaModelTest {
         @Test
         void getEntityPersister() {
             // Given
-            SimpleMetaModel metaModel = SimpleMetaModel.of(null, "domain");
+            SimpleMetaModel metaModel = SimpleMetaModel.of(null, List.of(Order.class, OrderItem.class, Person.class));
 
             // When
             EntityPersister<Person> entityPersister1 = metaModel.getEntityPersister(Person.class);
@@ -70,7 +72,7 @@ class SimpleMetaModelTest {
         @Test
         void getEntityLoader() {
             // Given
-            SimpleMetaModel metaModel = SimpleMetaModel.of(null, "domain");
+            SimpleMetaModel metaModel = SimpleMetaModel.of(null, List.of(Order.class, OrderItem.class, Person.class));
 
             // When
             EntityLoader<Person> entityLoader1 = metaModel.getEntityLoader(Person.class);
