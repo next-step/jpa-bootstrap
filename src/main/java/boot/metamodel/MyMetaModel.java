@@ -39,4 +39,10 @@ public class MyMetaModel implements MetaModel {
     public <T> EntityMeta<T> getEntityMetaFrom(T entity) {
         return (EntityMeta<T>) models.get(entity.getClass());
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> EntityMeta<T> getEntityMetaFrom(Class<T> entity) {
+        return (EntityMeta<T>) models.get(entity);
+    }
 }

@@ -38,6 +38,10 @@ public class EntityMeta<T> {
         ValueInjector.inject(entity, idColumn, generatedId);
     }
 
+    public Object extractId(Object entity) {
+        return ValueExtractor.extract(entity, idColumn);
+    }
+
     public Table getTable() {
         return table;
     }

@@ -21,27 +21,27 @@ public class MyPersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public void addEntity(Object entity) {
+    public void addEntity(Object id, Object entity) {
         entries.put(entity, new EntityEntry(EntityEntryStatus.MANAGED));
-        entities.put(EntityKey.from(entity), entity);
+        entities.put(new EntityKey(id, entity.getClass()), entity);
     }
 
     @Override
-    public void removeEntity(Object entity) {
+    public void removeEntity(Object id, Object entity) {
         EntityEntry entityEntry = entries.get(entity);
         entityEntry.updateStatus(EntityEntryStatus.DELETED);
-        entities.remove(EntityKey.from(entity));
+        entities.remove(new EntityKey(id, entity.getClass()));
         entityEntry.updateStatus(EntityEntryStatus.GONE);
     }
 
     @Override
-    public EntitySnapshot getDatabaseSnapshot(Object entity) {
-        return snapshots.put(EntityKey.from(entity), EntitySnapshot.from(entity));
+    public EntitySnapshot getDatabaseSnapshot(Object id, Object entity) {
+        return snapshots.put(new EntityKey(id, entity.getClass()), EntitySnapshot.from(entity));
     }
 
     @Override
-    public EntitySnapshot getCachedDatabaseSnapshot(Object entity) {
-        return snapshots.get(EntityKey.from(entity));
+    public EntitySnapshot getCachedDatabaseSnapshot(Object id, Object entity) {
+        return snapshots.get(new EntityKey(id, entity.getClass()));
     }
 
     @Override

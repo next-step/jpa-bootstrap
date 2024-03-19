@@ -1,7 +1,7 @@
 package persistence.persistencecontext;
 
-import org.junit.jupiter.api.Test;
 import domain.Person;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,7 +14,7 @@ class MyPersistenceContextTest {
         Person person = new Person(1L, "ABC", 10, "ABC@email.com", 10);
 
         //when
-        persistenceContext.addEntity(person);
+        persistenceContext.addEntity(1L, person);
 
         //then
         assertThat(persistenceContext.getEntity(Person.class, 1L)).isNotNull();
@@ -26,7 +26,7 @@ class MyPersistenceContextTest {
         MyPersistenceContext persistenceContext = new MyPersistenceContext();
         String expectedName = "ABC";
         Person person = new Person(1L, expectedName, 10, "ABC@email.com", 10);
-        persistenceContext.addEntity(person);
+        persistenceContext.addEntity(1L, person);
 
         //when
         Object actual = persistenceContext.getEntity(Person.class, 1L).get();
@@ -40,10 +40,10 @@ class MyPersistenceContextTest {
         //given
         MyPersistenceContext persistenceContext = new MyPersistenceContext();
         Person person = new Person(1L, "ABC", 10, "ABC@email.com", 10);
-        persistenceContext.addEntity(person);
+        persistenceContext.addEntity(1L, person);
 
         //when
-        persistenceContext.removeEntity(person);
+        persistenceContext.removeEntity(1L, person);
 
         //then
         assertThat(persistenceContext.getEntity(Person.class, 1L).isEmpty()).isTrue();
@@ -54,10 +54,10 @@ class MyPersistenceContextTest {
         //given
         MyPersistenceContext persistenceContext = new MyPersistenceContext();
         Person person = new Person(1L, "ABC", 10, "ABC@email.com", 10);
-        persistenceContext.getDatabaseSnapshot(person);
+        persistenceContext.getDatabaseSnapshot(1L, person);
 
         //when
-        EntitySnapshot actual = persistenceContext.getDatabaseSnapshot(person);
+        EntitySnapshot actual = persistenceContext.getDatabaseSnapshot(1L, person);
 
         //then
         assertThat(actual.getSnapshot()).isNotEmpty();

@@ -1,9 +1,5 @@
 package persistence.persistencecontext;
 
-import persistence.sql.meta.IdColumn;
-import persistence.sql.meta.Table;
-import utils.ValueExtractor;
-
 import java.util.Objects;
 
 public class EntityKey {
@@ -13,13 +9,6 @@ public class EntityKey {
     public EntityKey(Object id, Class<?> clazz) {
         this.id = id;
         this.clazz = clazz;
-    }
-
-    public static EntityKey from(Object entity) {
-        Class<?> clazz = entity.getClass();
-        IdColumn idColumn = Table.from(clazz).getIdColumn();
-        Object id = ValueExtractor.extract(entity, idColumn);
-        return new EntityKey(id, clazz);
     }
 
     @Override
