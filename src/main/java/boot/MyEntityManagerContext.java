@@ -23,4 +23,10 @@ public class MyEntityManagerContext implements EntityManagerContext {
         Thread thread = Thread.currentThread();
         sessions.put(thread, entityManager);
     }
+
+    @Override
+    public void remove() {
+        Thread thread = Thread.currentThread();
+        sessions.remove(thread);
+    }
 }

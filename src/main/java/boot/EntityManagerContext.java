@@ -7,4 +7,6 @@ public interface EntityManagerContext {
     EntityManager currentEntityManager();
 
     void bindEntityManager(EntityManager entityManager);
+
+    void remove();
 }
