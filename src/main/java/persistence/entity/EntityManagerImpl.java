@@ -1,5 +1,7 @@
 package persistence.entity;
 
+import bootstrap.MetaModel;
+import bootstrap.MetaModelImpl;
 import jakarta.persistence.GenerationType;
 import jdbc.JdbcTemplate;
 import persistence.entity.event.DeleteEvent;
@@ -9,28 +11,28 @@ import persistence.sql.column.IdColumn;
 import persistence.sql.dialect.Dialect;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 
 public class EntityManagerImpl implements EntityManager {
 
     private final Dialect dialect;
     private final PersistenceContext persistContext;
-    private final EntityPersister entityPersister;
-    private final EntityLoader entityLoader;
+    private final MetaModel metaModel;
 
     public EntityManagerImpl(JdbcTemplate jdbcTemplate, Dialect dialect) {
-        this(dialect, new HibernatePersistContext(), new EntityPersisterImpl(jdbcTemplate, dialect), new EntityLoaderImpl(jdbcTemplate));
+        this(dialect, new HibernatePersistContext(), new MetaModelImpl(jdbcTemplate, dialect, "domain"));
     }
 
-    public EntityManagerImpl(Dialect dialect, PersistenceContext persistContext, EntityPersister entityPersister, EntityLoader entityLoader) {
+    public EntityManagerImpl(Dialect dialect, PersistenceContext persistContext, MetaModel metaModel) {
         this.dialect = dialect;
         this.persistContext = persistContext;
-        this.entityPersister = entityPersister;
-        this.entityLoader = entityLoader;
+        this.metaModel = metaModel;
     }
 
     @Override
     public <T> T find(Class<T> clazz, Long id) {
         EntityMetaData entityMetaData = new EntityMetaData(clazz, new Columns(clazz.getDeclaredFields()));
+        EntityLoader entityLoader = metaModel.getEntityLoader(clazz);
         Object entity = persistContext.getEntity(clazz, id)
                 .orElseGet(() -> {
                     T findEntity = entityLoader.find(clazz, id);
@@ -45,6 +47,8 @@ public class EntityManagerImpl implements EntityManager {
     public <T> T persist(Object entity) {
         IdColumn idColumn = new IdColumn(entity);
         GenerationType generationType = idColumn.getIdGeneratedStrategy(dialect).getGenerationType();
+        EntityPersister entityPersister = metaModel.getEntityPersister(entity.getClass());
+
         if (dialect.getIdGeneratedStrategy(generationType).isAutoIncrement()) {
             long id = entityPersister.insertByGeneratedKey(entity);
             savePersistence(entity, id);
@@ -106,9 +110,13 @@ public class EntityManagerImpl implements EntityManager {
     @Override
     public void flush() {
         persistContext.getUpdateActionQueue()
-                .forEach(event -> entityPersister.update(event.getEntity(), event.getId()));
+                .forEach(event -> {
+                    EntityPersister entityPersister = metaModel.getEntityPersister(event.getEntity().getClass());
+                    entityPersister.update(event.getEntity(), event.getId());
+                });
         persistContext.getDeleteActionQueue()
             .forEach(event -> {
+                EntityPersister entityPersister = metaModel.getEntityPersister(event.getEntity().getClass());
                 entityPersister.delete(event.getEntity(), event.getId());
                 persistContext.updateEntityEntryToGone(event.getEntity(), event.getId());
             });
@@ -118,4 +126,6 @@ public class EntityManagerImpl implements EntityManager {
     public Dialect getDialect() {
         return dialect;
     }
+
+
 }
