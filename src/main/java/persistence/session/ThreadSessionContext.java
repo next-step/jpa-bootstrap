@@ -9,7 +9,7 @@ public class ThreadSessionContext implements CurrentSessionContext {
 
     private final Map<Thread, EntityManager> sessionMap;
 
-    public ThreadSessionContext(Map<Thread, EntityManager> sessionMap) {
+    private ThreadSessionContext(Map<Thread, EntityManager> sessionMap) {
         this.sessionMap = sessionMap;
     }
 
