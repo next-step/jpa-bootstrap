@@ -1,6 +1,7 @@
 package persistence.entity;
 
 import boot.metamodel.MyMetaModel;
+import event.EventListenerGroup;
 import jdbc.JdbcTemplate;
 import jdbc.RowMapperFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -70,7 +71,7 @@ class MyEntityPersisterTest {
 
         //then
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
-        EntityManager entityManager = new MyEntityManager(metaModel);
+        EntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel));
         Person result = entityManager.find(Person.class, 1L);
         assertAll(
                 () -> assertThat(result).extracting("name").isEqualTo(updateName),

@@ -1,6 +1,10 @@
 package persistence.entity;
 
 import boot.metamodel.MetaModel;
+import event.EventListenerGroup;
+import event.EventType;
+import event.LoadEvent;
+import event.LoadEventListener;
 import persistence.persistencecontext.EntitySnapshot;
 import persistence.persistencecontext.MyPersistenceContext;
 import persistence.persistencecontext.PersistenceContext;
@@ -10,19 +14,23 @@ import java.util.List;
 public class MyEntityManager implements EntityManager {
 
     private final MetaModel metaModel;
+    private final EventListenerGroup eventListenerGroup;
     private final PersistenceContext persistenceContext;
 
-    public MyEntityManager(MetaModel metaModel) {
+    public MyEntityManager(MetaModel metaModel, EventListenerGroup eventListenerGroup) {
         this.metaModel = metaModel;
+        this.eventListenerGroup = eventListenerGroup;
         this.persistenceContext = new MyPersistenceContext();
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T find(Class<T> clazz, Long id) {
         return (T) persistenceContext.getEntity(clazz, id)
                 .orElseGet(() -> {
-                    EntityLoader<T> entityLoader = metaModel.getEntityLoader(clazz);
-                    T foundEntity = entityLoader.find(id);
+                    //TODO: Casting이 아니라 EventType의 eventListener 타입을 잘 조합하면 사용할 수 있을 것 같은데 도와주세요.
+                    LoadEventListener listener = (LoadEventListener) eventListenerGroup.getListener(EventType.LOAD);
+                    T foundEntity = listener.onLoad(new LoadEvent<>(clazz, id));
                     EntityMeta<T> entityMeta = metaModel.getEntityMetaFrom(foundEntity);
                     addToCache(entityMeta.extractId(foundEntity), foundEntity);
                     return foundEntity;

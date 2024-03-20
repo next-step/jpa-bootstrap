@@ -2,6 +2,7 @@ package boot;
 
 import boot.metamodel.MetaModel;
 import boot.metamodel.MyMetaModel;
+import event.EventListenerGroup;
 import jdbc.JdbcTemplate;
 import persistence.entity.EntityManager;
 import persistence.entity.MyEntityManager;
@@ -20,7 +21,8 @@ public class MyEntityManagerFactory implements EntityManagerFactory {
         if (entityManagerContext.currentEntityManager() != null) {
             throw new IllegalStateException("CurrentSessionContext exists already");
         }
-        MyEntityManager entityManager = new MyEntityManager(metaModel);
+        EventListenerGroup eventListenerGroup = EventListenerGroup.createDefaultGroup(metaModel);
+        MyEntityManager entityManager = new MyEntityManager(metaModel, eventListenerGroup);
         entityManagerContext.bindEntityManager(entityManager);
         return entityManager;
     }
