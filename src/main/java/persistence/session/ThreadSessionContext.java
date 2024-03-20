@@ -7,16 +7,24 @@ import java.util.Map;
 
 public class ThreadSessionContext implements CurrentSessionContext {
 
-    private static final Map<Thread, EntityManager> SESSION_MAP = new HashMap<>();
+    private final Map<Thread, EntityManager> sessionMap;
 
-    @Override
-    public EntityManager currentEntityManager() {
-        return SESSION_MAP.get(Thread.currentThread());
+    public ThreadSessionContext(Map<Thread, EntityManager> sessionMap) {
+        this.sessionMap = sessionMap;
+    }
+
+    public ThreadSessionContext() {
+        this(new HashMap<>());
     }
 
     @Override
-    public void bindEntityManager(EntityManager entityManager) {
-        SESSION_MAP.put(Thread.currentThread(), entityManager);
+    public EntityManager currentEntityManager() {
+        return sessionMap.get(Thread.currentThread());
+    }
+
+    @Override
+    public EntityManager bindEntityManager(EntityManager entityManager) {
+        return sessionMap.put(Thread.currentThread(), entityManager);
     }
 
 }

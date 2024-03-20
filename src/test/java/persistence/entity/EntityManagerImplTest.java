@@ -274,7 +274,5 @@ class EntityManagerImplTest {
 	private void createAllTable() {
 		jdbcTemplate.execute("create table department (id bigint auto_increment, name varchar(255), primary key (id))");
 		jdbcTemplate.execute("create table Employee (id bigint auto_increment, name varchar(255), department_id bigint, FOREIGN KEY (department_id) REFERENCES department(id), primary key (id))");
-		jdbcTemplate.execute("create table orders (id bigint auto_increment, order_number varchar(255), primary key (id))");
-		jdbcTemplate.execute("create table order_items (id bigint auto_increment, product varchar(255), quantity int, order_id bigint, FOREIGN KEY (order_id) REFERENCES orders(id), primary key (id))");
 	}
 }

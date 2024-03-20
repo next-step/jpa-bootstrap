@@ -11,4 +11,4 @@
 ### step2 - SessionFactory
 
 - [x] 요구사항 1 - EntityManagerFactory 를 만들어 보기
-- [ ] 요구사항 2 - EntityManagerFactory 를 적용하여 리팩터링을 해보자
+- [x] 요구사항 2 - EntityManagerFactory 를 적용하여 리팩터링을 해보자

@@ -1,5 +1,6 @@
 package database;
 
+import database.DataSourceProperties;
 import persistence.sql.dialect.Dialect;
 
 import java.sql.Connection;
@@ -18,10 +19,6 @@ public class HibernateProperties {
 
     public Dialect getDialect() {
         return dialect;
-    }
-
-    public DataSourceProperties getDataSourceProperties() {
-        return dataSourceProperties;
     }
 
     public Connection getConnection() {

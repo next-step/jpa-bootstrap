@@ -18,14 +18,27 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
     @Override
     public EntityManager openSession() {
-        validateCurrentSession();
+        validateOpenSession();
         currentSessionContext.bindEntityManager(new EntityManagerImpl(jdbcTemplate, properties.getDialect()));
-        return currentSessionContext.currentEntityManager();
+        return currentSession();
     }
 
-    private void validateCurrentSession() {
-        if(currentSessionContext.currentEntityManager() != null) {
+    private void validateOpenSession() {
+        if (currentSessionContext.currentEntityManager() != null) {
             throw new IllegalStateException("이미 오픈된 세션이 존재합니다.");
+        }
+    }
+
+    @Override
+    public EntityManager currentSession() {
+        EntityManager entityManager = currentSessionContext.currentEntityManager();
+        validateCurrentSession(entityManager);
+        return entityManager;
+    }
+
+    private void validateCurrentSession(EntityManager entityManager) {
+        if(entityManager == null) {
+            throw new IllegalStateException("현재 오픈된 세션이 없습니다.");
         }
     }
 }

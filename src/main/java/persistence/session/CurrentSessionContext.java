@@ -6,5 +6,5 @@ public interface CurrentSessionContext {
 
     EntityManager currentEntityManager();
 
-    void bindEntityManager(EntityManager entityManager);
+    EntityManager bindEntityManager(EntityManager entityManager);
 }
