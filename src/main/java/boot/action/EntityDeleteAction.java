@@ -1,6 +1,6 @@
 package boot.action;
 
-public class EntityDeleteAction implements EntityAction{
+public class EntityDeleteAction<T> implements EntityAction{
     @Override
     public void execute() {
 

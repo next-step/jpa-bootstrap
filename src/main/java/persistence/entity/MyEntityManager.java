@@ -1,5 +1,6 @@
 package persistence.entity;
 
+import boot.action.ActionQueue;
 import boot.metamodel.MetaModel;
 import event.EventListenerGroup;
 import event.EventType;
@@ -20,11 +21,13 @@ public class MyEntityManager implements EntityManager {
     private final MetaModel metaModel;
     private final EventListenerGroup eventListenerGroup;
     private final PersistenceContext persistenceContext;
+    private final ActionQueue actionQueue;
 
-    public MyEntityManager(MetaModel metaModel, EventListenerGroup eventListenerGroup) {
+    public MyEntityManager(MetaModel metaModel, EventListenerGroup eventListenerGroup, ActionQueue actionQueue) {
         this.metaModel = metaModel;
         this.eventListenerGroup = eventListenerGroup;
         this.persistenceContext = new MyPersistenceContext();
+        this.actionQueue = actionQueue;
     }
 
     @Override
@@ -76,11 +79,9 @@ public class MyEntityManager implements EntityManager {
         for (Object entity : entities) {
             UpdateEventListener listener = (UpdateEventListener) eventListenerGroup.getListener(EventType.UPDATE);
             listener.onUpdate(new UpdateEvent<>(entity));
-
-//            EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
-//            entityPersister.update(entity);
             persistenceContext.addEntityEntry(entity, EntityEntryStatus.GONE);
         }
+        actionQueue.executeAll();
     }
 
     @Override
