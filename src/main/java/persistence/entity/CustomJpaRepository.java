@@ -1,5 +1,6 @@
 package persistence.entity;
 
+import persistence.entity.entitymanager.EntityManager;
 import persistence.sql.meta.Table;
 
 public class CustomJpaRepository<T, ID> implements Repository<T, ID> {

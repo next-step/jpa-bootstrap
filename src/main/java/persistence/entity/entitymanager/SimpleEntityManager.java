@@ -1,8 +1,7 @@
-package persistence.entity;
+package persistence.entity.entitymanager;
 
 import java.util.List;
 import java.util.Objects;
-import jdbc.JdbcTemplate;
 import persistence.entity.loader.EntityLoader;
 import persistence.entity.persistencecontext.EntitySnapshot;
 import persistence.entity.persistencecontext.SimplePersistenceContext;
@@ -11,7 +10,6 @@ import persistence.entity.proxy.LazyLoadingContext;
 import persistence.entity.proxy.LazyLoadingProxyFactory;
 import persistence.sql.meta.Column;
 import persistence.sql.meta.MetaModel;
-import persistence.sql.meta.SimpleMetaModel;
 import persistence.sql.meta.Table;
 
 public class SimpleEntityManager implements EntityManager {
@@ -20,13 +18,13 @@ public class SimpleEntityManager implements EntityManager {
     private final MetaModel metaModel;
 
 
-    private SimpleEntityManager(JdbcTemplate jdbcTemplate, String basePackage) {
-        metaModel = SimpleMetaModel.of(jdbcTemplate, basePackage);
+    private SimpleEntityManager(MetaModel metaModel) {
+        this.metaModel = metaModel;
         persistenceContext = new SimplePersistenceContext();
     }
 
-    public static SimpleEntityManager of(JdbcTemplate jdbcTemplate, String basePackage) {
-        return new SimpleEntityManager(jdbcTemplate, basePackage);
+    public static SimpleEntityManager from(MetaModel metaModel) {
+        return new SimpleEntityManager(metaModel);
     }
 
     @Override
@@ -73,6 +71,12 @@ public class SimpleEntityManager implements EntityManager {
             cacheEntity(entity, EntityEntry.saving());
         }
         return entity;
+    }
+
+    @Override
+    public void close() {
+        SessionContext sessionContext = ThreadLocalSessionContext.getInstance();
+        sessionContext.close();
     }
 
     private <T> void setLazyRelationProxy(T entity) {

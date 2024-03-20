@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public class ComponentScanner {
 
 
-    private static final Map<String, List<Class<?>>> clazzCache = new ConcurrentHashMap<>();
+    private static final Map<String, List<Class<?>>> CLASS_CACHE = new ConcurrentHashMap<>();
 
     private ComponentScanner() {
     }
@@ -24,12 +24,12 @@ public class ComponentScanner {
     private static final String PACKAGE_SEPARATOR = "/";
 
     public static List<Class<?>> getClasses(String basePackage){
-        return clazzCache.computeIfAbsent(basePackage, k -> scan(basePackage));
+        return CLASS_CACHE.computeIfAbsent(basePackage, k -> scan(basePackage));
     }
 
     private static List<Class<?>> scan(String basePackage) {
-        if (clazzCache.containsKey(basePackage)) {
-            return clazzCache.get(basePackage);
+        if (CLASS_CACHE.containsKey(basePackage)) {
+            return CLASS_CACHE.get(basePackage);
         }
 
         String packagePath = basePackage.replace(DOT, PACKAGE_SEPARATOR);

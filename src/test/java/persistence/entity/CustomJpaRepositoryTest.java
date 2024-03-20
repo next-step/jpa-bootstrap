@@ -11,6 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import persistence.entity.entitymanager.SimpleEntityManagerFactory;
+import persistence.entity.binder.AnnotationBinder;
+import persistence.entity.entitymanager.EntityManagerFactory;
 import persistence.fixture.PersonFixture;
 import persistence.sql.ddl.DdlGenerator;
 import persistence.sql.dialect.h2.H2Dialect;
@@ -22,7 +25,7 @@ class CustomJpaRepositoryTest {
 
     private JdbcTemplate jdbcTemplate;
     private DdlGenerator ddlGenerator;
-    private EntityManager entityManager;
+    private EntityManagerFactory entityManagerFactory;
     private CustomJpaRepository<Person, Long> customJpaRepository;
 
     @BeforeEach
@@ -32,10 +35,10 @@ class CustomJpaRepositoryTest {
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
-        entityManager = SimpleEntityManager.of(jdbcTemplate, "domain");
+        entityManagerFactory = new SimpleEntityManagerFactory(AnnotationBinder.bind("domain"), server);
         jdbcTemplate.execute(ddlGenerator.generateCreateQuery(Person.class));
 
-        customJpaRepository = new CustomJpaRepository(entityManager);
+        customJpaRepository = new CustomJpaRepository(entityManagerFactory.openSession());
     }
 
     @AfterEach

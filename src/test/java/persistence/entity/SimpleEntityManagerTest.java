@@ -5,7 +5,6 @@ import database.H2;
 import domain.Department;
 import domain.Employee;
 import domain.Order;
-import domain.OrderItem;
 import domain.Person;
 import java.sql.SQLException;
 import java.util.List;
@@ -19,6 +18,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import persistence.entity.entitymanager.SimpleEntityManagerFactory;
+import persistence.entity.binder.AnnotationBinder;
+import persistence.entity.entitymanager.EntityManager;
 import persistence.fixture.OrderFixture;
 import persistence.fixture.PersonFixture;
 import persistence.sql.ComponentScanner;
@@ -43,7 +45,7 @@ class SimpleEntityManagerTest {
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
         entityClass.forEach(clazz -> jdbcTemplate.execute(ddlGenerator.generateCreateQuery(clazz)));
-        entityManager = SimpleEntityManager.of(jdbcTemplate, "domain");
+        entityManager = new SimpleEntityManagerFactory(AnnotationBinder.bind("domain"), server).openSession();
     }
 
     @AfterEach
@@ -114,7 +116,7 @@ class SimpleEntityManagerTest {
 
         @DisplayName("Order entity를 조회 후 oderItem을 lazy로 조회한다.")
         @Test
-        void findTest_whenOrder() {
+        void findTest_whenOrder() throws SQLException {
             // given
             Order order = OrderFixture.createOrder();
             order.addOrderItem(OrderFixture.createOrderItem());
@@ -124,7 +126,7 @@ class SimpleEntityManagerTest {
             entityManager.persist(order);
 
             // when
-            EntityManager manager = SimpleEntityManager.of(jdbcTemplate, "domain");
+            EntityManager manager = new SimpleEntityManagerFactory(AnnotationBinder.bind("domain"), server).openSession();
             Order foundOrder = manager.find(Order.class, 1L);
 
             // then
@@ -138,7 +140,7 @@ class SimpleEntityManagerTest {
 
         @DisplayName("department 조회시 employee도 같이 조회한다.")
         @Test
-        void findTest_whenDepartment() {
+        void findTest_whenDepartment() throws SQLException {
             // given
             Department department = new Department("IT");
             department.addEmployee(new Employee("user1"));
@@ -148,7 +150,7 @@ class SimpleEntityManagerTest {
             entityManager.persist(department);
 
             // when
-            EntityManager manager = SimpleEntityManager.of(jdbcTemplate, "domain");
+            EntityManager manager = new SimpleEntityManagerFactory(AnnotationBinder.bind("domain"), server).openSession();
             Department foundDepartment = manager.find(Department.class, 1L);
 
             // then

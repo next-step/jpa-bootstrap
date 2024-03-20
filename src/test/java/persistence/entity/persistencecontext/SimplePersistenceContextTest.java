@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import persistence.entity.EntityEntry;
 import persistence.fixture.PersonFixture;
 
 @DisplayName("SimplePersistenceContext class 의")
