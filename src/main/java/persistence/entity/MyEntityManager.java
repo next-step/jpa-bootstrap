@@ -7,6 +7,8 @@ import event.load.LoadEvent;
 import event.load.LoadEventListener;
 import event.save.SaveEvent;
 import event.save.SaveEventListener;
+import event.update.UpdateEvent;
+import event.update.UpdateEventListener;
 import persistence.persistencecontext.EntitySnapshot;
 import persistence.persistencecontext.MyPersistenceContext;
 import persistence.persistencecontext.PersistenceContext;
@@ -72,8 +74,11 @@ public class MyEntityManager implements EntityManager {
     public void flush() {
         List<Object> entities = persistenceContext.getDirtyEntities();
         for (Object entity : entities) {
-            EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
-            entityPersister.update(entity);
+            UpdateEventListener listener = (UpdateEventListener) eventListenerGroup.getListener(EventType.UPDATE);
+            listener.onUpdate(new UpdateEvent<>(entity));
+
+//            EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
+//            entityPersister.update(entity);
             persistenceContext.addEntityEntry(entity, EntityEntryStatus.GONE);
         }
     }
