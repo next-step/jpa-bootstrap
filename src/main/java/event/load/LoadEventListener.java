@@ -1,4 +1,6 @@
-package event;
+package event.load;
+
+import event.EventListener;
 
 public interface LoadEventListener extends EventListener {
 

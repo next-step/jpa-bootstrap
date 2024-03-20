@@ -1,4 +1,4 @@
-package event;
+package event.load;
 
 public class LoadEvent<T>{
 

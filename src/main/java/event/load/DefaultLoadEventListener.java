@@ -1,4 +1,4 @@
-package event;
+package event.load;
 
 import boot.metamodel.MetaModel;
 
