@@ -1,5 +1,6 @@
 package boot;
 
+import boot.action.ActionQueue;
 import boot.metamodel.MetaModel;
 import boot.metamodel.MyMetaModel;
 import event.EventListenerGroup;
@@ -21,8 +22,9 @@ public class MyEntityManagerFactory implements EntityManagerFactory {
         if (entityManagerContext.currentEntityManager() != null) {
             throw new IllegalStateException("CurrentSessionContext exists already");
         }
-        EventListenerGroup eventListenerGroup = EventListenerGroup.createDefaultGroup(metaModel);
-        MyEntityManager entityManager = new MyEntityManager(metaModel, eventListenerGroup);
+        ActionQueue actionQueue = new ActionQueue();
+        EventListenerGroup eventListenerGroup = EventListenerGroup.createDefaultGroup(metaModel, actionQueue);
+        MyEntityManager entityManager = new MyEntityManager(metaModel, eventListenerGroup, actionQueue);
         entityManagerContext.bindEntityManager(entityManager);
         return entityManager;
     }

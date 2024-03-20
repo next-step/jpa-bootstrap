@@ -1,17 +1,18 @@
 package persistence.entity;
 
+import boot.action.ActionQueue;
 import boot.metamodel.MyMetaModel;
+import database.dialect.H2Dialect;
+import domain.Person;
 import event.EventListenerGroup;
 import jdbc.JdbcTemplate;
 import jdbc.RowMapperFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import domain.Person;
 import persistence.sql.ddl.CreateQueryBuilder;
 import persistence.sql.ddl.DropQueryBuilder;
 import persistence.sql.dml.SelectAllQueryBuilder;
-import database.dialect.H2Dialect;
 import persistence.support.DatabaseSetup;
 
 import java.util.List;
@@ -71,7 +72,8 @@ class MyEntityPersisterTest {
 
         //then
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
-        EntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel));
+        ActionQueue actionQueue = new ActionQueue();
+        EntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel, actionQueue), actionQueue);
         Person result = entityManager.find(Person.class, 1L);
         assertAll(
                 () -> assertThat(result).extracting("name").isEqualTo(updateName),

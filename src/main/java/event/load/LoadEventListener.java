@@ -4,5 +4,5 @@ import event.EventListener;
 
 public interface LoadEventListener extends EventListener {
 
-    <T> T onLoad(LoadEvent<T> loadEvent);
+    <T> T onLoad(LoadEvent<T> event);
 }

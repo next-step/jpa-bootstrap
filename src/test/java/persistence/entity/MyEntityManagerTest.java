@@ -1,5 +1,6 @@
 package persistence.entity;
 
+import boot.action.ActionQueue;
 import boot.metamodel.MyMetaModel;
 import database.dialect.H2Dialect;
 import domain.Order;
@@ -45,7 +46,8 @@ class MyEntityManagerTest {
     void find() {
         // given
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
-        MyEntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel));
+        ActionQueue actionQueue = new ActionQueue();
+        MyEntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel, actionQueue), actionQueue);
         Long id = 1L;
         Person expected = new Person(id, "John", 25, "qwer@asdf.com", 1);
         String insertQuery = new InsertQueryBuilder().build(expected, Table.from(Person.class));
@@ -70,7 +72,8 @@ class MyEntityManagerTest {
         jdbcTemplate.execute("INSERT INTO order_items (id, order_id, product, quantity) VALUES (2, 1,'상품B', 2);");
         jdbcTemplate.execute("INSERT INTO orders (id, orderNumber) VALUES (1, '주문번호1');");
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
-        MyEntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel));
+        ActionQueue actionQueue = new ActionQueue();
+        MyEntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel, actionQueue), actionQueue);
 
         //when
         Order order = entityManager.find(Order.class, 1L);
@@ -84,7 +87,8 @@ class MyEntityManagerTest {
     void persist() {
         // given
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
-        MyEntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel));
+        ActionQueue actionQueue = new ActionQueue();
+        MyEntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel, actionQueue), actionQueue);
         Long id = 1L;
         String expectedName = "John";
         Person expected = new Person(id, expectedName, 25, "qwer@asdf.com", 1);
@@ -103,7 +107,8 @@ class MyEntityManagerTest {
     void remove() {
         //given
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
-        MyEntityManager entityManager = new MyEntityManager(metaModel,EventListenerGroup.createDefaultGroup(metaModel));
+        ActionQueue actionQueue = new ActionQueue();
+        MyEntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel, actionQueue), actionQueue);
         Person expected = new Person(1L, "name", 25, "qwer@asdf.com", 1);
         entityManager.persist(expected);
 
@@ -120,7 +125,8 @@ class MyEntityManagerTest {
     void flush() {
         //given
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
-        MyEntityManager entityManager = new MyEntityManager(metaModel,EventListenerGroup.createDefaultGroup(metaModel));
+        ActionQueue actionQueue = new ActionQueue();
+        MyEntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel, actionQueue), actionQueue);
         Person person = new Person(1L, "name", 25, "qwer@asdf.com", 1);
         entityManager.persist(person);
         String updatedName = "ABC";

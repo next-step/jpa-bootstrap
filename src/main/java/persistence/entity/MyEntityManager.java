@@ -4,6 +4,8 @@ import boot.action.ActionQueue;
 import boot.metamodel.MetaModel;
 import event.EventListenerGroup;
 import event.EventType;
+import event.delete.DeleteEvent;
+import event.delete.DeleteEventListener;
 import event.load.LoadEvent;
 import event.load.LoadEventListener;
 import event.save.SaveEvent;
@@ -57,9 +59,9 @@ public class MyEntityManager implements EntityManager {
     @Override
     public void remove(Object entity) {
         EntityMeta<?> entityMeta = metaModel.getEntityMetaFrom(entity.getClass());
+        DeleteEventListener listener = (DeleteEventListener) eventListenerGroup.getListener(EventType.DELETE);
+        listener.onDelete(new DeleteEvent<>(entity));
         persistenceContext.removeEntity(entityMeta.extractId(entity), entity);
-        EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
-        entityPersister.delete(entity);
     }
 
     @Override

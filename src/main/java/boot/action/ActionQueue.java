@@ -26,7 +26,7 @@ public class ActionQueue {
         updates.add(action);
     }
 
-    public void addAction(EntityDeleteAction action) {
+    public void addAction(EntityDeleteAction<?> action) {
         deletions.add(action);
     }
 

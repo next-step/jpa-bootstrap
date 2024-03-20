@@ -1,8 +1,12 @@
 package event;
 
 
+import boot.action.ActionQueue;
 import boot.metamodel.MetaModel;
+import event.delete.DefaultDeleteEventListener;
 import event.load.DefaultLoadEventListener;
+import event.save.DefaultSaveEventListener;
+import event.update.DefaultUpdateEventListener;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,10 +19,12 @@ public class EventListenerGroup {
         this.eventListeners = eventListeners;
     }
 
-    public static EventListenerGroup createDefaultGroup(MetaModel metaModel) {
+    public static EventListenerGroup createDefaultGroup(MetaModel metaModel, ActionQueue actionQueue) {
         Map<EventType, EventListener<?>> eventListeners = new ConcurrentHashMap<>();
-        DefaultLoadEventListener defaultLoadEventListener = new DefaultLoadEventListener(metaModel);
-        eventListeners.put(EventType.LOAD, defaultLoadEventListener);
+        eventListeners.put(EventType.LOAD, new DefaultLoadEventListener(metaModel));
+        eventListeners.put(EventType.SAVE, new DefaultSaveEventListener(metaModel, actionQueue));
+        eventListeners.put(EventType.UPDATE, new DefaultUpdateEventListener(metaModel, actionQueue));
+        eventListeners.put(EventType.DELETE, new DefaultDeleteEventListener(metaModel, actionQueue));
         return new EventListenerGroup(eventListeners);
     }
 
