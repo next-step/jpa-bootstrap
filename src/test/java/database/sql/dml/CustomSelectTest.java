@@ -1,8 +1,8 @@
 package database.sql.dml;
 
 import database.sql.dml.part.WhereMap;
+import entity.EagerLoadTestOrder;
 import org.junit.jupiter.api.Test;
-import persistence.entity.testentities.EagerLoadTestOrder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

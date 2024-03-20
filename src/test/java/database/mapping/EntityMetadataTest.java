@@ -1,7 +1,7 @@
 package database.mapping;
 
 import database.mapping.column.EntityColumn;
-import database.sql.dml.Person4;
+import entity.Person4;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

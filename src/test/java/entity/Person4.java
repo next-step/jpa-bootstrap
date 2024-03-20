@@ -1,10 +1,10 @@
-package database.sql.ddl;
+package entity;
 
 import jakarta.persistence.*;
 
 @Table(name = "users")
 @Entity
-public class OldPerson3 {
+public class Person4 {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +22,15 @@ public class OldPerson3 {
     @Transient
     private Integer index;
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

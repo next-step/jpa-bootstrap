@@ -3,6 +3,8 @@ package database.sql.dml;
 import database.mapping.EntityMetadata;
 import database.mapping.EntityMetadataFactory;
 import database.sql.dml.part.ValueMap;
+import entity.NoAutoIncrementUser;
+import entity.Person4;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

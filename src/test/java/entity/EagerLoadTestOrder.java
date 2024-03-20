@@ -1,4 +1,4 @@
-package persistence.entity.testentities;
+package entity;
 
 import jakarta.persistence.*;
 

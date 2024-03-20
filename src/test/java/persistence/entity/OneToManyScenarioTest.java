@@ -2,13 +2,13 @@ package persistence.entity;
 
 import database.mapping.AllEntities;
 import database.sql.ddl.Create;
+import entity.EagerLoadTestOrder;
+import entity.EagerLoadTestOrderItem;
+import entity.LazyLoadTestOrder;
+import entity.LazyLoadTestOrderItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.entity.testentities.EagerLoadTestOrder;
-import persistence.entity.testentities.EagerLoadTestOrderItem;
-import persistence.entity.testentities.LazyLoadTestOrder;
-import persistence.entity.testentities.LazyLoadTestOrderItem;
 import testsupport.H2DatabaseTest;
 
 import java.util.List;

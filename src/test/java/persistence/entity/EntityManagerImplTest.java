@@ -1,6 +1,6 @@
 package persistence.entity;
 
-import database.sql.dml.NoAutoIncrementUser;
+import entity.NoAutoIncrementUser;
 import entity.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ class EntityManagerImplTest extends H2DatabaseTest {
         NoAutoIncrementUser user = new NoAutoIncrementUser(null, "abc123", 14, "c123@d.com");
 
         PrimaryKeyMissingException ex = assertThrows(PrimaryKeyMissingException.class, () -> entityManager.persist(user));
-        assertThat(ex.getMessage()).isEqualTo("Primary key is not assigned when inserting: database.sql.dml.NoAutoIncrementUser");
+        assertThat(ex.getMessage()).isEqualTo("Primary key is not assigned when inserting: entity.NoAutoIncrementUser");
     }
 
     @Test

@@ -9,9 +9,9 @@ class DropTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-            "database.sql.ddl.OldPerson1:DROP TABLE OldPerson1",
-            "database.sql.ddl.OldPerson2:DROP TABLE OldPerson2",
-            "database.sql.ddl.OldPerson3:DROP TABLE users"
+            "entity.OldPerson1:DROP TABLE OldPerson1",
+            "entity.OldPerson2:DROP TABLE OldPerson2",
+            "entity.OldPerson3:DROP TABLE users"
     }, delimiter = ':')
     void buildDeleteQuery(Class<?> clazz, String expected) {
         String actual = new Drop(clazz).buildQuery();

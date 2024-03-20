@@ -3,7 +3,7 @@ package database.mapping;
 import database.mapping.column.EntityColumn;
 import database.mapping.column.GeneralEntityColumn;
 import database.mapping.column.PrimaryKeyEntityColumn;
-import database.sql.ddl.OldPerson1;
+import entity.OldPerson1;
 import entity.Person;
 import org.junit.jupiter.api.Test;
 

@@ -3,6 +3,7 @@ package database.sql.dml;
 import database.mapping.EntityMetadata;
 import database.mapping.EntityMetadataFactory;
 import database.sql.dml.part.WhereMap;
+import entity.Person4;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 

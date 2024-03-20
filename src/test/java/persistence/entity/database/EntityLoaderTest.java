@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import persistence.entity.EntityManagerImpl;
 import testsupport.H2DatabaseTest;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static testsupport.EntityTestUtils.assertSamePerson;
 

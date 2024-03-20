@@ -1,6 +1,6 @@
 package persistence.entity.database;
 
-import database.sql.dml.NoAutoIncrementUser;
+import entity.NoAutoIncrementUser;
 import entity.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

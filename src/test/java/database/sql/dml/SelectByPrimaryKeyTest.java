@@ -2,6 +2,7 @@ package database.sql.dml;
 
 import database.mapping.EntityMetadata;
 import database.mapping.EntityMetadataFactory;
+import entity.Person4;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

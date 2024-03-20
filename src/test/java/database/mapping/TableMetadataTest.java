@@ -1,6 +1,6 @@
 package database.mapping;
 
-import database.sql.dml.Person4;
+import entity.Person4;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
