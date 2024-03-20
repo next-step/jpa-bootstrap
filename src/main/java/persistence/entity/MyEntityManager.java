@@ -5,6 +5,8 @@ import event.EventListenerGroup;
 import event.EventType;
 import event.LoadEvent;
 import event.LoadEventListener;
+import event.save.SaveEvent;
+import event.save.SaveEventListener;
 import persistence.persistencecontext.EntitySnapshot;
 import persistence.persistencecontext.MyPersistenceContext;
 import persistence.persistencecontext.PersistenceContext;
@@ -40,10 +42,9 @@ public class MyEntityManager implements EntityManager {
     @Override
     public <T> T persist(T entity) {
         persistenceContext.addEntityEntry(entity, EntityEntryStatus.SAVING);
-        EntityPersister<?> entityPersister = metaModel.getEntityPersister(entity.getClass());
-        Object generatedId = entityPersister.insert(entity);
+        SaveEventListener listener = (SaveEventListener) eventListenerGroup.getListener(EventType.SAVE);
+        listener.onSave(new SaveEvent<>(entity));
         EntityMeta<T> entityMeta = metaModel.getEntityMetaFrom(entity);
-        entityMeta.injectId(entity, generatedId);
         addToCache(entityMeta.extractId(entity), entity);
         return entity;
     }
