@@ -23,8 +23,8 @@ public class ThreadSessionContext implements CurrentSessionContext {
     }
 
     @Override
-    public EntityManager bindEntityManager(EntityManager entityManager) {
-        return sessionMap.put(Thread.currentThread(), entityManager);
+    public void bindEntityManager(EntityManager entityManager) {
+        sessionMap.put(Thread.currentThread(), entityManager);
     }
 
 }
