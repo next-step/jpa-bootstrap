@@ -60,4 +60,9 @@ public class H2 implements DatabaseServer {
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(properties.getUrl(), properties.getUsername(), properties.getPassword());
     }
+
+    @Override
+    public DataSourceProperties getDataSourceProperties() {
+        return properties;
+    }
 }
