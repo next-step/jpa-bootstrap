@@ -31,8 +31,8 @@ public class LazyLoadingContext {
     }
 
     public Object loading() {
-        Object entity = dispatcher.dispatch(new RelationEntityEvent<>(relationTable.getClazz(),
-                Map.of(joinColumn, root.getIdValue(instance))), EventType.LOAD_RELATION);
+        Object entity = dispatcher.dispatch(new RelationEntityEvent<>(relationTable.getClazz(), EventType.LOAD_RELATION,
+            Map.of(joinColumn, root.getIdValue(instance))));
         consumer.accept(entity);
         return entity;
     }

@@ -1,7 +1,8 @@
 package persistence.entity.event.listener;
 
 import persistence.entity.event.EntityEvent;
-import persistence.entity.persister.EntityPersister;
+import persistence.entity.event.action.ActionQueue;
+import persistence.entity.event.action.InsertEntityAction;
 import persistence.sql.meta.MetaModel;
 
 public class EntityPersistListener extends AbstractEntityListener implements EntityListener {
@@ -11,9 +12,9 @@ public class EntityPersistListener extends AbstractEntityListener implements Ent
     }
 
     @Override
-    public <T> T handleEvent(EntityEvent<T> event) {
-        EntityPersister<T> entityPersister = metaModel.getEntityPersister(event.getEntityClass());
-        entityPersister.insert(event.getEntity());
+    public <T> T handleEvent(EntityEvent<T> event, ActionQueue actionQueue) {
+        actionQueue.addAction(new InsertEntityAction<>(metaModel.getEntityPersister(event.getEntityClass()),
+            event.getEntity()), event.getActionType());
         return event.getEntity();
     }
 }

@@ -2,6 +2,7 @@ package persistence.entity.event.listener;
 
 import persistence.entity.event.EntityEvent;
 import persistence.entity.event.RelationEntityEvent;
+import persistence.entity.event.action.ActionQueue;
 import persistence.entity.loader.EntityLoader;
 import persistence.sql.meta.MetaModel;
 
@@ -12,7 +13,7 @@ public class EntityRelationLoadListener extends AbstractEntityListener implement
     }
 
     @Override
-    public <T> Object handleEvent(EntityEvent<T> event) {
+    public <T> Object handleEvent(EntityEvent<T> event, ActionQueue actionQueue) {
         if (event instanceof RelationEntityEvent) {
             RelationEntityEvent<T> relationEntityEvent = (RelationEntityEvent<T>) event;
             EntityLoader<T> entityLoader = metaModel.getEntityLoader(event.getEntityClass());

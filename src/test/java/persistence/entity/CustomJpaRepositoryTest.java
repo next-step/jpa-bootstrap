@@ -35,10 +35,10 @@ class CustomJpaRepositoryTest {
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
-        entityManagerFactory = new SimpleEntityManagerFactory(AnnotationBinder.bind("domain"), server);
+        entityManagerFactory = SimpleEntityManagerFactory.getInstance(AnnotationBinder.bind("domain"), server);
         jdbcTemplate.execute(ddlGenerator.generateCreateQuery(Person.class));
 
-        customJpaRepository = new CustomJpaRepository(entityManagerFactory.openSession());
+        customJpaRepository = new CustomJpaRepository<>(entityManagerFactory.openSession());
     }
 
     @AfterEach

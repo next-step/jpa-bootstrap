@@ -7,8 +7,8 @@ public class RelationEntityEvent<T> extends EntityEvent<T> {
 
     private Map<Column, Object> where;
 
-    public RelationEntityEvent(Class<T> entityClass, Map<Column, Object> where) {
-        super(entityClass);
+    public RelationEntityEvent(Class<T> entityClass, EventType eventType, Map<Column, Object> where) {
+        super(entityClass, eventType);
         this.where = where;
     }
 

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import persistence.entity.event.EntityEvent;
 import persistence.entity.event.EventType;
+import persistence.entity.event.action.ActionQueue;
 import persistence.entity.event.listener.EntityEventDispatcher;
 import persistence.entity.persistencecontext.EntitySnapshot;
 import persistence.entity.persistencecontext.SimplePersistenceContext;
@@ -17,10 +18,13 @@ public class SimpleEntityManager implements EntityManager {
 
     private final SimplePersistenceContext persistenceContext;
     private final EntityEventDispatcher entityEventDispatcher;
+    private final ActionQueue actionQueue;
 
     private SimpleEntityManager(MetaModel metaModel) {
         persistenceContext = new SimplePersistenceContext();
-        entityEventDispatcher = new EntityEventDispatcher(metaModel);
+        actionQueue = new ActionQueue();
+        entityEventDispatcher = new EntityEventDispatcher(metaModel, actionQueue);
+
     }
 
     public static SimpleEntityManager from(MetaModel metaModel) {
@@ -32,7 +36,7 @@ public class SimpleEntityManager implements EntityManager {
     public <T> T find(Class<T> clazz, Long id) {
         T entity = persistenceContext.getEntity(clazz, id);
         if (entity == null) {
-            entity = (T) entityEventDispatcher.dispatch(new EntityEvent<>(clazz, id), EventType.LOAD);
+            entity = (T) entityEventDispatcher.dispatch(new EntityEvent<>(clazz, id, EventType.LOAD));
             cacheEntityWithAssociations(entity, EntityEntry.loading());
             setLazyRelationProxy(entity);
         }
@@ -40,10 +44,9 @@ public class SimpleEntityManager implements EntityManager {
     }
 
     @Override
-    public <T> T persist(T entity) {
-        entityEventDispatcher.dispatch(new EntityEvent<>(entity), EventType.PERSIST);
+    public <T> void persist(T entity) {
+        entityEventDispatcher.dispatch(new EntityEvent<>(entity, EventType.PERSIST));
         cacheEntityWithAssociations(entity, EntityEntry.saving());
-        return entity;
     }
 
     @Override
@@ -51,20 +54,24 @@ public class SimpleEntityManager implements EntityManager {
         EntityEntry entityEntry = persistenceContext.getEntityEntry(entity);
         entityEntry.deleted();
         persistenceContext.removeEntity(entity);
-        entityEventDispatcher.dispatch(new EntityEvent<>(entity), EventType.DELETE);
+        entityEventDispatcher.dispatch(new EntityEvent<>(entity, EventType.DELETE));
         entityEntry.gone();
     }
 
     @Override
-    public <T> T merge(T entity) {
+    public <T> void merge(T entity) {
         EntitySnapshot before = persistenceContext.getCachedDatabaseSnapshot(entity);
         EntitySnapshot after = EntitySnapshot.from(entity);
 
         if (!Objects.equals(before, after)) {
-            entityEventDispatcher.dispatch(new EntityEvent<>(entity), EventType.MERGE);
+            entityEventDispatcher.dispatch(new EntityEvent<>(entity, EventType.MERGE));
             cacheEntity(entity, EntityEntry.saving());
         }
-        return entity;
+    }
+
+    @Override
+    public void flush() {
+        actionQueue.executeAll();
     }
 
     @Override

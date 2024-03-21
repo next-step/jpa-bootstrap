@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import persistence.entity.entitymanager.SimpleEntityManager;
 import persistence.entity.entitymanager.SimpleEntityManagerFactory;
 import persistence.entity.binder.AnnotationBinder;
 import persistence.entity.entitymanager.EntityManager;
@@ -36,6 +37,7 @@ class SimpleEntityManagerTest {
 
     private JdbcTemplate jdbcTemplate;
     private DdlGenerator ddlGenerator;
+    private SimpleEntityManagerFactory entityManagerFactory;
     private EntityManager entityManager;
 
     @BeforeEach
@@ -46,7 +48,8 @@ class SimpleEntityManagerTest {
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
         entityClass.forEach(clazz -> jdbcTemplate.execute(ddlGenerator.generateCreateQuery(clazz)));
-        entityManager = new SimpleEntityManagerFactory(AnnotationBinder.bind("domain"), server).openSession();
+        entityManagerFactory = SimpleEntityManagerFactory.getInstance(AnnotationBinder.bind("domain"), server);
+        entityManager = entityManagerFactory.openSession();
     }
 
     @AfterEach
@@ -71,6 +74,7 @@ class SimpleEntityManagerTest {
 
             //when
             entityManager.persist(person);
+            entityManager.flush();
 
             //then
             Person foundPerson = entityManager.find(person.getClass(), 1L);
@@ -92,6 +96,7 @@ class SimpleEntityManagerTest {
             // given
             Person person = PersonFixture.createPerson();
             entityManager.persist(person);
+            entityManager.flush();
 
             // when
             Person foundPerson = entityManager.find(Person.class, 1L);
@@ -110,6 +115,7 @@ class SimpleEntityManagerTest {
             // given
             Person person = PersonFixture.createPerson();
             entityManager.persist(person);
+            entityManager.flush();
 
             // when
             Person foundPerson1 = entityManager.find(Person.class, 1L);
@@ -121,7 +127,7 @@ class SimpleEntityManagerTest {
 
         @DisplayName("Order entity를 조회 후 oderItem을 lazy로 조회한다.")
         @Test
-        void findTest_whenOrder() {
+        void findTest_whenOrder() throws SQLException {
             // given
             Order order = OrderFixture.createOrder();
             order.addOrderItem(OrderFixture.createOrderItem());
@@ -129,9 +135,10 @@ class SimpleEntityManagerTest {
             order.addOrderItem(OrderFixture.createOrderItem());
 
             entityManager.persist(order);
+            entityManager.flush();
 
             // when
-            EntityManager manager = new SimpleEntityManagerFactory(AnnotationBinder.bind("domain"), server).openSession();
+            EntityManager manager = SimpleEntityManagerFactory.getInstance(AnnotationBinder.bind("domain"), server).openSession();
             Order foundOrder = manager.find(Order.class, 1L);
 
             // then
@@ -145,7 +152,7 @@ class SimpleEntityManagerTest {
 
         @DisplayName("department 조회시 employee도 같이 조회한다.")
         @Test
-        void findTest_whenDepartment() {
+        void findTest_whenDepartment() throws SQLException {
             // given
             Department department = new Department("IT");
             department.addEmployee(new Employee("user1"));
@@ -153,9 +160,10 @@ class SimpleEntityManagerTest {
             department.addEmployee(new Employee("user3"));
 
             entityManager.persist(department);
+            entityManager.flush();
 
             // when
-            EntityManager manager = new SimpleEntityManagerFactory(AnnotationBinder.bind("domain"), server).openSession();
+            EntityManager manager = SimpleEntityManagerFactory.getInstance(AnnotationBinder.bind("domain"), server).openSession();
             Department foundDepartment = manager.find(Department.class, 1L);
 
             // then
@@ -178,10 +186,12 @@ class SimpleEntityManagerTest {
             //given
             Person person = PersonFixture.createPerson();
             entityManager.persist(person);
+            entityManager.flush();
             Person person1 = entityManager.find(Person.class, 1L);
 
             //when
             entityManager.remove(person1);
+            entityManager.flush();
 
             //then
             assertThatThrownBy(() -> entityManager.find(Person.class, 1L))
@@ -199,31 +209,36 @@ class SimpleEntityManagerTest {
             //given
             Person person = PersonFixture.createPerson();
             entityManager.persist(person);
+            entityManager.flush();
             person = entityManager.find(Person.class, 1L);
             person.updateName("user2");
 
             //when
             entityManager.merge(person);
+            entityManager.flush();
 
             //then
             person = entityManager.find(Person.class, 1L);
             assertEquals(person.getName(), "user2");
         }
 
-        @DisplayName("Person entity를 수정하지 않으면 수정하지 않는다.")
+        @DisplayName("Person entity를 flush를 호출하지 않으면 수정하지 않는다.")
         @Test
         void mergeTest_whenNotUpdate() {
             //given
             Person person = PersonFixture.createPerson();
             entityManager.persist(person);
+            entityManager.flush();
             person = entityManager.find(Person.class, 1L);
-            Person person1 = entityManager.find(Person.class, 1L);
+            person.updateName("user2");
 
+            EntityManager entityManager1 = entityManagerFactory.openSession();
+            Person person1 = entityManager1.find(Person.class, 1L);
             //when
             entityManager.merge(person);
 
             //then
-            assertEquals(person, person1);
+            assertThat(person1.getName()).isNotEqualTo("user2");
         }
     }
 }
