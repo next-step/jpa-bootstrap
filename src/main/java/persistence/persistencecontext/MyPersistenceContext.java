@@ -30,7 +30,9 @@ public class MyPersistenceContext implements PersistenceContext {
     public void removeEntity(Object id, Object entity) {
         EntityEntry entityEntry = entries.get(entity);
         entityEntry.updateStatus(EntityEntryStatus.DELETED);
-        entities.remove(new EntityKey(id, entity.getClass()));
+        EntityKey entityKey = new EntityKey(id, entity.getClass());
+        entities.remove(entityKey);
+        snapshots.remove(entityKey);
         entityEntry.updateStatus(EntityEntryStatus.GONE);
     }
 

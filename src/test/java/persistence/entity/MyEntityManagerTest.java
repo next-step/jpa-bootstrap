@@ -114,6 +114,7 @@ class MyEntityManagerTest {
 
         //when
         entityManager.remove(expected);
+        entityManager.flush();
 
         //then
         assertThatThrownBy(() -> entityManager.find(Person.class, 1L))
