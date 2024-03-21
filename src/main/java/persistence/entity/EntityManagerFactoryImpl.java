@@ -1,6 +1,6 @@
 package persistence.entity;
 
-import database.HibernateProperties;
+import database.HibernateEnvironment;
 import jdbc.JdbcTemplate;
 import persistence.session.CurrentSessionContext;
 import persistence.session.ThreadSessionContext;
@@ -8,19 +8,19 @@ import persistence.session.ThreadSessionContext;
 public class EntityManagerFactoryImpl implements EntityManagerFactory {
     private final CurrentSessionContext currentSessionContext;
     private final JdbcTemplate jdbcTemplate;
-    private final HibernateProperties properties;
+    private final HibernateEnvironment environment;
 
-    public EntityManagerFactoryImpl(HibernateProperties properties) {
+    public EntityManagerFactoryImpl(HibernateEnvironment environment) {
         this.currentSessionContext = new ThreadSessionContext();
-        this.jdbcTemplate = new JdbcTemplate(properties.getConnection());
-        this.properties = properties;
+        this.jdbcTemplate = new JdbcTemplate(environment.getConnection());
+        this.environment = environment;
     }
 
     @Override
-    public EntityManager openSession() {
+    public EntityManager createEntityManager() {
         validateOpenSession();
-        currentSessionContext.bindEntityManager(new EntityManagerImpl(jdbcTemplate, properties.getDialect()));
-        return currentSession();
+        currentSessionContext.bindEntityManager(new EntityManagerImpl(jdbcTemplate, environment.getDialect()));
+        return currentEntityManager();
     }
 
     private void validateOpenSession() {
@@ -30,7 +30,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     }
 
     @Override
-    public EntityManager currentSession() {
+    public EntityManager currentEntityManager() {
         EntityManager entityManager = currentSessionContext.currentEntityManager();
         validateCurrentSession(entityManager);
         return entityManager;

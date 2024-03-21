@@ -2,7 +2,7 @@ package persistence.entity;
 
 public interface EntityManagerFactory {
 
-    EntityManager openSession();
+    EntityManager createEntityManager();
 
-    EntityManager currentSession();
+    EntityManager currentEntityManager();
 }
