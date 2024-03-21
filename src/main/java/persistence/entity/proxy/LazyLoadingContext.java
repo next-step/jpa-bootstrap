@@ -2,23 +2,27 @@ package persistence.entity.proxy;
 
 import java.util.Map;
 import java.util.function.Consumer;
-import persistence.entity.loader.EntityLoader;
+import persistence.entity.event.EventType;
+import persistence.entity.event.RelationEntityEvent;
+import persistence.entity.event.listener.EntityEventDispatcher;
 import persistence.sql.meta.Column;
 import persistence.sql.meta.RelationTable;
 import persistence.sql.meta.Table;
 
 public class LazyLoadingContext {
     private final Table root;
+    private final Table relationTable;
     private final Column joinColumn;
     private final Object instance;
-    private final EntityLoader entityLoader;
+    private final EntityEventDispatcher dispatcher;
     private final Consumer<Object> consumer;
 
-    public LazyLoadingContext(Table root, Table relationTable, Object instance, EntityLoader entityLoader, Consumer<Object> consumer) {
+    public LazyLoadingContext(Table root, Table relationTable, Object instance, EntityEventDispatcher dispatcher, Consumer<Object> consumer) {
         this.root = root;
+        this.relationTable = relationTable;
         this.joinColumn = RelationTable.getJoinColumn(root, relationTable);
         this.instance = instance;
-        this.entityLoader = entityLoader;
+        this.dispatcher = dispatcher;
         this.consumer = consumer;
     }
 
@@ -27,7 +31,8 @@ public class LazyLoadingContext {
     }
 
     public Object loading() {
-        Object entity = entityLoader.find(Map.of(joinColumn, root.getIdValue(instance)));
+        Object entity = dispatcher.dispatch(new RelationEntityEvent<>(relationTable.getClazz(),
+                Map.of(joinColumn, root.getIdValue(instance))), EventType.LOAD_RELATION);
         consumer.accept(entity);
         return entity;
     }

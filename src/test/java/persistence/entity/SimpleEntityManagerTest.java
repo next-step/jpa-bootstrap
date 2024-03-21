@@ -5,6 +5,7 @@ import database.H2;
 import domain.Department;
 import domain.Employee;
 import domain.Order;
+import domain.OrderItem;
 import domain.Person;
 import java.sql.SQLException;
 import java.util.List;
@@ -50,7 +51,11 @@ class SimpleEntityManagerTest {
 
     @AfterEach
     void tearDown() {
-        entityClass.forEach(clazz -> jdbcTemplate.execute(ddlGenerator.generateDropQuery(clazz)));
+        jdbcTemplate.execute(ddlGenerator.generateDropQuery(Person.class));
+        jdbcTemplate.execute(ddlGenerator.generateDropQuery(OrderItem.class));
+        jdbcTemplate.execute(ddlGenerator.generateDropQuery(Order.class));
+        jdbcTemplate.execute(ddlGenerator.generateDropQuery(Employee.class));
+        jdbcTemplate.execute(ddlGenerator.generateDropQuery(Department.class));
         server.stop();
     }
 
@@ -116,7 +121,7 @@ class SimpleEntityManagerTest {
 
         @DisplayName("Order entity를 조회 후 oderItem을 lazy로 조회한다.")
         @Test
-        void findTest_whenOrder() throws SQLException {
+        void findTest_whenOrder() {
             // given
             Order order = OrderFixture.createOrder();
             order.addOrderItem(OrderFixture.createOrderItem());
@@ -140,7 +145,7 @@ class SimpleEntityManagerTest {
 
         @DisplayName("department 조회시 employee도 같이 조회한다.")
         @Test
-        void findTest_whenDepartment() throws SQLException {
+        void findTest_whenDepartment() {
             // given
             Department department = new Department("IT");
             department.addEmployee(new Employee("user1"));

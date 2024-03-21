@@ -24,7 +24,7 @@ public class SimpleEntityLoader<T> implements EntityLoader<T> {
     }
 
     @Override
-    public T find(Long id) {
+    public T find(Object id) {
        return jdbcTemplate.queryForObject(dmlGenerator.generateSelectQuery(type, id),
             resultSet -> new EntityRowMapper<>(type).mapRow(resultSet));
     }

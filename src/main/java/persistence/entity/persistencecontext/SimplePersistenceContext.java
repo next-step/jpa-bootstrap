@@ -17,10 +17,10 @@ public class SimplePersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public <T> Object getEntity(Class<T> clazz, Object id) {
+    public <T> T getEntity(Class<T> clazz, Object id) {
         EntityKey key = EntityKey.of(clazz, id);
         if (entities.containsKey(key)) {
-            return entities.get(key);
+            return (T) entities.get(key);
         }
         return null;
     }

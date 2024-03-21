@@ -43,7 +43,7 @@ public class FieldQueryGenerator {
         builder.append(SPACE.getValue());
         builder.append(getSqlType(root.getIdColumn()));
         builder.append(COMMA.getValue());
-        builder.append(String.format(FOREIGN_KEY_DEFINITION, field.getColumnName(), field.getRelationTable().getTableName(), root.getIdColumnName()));
+        builder.append(String.format(FOREIGN_KEY_DEFINITION, field.getColumnName(), root.getTableName(), root.getIdColumnName()));
 
         return builder.toString();
     }

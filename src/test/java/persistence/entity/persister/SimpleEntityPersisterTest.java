@@ -48,8 +48,8 @@ class SimpleEntityPersisterTest {
     @AfterEach
     void tearDown() {
         jdbcTemplate.execute(ddlGenerator.generateDropQuery(Person.class));
-        jdbcTemplate.execute(ddlGenerator.generateDropQuery(Order.class));
         jdbcTemplate.execute(ddlGenerator.generateDropQuery(OrderItem.class));
+        jdbcTemplate.execute(ddlGenerator.generateDropQuery(Order.class));
         server.stop();
     }
 
