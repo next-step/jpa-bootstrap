@@ -12,7 +12,7 @@ public class MySQLDialect implements Dialect {
     private static final SqlTypes sqlTypes = new SqlTypes();
     private final Map<Class<?>, Integer> javaTypeMap;
 
-    public static MySQLDialect INSTANCE = new MySQLDialect();
+    private static final MySQLDialect INSTANCE = new MySQLDialect();
 
     private MySQLDialect() {
         javaTypeMap = new HashMap<>();

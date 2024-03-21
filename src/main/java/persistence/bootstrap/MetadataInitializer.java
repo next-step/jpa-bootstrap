@@ -15,7 +15,7 @@ public class MetadataInitializer {
         this.components = components;
     }
 
-    public <T> void initialize(JdbcTemplate jdbcTemplate, Dialect dialect) {
+    public <T> MetadataImpl initialize(JdbcTemplate jdbcTemplate, Dialect dialect) {
         MetadataImpl metadata = new MetadataImpl();
 
         components.forEach(componentClass1 -> {
@@ -25,5 +25,7 @@ public class MetadataInitializer {
             CollectionLoader2<T> collectionLoader2 = new CollectionLoader2<>(entityLoader2, jdbcTemplate, dialect, componentClass);
             metadata.register(componentClass, entityPersister2, entityLoader2, collectionLoader2);
         });
+
+        return metadata;
     }
 }
