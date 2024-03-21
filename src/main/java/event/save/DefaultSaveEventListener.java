@@ -17,7 +17,7 @@ public class DefaultSaveEventListener implements SaveEventListener {
     @Override
     public <T> void onSave(SaveEvent<T> event) {
         T entity = event.getEntity();
-        EntityInsertAction<T> insertAction = new EntityInsertAction<>(entity, metaModel.getEntityPersister(event.getClazz()), metaModel.getEntityMetaFrom(entity));
+        EntityInsertAction<T> insertAction = new EntityInsertAction<>(entity, metaModel.getEntityPersister(event.getClazz()));
         actionQueue.addAction(insertAction);
     }
 }

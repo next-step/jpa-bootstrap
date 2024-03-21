@@ -24,7 +24,7 @@ public class MyEntityPersister<T> implements EntityPersister<T> {
     }
 
     @Override
-    public boolean update(Object entity) {
+    public boolean update(T entity) {
         Table table = entityMeta.getTable();
         IdColumn idColumn = entityMeta.getIdColumn();
         String query = updateQueryBuilder.build(entity, table, idColumn);
@@ -32,14 +32,15 @@ public class MyEntityPersister<T> implements EntityPersister<T> {
     }
 
     @Override
-    public Object insert(Object entity) {
+    public void insert(T entity) {
         Table table = entityMeta.getTable();
         String query = insertQueryBuilder.build(entity, table);
-        return jdbcTemplate.executeForInsert(query);
+        Object generatedId = jdbcTemplate.executeForInsert(query);
+        entityMeta.injectId(entity, generatedId);
     }
 
     @Override
-    public void delete(Object entity) {
+    public void delete(T entity) {
         Table table = entityMeta.getTable();
         IdColumn idColumn = entityMeta.getIdColumn();
         Object id = entityMeta.getId(entity);
