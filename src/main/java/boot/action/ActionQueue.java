@@ -20,6 +20,7 @@ public class ActionQueue {
 
     public void addAction(EntityInsertAction<?> action) {
         insertions.add(action);
+        executeAllInsertions();
     }
 
     public void addAction(EntityUpdateAction<?> action) {
