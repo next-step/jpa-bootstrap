@@ -2,10 +2,12 @@ package persistence;
 
 import database.DatabaseServer;
 import database.H2;
+import database.dialect.MySQLDialect;
 import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.bootstrap.ComponentScanner;
+import persistence.bootstrap.MetadataInitializer;
 
 import java.util.List;
 
@@ -24,6 +26,8 @@ public class Application {
             List<Class<?>> result = componentScanner.scan("entity");
             System.out.println(result);
 
+            MetadataInitializer metadataInitializer = new MetadataInitializer(result);
+            metadataInitializer.initialize(jdbcTemplate, MySQLDialect.getInstance());
 
             server.stop();
         } catch (Exception e) {
