@@ -1,12 +1,12 @@
 package persistence.entity.entitymanager;
 
-import java.sql.Connection;
+import jdbc.JdbcTemplate;
 
 public interface SessionContext {
 
     EntityManager currentSession();
 
-    void bindSession(Connection connection, EntityManager entityManager);
+    void bindSession(JdbcTemplate jdbcTemplate, EntityManager entityManager);
 
     void close();
 }

@@ -65,4 +65,12 @@ public class JdbcTemplate {
             throw new RuntimeException(e);
         }
     }
+
+    public boolean isClosed() {
+        try {
+            return connection.isClosed();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
