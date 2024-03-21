@@ -3,6 +3,7 @@ package persistence.entity;
 import boot.action.ActionQueue;
 import boot.metamodel.MetaModel;
 import event.EventListenerGroup;
+import event.EventListenerWrapper;
 import event.EventType;
 import event.delete.DeleteEvent;
 import event.delete.DeleteEventListener;
@@ -37,9 +38,8 @@ public class MyEntityManager implements EntityManager {
     public <T> T find(Class<T> clazz, Long id) {
         return (T) persistenceContext.getEntity(clazz, id)
                 .orElseGet(() -> {
-                    //TODO: Casting이 아니라 EventType의 eventListener 타입을 잘 조합하면 사용할 수 있을 것 같은데 도와주세요.
-                    LoadEventListener listener = (LoadEventListener) eventListenerGroup.getListener(EventType.LOAD);
-                    T foundEntity = listener.onLoad(new LoadEvent<>(clazz, id));
+                    EventListenerWrapper<LoadEventListener> listener = eventListenerGroup.getListener(EventType.LOAD);
+                    T foundEntity = listener.fireEventWithReturn(new LoadEvent<>(clazz, id), LoadEventListener::onLoad);
                     EntityMeta<T> entityMeta = metaModel.getEntityMetaFrom(foundEntity);
                     addToCache(entityMeta.extractId(foundEntity), foundEntity);
                     return foundEntity;
@@ -49,8 +49,8 @@ public class MyEntityManager implements EntityManager {
     @Override
     public <T> T persist(T entity) {
         persistenceContext.addEntityEntry(entity, EntityEntryStatus.SAVING);
-        SaveEventListener listener = (SaveEventListener) eventListenerGroup.getListener(EventType.SAVE);
-        listener.onSave(new SaveEvent<>(entity));
+        EventListenerWrapper<SaveEventListener> listener = eventListenerGroup.getListener(EventType.SAVE);
+        listener.fireEvent(new SaveEvent<>(entity), SaveEventListener::onSave);
         EntityMeta<T> entityMeta = metaModel.getEntityMetaFrom(entity);
         addToCache(entityMeta.extractId(entity), entity);
         return entity;
@@ -59,8 +59,8 @@ public class MyEntityManager implements EntityManager {
     @Override
     public void remove(Object entity) {
         EntityMeta<?> entityMeta = metaModel.getEntityMetaFrom(entity.getClass());
-        DeleteEventListener listener = (DeleteEventListener) eventListenerGroup.getListener(EventType.DELETE);
-        listener.onDelete(new DeleteEvent<>(entity));
+        EventListenerWrapper<DeleteEventListener> listener = eventListenerGroup.getListener(EventType.DELETE);
+        listener.fireEvent(new DeleteEvent<>(entity), DeleteEventListener::onDelete);
         persistenceContext.removeEntity(entityMeta.extractId(entity), entity);
     }
 
@@ -79,8 +79,8 @@ public class MyEntityManager implements EntityManager {
     public void flush() {
         List<Object> entities = persistenceContext.getDirtyEntities();
         for (Object entity : entities) {
-            UpdateEventListener listener = (UpdateEventListener) eventListenerGroup.getListener(EventType.UPDATE);
-            listener.onUpdate(new UpdateEvent<>(entity));
+            EventListenerWrapper<UpdateEventListener> listener = eventListenerGroup.getListener(EventType.UPDATE);
+            listener.fireEvent(new UpdateEvent<>(entity), UpdateEventListener::onUpdate);
             persistenceContext.addEntityEntry(entity, EntityEntryStatus.GONE);
         }
         actionQueue.executeAll();
