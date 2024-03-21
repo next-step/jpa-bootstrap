@@ -11,7 +11,6 @@ import persistence.sql.column.IdColumn;
 import persistence.sql.dialect.Dialect;
 
 import java.lang.reflect.Field;
-import java.util.Map;
 
 public class EntityManagerImpl implements EntityManager {
 
@@ -19,8 +18,8 @@ public class EntityManagerImpl implements EntityManager {
     private final PersistenceContext persistContext;
     private final MetaModel metaModel;
 
-    public EntityManagerImpl(JdbcTemplate jdbcTemplate, Dialect dialect) {
-        this(dialect, new HibernatePersistContext(), new MetaModelImpl(jdbcTemplate, dialect, "domain"));
+    public EntityManagerImpl(Dialect dialect, MetaModel metaModel) {
+        this(dialect, new HibernatePersistContext(), metaModel);
     }
 
     public EntityManagerImpl(Dialect dialect, PersistenceContext persistContext, MetaModel metaModel) {
