@@ -2,6 +2,7 @@ package persistence.entity;
 
 import database.DatabaseServer;
 import database.H2;
+import database.HibernateEnvironment;
 import domain.Order;
 import domain.OrderItem;
 import domain.Person;
@@ -31,13 +32,16 @@ class EntityLoaderTest {
     private JdbcTemplate jdbcTemplate;
     private TableColumn table;
     private Dialect dialect;
+    private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
     void setUp() throws SQLException {
         DatabaseServer server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-
+        entityManagerFactory = new EntityManagerFactoryImpl(
+                new HibernateEnvironment(new MysqlDialect(), server.getDataSourceProperties(), server.getConnection())
+        );
         Class<Person> personEntity = Person.class;
         table = new TableColumn(personEntity);
         dialect = new MysqlDialect();
@@ -62,7 +66,7 @@ class EntityLoaderTest {
     void find() {
         // given
         Person person = new Person("홍길동", "jon@test.com", 20);
-        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, dialect);
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.persist(person);
         EntityLoader entityLoader = new EntityLoaderImpl(jdbcTemplate);
 

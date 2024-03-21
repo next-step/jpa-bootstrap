@@ -9,4 +9,6 @@ public interface DatabaseServer {
     void stop();
 
     Connection getConnection() throws SQLException;
+
+    DataSourceProperties getDataSourceProperties();
 }
