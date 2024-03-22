@@ -6,7 +6,6 @@ import database.mapping.column.GeneralEntityColumn;
 import database.mapping.column.PrimaryKeyEntityColumn;
 import persistence.entity.context.PersistentClass;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -40,13 +39,12 @@ public class Create<T> {
     }
 
     public String buildQuery() {
-        List<String> newList = new ArrayList<>();
+        ColumnsBuilder columnsBuilder = new ColumnsBuilder();
+        columnsBuilder.add(primaryKey.getColumnName(), getPrimaryKeyColumnDefinition(primaryKey));
+        generalColumns.forEach(generalEntityColumn -> columnsBuilder.add(generalEntityColumn.getColumnName(), getGeneralColumnDefinition(generalEntityColumn)));
+        associationRelatedToOtherEntities.forEach(association -> columnsBuilder.add(association.getForeignKeyColumnName(), getAssociationFieldDefinition(association)));
 
-        newList.add(getPrimaryKeyColumnDefinition(primaryKey));
-        generalColumns.forEach(generalEntityColumn -> newList.add(getGeneralColumnDefinition(generalEntityColumn)));
-        associationRelatedToOtherEntities.forEach(association -> newList.add(getAssociationFieldDefinition(association)));
-
-        return String.format("CREATE TABLE %s (%s)", tableName, String.join(", ", newList));
+        return String.format("CREATE TABLE %s (%s)", tableName, String.join(", ", columnsBuilder.toList()));
     }
 
     private String getPrimaryKeyColumnDefinition(PrimaryKeyEntityColumn entityColumn) {
@@ -71,16 +69,15 @@ public class Create<T> {
         Class<?> type = entityColumn.getType();
         Integer columnLength = entityColumn.getColumnLength();
         boolean nullable = entityColumn.isNullable();
-        return new StringJoiner(" ")
-                .add(columnName)
-                .add(dialect.convertToSqlTypeDefinition(type, columnLength))
-                .add(dialect.nullableDefinition(nullable))
-                .toString();
+        return String.format("%s %s %s",
+                             columnName,
+                             dialect.convertToSqlTypeDefinition(type, columnLength),
+                             dialect.nullableDefinition(nullable));
     }
 
     private String getAssociationFieldDefinition(Association associationColumn) {
-        String foreignKeyColumnName = associationColumn.getForeignKeyColumnName();
-        String foreignKeyColumnType = associationColumn.getForeignKeyColumnType(dialect);
-        return foreignKeyColumnName + " " + foreignKeyColumnType + " NOT NULL";
+        return String.format("%s %s NOT NULL",
+                             associationColumn.getForeignKeyColumnName(),
+                             associationColumn.getForeignKeyColumnType(dialect));
     }
 }
