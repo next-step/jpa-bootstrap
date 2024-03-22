@@ -45,7 +45,7 @@ class SimpleEntityManagerTest {
         server = new H2();
         server.start();
 
-        jdbcTemplate = new JdbcTemplate(server.getConnection());
+        jdbcTemplate = new JdbcTemplate(server);
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
         entityClass.forEach(clazz -> jdbcTemplate.execute(ddlGenerator.generateCreateQuery(clazz)));
         entityManagerFactory = SimpleEntityManagerFactory.getInstance(AnnotationBinder.bind("domain"), server);

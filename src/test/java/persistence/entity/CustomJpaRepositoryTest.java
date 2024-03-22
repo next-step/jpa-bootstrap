@@ -33,7 +33,7 @@ class CustomJpaRepositoryTest {
         server = new H2();
         server.start();
 
-        jdbcTemplate = new JdbcTemplate(server.getConnection());
+        jdbcTemplate = new JdbcTemplate(server);
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
         entityManagerFactory = SimpleEntityManagerFactory.getInstance(AnnotationBinder.bind("domain"), server);
         jdbcTemplate.execute(ddlGenerator.generateCreateQuery(Person.class));
@@ -58,7 +58,7 @@ class CustomJpaRepositoryTest {
             Person person = PersonFixture.createPerson();
 
             // When
-            Person savedPerson = customJpaRepository.save(person);
+            Person savedPerson = customJpaRepository.saveAndFlush(person);
 
             // Then
             assertNotNull(savedPerson.getId());
@@ -73,6 +73,7 @@ class CustomJpaRepositoryTest {
             // When
             savedPerson.updateName("user2");
             Person mergedPerson = customJpaRepository.save(savedPerson);
+            customJpaRepository.flush();
 
             // Then
             assertEquals(savedPerson.getId(), mergedPerson.getId());
