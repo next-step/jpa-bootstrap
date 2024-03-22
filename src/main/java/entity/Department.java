@@ -16,5 +16,31 @@ public class Department {
     @JoinColumn(name = "department_id")
     private List<Employee> employees;
 
-    // getter, setter, constructors, 등등
+    public Department() {
+    }
+
+    public Department(String name) {
+        this.name = name;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<Employee> getEmployees() {
+        return employees;
+    }
+
+    @Override
+    public String toString() {
+        return "Department{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", employees=" + employees +
+                '}';
+    }
 }
