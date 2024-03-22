@@ -1,8 +1,10 @@
 package persistence.entity;
 
+import boot.action.ActionQueue;
 import boot.metamodel.MyMetaModel;
 import database.dialect.H2Dialect;
 import domain.Person;
+import event.EventListenerGroup;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,10 +39,12 @@ class MyEntityLoaderTest {
     void find() {
         //given
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
-        MyEntityManager entityManager = new MyEntityManager(metaModel);
+        ActionQueue actionQueue = new ActionQueue();
+        MyEntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel, actionQueue), actionQueue);
         MyEntityLoader<Person> entityLoader = new MyEntityLoader<>(jdbcTemplate, EntityMeta.from(Person.class));
         String expectName = "ABC";
         entityManager.persist(new Person(1L, expectName, 10, "ABC@email.com", 10));
+        entityManager.flush();
 
         //when
         Person actual = entityLoader.find(1L);

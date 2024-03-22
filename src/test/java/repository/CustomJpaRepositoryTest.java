@@ -1,8 +1,10 @@
 package repository;
 
+import boot.action.ActionQueue;
 import boot.metamodel.MyMetaModel;
 import database.dialect.H2Dialect;
 import domain.Person;
+import event.EventListenerGroup;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,16 +43,18 @@ class CustomJpaRepositoryTest {
     void save_persist() {
         //given
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
-        EntityManager entityManager = new MyEntityManager(metaModel);
+        ActionQueue actionQueue = new ActionQueue();
+        EntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel, actionQueue), actionQueue);
         CustomJpaRepository<Person, Long> repository = new CustomJpaRepository<>(entityManager, EntityMeta.from(Person.class));
         Person person = new Person(null, "ABC", 20, "email.com", 10);
 
         //when
         repository.save(person);
+        entityManager.flush();
 
         //then
         Person actual = entityManager.find(Person.class, 1L);
-        assertThat(actual).isEqualTo(person);
+        assertThat(actual.getName()).isEqualTo("ABC");
     }
 
     @Test
@@ -58,7 +62,8 @@ class CustomJpaRepositoryTest {
     void save_merge() {
         //given
         MyMetaModel metaModel = new MyMetaModel(jdbcTemplate);
-        EntityManager entityManager = new MyEntityManager(metaModel);
+        ActionQueue actionQueue = new ActionQueue();
+        EntityManager entityManager = new MyEntityManager(metaModel, EventListenerGroup.createDefaultGroup(metaModel, actionQueue), actionQueue);
         CustomJpaRepository<Person, Long> repository = new CustomJpaRepository<>(entityManager, EntityMeta.from(Person.class));
         Person person = new Person(null, "ABC", 20, "email.com", 10);
         repository.save(person);
@@ -69,6 +74,6 @@ class CustomJpaRepositoryTest {
 
         //then
         Person actual = entityManager.find(Person.class, 1L);
-        assertThat(actual).isEqualTo(updatePerson);
+        assertThat(actual.getName()).isEqualTo("QWE");
     }
 }

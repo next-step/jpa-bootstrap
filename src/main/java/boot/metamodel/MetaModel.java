@@ -11,4 +11,5 @@ public interface MetaModel {
     <T> EntityLoader<T> getEntityLoader(Class<T> clazz);
 
     <T> EntityMeta<T> getEntityMetaFrom(T entity);
+    <T> EntityMeta<T> getEntityMetaFrom(Class<T> entity);
 }
