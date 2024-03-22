@@ -46,21 +46,18 @@ public class JoinedRowsCombiner<T> {
 
         for (Association association : this.associations) {
             String fieldName = association.getFieldName();
-
-            Object value;
-            if (association.isLazyLoad()) {
-                Long id = persistentClass.getPrimaryKeyValue(entity);
-                value = lazyLoadProxy(association, id);
-                setFieldValue(entity, fieldName, value);
-            } else {
-                // TODO: 연관관계가 Collection 이 아니면 달라져야 함
-                Class<?> genericType = association.getFieldGenericType();
-                value = filterEntitiesByType(genericType);
-            }
+            Object value = getFieldValue(association, entity);
             setFieldValue(entity, fieldName, value);
         }
 
         return Optional.of(entity);
+    }
+
+    private Object getFieldValue(Association association, T entity) {
+        if (association.isLazyLoad()) {
+            return lazyLoadProxy(association, persistentClass.getPrimaryKeyValue(entity));
+        }
+        return filterEntitiesByType(association.getFieldGenericType());
     }
 
     private <R> Object lazyLoadProxy(Association association, Long id) {
@@ -76,6 +73,13 @@ public class JoinedRowsCombiner<T> {
         });
     }
 
+    private <R> List<R> filterEntitiesByType(Class<R> associatedType) {
+        PersistentClass<R> persistentClass1 = PersistentClass.from(associatedType);
+        return joinedRows.stream()
+                .map(joinedRow -> joinedRow.mapValues(persistentClass1))
+                .collect(Collectors.toList());
+    }
+
     private <R> void setFieldValue(R entity, String fieldName, Object value) {
         Field field = getFieldByName(fieldName);
         try {
@@ -88,12 +92,5 @@ public class JoinedRowsCombiner<T> {
 
     private Field getFieldByName(String fieldName) {
         return persistentClass.getFieldByFieldName(fieldName);
-    }
-
-    private <R> List<R> filterEntitiesByType(Class<R> associatedType) {
-        PersistentClass<R> persistentClass1 = PersistentClass.from(associatedType);
-        return joinedRows.stream()
-                .map(joinedRow -> joinedRow.mapValues(persistentClass1))
-                .collect(Collectors.toList());
     }
 }
