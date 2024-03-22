@@ -59,7 +59,7 @@ public class SimpleEntityManager implements EntityManager {
     }
 
     @Override
-    public <T> void merge(T entity) {
+    public <T> T merge(T entity) {
         EntitySnapshot before = persistenceContext.getCachedDatabaseSnapshot(entity);
         EntitySnapshot after = EntitySnapshot.from(entity);
 
@@ -67,6 +67,8 @@ public class SimpleEntityManager implements EntityManager {
             entityEventDispatcher.dispatch(new EntityEvent<>(entity, EventType.MERGE));
             cacheEntity(entity, EntityEntry.saving());
         }
+
+        return entity;
     }
 
     @Override

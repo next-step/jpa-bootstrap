@@ -8,7 +8,7 @@ public interface EntityManager extends AutoCloseable {
 
     <T> void remove(T entity);
 
-    <T> void merge(T entity);
+    <T> T merge(T entity);
 
     void flush();
 

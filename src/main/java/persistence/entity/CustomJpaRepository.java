@@ -15,12 +15,21 @@ public class CustomJpaRepository<T, ID> implements Repository<T, ID> {
     public T save(T entity) {
         if (isNew(entity)) {
             entityManager.persist(entity);
-            entityManager.flush();
             return entity;
         }
-        entityManager.merge(entity);
+        return entityManager.merge(entity);
+    }
+
+    @Override
+    public T saveAndFlush(T entity) {
+        save(entity);
         entityManager.flush();
         return entity;
+    }
+
+    @Override
+    public void flush() {
+        entityManager.flush();
     }
 
     private boolean isNew(T entity) {
