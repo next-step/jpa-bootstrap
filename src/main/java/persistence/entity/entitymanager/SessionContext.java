@@ -6,7 +6,7 @@ public interface SessionContext {
 
     EntityManager currentSession();
 
-    void bindSession(JdbcTemplate jdbcTemplate, EntityManager entityManager);
+    void bindSession(EntityManager entityManager);
 
     void close();
 }

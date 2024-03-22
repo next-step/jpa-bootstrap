@@ -1,23 +1,22 @@
 package jdbc;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-
-import java.sql.Connection;
+import database.DatabaseServer;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import java.util.ArrayList;
 import java.util.List;
 
 public class JdbcTemplate {
-    private final Connection connection;
+    private final DatabaseServer databaseServer;
 
-    public JdbcTemplate(final Connection connection) {
-        this.connection = connection;
+    public JdbcTemplate(final DatabaseServer databaseServer) {
+        this.databaseServer = databaseServer;
     }
 
     public void execute(final String sql) {
         System.out.println(sql);
-        try (final Statement statement = connection.createStatement()) {
+        try (final Statement statement = databaseServer.getConnection().createStatement()) {
             statement.execute(sql);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -26,7 +25,7 @@ public class JdbcTemplate {
 
     public Object executeInsert(final String sql) {
         System.out.println(sql);
-        try (final Statement statement = connection.createStatement()) {
+        try (final Statement statement = databaseServer.getConnection().createStatement()) {
             statement.executeUpdate(sql, RETURN_GENERATED_KEYS);
             ResultSet generatedKeys = statement.getGeneratedKeys();
             generatedKeys.next();
@@ -38,7 +37,7 @@ public class JdbcTemplate {
 
     public int executeUpdate(final String sql) {
         System.out.println(sql);
-        try (final Statement statement = connection.createStatement()) {
+        try (final Statement statement = databaseServer.getConnection().createStatement()) {
             return statement.executeUpdate(sql);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -55,20 +54,12 @@ public class JdbcTemplate {
 
     public <T> List<T> query(final String sql, final RowMapper<T> rowMapper) {
         System.out.println(sql);
-        try (final ResultSet resultSet = connection.prepareStatement(sql).executeQuery()) {
+        try (final ResultSet resultSet = databaseServer.getConnection().prepareStatement(sql).executeQuery()) {
             final List<T> result = new ArrayList<>();
             while (resultSet.next()) {
                 result.add(rowMapper.mapRow(resultSet));
             }
             return result;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public boolean isClosed() {
-        try {
-            return connection.isClosed();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

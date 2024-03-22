@@ -15,7 +15,7 @@ public class Application {
             final DatabaseServer server = new H2();
             server.start();
 
-            final JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
+            final JdbcTemplate jdbcTemplate = new JdbcTemplate(server);
 
             server.stop();
         } catch (Exception e) {
