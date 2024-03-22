@@ -1,10 +1,9 @@
 package testsupport;
 
-import database.mapping.EntityMetadata;
-import database.mapping.EntityMetadataFactory;
 import database.sql.dml.Select;
 import entity.Person5;
 import jdbc.JdbcTemplate;
+import persistence.entity.context.PersistentClass;
 
 import java.util.List;
 
@@ -30,13 +29,7 @@ public class EntityTestUtils {
     }
 
     public static List<Person5> findPeople(JdbcTemplate jdbcTemplate) {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(Person5.class);
-        String query = new Select(
-                entityMetadata.getTableName(),
-                entityMetadata.getAllColumnNamesWithAssociations(),
-                entityMetadata.getPrimaryKeyName(),
-                entityMetadata.getGeneralColumnNames()
-        ).buildQuery();
+        String query = Select.from(PersistentClass.from(Person5.class), List.of()).buildQuery();
         return jdbcTemplate.query(query, resultSet -> new Person5(
                 resultSet.getLong("id"),
                 resultSet.getString("nick_name"),

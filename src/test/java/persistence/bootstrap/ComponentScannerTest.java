@@ -1,6 +1,9 @@
 package persistence.bootstrap;
 
-import entity.*;
+import entity.OldPerson1;
+import entity.OldPerson2;
+import entity.OldPerson3;
+import entity.Person4;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

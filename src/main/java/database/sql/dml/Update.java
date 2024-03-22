@@ -5,6 +5,7 @@ import database.mapping.column.PrimaryKeyEntityColumn;
 import database.sql.dml.part.ValueMap;
 import database.sql.dml.part.WhereClause;
 import database.sql.dml.part.WhereMap;
+import persistence.entity.context.PersistentClass;
 
 import java.util.List;
 import java.util.StringJoiner;
@@ -18,7 +19,13 @@ public class Update {
     private ValueMap changes;
     private WhereClause where;
 
-    public Update(String tableName, List<GeneralEntityColumn> generalColumns, PrimaryKeyEntityColumn primaryKey) {
+    public static <T> Update from(PersistentClass<T> persistentClass) {
+        return new Update(persistentClass.getTableName(),
+                          persistentClass.getGeneralColumns(),
+                          persistentClass.getPrimaryKey());
+    }
+
+    private Update(String tableName, List<GeneralEntityColumn> generalColumns, PrimaryKeyEntityColumn primaryKey) {
         this.tableName = tableName;
         this.generalColumns = generalColumns;
         this.primaryKey = primaryKey;

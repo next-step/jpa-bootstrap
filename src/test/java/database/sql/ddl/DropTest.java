@@ -2,6 +2,7 @@ package database.sql.ddl;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import persistence.entity.context.PersistentClass;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,7 +15,7 @@ class DropTest {
             "entity.OldPerson3:DROP TABLE users"
     }, delimiter = ':')
     void buildDeleteQuery(Class<?> clazz, String expected) {
-        String actual = new Drop(clazz).buildQuery();
+        String actual = Drop.from(PersistentClass.from(clazz)).buildQuery();
 
         assertThat(actual).isEqualTo(expected);
     }

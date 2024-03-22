@@ -7,7 +7,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import persistence.bootstrap.Initializer;
 import persistence.entity.EntityManager;
+import persistence.entity.context.PersistentClass;
 import testsupport.H2DatabaseTest;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static testsupport.EntityTestUtils.assertSamePerson;
@@ -26,14 +29,16 @@ class EntityLoaderTest extends H2DatabaseTest {
 
     @Test
     void loadMissingRecord() {
-        EntityLoader<Person5> entityLoader = new EntityLoader<>(Person5.class, jdbcTemplate, dialect);
+        PersistentClass<Person5> persistentClass = PersistentClass.from(Person5.class);
+        EntityLoader<Person5> entityLoader = new EntityLoader<>(persistentClass, jdbcTemplate, dialect, List.of());
 
         assertThat(entityLoader.load(1L)).isEmpty();
     }
 
     @Test
     void load2() {
-        EntityLoader<Person5> entityLoader = new EntityLoader<>(Person5.class, jdbcTemplate, dialect);
+        PersistentClass<Person5> persistentClass = PersistentClass.from(Person5.class);
+        EntityLoader<Person5> entityLoader = new EntityLoader<>(persistentClass, jdbcTemplate, dialect, List.of());
 
         Person5 person = new Person5(null, "abc123", 14, "c123@d.com");
         entityManager.persist(person);

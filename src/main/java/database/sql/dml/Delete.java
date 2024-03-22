@@ -3,6 +3,7 @@ package database.sql.dml;
 import database.mapping.column.PrimaryKeyEntityColumn;
 import database.sql.dml.part.WhereClause;
 import database.sql.dml.part.WhereMap;
+import persistence.entity.context.PersistentClass;
 
 import java.util.List;
 import java.util.StringJoiner;
@@ -13,7 +14,14 @@ public class Delete {
     private final List<String> allColumnNamesWithAssociations;
     private WhereClause where;
 
-    public Delete(String tableName, List<String> allColumnNamesWithAssociations, PrimaryKeyEntityColumn primaryKey) {
+    public static <T> Delete from(PersistentClass<T> persistentClass, List<Class<?>> entities) {
+        return new Delete(persistentClass.getTableName(),
+                          persistentClass.getAllColumnNamesWithAssociations(entities),
+                          persistentClass.getPrimaryKey()
+        );
+    }
+
+    private Delete(String tableName, List<String> allColumnNamesWithAssociations, PrimaryKeyEntityColumn primaryKey) {
         this.tableName = tableName;
         this.primaryKey = primaryKey;
         this.allColumnNamesWithAssociations = allColumnNamesWithAssociations;

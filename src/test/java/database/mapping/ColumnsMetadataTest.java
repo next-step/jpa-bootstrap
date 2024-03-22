@@ -6,6 +6,7 @@ import database.mapping.column.PrimaryKeyEntityColumn;
 import entity.OldPerson1;
 import entity.Person;
 import org.junit.jupiter.api.Test;
+import persistence.entity.context.PersistentClass;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,8 +18,8 @@ class ColumnsMetadataTest {
 
     @Test
     void getTableNameWithoutTableAnnotation() {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(OldPerson1.class);
-        String tableName = entityMetadata.getTableName();
+        PersistentClass<OldPerson1> persistentClass = PersistentClass.from(OldPerson1.class);
+        String tableName = persistentClass.getTableName();
         assertThat(tableName).isEqualTo("OldPerson1");
     }
 

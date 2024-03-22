@@ -1,17 +1,16 @@
 package database.sql.ddl;
 
-import database.mapping.EntityMetadata;
-import database.mapping.EntityMetadataFactory;
+import persistence.entity.context.PersistentClass;
 
-public class Drop {
+public class Drop<T> {
     private final String tableName;
 
-    public Drop(EntityMetadata entityMetadata) {
-        this.tableName = entityMetadata.getTableName();
+    public static <T> Drop<T> from(PersistentClass<T> persistentClass) {
+        return new Drop<>(persistentClass.getTableName());
     }
 
-    public Drop(Class<?> clazz) {
-        this(EntityMetadataFactory.get(clazz));
+    private Drop(String tableName) {
+        this.tableName = tableName;
     }
 
     public String buildQuery() {

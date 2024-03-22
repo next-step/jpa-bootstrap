@@ -2,12 +2,11 @@ package database.mapping.rowmapper;
 
 import database.dialect.Dialect;
 import database.mapping.Association;
-import database.mapping.EntityMetadata;
-import database.mapping.EntityMetadataFactory;
 import database.sql.dml.part.WhereMap;
 import jdbc.JdbcTemplate;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.LazyLoader;
+import persistence.entity.context.PersistentClass;
 import persistence.entity.database.EntityLoader;
 
 import java.lang.reflect.Field;
@@ -18,22 +17,24 @@ import java.util.stream.Collectors;
 // TODO: 테스트 추가
 public class JoinedRowsCombiner<T> {
     private final List<JoinedRow<T>> joinedRows;
+    private final PersistentClass<T> persistentClass;
     private final List<Association> associations;
     private final JdbcTemplate jdbcTemplate;
     private final Dialect dialect;
-    private final EntityMetadata entityMetadata;
+    private final List<Class<?>> entities;
 
     public JoinedRowsCombiner(List<JoinedRow<T>> joinedRows,
-                              Class<T> clazz,
+                              PersistentClass<T> persistentClass,
                               List<Association> associations,
                               JdbcTemplate jdbcTemplate,
-                              Dialect dialect) {
-        // XXX 이거 딴데서 가져올수 있나?
-        this.entityMetadata = EntityMetadataFactory.get(clazz);
+                              Dialect dialect,
+                              List<Class<?>> entities) {
         this.joinedRows = joinedRows;
+        this.persistentClass = persistentClass;
         this.associations = associations;
         this.jdbcTemplate = jdbcTemplate;
         this.dialect = dialect;
+        this.entities = entities;
     }
 
     public Optional<T> merge() {
@@ -48,12 +49,13 @@ public class JoinedRowsCombiner<T> {
 
             Object value;
             if (association.isLazyLoad()) {
-                Long id = entityMetadata.getPrimaryKeyValue(entity);
+                Long id = persistentClass.getPrimaryKeyValue(entity);
                 value = lazyLoadProxy(association, id);
                 setFieldValue(entity, fieldName, value);
             } else {
                 // TODO: 연관관계가 Collection 이 아니면 달라져야 함
-                value = filterEntitiesByType(association.getFieldGenericType());
+                Class<?> genericType = association.getFieldGenericType();
+                value = filterEntitiesByType(genericType);
             }
             setFieldValue(entity, fieldName, value);
         }
@@ -64,7 +66,10 @@ public class JoinedRowsCombiner<T> {
     private <R> Object lazyLoadProxy(Association association, Long id) {
         return Enhancer.create(association.getFieldType(), (LazyLoader) () -> {
             Class<R> genericType = (Class<R>) association.getFieldGenericType();
-            EntityLoader<R> entityLoaderForProxy = new EntityLoader<>(genericType, jdbcTemplate, dialect);
+
+            // TODO: entityloader 생성을 다른곳에 맡기면 좋겠는데? entities 등의 세션정보를 받아올 필요가 있다.
+            PersistentClass<R> persistentClass = PersistentClass.from(genericType);
+            EntityLoader<R> entityLoaderForProxy = new EntityLoader<>(persistentClass, jdbcTemplate, dialect, entities);
 
             WhereMap whereMap = WhereMap.of(association.getForeignKeyColumnName(), id);
             return entityLoaderForProxy.load(whereMap);
@@ -82,10 +87,13 @@ public class JoinedRowsCombiner<T> {
     }
 
     private Field getFieldByName(String fieldName) {
-        return entityMetadata.getFieldByFieldName(fieldName);
+        return persistentClass.getFieldByFieldName(fieldName);
     }
 
     private <R> List<R> filterEntitiesByType(Class<R> associatedType) {
-        return joinedRows.stream().map(joinedRow -> joinedRow.mapValues(associatedType)).collect(Collectors.toList());
+        PersistentClass<R> persistentClass1 = PersistentClass.from(associatedType);
+        return joinedRows.stream()
+                .map(joinedRow -> joinedRow.mapValues(persistentClass1))
+                .collect(Collectors.toList());
     }
 }

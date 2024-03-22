@@ -5,7 +5,6 @@ import jdbc.JdbcTemplate;
 import persistence.entity.EntityManager;
 import persistence.entity.EntityManagerImpl;
 
-import java.io.IOException;
 import java.util.List;
 
 public class Initializer {
@@ -22,6 +21,7 @@ public class Initializer {
         this.dialect = dialect;
 
         this.components = null;
+        this.metadata = null;
     }
 
     public void bootUp() {
@@ -30,20 +30,11 @@ public class Initializer {
     }
 
     private void scanComponents() {
-        if (components == null) {
-            ComponentScanner componentScanner = new ComponentScanner();
-
-            try {
-                components = componentScanner.scan(basePackage);
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        components = new ComponentScanner().scan(basePackage);
     }
 
     private void buildMetadata() {
-        MetadataInitializer metadataInitializer = new MetadataInitializer(components);
-        metadata = metadataInitializer.initialize(jdbcTemplate, dialect);
+        metadata = new MetadataInitializer(components).initialize(jdbcTemplate, dialect);
     }
 
     public EntityManager newEntityManager() {

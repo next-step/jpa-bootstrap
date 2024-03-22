@@ -2,30 +2,41 @@ package database.sql.ddl;
 
 import database.dialect.Dialect;
 import database.mapping.Association;
-import database.mapping.EntityMetadata;
-import database.mapping.EntityMetadataFactory;
 import database.mapping.column.GeneralEntityColumn;
 import database.mapping.column.PrimaryKeyEntityColumn;
+import persistence.entity.context.PersistentClass;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-public class Create {
+public class Create<T> {
     private final String tableName;
     private final Dialect dialect;
     private final List<Association> associationRelatedToOtherEntities;
     private final PrimaryKeyEntityColumn primaryKey;
     private final List<GeneralEntityColumn> generalColumns;
 
-    public Create(Class<?> clazz, Dialect dialect) {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(clazz);
-        this.tableName = entityMetadata.getTableName();
-        this.primaryKey = entityMetadata.getPrimaryKey();
-        this.generalColumns = entityMetadata.getGeneralColumns();
+    public static <T> Create<T> from(PersistentClass<T> persistentClass, Dialect dialect) {
+        return new Create<>(
+                dialect,
+                persistentClass.getTableName(),
+                persistentClass.getPrimaryKey(),
+                persistentClass.getGeneralColumns(),
+                persistentClass.getAssociationsRelatedTo()
+        );
+    }
 
+    private Create(Dialect dialect,
+                   String tableName,
+                   PrimaryKeyEntityColumn primaryKey,
+                   List<GeneralEntityColumn> generalColumns,
+                   List<Association> associationRelatedToOtherEntities) {
+        this.tableName = tableName;
+        this.primaryKey = primaryKey;
+        this.generalColumns = generalColumns;
+        this.associationRelatedToOtherEntities = associationRelatedToOtherEntities;
         this.dialect = dialect;
-        this.associationRelatedToOtherEntities = entityMetadata.getAssociationRelatedToOtherEntities();
     }
 
     public String buildQuery() {

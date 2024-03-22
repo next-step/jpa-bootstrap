@@ -2,6 +2,7 @@ package persistence.bootstrap;
 
 import database.dialect.Dialect;
 import jdbc.JdbcTemplate;
+import persistence.entity.context.PersistentClass;
 import persistence.entity.database.CollectionLoader;
 import persistence.entity.database.EntityLoader;
 import persistence.entity.database.EntityPersister;
@@ -16,14 +17,17 @@ public class MetadataInitializer {
     }
 
     public <T> MetadataImpl initialize(JdbcTemplate jdbcTemplate, Dialect dialect) {
-        MetadataImpl metadata = new MetadataImpl();
+        MetadataImpl metadata = MetadataImpl.INSTANCE;
 
+        metadata.setComponents(components);
         components.forEach(componentClass1 -> {
-            Class<T> componentClass = (Class<T>) componentClass1;
-            EntityLoader<T> entityLoader = new EntityLoader<>(componentClass, jdbcTemplate, dialect);
-            EntityPersister<T> entityPersister = new EntityPersister<>(componentClass, jdbcTemplate);
-            CollectionLoader<T> collectionLoader = new CollectionLoader<>(componentClass, jdbcTemplate, dialect);
-            metadata.register(componentClass, entityPersister, entityLoader, collectionLoader);
+            PersistentClass<T> persistentClass = metadata.getPersistentClass((Class<T>) componentClass1);
+            metadata.register(
+                    persistentClass,
+                    new EntityPersister<>(persistentClass, jdbcTemplate, components),
+                    new EntityLoader<>(persistentClass, jdbcTemplate, dialect, components),
+                    new CollectionLoader<>(persistentClass, jdbcTemplate, dialect, components)
+            );
         });
 
         return metadata;

@@ -1,13 +1,12 @@
 package persistence.bootstrap;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ComponentScanner {
 
-    public List<Class<?>> scan(String basePackage) throws IOException, ClassNotFoundException {
+    public List<Class<?>> scan(String basePackage) {
         List<Class<?>> classes = new ArrayList<>();
         String path = basePackage.replace(".", "/");
         File baseDir = new File(Thread.currentThread().getContextClassLoader().getResource(path).getFile());
@@ -18,7 +17,11 @@ public class ComponentScanner {
                     classes.addAll(scan(basePackage + "." + file.getName()));
                 } else if (file.getName().endsWith(".class")) {
                     String className = basePackage + "." + file.getName().substring(0, file.getName().length() - 6);
-                    classes.add(Class.forName(className));
+                    try {
+                        classes.add(Class.forName(className));
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }

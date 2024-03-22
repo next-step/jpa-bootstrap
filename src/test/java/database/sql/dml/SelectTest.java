@@ -1,10 +1,9 @@
 package database.sql.dml;
 
-import database.mapping.EntityMetadata;
-import database.mapping.EntityMetadataFactory;
 import database.sql.dml.part.WhereMap;
 import entity.Person4;
 import org.junit.jupiter.api.Test;
+import persistence.entity.context.PersistentClass;
 
 import java.util.List;
 
@@ -42,12 +41,8 @@ class SelectTest {
     }
 
     private Select newSelect() {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(Person4.class);
-        return new Select(
-                entityMetadata.getTableName(),
-                entityMetadata.getAllColumnNamesWithAssociations(),
-                entityMetadata.getPrimaryKeyName(),
-                entityMetadata.getGeneralColumnNames());
+        PersistentClass<Person4> persistentClass = PersistentClass.from(Person4.class);
+        return Select.from(persistentClass, List.of());
     }
 
 }

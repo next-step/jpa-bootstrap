@@ -3,11 +3,14 @@ package database.sql.dml;
 import database.sql.dml.part.WhereMap;
 import entity.EagerLoadTestOrder;
 import org.junit.jupiter.api.Test;
+import persistence.entity.context.PersistentClass;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CustomSelectTest {
-    private final CustomSelect customSelect = new CustomSelect(EagerLoadTestOrder.class);
+    private final CustomSelect customSelect = CustomSelect.from(PersistentClass.from(EagerLoadTestOrder.class), List.of());
 
     @Test
     void buildSelectQueryWithoutCondition() {

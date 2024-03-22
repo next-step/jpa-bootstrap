@@ -4,6 +4,7 @@ import database.dialect.Dialect;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import persistence.entity.context.PersistentClass;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -39,15 +40,15 @@ public class Association {
     }
 
     public String getTableName() {
-        return getOwnerEntityMetadata().getTableName();
+        return getGenericPersistentClass().getTableName();
     }
 
-    private EntityMetadata getOwnerEntityMetadata() {
-        return EntityMetadataFactory.get(this.getFieldGenericType());
+    private <T> PersistentClass<T> getGenericPersistentClass() {
+        return (PersistentClass<T>) PersistentClass.from(this.getFieldGenericType());
     }
 
     public String getForeignKeyColumnType(Dialect dialect) {
-        Type foreignKeyColumnType = getOwnerEntityMetadata().getPrimaryKey().getFieldType();
+        Type foreignKeyColumnType = getGenericPersistentClass().getPrimaryKey().getFieldType();
 
         return dialect.convertToSqlTypeDefinition((Class<?>) foreignKeyColumnType, 0);
     }

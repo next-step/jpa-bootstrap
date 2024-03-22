@@ -2,6 +2,7 @@ package database.sql.dml;
 
 import database.sql.dml.part.WhereClause;
 import database.sql.dml.part.WhereMap;
+import persistence.entity.context.PersistentClass;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,14 @@ public class Select {
     private final List<String> generalEntityColumnNames;
     private WhereClause where;
 
-    public Select(String tableName, List<String> allColumnNamesWithAssociations,
+    public static <T> Select from(PersistentClass<T> persistentClass, List<Class<?>> entities) {
+        return new Select(persistentClass.getTableName(),
+                          persistentClass.getAllColumnNamesWithAssociations(entities),
+                          persistentClass.getPrimaryKeyName(),
+                          persistentClass.getGeneralColumnNames());
+    }
+
+    private Select(String tableName, List<String> allColumnNamesWithAssociations,
                   String primaryKeyColumnName,
                   List<String> generalEntityColumnNames
     ) {
@@ -53,6 +61,7 @@ public class Select {
 
         return query.toString();
     }
+
 
     private String joinAllColumnNames() {
         List<String> columns = new ArrayList<>();

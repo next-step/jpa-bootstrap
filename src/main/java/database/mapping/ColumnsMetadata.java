@@ -1,9 +1,6 @@
 package database.mapping;
 
-import database.mapping.column.EntityColumn;
-import database.mapping.column.EntityColumnFactory;
-import database.mapping.column.GeneralEntityColumn;
-import database.mapping.column.PrimaryKeyEntityColumn;
+import database.mapping.column.*;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -71,6 +68,12 @@ public class ColumnsMetadata {
                 .filter(field -> !field.isAnnotationPresent(Id.class))
                 .collect(Collectors.toList()).stream()
                 .map(EntityColumnFactory::fromGeneralField)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getGeneralColumnNames() {
+        return getGeneralColumns().stream()
+                .map(AbstractEntityColumn::getColumnName)
                 .collect(Collectors.toList());
     }
 

@@ -3,6 +3,7 @@ package persistence.entity.database;
 import entity.NoAutoIncrementUser;
 import entity.Person5;
 import org.junit.jupiter.api.Test;
+import persistence.entity.context.PersistentClass;
 import testsupport.H2DatabaseTest;
 
 import java.util.List;
@@ -15,7 +16,7 @@ class EntityPersisterTest extends H2DatabaseTest {
     @Test
     void insert() {
         // row 두개를 추가하면
-        EntityPersister<Person5> entityPersister = new EntityPersister<>(Person5.class, jdbcTemplate);
+        EntityPersister<Person5> entityPersister = new EntityPersister<>(PersistentClass.from(Person5.class), jdbcTemplate, List.of());
 
         Person5 person = newPerson(null, "some name", 11, "some@name.com");
         entityPersister.insert(person);
@@ -32,7 +33,7 @@ class EntityPersisterTest extends H2DatabaseTest {
 
     @Test
     void insertIntoEntityWithNoIdGenerationStrategy() {
-        EntityPersister<NoAutoIncrementUser> entityPersister = new EntityPersister(NoAutoIncrementUser.class, jdbcTemplate);
+        EntityPersister<NoAutoIncrementUser> entityPersister = new EntityPersister<>(PersistentClass.from(NoAutoIncrementUser.class), jdbcTemplate, List.of());
 
         NoAutoIncrementUser person = new NoAutoIncrementUser(null, "some name", 11, "some@name.com");
         assertThrows(PrimaryKeyMissingException.class, () -> entityPersister.insert(person));
@@ -40,7 +41,7 @@ class EntityPersisterTest extends H2DatabaseTest {
 
     @Test
     void update() {
-        EntityPersister<Person5> entityPersister = new EntityPersister<>(Person5.class, jdbcTemplate);
+        EntityPersister<Person5> entityPersister = new EntityPersister<>(PersistentClass.from(Person5.class), jdbcTemplate, List.of());
         // row 한 개를 삽입하고,
         Person5 person = newPerson(null, "some name", 11, "some@name.com");
         entityPersister.insert(person);
@@ -60,7 +61,7 @@ class EntityPersisterTest extends H2DatabaseTest {
 
     @Test
     void delete() {
-        EntityPersister<Person5> entityPersister = new EntityPersister<>(Person5.class, jdbcTemplate);
+        EntityPersister<Person5> entityPersister = new EntityPersister<>(PersistentClass.from(Person5.class), jdbcTemplate, List.of());
         // row 한 개를 저장 후에
         Person5 person = newPerson(null, "some name", 11, "some@name.com");
         entityPersister.insert(person);

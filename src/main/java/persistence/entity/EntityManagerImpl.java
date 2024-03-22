@@ -27,7 +27,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <T> T find(Class<T> clazz, Long id) {
-        PersistentClass<T> persistentClass = PersistentClass.from(clazz, metadata);
+        PersistentClass<T> persistentClass = metadata.getPersistentClass(clazz);
 
         Object cached = persistenceContext.getEntity(persistentClass, id);
         if (Objects.isNull(cached)) {
@@ -38,16 +38,16 @@ public class EntityManagerImpl implements EntityManager {
 
     private <T> void loadEntity(PersistentClass<T> persistentClass, Long id) {
         if (persistentClass.hasAssociation()) {
-            CollectionLoader<T> collectionLoader = persistentClass.getCollectionLoader();
+            CollectionLoader<T> collectionLoader = metadata.getCollectionLoaderByClass(persistentClass);
             collectionLoader.load(id).ifPresent(persistenceContext::addEntity);
         } else {
-            persistentClass.getEntityLoader().load(id).ifPresent(persistenceContext::addEntity);
+            metadata.getEntityLoaderByClass(persistentClass).load(id).ifPresent(persistenceContext::addEntity);
         }
     }
 
     @Override
     public <T> T persist(Object object) {
-        PersistentClass<T> persistentClass = (PersistentClass<T>) PersistentClass.from(object.getClass(), metadata);
+        PersistentClass<T> persistentClass = (PersistentClass<T>) metadata.getPersistentClass(object.getClass());
 
         if (isInsertOperation(persistentClass, object)) {
             return insertEntity(persistentClass, object);
@@ -66,8 +66,8 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     private <T> T insertEntity(PersistentClass<T> persistentClass, Object object) {
-        EntityPersister<T> entityPersister = persistentClass.getEntityPersister();
-        EntityLoader<T> entityLoader = persistentClass.getEntityLoader();
+        EntityPersister<T> entityPersister = metadata.getEntityPersisterByClass(persistentClass);
+        EntityLoader<T> entityLoader = metadata.getEntityLoaderByClass(persistentClass);
 
         Long newId = entityPersister.insert(object);
         T load = entityLoader.load(newId).get();
@@ -85,7 +85,7 @@ public class EntityManagerImpl implements EntityManager {
         ValueMap diff = EntitySnapshot.of(oldEntity).diff(EntitySnapshot.of(entity));
 
         if (!diff.isEmpty()) {
-            EntityPersister<T> entityPersister = persistentClass.getEntityPersister();
+            EntityPersister<T> entityPersister = metadata.getEntityPersisterByClass(persistentClass);
             entityPersister.update(id, diff);
             persistenceContext.addEntity(entity);
         }
@@ -100,7 +100,7 @@ public class EntityManagerImpl implements EntityManager {
             return;
         }
         PersistentClass<?> persistentClass = PersistentClass.from(entity.getClass(), metadata);
-        EntityPersister<?> entityPersister = persistentClass.getEntityPersister();
+        EntityPersister<?> entityPersister = metadata.getEntityPersisterByClass(persistentClass);
 
         Long id = persistentClass.getRowId(entity);
         entityPersister.delete(id);

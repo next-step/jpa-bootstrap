@@ -2,24 +2,21 @@ package database.sql.ddl;
 
 import database.dialect.Dialect;
 import database.dialect.MySQLDialect;
-import database.mapping.AllEntities;
 import entity.Person;
 import entity.TestDepartment;
 import entity.TestEmployee;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import persistence.bootstrap.MetadataImpl;
+import persistence.entity.context.PersistentClass;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CreateTest {
     private final Dialect dialect = MySQLDialect.getInstance();
-
-    @BeforeAll
-    static void setUpEntities() {
-        AllEntities.register(TestDepartment.class);
-    }
 
     @ParameterizedTest
     @CsvSource(value = {
@@ -37,8 +34,10 @@ class CreateTest {
         assertCreateQuery(TestEmployee.class, "CREATE TABLE employee (id BIGINT PRIMARY KEY, name VARCHAR(255) NULL, departure_id BIGINT NOT NULL)");
     }
 
-    private void assertCreateQuery(Class<?> clazz, String expected) {
-        Create create = new Create(clazz, dialect);
+    private <T> void assertCreateQuery(Class<T> clazz, String expected) {
+        MetadataImpl.INSTANCE.setComponents(List.of(TestDepartment.class));
+        PersistentClass<T> persistentClass = MetadataImpl.INSTANCE.getPersistentClass(clazz);
+        Create<T> create = Create.from(persistentClass, dialect);
         String actual = create.buildQuery();
         assertThat(actual).isEqualTo(expected);
     }

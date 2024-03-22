@@ -5,11 +5,14 @@ import database.dialect.Dialect;
 import database.dialect.MySQLDialect;
 import database.sql.ddl.Create;
 import entity.Person;
+import entity.TestDepartment;
 import jdbc.JdbcTemplate;
 import net.sf.cglib.proxy.Enhancer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import persistence.bootstrap.MetadataImpl;
+import persistence.entity.context.PersistentClass;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -49,7 +52,8 @@ abstract public class H2DatabaseTest {
     private void createTable() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
         jdbcTemplate.execute("DROP TABLE users IF EXISTS");
-        jdbcTemplate.execute(new Create(Person.class, dialect).buildQuery());
+        MetadataImpl.INSTANCE.setComponents(List.of());
+        jdbcTemplate.execute(Create.from(PersistentClass.from(Person.class), dialect).buildQuery());
     }
 
     @AfterAll

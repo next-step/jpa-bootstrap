@@ -1,7 +1,5 @@
 package database.sql.dml;
 
-import database.mapping.EntityMetadata;
-import database.mapping.EntityMetadataFactory;
 import database.sql.dml.part.ValueMap;
 import entity.NoAutoIncrementUser;
 import entity.Person4;
@@ -9,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import persistence.entity.context.PersistentClass;
 
 import java.util.List;
 import java.util.Map;
@@ -33,10 +32,7 @@ class InsertTest {
     @ParameterizedTest
     @MethodSource("testCases")
     void buildInsertQuery(ValueMap valueMap, String expected) {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(Person4.class);
-        String actual = new Insert(entityMetadata.getTableName(),
-                                   entityMetadata.getPrimaryKey(),
-                                   entityMetadata.getGeneralColumns())
+        String actual = Insert.from(PersistentClass.from(Person4.class))
                 .values(valueMap)
                 .toQueryString();
         assertThat(actual).isEqualTo(expected);
@@ -44,11 +40,8 @@ class InsertTest {
 
     @Test
     void insertQueryWithId() {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(Person4.class);
         ValueMap valueMap = ValueMap.from(Map.of("nick_name", "abc", "old", 14, "email", "a@b.com"));
-        String actual = new Insert(entityMetadata.getTableName(),
-                                   entityMetadata.getPrimaryKey(),
-                                   entityMetadata.getGeneralColumns())
+        String actual = Insert.from(PersistentClass.from(Person4.class))
                 .id(10L)
                 .values(valueMap)
                 .toQueryString();
@@ -57,11 +50,8 @@ class InsertTest {
 
     @Test
     void insertIntoEntityWithNoId() {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(NoAutoIncrementUser.class);
         ValueMap valueMap = ValueMap.from(Map.of("nick_name", "abc", "old", 14, "email", "a@b.com"));
-        String actual = new Insert(entityMetadata.getTableName(),
-                                   entityMetadata.getPrimaryKey(),
-                                   entityMetadata.getGeneralColumns())
+        String actual = Insert.from(PersistentClass.from(NoAutoIncrementUser.class))
                 .id(10L)
                 .values(valueMap)
                 .toQueryString();

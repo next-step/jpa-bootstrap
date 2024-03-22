@@ -1,11 +1,10 @@
 package database.sql.dml;
 
 import database.mapping.Association;
-import database.mapping.EntityMetadata;
-import database.mapping.EntityMetadataFactory;
 import database.mapping.column.EntityColumn;
 import database.sql.dml.part.WhereClause;
 import database.sql.dml.part.WhereMap;
+import persistence.entity.context.PersistentClass;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -25,15 +24,20 @@ public class CustomSelect {
     private final List<String> allColumnNamesWithAssociations;
     private final List<Association> associations;
 
-    public CustomSelect(Class<?> clazz) {
-        this(EntityMetadataFactory.get(clazz));
+    public static <T> CustomSelect from(PersistentClass<T> persistentClass, List<Class<?>> entities) {
+        return new CustomSelect(
+                persistentClass.getTableName(),
+                persistentClass.getAllEntityColumns(),
+                persistentClass.getAllColumnNamesWithAssociations(entities),
+                persistentClass.getAssociations());
     }
 
-    private CustomSelect(EntityMetadata entityMetadata) {
-        this.tableName = entityMetadata.getTableName();
-        this.allEntityColumns = entityMetadata.getAllEntityColumns();
-        this.allColumnNamesWithAssociations = entityMetadata.getAllColumnNamesWithAssociations();
-        this.associations = entityMetadata.getAssociations();
+    private CustomSelect(String tableName, List<EntityColumn> allEntityColumns,
+                         List<String> allColumnNamesWithAssociations, List<Association> associations) {
+        this.tableName = tableName;
+        this.allEntityColumns = allEntityColumns;
+        this.allColumnNamesWithAssociations = allColumnNamesWithAssociations;
+        this.associations = associations;
     }
 
     public String buildQuery(WhereMap whereMap) {
@@ -68,10 +72,9 @@ public class CustomSelect {
 
     private List<String> associatedTableColumns(int index) {
         Association association = associations.get(index);
-        Class<?> genericType = association.getFieldGenericType();
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(genericType);
+        PersistentClass<?> genericType = PersistentClass.from(association.getFieldGenericType());
         String tableAlias = associatedTableAliasOf(index);
-        List<EntityColumn> allEntityColumns = entityMetadata.getAllEntityColumns();
+        List<EntityColumn> allEntityColumns = genericType.getAllEntityColumns();
 
         String foreignKeyColumnName = association.getForeignKeyColumnName();
 
