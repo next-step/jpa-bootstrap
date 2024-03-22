@@ -2,5 +2,5 @@ package persistence.entity;
 
 public interface EntityLoader {
 
-    <T> T find(Class<T> clazz, Long id);
+    <T, ID> T find(Class<T> clazz, ID id);
 }

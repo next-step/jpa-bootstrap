@@ -21,4 +21,8 @@ public class SnapShot {
     public EntityMetaData get(EntityKey entityKey) {
         return snapshot.get(entityKey);
     }
+
+    public void clear() {
+        snapshot.clear();
+    }
 }

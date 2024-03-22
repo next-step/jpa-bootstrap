@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.entity.event.action.ActionQueue;
 import persistence.sql.column.Columns;
 import persistence.sql.column.IdColumn;
 import persistence.sql.column.TableColumn;
@@ -45,11 +46,7 @@ class EntityManagerImplTest {
 		dialect = new MysqlDialect();
 		persistContext = new HibernatePersistContext();
 		entityLoader = new EntityLoaderImpl(jdbcTemplate);
-		entityManager = new EntityManagerImpl(
-			dialect,
-			persistContext,
-			new MetaModelImpl(jdbcTemplate, dialect, "domain")
-		);
+		entityManager = new EntityManagerImpl(dialect, persistContext, new MetaModelImpl(jdbcTemplate, dialect, "domain"), new ActionQueue());
 
 		createAllTable(personEntity);
 	}
@@ -118,10 +115,11 @@ class EntityManagerImplTest {
 	@Test
 	void persistContext() {
 		// given
-		Person person = new Person(1L, "John", 99, "john@test.com", 1);
+		Person person = new Person(null, "John", 99, "john@test.com", 1);
 
 		// when
 		entityManager.persist(person);
+		entityManager.flush();
 
 		// then
 		Optional<Person> findPerson = persistContext.getEntity(Person.class, person.getId());
@@ -204,12 +202,12 @@ class EntityManagerImplTest {
 	@Test
 	void updateContext() {
 		// given
-		Person person = new Person(1L, "John", 99, "john@test.com", 1);
+		Person person = new Person(null, "John", 99, "john@test.com", 1);
 		entityManager.persist(person);
-
 		// when
 		person.setName("John2");
 		entityManager.merge(person);
+		entityManager.flush();
 
 		// then
 		Optional<Person> findPerson = persistContext.getEntity(Person.class, person.getId());
@@ -226,11 +224,12 @@ class EntityManagerImplTest {
 		// given
 		Person person = new Person("John", 99, "john@test.com", 1);
 		entityManager.persist(person);
+		entityManager.flush();
 		person.setName("John2");
 		entityManager.merge(person);
 
-		Person person1 = entityLoader.find(Person.class, 1L);
-
+		entityManager.clear();
+		Person person1 = entityManager.find(Person.class, 1L);
 		assertThat(person1.getName()).isEqualTo("John");
 
 		// when

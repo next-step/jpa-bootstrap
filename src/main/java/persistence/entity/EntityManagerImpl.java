@@ -1,11 +1,16 @@
 package persistence.entity;
 
 import bootstrap.MetaModel;
-import bootstrap.MetaModelImpl;
 import jakarta.persistence.GenerationType;
-import jdbc.JdbcTemplate;
-import persistence.entity.event.DeleteEvent;
-import persistence.entity.event.UpdateEvent;
+import persistence.entity.event.EventListenerGroup;
+import persistence.entity.event.EventType;
+import persistence.entity.event.PersistEventListener;
+import persistence.entity.event.action.ActionQueue;
+import persistence.entity.event.delete.DeleteEvent;
+import persistence.entity.event.load.LoadEvent;
+import persistence.entity.event.load.LoadEventListener;
+import persistence.entity.event.save.SaveEvent;
+import persistence.entity.event.update.UpdateEvent;
 import persistence.sql.column.Columns;
 import persistence.sql.column.IdColumn;
 import persistence.sql.dialect.Dialect;
@@ -17,24 +22,37 @@ public class EntityManagerImpl implements EntityManager {
     private final Dialect dialect;
     private final PersistenceContext persistContext;
     private final MetaModel metaModel;
+    private final ActionQueue actionQueue;
+    private final EventListenerGroup eventListenerGroup;
 
-    public EntityManagerImpl(Dialect dialect, MetaModel metaModel) {
-        this(dialect, new HibernatePersistContext(), metaModel);
+    public static EntityManagerImpl of(Dialect dialect, MetaModel metaModel) {
+        ActionQueue actionQueue = new ActionQueue();
+        return new EntityManagerImpl(dialect, metaModel, actionQueue);
     }
 
-    public EntityManagerImpl(Dialect dialect, PersistenceContext persistContext, MetaModel metaModel) {
+    public EntityManagerImpl(Dialect dialect, PersistenceContext persistContext, MetaModel metaModel, ActionQueue actionQueue) {
+        this(dialect, persistContext, metaModel, actionQueue, EventListenerGroup.create(metaModel, actionQueue));
+    }
+
+    public EntityManagerImpl(Dialect dialect, MetaModel metaModel, ActionQueue actionQueue) {
+        this(dialect, new HibernatePersistContext(), metaModel, actionQueue, EventListenerGroup.create(metaModel, actionQueue));
+    }
+
+    private EntityManagerImpl(Dialect dialect, PersistenceContext persistContext, MetaModel metaModel, ActionQueue actionQueue, EventListenerGroup eventListenerGroup) {
         this.dialect = dialect;
         this.persistContext = persistContext;
         this.metaModel = metaModel;
+        this.actionQueue = actionQueue;
+        this.eventListenerGroup = eventListenerGroup;
     }
 
     @Override
     public <T> T find(Class<T> clazz, Long id) {
         EntityMetaData entityMetaData = new EntityMetaData(clazz, new Columns(clazz.getDeclaredFields()));
-        EntityLoader entityLoader = metaModel.getEntityLoader(clazz);
         Object entity = persistContext.getEntity(clazz, id)
                 .orElseGet(() -> {
-                    T findEntity = entityLoader.find(clazz, id);
+                    LoadEventListener eventListener = eventListenerGroup.getLoadEventListener(EventType.LOAD);
+                    T findEntity = eventListener.onLoad(new LoadEvent<>(id, clazz));
                     savePersistence(findEntity, id);
                     return findEntity;
                 });
@@ -46,17 +64,19 @@ public class EntityManagerImpl implements EntityManager {
     public <T> T persist(Object entity) {
         IdColumn idColumn = new IdColumn(entity);
         GenerationType generationType = idColumn.getIdGeneratedStrategy(dialect).getGenerationType();
-        EntityPersister entityPersister = metaModel.getEntityPersister(entity.getClass());
+        PersistEventListener eventListener = eventListenerGroup.getPersistEventListener(EventType.SAVE);
 
         if (dialect.getIdGeneratedStrategy(generationType).isAutoIncrement()) {
-            long id = entityPersister.insertByGeneratedKey(entity);
-            savePersistence(entity, id);
+            Long id = idColumn.getValue();
+            id = (id == null) ? 1L : id + 1;
             setIdValue(entity, getIdField(entity, idColumn), id);
+            eventListener.fireEvent(new SaveEvent<>(id, entity));
+            savePersistence(entity, id);
             return (T) entity;
         }
 
+        eventListener.fireEvent(new SaveEvent<>(idColumn.getValue(), entity));
         savePersistence(entity, idColumn.getValue());
-        entityPersister.insert(entity);
 
         return (T) entity;
     }
@@ -83,8 +103,9 @@ public class EntityManagerImpl implements EntityManager {
     @Override
     public void remove(Object entity) {
         IdColumn idColumn = new IdColumn(entity);
+        PersistEventListener eventListener = eventListenerGroup.getPersistEventListener(EventType.DELETE);
+        eventListener.fireEvent(new DeleteEvent<>(idColumn.getValue(), entity));
         persistContext.removeEntity(entity.getClass(), idColumn.getValue());
-        persistContext.addDeleteActionQueue(new DeleteEvent<>(idColumn.getValue(), entity));
     }
 
     @Override
@@ -92,8 +113,9 @@ public class EntityManagerImpl implements EntityManager {
         IdColumn idColumn = new IdColumn(entity);
         EntityMetaData entityMetaData = new EntityMetaData(entity);
         EntityMetaData previousEntity = persistContext.getSnapshot(entity, idColumn.getValue());
-         if (entityMetaData.isDirty(previousEntity)) {
-            persistContext.addUpdateActionQueue(new UpdateEvent<>(idColumn.getValue(), entity));
+        if (entityMetaData.isDirty(previousEntity)) {
+            PersistEventListener eventListener = eventListenerGroup.getPersistEventListener(EventType.UPDATE);
+            eventListener.fireEvent(new UpdateEvent<>(idColumn.getValue(), entity));
             savePersistence(entity, idColumn.getValue());
             return entity;
         }
@@ -108,23 +130,17 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void flush() {
-        persistContext.getUpdateActionQueue()
-                .forEach(event -> {
-                    EntityPersister entityPersister = metaModel.getEntityPersister(event.getEntity().getClass());
-                    entityPersister.update(event.getEntity(), event.getId());
-                });
-        persistContext.getDeleteActionQueue()
-            .forEach(event -> {
-                EntityPersister entityPersister = metaModel.getEntityPersister(event.getEntity().getClass());
-                entityPersister.delete(event.getEntity(), event.getId());
-                persistContext.updateEntityEntryToGone(event.getEntity(), event.getId());
-            });
+        actionQueue.executeAllActions();
+    }
+
+    @Override
+    public void clear() {
+        persistContext.clear();
     }
 
     @Override
     public Dialect getDialect() {
         return dialect;
     }
-
 
 }

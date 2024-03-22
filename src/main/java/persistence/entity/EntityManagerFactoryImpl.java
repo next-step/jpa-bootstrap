@@ -23,7 +23,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     @Override
     public EntityManager createEntityManager() {
         validateOpenSession();
-        currentSessionContext.bindEntityManager(new EntityManagerImpl(environment.getDialect(), metaModel));
+        currentSessionContext.bindEntityManager(EntityManagerImpl.of(environment.getDialect(), metaModel));
         return currentEntityManager();
     }
 

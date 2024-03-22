@@ -15,4 +15,6 @@ public interface EntityManager {
     Dialect getDialect();
 
     void flush();
+
+    void clear();
 }

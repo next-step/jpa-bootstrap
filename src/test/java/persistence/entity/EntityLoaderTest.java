@@ -1,5 +1,6 @@
 package persistence.entity;
 
+import bootstrap.MetaModelImpl;
 import database.DatabaseServer;
 import database.H2;
 import database.HibernateEnvironment;
@@ -68,6 +69,8 @@ class EntityLoaderTest {
         Person person = new Person("홍길동", "jon@test.com", 20);
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.persist(person);
+
+        new EntityPersisterImpl(jdbcTemplate, dialect).insert(person);
         EntityLoader entityLoader = new EntityLoaderImpl(jdbcTemplate);
 
         // when

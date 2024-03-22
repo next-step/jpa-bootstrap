@@ -16,4 +16,4 @@
 ### step3 - Event
 
 - [x] 요구사항 1 - EventType 을 활용해 리팩터링 해보기
-- [ ] 요구사항 2 - ActionQueue 를 활용해 쓰기 지연 구현해보기
+- [x] 요구사항 2 - ActionQueue 를 활용해 쓰기 지연 구현해보기

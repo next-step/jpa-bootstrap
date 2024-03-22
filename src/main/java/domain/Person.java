@@ -62,4 +62,14 @@ public class Person {
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return "Person{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                ", email='" + email + '\'' +
+                ", index=" + index +
+                '}';
+    }
 }
