@@ -4,6 +4,7 @@ import database.dialect.Dialect;
 import jdbc.JdbcTemplate;
 import persistence.entity.EntityManager;
 import persistence.entity.EntityManagerImpl;
+import persistence.entity.context.PersistentClass;
 
 import java.util.List;
 
@@ -29,6 +30,13 @@ public class Initializer {
         buildMetadata();
     }
 
+    public void createTables() {
+        for (Class<?> clazz : components) {
+            PersistentClass<?> persistentClass = metadata.getPersistentClass(clazz);
+            jdbcTemplate.execute(persistentClass.createQuery(dialect));
+        }
+    }
+
     private void scanComponents() {
         components = new ComponentScanner().scan(basePackage);
     }
@@ -38,6 +46,6 @@ public class Initializer {
     }
 
     public EntityManager newEntityManager() {
-        return EntityManagerImpl.from(metadata);
+        return EntityManagerImpl.newEntityManager(metadata);
     }
 }

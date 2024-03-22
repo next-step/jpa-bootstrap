@@ -39,19 +39,34 @@ public class MetadataImpl {
         return PersistentClass.from(clazz, this);
     }
 
-    public <T> CollectionLoader<T> getCollectionLoaderByClass(PersistentClass<T> persistentClass) {
-        //noinspection unchecked
-        return (CollectionLoader<T>) collectionLoaderMap.get(persistentClass.getMappedClass());
+    public <T> EntityLoader<T> getEntityLoader(PersistentClass<T> persistentClass) {
+        Class<T> mappedClass = persistentClass.getMappedClass();
+        return getEntityLoader(mappedClass);
     }
 
-    public <T> EntityLoader<T> getEntityLoaderByClass(PersistentClass<T> persistentClass) {
+    private <T> EntityLoader<T> getEntityLoader(Class<T> mappedClass) {
         //noinspection unchecked
-        return (EntityLoader<T>) entityLoaderMap.get(persistentClass.getMappedClass());
+        return (EntityLoader<T>) entityLoaderMap.get(mappedClass);
     }
 
-    public <T> EntityPersister<T> getEntityPersisterByClass(PersistentClass<T> persistentClass) {
+    public <T> EntityPersister<T> getEntityPersister(PersistentClass<T> persistentClass) {
+        Class<T> mappedClass = persistentClass.getMappedClass();
+        return getEntityPersister(mappedClass);
+    }
+
+    private <T> EntityPersister<T> getEntityPersister(Class<T> mappedClass) {
         //noinspection unchecked
-        return (EntityPersister<T>) entityPersisterMap.get(persistentClass.getMappedClass());
+        return (EntityPersister<T>) entityPersisterMap.get(mappedClass);
+    }
+
+    public <T> CollectionLoader<T> getCollectionLoader(PersistentClass<T> persistentClass) {
+        Class<T> mappedClass = persistentClass.getMappedClass();
+        return getCollectionLoader(mappedClass);
+    }
+
+    private <T> CollectionLoader<T> getCollectionLoader(Class<T> mappedClass) {
+        //noinspection unchecked
+        return (CollectionLoader<T>) collectionLoaderMap.get(mappedClass);
     }
 
     public void setComponents(List<Class<?>> components) {

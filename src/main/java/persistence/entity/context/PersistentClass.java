@@ -1,5 +1,6 @@
 package persistence.entity.context;
 
+import database.dialect.Dialect;
 import database.mapping.Association;
 import database.mapping.ColumnsMetadata;
 import database.mapping.EntityAssociationMetadata;
@@ -7,6 +8,7 @@ import database.mapping.TableMetadata;
 import database.mapping.column.EntityColumn;
 import database.mapping.column.GeneralEntityColumn;
 import database.mapping.column.PrimaryKeyEntityColumn;
+import database.sql.ddl.Create;
 import persistence.bootstrap.MetadataImpl;
 
 import java.lang.reflect.Field;
@@ -180,5 +182,9 @@ public class PersistentClass<T> {
 
     public Long getPrimaryKeyValue(Object entity) {
         return columnsMetadata.getPrimaryKeyValue(entity);
+    }
+
+    public String createQuery(Dialect dialect) {
+        return Create.from(this, dialect).buildQuery();
     }
 }
