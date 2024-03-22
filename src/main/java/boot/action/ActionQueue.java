@@ -1,21 +1,22 @@
 package boot.action;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class ActionQueue {
-    private final Queue<EntityInsertAction<?>> insertions;
-    private final Queue<EntityUpdateAction<?>> updates;
-    private final Queue<EntityDeleteAction<?>> deletions;
+    private final Set<EntityInsertAction<?>> insertions;
+    private final Set<EntityUpdateAction<?>> updates;
+    private final Set<EntityDeleteAction<?>> deletions;
 
-    public ActionQueue(Queue<EntityInsertAction<?>> insertions, Queue<EntityUpdateAction<?>> updates, Queue<EntityDeleteAction<?>> deletions) {
+    public ActionQueue(Set<EntityInsertAction<?>> insertions, Set<EntityUpdateAction<?>> updates,
+                       Set<EntityDeleteAction<?>> deletions) {
         this.insertions = insertions;
         this.updates = updates;
         this.deletions = deletions;
     }
 
     public ActionQueue() {
-        this(new LinkedList<>(), new LinkedList<>(), new LinkedList<>());
+        this(new LinkedHashSet<>(), new LinkedHashSet<>(), new LinkedHashSet<>());
     }
 
     public void addAction(EntityInsertAction<?> action) {
@@ -24,10 +25,12 @@ public class ActionQueue {
     }
 
     public void addAction(EntityUpdateAction<?> action) {
+        updates.remove(action);
         updates.add(action);
     }
 
     public void addAction(EntityDeleteAction<?> action) {
+        deletions.remove(action);
         deletions.add(action);
     }
 
@@ -38,23 +41,17 @@ public class ActionQueue {
     }
 
     private void executeAllInsertions() {
-        while (!insertions.isEmpty()) {
-            EntityInsertAction<?> insertAction = insertions.poll();
-            insertAction.execute();
-        }
+        insertions.forEach(EntityInsertAction::execute);
+        insertions.clear();
     }
 
     private void executeAllUpdates() {
-        while (!updates.isEmpty()) {
-            EntityUpdateAction<?> updateAction = updates.poll();
-            updateAction.execute();
-        }
+        updates.forEach(EntityUpdateAction::execute);
+        updates.clear();
     }
 
     private void executeAllDeletes() {
-        while (!deletions.isEmpty()) {
-            EntityDeleteAction<?> deleteAction = deletions.poll();
-            deleteAction.execute();
-        }
+        deletions.forEach(EntityDeleteAction::execute);
+        deletions.clear();
     }
 }
