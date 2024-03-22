@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class CustomSelect {
     private static final String TABLE_ALIAS = "t";
@@ -88,14 +89,10 @@ public class CustomSelect {
     }
 
     private List<String> joins() {
-        List<String> joins = new ArrayList<>();
-        for (int index = 0; index < associations.size(); index++) {
-            if (associations.get(index).isLazyLoad()) {
-                continue;
-            }
-            joins.add(eachJoin(index));
-        }
-        return joins;
+        return IntStream.range(0, associations.size())
+                .filter(index -> !associations.get(index).isLazyLoad())
+                .mapToObj(this::eachJoin)
+                .collect(Collectors.toList());
     }
 
     private String eachJoin(int index) {
