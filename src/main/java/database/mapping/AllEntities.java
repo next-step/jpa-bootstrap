@@ -6,6 +6,7 @@ import java.util.List;
 /**
  * 임시로 모든 엔터티를 목록으로 담아서 여기저기서 사용합니다.
  */
+@Deprecated
 public class AllEntities {
     private static final AllEntities INSTANCE = new AllEntities();
 

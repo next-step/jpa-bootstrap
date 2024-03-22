@@ -1,8 +1,11 @@
 package database.mapping.rowmapper;
 
+import database.dialect.Dialect;
 import database.mapping.Association;
+import database.mapping.EntityMetadata;
 import database.mapping.EntityMetadataFactory;
 import database.sql.dml.part.WhereMap;
+import jdbc.JdbcTemplate;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.LazyLoader;
 import persistence.entity.database.EntityLoader;
@@ -15,18 +18,22 @@ import java.util.stream.Collectors;
 // TODO: 테스트 추가
 public class JoinedRowsCombiner<T> {
     private final List<JoinedRow<T>> joinedRows;
-    private final Class<T> clazz;
     private final List<Association> associations;
-    private final EntityLoader entityLoader;
+    private final JdbcTemplate jdbcTemplate;
+    private final Dialect dialect;
+    private final EntityMetadata entityMetadata;
 
     public JoinedRowsCombiner(List<JoinedRow<T>> joinedRows,
                               Class<T> clazz,
                               List<Association> associations,
-                              EntityLoader entityLoader) {
+                              JdbcTemplate jdbcTemplate,
+                              Dialect dialect) {
+        // XXX 이거 딴데서 가져올수 있나?
+        this.entityMetadata = EntityMetadataFactory.get(clazz);
         this.joinedRows = joinedRows;
-        this.clazz = clazz;
         this.associations = associations;
-        this.entityLoader = entityLoader;
+        this.jdbcTemplate = jdbcTemplate;
+        this.dialect = dialect;
     }
 
     public Optional<T> merge() {
@@ -41,7 +48,7 @@ public class JoinedRowsCombiner<T> {
 
             Object value;
             if (association.isLazyLoad()) {
-                Long id = EntityMetadataFactory.get(clazz).getPrimaryKeyValue(entity);
+                Long id = entityMetadata.getPrimaryKeyValue(entity);
                 value = lazyLoadProxy(association, id);
                 setFieldValue(entity, fieldName, value);
             } else {
@@ -54,11 +61,13 @@ public class JoinedRowsCombiner<T> {
         return Optional.of(entity);
     }
 
-    private Object lazyLoadProxy(Association association, Long id) {
+    private <R> Object lazyLoadProxy(Association association, Long id) {
         return Enhancer.create(association.getFieldType(), (LazyLoader) () -> {
-            Class<?> genericType = association.getFieldGenericType();
+            Class<R> genericType = (Class<R>) association.getFieldGenericType();
+            EntityLoader<R> entityLoaderForProxy = new EntityLoader<>(genericType, jdbcTemplate, dialect);
+
             WhereMap whereMap = WhereMap.of(association.getForeignKeyColumnName(), id);
-            return entityLoader.load(genericType, whereMap);
+            return entityLoaderForProxy.load(whereMap);
         });
     }
 
@@ -73,7 +82,7 @@ public class JoinedRowsCombiner<T> {
     }
 
     private Field getFieldByName(String fieldName) {
-        return EntityMetadataFactory.get(clazz).getFieldByFieldName(fieldName);
+        return entityMetadata.getFieldByFieldName(fieldName);
     }
 
     private <R> List<R> filterEntitiesByType(Class<R> associatedType) {

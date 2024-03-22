@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Initializer {
 
-    private String basePackage;
+    private final String basePackage;
     private final JdbcTemplate jdbcTemplate;
     private final Dialect dialect;
     private List<Class<?>> components;
@@ -18,7 +18,6 @@ public class Initializer {
 
     public Initializer(String basePackage, JdbcTemplate jdbcTemplate, Dialect dialect) {
         this.basePackage = basePackage;
-//        this.basePackage = "entity";
         this.jdbcTemplate = jdbcTemplate;
         this.dialect = dialect;
 
@@ -48,6 +47,6 @@ public class Initializer {
     }
 
     public EntityManager newEntityManager() {
-        return EntityManagerImpl.from(jdbcTemplate, dialect);
+        return EntityManagerImpl.from(metadata);
     }
 }

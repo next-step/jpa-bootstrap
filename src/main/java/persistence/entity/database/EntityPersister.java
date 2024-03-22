@@ -12,23 +12,23 @@ import jdbc.JdbcTemplate;
  * 엔터티의 메타데이터와 데이터베이스 매핑 정보를 제공하고,
  * 변경된 엔터티를 데이터베이스에 동기화하는 역할
  */
-public class EntityPersister {
+public class EntityPersister<T> {
     private final JdbcTemplate jdbcTemplate;
+    private final EntityMetadata entityMetadata;
 
-    public EntityPersister(JdbcTemplate jdbcTemplate) {
+    public EntityPersister(Class<T> clazz, JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.entityMetadata = EntityMetadataFactory.get(clazz);
     }
 
-    public Long insert(Class<?> clazz, Object entity) {
-        EntityMetadata metadata = EntityMetadataFactory.get(clazz);
+    public Long insert(Object entity) {
+        Long id = entityMetadata.getPrimaryKeyValue(entity);
+        checkGenerationStrategy(entityMetadata.requiresIdWhenInserting(), id, entityMetadata.getEntityClassName());
+        id = entityMetadata.requiresIdWhenInserting() ? id : null;
 
-        Long id = metadata.getPrimaryKeyValue(entity);
-        checkGenerationStrategy(metadata.requiresIdWhenInserting(), id, metadata.getEntityClassName());
-        id = metadata.requiresIdWhenInserting() ? id : null;
-
-        Insert insert = new Insert(metadata.getTableName(),
-                                   metadata.getPrimaryKey(),
-                                   metadata.getGeneralColumns())
+        Insert insert = new Insert(entityMetadata.getTableName(),
+                                   entityMetadata.getPrimaryKey(),
+                                   entityMetadata.getGeneralColumns())
                 .id(id)
                 .valuesFromEntity(entity);
         return jdbcTemplate.execute(insert.toQueryString());
@@ -40,8 +40,7 @@ public class EntityPersister {
         }
     }
 
-    public void update(Class<?> clazz, Long id, ValueMap changes) {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(clazz);
+    public void update(Long id, ValueMap changes) {
         String query = new Update(entityMetadata.getTableName(),
                                   entityMetadata.getGeneralColumns(),
                                   entityMetadata.getPrimaryKey())
@@ -51,8 +50,7 @@ public class EntityPersister {
         jdbcTemplate.execute(query);
     }
 
-    public void update(Class<?> clazz, Long id, Object entity) {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(clazz);
+    public void update(Long id, Object entity) {
         String query = new Update(entityMetadata.getTableName(),
                                   entityMetadata.getGeneralColumns(),
                                   entityMetadata.getPrimaryKey())
@@ -62,8 +60,7 @@ public class EntityPersister {
         jdbcTemplate.execute(query);
     }
 
-    public void delete(Class<?> clazz, Long id) {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(clazz);
+    public void delete(Long id) {
         String query = new Delete(entityMetadata.getTableName(),
                                   entityMetadata.getAllColumnNamesWithAssociations(),
                                   entityMetadata.getPrimaryKey()

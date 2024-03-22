@@ -9,6 +9,7 @@ import entity.LazyLoadTestOrderItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.bootstrap.Initializer;
 import testsupport.H2DatabaseTest;
 
 import java.util.List;
@@ -17,11 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class OneToManyScenarioTest extends H2DatabaseTest {
-    private EntityManagerImpl entityManager;
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
-        entityManager = EntityManagerImpl.from(jdbcTemplate, dialect);
+        Initializer entity = new Initializer("entity", jdbcTemplate, dialect);
+        entity.bootUp();
+        entityManager = entity.newEntityManager();
 
         AllEntities.register(EagerLoadTestOrder.class);
         AllEntities.register(EagerLoadTestOrderItem.class);

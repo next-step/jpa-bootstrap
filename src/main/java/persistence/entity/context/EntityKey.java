@@ -21,12 +21,23 @@ public class EntityKey {
         return new EntityKey(clazz.getName(), id);
     }
 
+    public static EntityKey of(String className, Long id) {
+        if (id == null) {
+            throw new RuntimeException("id is null");
+        }
+        return new EntityKey(className, id);
+    }
+
     public static EntityKey of(Object entity) {
         Class<?> clazz = entity.getClass();
         EntityMetadata entityMetadata = EntityMetadataFactory.get(clazz);
         Long id = entityMetadata.getPrimaryKeyValue(entity);
 
         return EntityKey.of(clazz, id);
+    }
+
+    public static <T> EntityKey of(PersistentClass<T> persistentClass, Long id) {
+        return EntityKey.of(persistentClass.getMappedClassName(), id);
     }
 
     @Override

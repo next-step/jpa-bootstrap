@@ -13,16 +13,19 @@ import jdbc.RowMapper;
 import java.util.List;
 import java.util.Optional;
 
-public class EntityLoader {
+public class EntityLoader<T> {
     private final JdbcTemplate jdbcTemplate;
     private final Dialect dialect;
+    private final Class<T> clazz;
 
-    public EntityLoader(JdbcTemplate jdbcTemplate, Dialect dialect) {
+    public EntityLoader(Class<T> clazz, JdbcTemplate jdbcTemplate, Dialect dialect) {
         this.jdbcTemplate = jdbcTemplate;
         this.dialect = dialect;
+
+        this.clazz = clazz;
     }
 
-    public <T> Optional<T> load(Class<T> clazz, Long id) {
+    public Optional<T> load(Long id) {
         RowMapper<T> rowMapper = SingleRowMapperFactory.create(clazz, dialect);
 
         EntityMetadata entityMetadata = EntityMetadataFactory.get(clazz);
@@ -35,7 +38,7 @@ public class EntityLoader {
         return jdbcTemplate.query(query, rowMapper).stream().findFirst();
     }
 
-    public <T> List<T> load(Class<T> clazz, WhereMap whereMap) {
+    public List<T> load(WhereMap whereMap) {
         RowMapper<T> rowMapper = SingleRowMapperFactory.create(clazz, dialect);
 
         EntityMetadata entityMetadata = EntityMetadataFactory.get(clazz);

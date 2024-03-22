@@ -17,8 +17,6 @@ class ComponentScannerTest {
 
         assertThat(result).containsAll(
                 List.of(
-                        Departure.class,
-                        Employee.class,
                         OldPerson1.class,
                         OldPerson2.class,
                         OldPerson3.class,

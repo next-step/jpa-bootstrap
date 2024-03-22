@@ -1,8 +1,8 @@
 package persistence.bootstrap;
 
-import persistence.entity.database.CollectionLoader2;
-import persistence.entity.database.EntityLoader2;
-import persistence.entity.database.EntityPersister2;
+import persistence.entity.database.CollectionLoader;
+import persistence.entity.database.EntityLoader;
+import persistence.entity.database.EntityPersister;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,32 +11,30 @@ import java.util.concurrent.ConcurrentHashMap;
 // org.hibernate.boot.model.internal 참조
 
 public class MetadataImpl {
-    private final static MetadataImpl INSTANCE = new MetadataImpl();
-
-    private final Map<Class<?>, EntityPersister2<?>> entityPersisterMap = new ConcurrentHashMap<>();
-    private final Map<Class<?>, EntityLoader2<?>> entityLoaderMap = new ConcurrentHashMap<>();
-    private final Map<Class<?>, CollectionLoader2<?>> collectionLoaderMap = new ConcurrentHashMap<>();
+    private final Map<Class<?>, EntityPersister<?>> entityPersisterMap = new ConcurrentHashMap<>();
+    private final Map<Class<?>, EntityLoader<?>> entityLoaderMap = new ConcurrentHashMap<>();
+    private final Map<Class<?>, CollectionLoader<?>> collectionLoaderMap = new ConcurrentHashMap<>();
 //    private final Map<Class<?>, CollectionPersister> collectionPersisterMap = new ConcurrentHashMap<>();
 
-    public <T> void register(Class<T> clazz, EntityPersister2<T> entityPersister, EntityLoader2<T> entityLoader,
-                             CollectionLoader2<T> collectionLoader) {
-        INSTANCE.entityPersisterMap.put(clazz, entityPersister);
-        INSTANCE.entityLoaderMap.put(clazz, entityLoader);
-        INSTANCE.collectionLoaderMap.put(clazz, collectionLoader);
+    public <T> void register(Class<T> clazz, EntityPersister<T> entityPersister, EntityLoader<T> entityLoader,
+                             CollectionLoader<T> collectionLoader) {
+        entityPersisterMap.put(clazz, entityPersister);
+        entityLoaderMap.put(clazz, entityLoader);
+        collectionLoaderMap.put(clazz, collectionLoader);
     }
 
-    public static <T> CollectionLoader2<T> getCollectionLoaderByClass(Class<T> clazz) {
+    public <T> CollectionLoader<T> getCollectionLoaderByClass(Class<T> clazz) {
         //noinspection unchecked
-        return (CollectionLoader2<T>) INSTANCE.collectionLoaderMap.get(clazz);
+        return (CollectionLoader<T>) collectionLoaderMap.get(clazz);
     }
 
-    public static <T> EntityLoader2<T> getEntityLoaderByClass(Class<T> clazz) {
+    public <T> EntityLoader<T> getEntityLoaderByClass(Class<T> clazz) {
         //noinspection unchecked
-        return (EntityLoader2<T>) INSTANCE.entityLoaderMap.get(clazz);
+        return (EntityLoader<T>) entityLoaderMap.get(clazz);
     }
 
-    public static <T> EntityPersister2<T> getEntityPersisterByClass(Class<T> clazz) {
+    public <T> EntityPersister<T> getEntityPersisterByClass(Class<T> clazz) {
         //noinspection unchecked
-        return (EntityPersister2<T>) INSTANCE.entityPersisterMap.get(clazz);
+        return (EntityPersister<T>) entityPersisterMap.get(clazz);
     }
 }

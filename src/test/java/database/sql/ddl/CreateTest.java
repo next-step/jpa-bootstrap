@@ -3,9 +3,9 @@ package database.sql.ddl;
 import database.dialect.Dialect;
 import database.dialect.MySQLDialect;
 import database.mapping.AllEntities;
-import entity.Departure;
-import entity.Employee;
 import entity.Person;
+import entity.TestDepartment;
+import entity.TestEmployee;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,7 +18,7 @@ class CreateTest {
 
     @BeforeAll
     static void setUpEntities() {
-        AllEntities.register(Departure.class);
+        AllEntities.register(TestDepartment.class);
     }
 
     @ParameterizedTest
@@ -33,8 +33,8 @@ class CreateTest {
 
     @Test
     void buildCreateQueryForAssociatedEntity() {
-        assertCreateQuery(Departure.class, "CREATE TABLE Departure (id BIGINT PRIMARY KEY)");
-        assertCreateQuery(Employee.class, "CREATE TABLE Employee (id BIGINT PRIMARY KEY, name VARCHAR(255) NULL, departure_id BIGINT NOT NULL)");
+        assertCreateQuery(TestDepartment.class, "CREATE TABLE department (id BIGINT PRIMARY KEY)");
+        assertCreateQuery(TestEmployee.class, "CREATE TABLE employee (id BIGINT PRIMARY KEY, name VARCHAR(255) NULL, departure_id BIGINT NOT NULL)");
     }
 
     private void assertCreateQuery(Class<?> clazz, String expected) {

@@ -10,8 +10,8 @@ public class PersistenceContextImpl implements PersistenceContext {
     }
 
     @Override
-    public Object getEntity(Class<?> clazz, Long id) {
-        EntityKey entityKey = EntityKey.of(clazz, id);
+    public <T> Object getEntity(PersistentClass<T> persistentClass, Long id) {
+        EntityKey entityKey = EntityKey.of(persistentClass, id);
 
         if (!entityEntries.isReadable(entityKey)) return null;
         return firstLevelCache.find(entityKey);
