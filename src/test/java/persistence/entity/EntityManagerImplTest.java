@@ -218,6 +218,29 @@ class EntityManagerImplTest {
 		);
 	}
 
+	@DisplayName("merege가 2번 수행되면 마지막 merge 액션만 수행된다.")
+	@Test
+	void mergeTwice() {
+		// given
+		Person person = new Person(null, "John", 99, "john@test.com", 1);
+		entityManager.persist(person);
+		// when
+		person.setName("John2");
+		entityManager.merge(person);
+		person.setName("John3");
+		entityManager.merge(person);
+		entityManager.flush();
+		entityManager.clear();
+		// then
+		Person findPerson = entityManager.find(Person.class, person.getId());
+
+		assertAll(
+			() -> assertThat(findPerson).isNotNull(),
+			() -> assertThat((findPerson).getId()).isEqualTo(1L),
+			() -> assertThat((findPerson).getName()).isEqualTo("John3")
+		);
+	}
+
 	@DisplayName("flush 메서드를 통해 persistContext에 저장된 이벤트를 실행한다.")
 	@Test
 	void flush() {
@@ -252,7 +275,6 @@ class EntityManagerImplTest {
 		jdbcTemplate.execute("insert into department (id, name) values (1, 'depart123')");
 		jdbcTemplate.execute("insert into employee (id, name, department_id) values (1, 'hong', 1)");
 		jdbcTemplate.execute("insert into employee (id, name, department_id) values (2, 'kim', 1)");
-
 
 		// when
 		entityManager.flush();

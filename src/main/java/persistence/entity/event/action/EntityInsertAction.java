@@ -2,7 +2,7 @@ package persistence.entity.event.action;
 
 import persistence.entity.EntityPersister;
 
-public class EntityInsertAction<T> implements EntityAction{
+public class EntityInsertAction<T> implements EntityAction {
 
     private final T entity;
     private final EntityPersister entityPersister;

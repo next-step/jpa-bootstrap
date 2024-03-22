@@ -18,7 +18,9 @@ public class ActionQueue {
     }
 
     public <T, ID> void addAction(EntityDeleteAction<T, ID> action) {
-        deleteActionQueue.add(action);
+        if (!deleteActionQueue.contains(action)) {
+            deleteActionQueue.add(action);
+        }
     }
 
     public <T> void addAction(EntityInsertAction<T> action) {
@@ -26,7 +28,9 @@ public class ActionQueue {
     }
 
     public <T, ID> void addAction(EntityUpdateAction<T, ID> action) {
-        updateActionQueue.add(action);
+        if (!updateActionQueue.contains(action)) {
+            updateActionQueue.add(action);
+        }
     }
 
     public void executeAllActions() {
