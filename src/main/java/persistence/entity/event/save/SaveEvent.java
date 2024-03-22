@@ -1,19 +1,23 @@
-package persistence.entity.event;
+package persistence.entity.event.save;
 
-public class UpdateEvent<T, ID> {
+import persistence.entity.event.PersistEvent;
+
+public class SaveEvent<T, ID> implements PersistEvent<T, ID> {
 
     private final ID id;
     private final T entity;
 
-    public UpdateEvent(ID id, T entity) {
+    public SaveEvent(ID id, T entity) {
         this.id = id;
         this.entity = entity;
     }
 
+    @Override
     public ID getId() {
         return id;
     }
 
+    @Override
     public T getEntity() {
         return entity;
     }

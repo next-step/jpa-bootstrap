@@ -1,7 +1,9 @@
-package persistence.entity.event;
+package persistence.entity.event.delete;
 
 
-public class DeleteEvent<T, ID> {
+import persistence.entity.event.PersistEvent;
+
+public class DeleteEvent<T, ID> implements PersistEvent<T, ID> {
     private final ID id;
     private final T entity;
 
