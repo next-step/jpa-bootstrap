@@ -51,7 +51,7 @@ class CreateQueryBuilderTest {
 
             //then
             assertThat(ddl).isEqualTo("CREATE TABLE orders (id BIGINT AUTO_INCREMENT PRIMARY KEY,order_number VARCHAR)");
-            assertThat(ddl2).isEqualTo("CREATE TABLE order_items (id BIGINT AUTO_INCREMENT PRIMARY KEY,product VARCHAR,quantity INTEGER,order_id BIGINT,FOREIGN KEY (order_id) REFERENCES order_items(id))");
+            assertThat(ddl2).isEqualTo("CREATE TABLE order_items (id BIGINT AUTO_INCREMENT PRIMARY KEY,product VARCHAR,quantity INTEGER,order_id BIGINT,FOREIGN KEY (order_id) REFERENCES orders(id))");
         }
     }
 }

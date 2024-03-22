@@ -6,7 +6,7 @@ import persistence.sql.meta.Column;
 
 public interface EntityLoader<T> {
 
-    T find(Long id);
+    T find(Object id);
 
     List<T> find(Map<Column, Object> conditions);
 }

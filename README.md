@@ -8,3 +8,8 @@
 🚀 2단계 - SessionFactory
 - [x] : 요구사항 1 - EntityManagerFactory 를 만들어 보기
 - [x] : 요구사항 2 - EntityManagerFactory 를 적용하여 리팩터링을 해보자
+
+🚀 3단계 - Event
+- [x] : 요구사항 1 - EventType 을 활용해 리팩터링 해보기
+- [x] : 요구사항 2 - ActionQueue 를 활용해 쓰기 지연 구현해보기
+

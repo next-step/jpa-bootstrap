@@ -24,7 +24,7 @@ class DdlGeneratorIntegrationTest {
         server = new H2();
         server.start();
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
-        jdbcTemplate = new JdbcTemplate(server.getConnection());
+        jdbcTemplate = new JdbcTemplate(server);
     }
 
     @AfterEach

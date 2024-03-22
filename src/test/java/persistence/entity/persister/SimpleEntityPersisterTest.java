@@ -37,7 +37,7 @@ class SimpleEntityPersisterTest {
         server = new H2();
         server.start();
 
-        jdbcTemplate = new JdbcTemplate(server.getConnection());
+        jdbcTemplate = new JdbcTemplate(server);
         ddlGenerator = DdlGenerator.getInstance(H2Dialect.getInstance());
         dmlGenerator = DmlGenerator.getInstance();
         jdbcTemplate.execute(ddlGenerator.generateCreateQuery(Person.class));
@@ -48,8 +48,8 @@ class SimpleEntityPersisterTest {
     @AfterEach
     void tearDown() {
         jdbcTemplate.execute(ddlGenerator.generateDropQuery(Person.class));
-        jdbcTemplate.execute(ddlGenerator.generateDropQuery(Order.class));
         jdbcTemplate.execute(ddlGenerator.generateDropQuery(OrderItem.class));
+        jdbcTemplate.execute(ddlGenerator.generateDropQuery(Order.class));
         server.stop();
     }
 

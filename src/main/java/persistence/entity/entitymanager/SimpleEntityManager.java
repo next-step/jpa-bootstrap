@@ -2,10 +2,12 @@ package persistence.entity.entitymanager;
 
 import java.util.List;
 import java.util.Objects;
-import persistence.entity.loader.EntityLoader;
+import persistence.entity.event.EntityEvent;
+import persistence.entity.event.EventType;
+import persistence.entity.event.action.ActionQueue;
+import persistence.entity.event.listener.EntityEventDispatcher;
 import persistence.entity.persistencecontext.EntitySnapshot;
 import persistence.entity.persistencecontext.SimplePersistenceContext;
-import persistence.entity.persister.EntityPersister;
 import persistence.entity.proxy.LazyLoadingContext;
 import persistence.entity.proxy.LazyLoadingProxyFactory;
 import persistence.sql.meta.Column;
@@ -15,12 +17,14 @@ import persistence.sql.meta.Table;
 public class SimpleEntityManager implements EntityManager {
 
     private final SimplePersistenceContext persistenceContext;
-    private final MetaModel metaModel;
-
+    private final EntityEventDispatcher entityEventDispatcher;
+    private final ActionQueue actionQueue;
 
     private SimpleEntityManager(MetaModel metaModel) {
-        this.metaModel = metaModel;
         persistenceContext = new SimplePersistenceContext();
+        actionQueue = new ActionQueue();
+        entityEventDispatcher = new EntityEventDispatcher(metaModel, actionQueue);
+
     }
 
     public static SimpleEntityManager from(MetaModel metaModel) {
@@ -30,9 +34,9 @@ public class SimpleEntityManager implements EntityManager {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T find(Class<T> clazz, Long id) {
-        T entity = (T) persistenceContext.getEntity(clazz, id);
+        T entity = persistenceContext.getEntity(clazz, id);
         if (entity == null) {
-            entity = metaModel.getEntityLoader(clazz).find(id);
+            entity = (T) entityEventDispatcher.dispatch(new EntityEvent<>(clazz, id, EventType.LOAD));
             cacheEntityWithAssociations(entity, EntityEntry.loading());
             setLazyRelationProxy(entity);
         }
@@ -40,37 +44,36 @@ public class SimpleEntityManager implements EntityManager {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T persist(T entity) {
-        EntityPersister<T> persister = metaModel.getEntityPersister((Class<T>) entity.getClass());
-        persister.insert(entity);
+    public <T> void persist(T entity) {
+        entityEventDispatcher.dispatch(new EntityEvent<>(entity, EventType.PERSIST));
         cacheEntityWithAssociations(entity, EntityEntry.saving());
-        return entity;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> void remove(T entity) {
         EntityEntry entityEntry = persistenceContext.getEntityEntry(entity);
         entityEntry.deleted();
         persistenceContext.removeEntity(entity);
-        EntityPersister<T> persister = metaModel.getEntityPersister((Class<T>) entity.getClass());
-        persister.delete(entity);
+        entityEventDispatcher.dispatch(new EntityEvent<>(entity, EventType.DELETE));
         entityEntry.gone();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T merge(T entity) {
         EntitySnapshot before = persistenceContext.getCachedDatabaseSnapshot(entity);
         EntitySnapshot after = EntitySnapshot.from(entity);
 
         if (!Objects.equals(before, after)) {
-            EntityPersister<T> persister = metaModel.getEntityPersister((Class<T>) entity.getClass());
-            persister.update(entity);
+            entityEventDispatcher.dispatch(new EntityEvent<>(entity, EventType.MERGE));
             cacheEntity(entity, EntityEntry.saving());
         }
+
         return entity;
+    }
+
+    @Override
+    public void flush() {
+        actionQueue.executeAll();
     }
 
     @Override
@@ -85,9 +88,8 @@ public class SimpleEntityManager implements EntityManager {
 
         for (Column lazyRelationColumn : lazyRelationColumns) {
             Table relationTable = lazyRelationColumn.getRelationTable();
-            EntityLoader<?> entityLoader = metaModel.getEntityLoader(relationTable.getClazz());
             LazyLoadingContext context = new LazyLoadingContext(table, relationTable, entity,
-                entityLoader, this::prepareCacheEntity);
+                entityEventDispatcher, this::prepareCacheEntity);
             lazyRelationColumn.setFieldValue(entity, LazyLoadingProxyFactory.createProxy(context));
         }
     }
