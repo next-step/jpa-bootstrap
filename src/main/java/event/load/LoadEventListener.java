@@ -1,8 +1,6 @@
 package event.load;
 
-import event.EventListener;
-
-public interface LoadEventListener extends EventListener {
+public interface LoadEventListener {
 
     <T> T onLoad(LoadEvent<T> event);
 }

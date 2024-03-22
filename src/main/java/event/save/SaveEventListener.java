@@ -1,8 +1,6 @@
 package event.save;
 
-import event.EventListener;
-
-public interface SaveEventListener extends EventListener {
+public interface SaveEventListener {
 
     <T> void onSave(SaveEvent<T> event);
 }

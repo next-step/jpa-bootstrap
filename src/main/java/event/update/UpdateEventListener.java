@@ -1,8 +1,6 @@
 package event.update;
 
-import event.EventListener;
-
-public interface UpdateEventListener extends EventListener {
+public interface UpdateEventListener {
 
     <T> void onUpdate(UpdateEvent<T> event);
 }
