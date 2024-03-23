@@ -1,18 +1,17 @@
 package testsupport;
 
+import app.entity.Person5;
 import database.H2;
 import database.dialect.Dialect;
 import database.dialect.MySQLDialect;
-import database.sql.ddl.Create;
-import entity.Person;
-import entity.TestDepartment;
 import jdbc.JdbcTemplate;
 import net.sf.cglib.proxy.Enhancer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import persistence.bootstrap.MetadataImpl;
-import persistence.entity.context.PersistentClass;
+import persistence.bootstrap.EntityManagerFactory;
+import persistence.bootstrap.Initializer;
+import persistence.entitymanager.EntityManager;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -26,6 +25,7 @@ abstract public class H2DatabaseTest {
     protected Connection connection;
     protected JdbcTemplate jdbcTemplate;
     protected List<String> executedQueries;
+    protected EntityManagerFactory entityManagerFactory;
 
     @BeforeAll
     static void startServer() throws SQLException {
@@ -36,10 +36,10 @@ abstract public class H2DatabaseTest {
     @BeforeEach
     void initJdbcTemplate() throws SQLException {
         connection = server.getConnection();
-        createTable();
-
         executedQueries = new ArrayList<>();
         jdbcTemplate = createJdbcTemplateProxy(executedQueries);
+        initializeEntityManagerFactory();
+        createTable();
     }
 
     private JdbcTemplate createJdbcTemplateProxy(List<String> executedQueries) {
@@ -52,8 +52,17 @@ abstract public class H2DatabaseTest {
     private void createTable() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
         jdbcTemplate.execute("DROP TABLE users IF EXISTS");
-        MetadataImpl.INSTANCE.setComponents(List.of());
-        jdbcTemplate.execute(Create.from(PersistentClass.from(Person.class), dialect).buildQuery());
+
+        EntityManager entityManager = entityManagerFactory.openSession();
+        entityManager.dropTable(Person5.class, true);
+        entityManager.createTable(Person5.class);
+        executedQueries.clear();
+    }
+
+    private void initializeEntityManagerFactory() {
+        Initializer initializer = new Initializer("app.entity", jdbcTemplate, dialect);
+        initializer.initialize();
+        this.entityManagerFactory = initializer.createEntityManagerFactory();
     }
 
     @AfterAll

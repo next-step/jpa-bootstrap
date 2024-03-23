@@ -1,16 +1,22 @@
 package database.sql.dml;
 
+import app.entity.EagerLoadTestOrder;
 import database.sql.dml.part.WhereMap;
-import entity.EagerLoadTestOrder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import persistence.entity.context.PersistentClass;
-
-import java.util.List;
+import persistence.bootstrap.Metadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static testsupport.EntityTestUtils.initializer;
 
 class CustomSelectTest {
-    private final CustomSelect customSelect = CustomSelect.from(PersistentClass.from(EagerLoadTestOrder.class), List.of());
+    private CustomSelect customSelect;
+
+    @BeforeEach
+    void setUp() {
+        Metadata metadata = initializer(null).getMetadata();
+        customSelect = CustomSelect.from(metadata.getPersistentClass(EagerLoadTestOrder.class), metadata);
+    }
 
     @Test
     void buildSelectQueryWithoutCondition() {

@@ -13,7 +13,7 @@ public class SingleRowMapperFactory {
     public static <T> RowMapper<T> create(PersistentClass<T> persistentClass, Dialect dialect) {
         return resultSet -> {
             ResultSetMetaData rsMetaData = resultSet.getMetaData();
-            T object = persistentClass.newInstance();
+            T object = persistentClass.newEntity();
 
             for (int i = 1; i < rsMetaData.getColumnCount() + 1; i++) {
                 String columnName = rsMetaData.getColumnName(i);

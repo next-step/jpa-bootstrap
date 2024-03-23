@@ -1,16 +1,21 @@
 package database.sql.dml;
 
-import entity.Person4;
+import app.entity.Person4;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import persistence.entity.context.PersistentClass;
-
-import java.util.List;
+import persistence.bootstrap.Metadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static testsupport.EntityTestUtils.initializer;
 
 class SelectByPrimaryKeyTest {
-    private final SelectByPrimaryKey<Person4> selectByPrimaryKey =
-            SelectByPrimaryKey.from(PersistentClass.from(Person4.class), List.of());
+    private SelectByPrimaryKey<Person4> selectByPrimaryKey;
+
+    @BeforeEach
+    void setUp() {
+        Metadata metadata = initializer(null).getMetadata();
+        selectByPrimaryKey = SelectByPrimaryKey.from(metadata.getPersistentClass(Person4.class), metadata);
+    }
 
     @Test
     void buildSelectPrimaryKeyQuery() {

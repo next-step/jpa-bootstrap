@@ -1,12 +1,11 @@
 package persistence.bootstrap;
 
-import entity.OldPerson1;
-import entity.OldPerson2;
-import entity.OldPerson3;
-import entity.Person4;
+import app.entity.OldPerson1;
+import app.entity.OldPerson2;
+import app.entity.OldPerson3;
+import app.entity.Person4;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,8 +14,8 @@ class ComponentScannerTest {
     ComponentScanner componentScanner = new ComponentScanner();
 
     @Test
-    void scan() throws IOException, ClassNotFoundException {
-        List<Class<?>> result = componentScanner.scan("entity");
+    void scan() {
+        List<Class<?>> result = componentScanner.scan("app.entity");
 
         assertThat(result).containsAll(
                 List.of(

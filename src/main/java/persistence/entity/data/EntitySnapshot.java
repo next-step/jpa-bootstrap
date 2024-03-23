@@ -14,14 +14,13 @@ public class EntitySnapshot {
         this.snapshot = new HashMap<>();
     }
 
-    public static EntitySnapshot of(Object entity) {
+    public static <T> EntitySnapshot of(PersistentClass<T> persistentClass, T entity) {
         EntitySnapshot newSnapshot = new EntitySnapshot();
 
         if (entity == null) {
             return newSnapshot;
         }
 
-        PersistentClass<?> persistentClass = PersistentClass.from(entity.getClass());
         for (EntityColumn column : persistentClass.getGeneralColumns()) {
             String key = column.getColumnName();
             Object value = column.getValue(entity);

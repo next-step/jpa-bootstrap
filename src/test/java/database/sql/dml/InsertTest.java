@@ -1,21 +1,29 @@
 package database.sql.dml;
 
+import app.entity.NoAutoIncrementUser;
+import app.entity.Person4;
 import database.sql.dml.part.ValueMap;
-import entity.NoAutoIncrementUser;
-import entity.Person4;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import persistence.entity.context.PersistentClass;
+import persistence.bootstrap.Metadata;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static testsupport.EntityTestUtils.initializer;
 
 class InsertTest {
+    private Metadata metadata;
+
+    @BeforeEach
+    void setUp() {
+        metadata = initializer(null).getMetadata();
+    }
 
     static List<Arguments> testCases() {
         return List.of(
@@ -32,7 +40,7 @@ class InsertTest {
     @ParameterizedTest
     @MethodSource("testCases")
     void buildInsertQuery(ValueMap valueMap, String expected) {
-        String actual = Insert.from(PersistentClass.from(Person4.class))
+        String actual = Insert.from(metadata.getPersistentClass(Person4.class))
                 .values(valueMap)
                 .toQueryString();
         assertThat(actual).isEqualTo(expected);
@@ -41,7 +49,7 @@ class InsertTest {
     @Test
     void insertQueryWithId() {
         ValueMap valueMap = ValueMap.from(Map.of("nick_name", "abc", "old", 14, "email", "a@b.com"));
-        String actual = Insert.from(PersistentClass.from(Person4.class))
+        String actual = Insert.from(metadata.getPersistentClass(Person4.class))
                 .id(10L)
                 .values(valueMap)
                 .toQueryString();
@@ -51,7 +59,7 @@ class InsertTest {
     @Test
     void insertIntoEntityWithNoId() {
         ValueMap valueMap = ValueMap.from(Map.of("nick_name", "abc", "old", 14, "email", "a@b.com"));
-        String actual = Insert.from(PersistentClass.from(NoAutoIncrementUser.class))
+        String actual = Insert.from(metadata.getPersistentClass(NoAutoIncrementUser.class))
                 .id(10L)
                 .values(valueMap)
                 .toQueryString();

@@ -10,8 +10,8 @@ import java.sql.SQLException;
 
 // TODO: 테스트 추가
 public class JoinedRowMapper<T> implements RowMapper<JoinedRow<T>> {
-    private final Dialect dialect;
     private final PersistentClass<T> persistentClass;
+    private final Dialect dialect;
 
     public JoinedRowMapper(PersistentClass<T> persistentClass, Dialect dialect) {
         this.persistentClass = persistentClass;

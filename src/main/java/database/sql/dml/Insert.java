@@ -21,9 +21,10 @@ public class Insert {
     private ValueMap values;
 
     public static <T> Insert from(PersistentClass<T> persistentClass) {
-        return new Insert(persistentClass.getTableName(),
-                          persistentClass.getPrimaryKey(),
-                          persistentClass.getGeneralColumns());
+        return new Insert(
+                persistentClass.getTableName(),
+                persistentClass.getPrimaryKey(),
+                persistentClass.getGeneralColumns());
     }
 
     public Insert(String tableName, PrimaryKeyEntityColumn primaryKey, List<GeneralEntityColumn> generalColumns) {

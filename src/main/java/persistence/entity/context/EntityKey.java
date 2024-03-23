@@ -25,14 +25,6 @@ public class EntityKey {
         return new EntityKey(className, id);
     }
 
-    public static EntityKey of(Object entity) {
-        Class<?> clazz = entity.getClass();
-        PersistentClass<?> persistentClass = PersistentClass.from(clazz);
-        Long id = persistentClass.getPrimaryKeyValue(entity);
-
-        return EntityKey.of(clazz, id);
-    }
-
     public static <T> EntityKey of(PersistentClass<T> persistentClass, Long id) {
         return EntityKey.of(persistentClass.getMappedClassName(), id);
     }

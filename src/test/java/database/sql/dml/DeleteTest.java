@@ -1,17 +1,23 @@
 package database.sql.dml;
 
+import app.entity.Person4;
 import database.sql.dml.part.WhereMap;
-import entity.Person4;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import persistence.entity.context.PersistentClass;
-
-import java.util.List;
+import persistence.bootstrap.Metadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static testsupport.EntityTestUtils.initializer;
 
 class DeleteTest {
-    private final Delete delete = Delete.from(PersistentClass.from(Person4.class), List.of());
+    private Delete delete;
+
+    @BeforeEach
+    void setUp() {
+        Metadata metadata = initializer(null).getMetadata();
+        delete = Delete.from(metadata.getPersistentClass(Person4.class), metadata);
+    }
 
     enum TestCases {
         BY_PRIMARY_KEY(WhereMap.of("nick_name", "foo"),

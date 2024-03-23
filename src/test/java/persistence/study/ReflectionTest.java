@@ -1,8 +1,6 @@
 package persistence.study;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -15,8 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 public class ReflectionTest {
-    private static final Logger logger = LoggerFactory.getLogger(ReflectionTest.class);
-
     @Test
     void test_로_시작하는_메소드_실행() throws InstantiationException, IllegalAccessException, InvocationTargetException {
         Class<Car> carClass = Car.class;

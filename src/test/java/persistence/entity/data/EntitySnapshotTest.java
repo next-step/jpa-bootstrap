@@ -1,19 +1,30 @@
 package persistence.entity.data;
 
+import app.entity.Person5;
 import database.sql.dml.part.ValueMap;
-import entity.Person;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import persistence.bootstrap.Metadata;
+import persistence.entity.context.PersistentClass;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static testsupport.EntityTestUtils.initializer;
 
 class EntitySnapshotTest {
+    private PersistentClass<Person5> persistentClass;
+
+    @BeforeEach
+    void setUp() {
+        Metadata metadata = initializer(null).getMetadata();
+        persistentClass = metadata.getPersistentClass(Person5.class);
+    }
 
     @Test
     void getValueWithNullValues() {
-        Person person = new Person();
-        EntitySnapshot oldEntitySnapshot = EntitySnapshot.of(null);
-        EntitySnapshot entitySnapshot = EntitySnapshot.of(person);
+        Person5 person = new Person5();
+        EntitySnapshot oldEntitySnapshot = EntitySnapshot.of(persistentClass, null);
+        EntitySnapshot entitySnapshot = EntitySnapshot.of(persistentClass, person);
 
         ValueMap changes = oldEntitySnapshot.diff(entitySnapshot);
 
@@ -24,9 +35,9 @@ class EntitySnapshotTest {
         );
     }
 
-    private final Person person0 = new Person();
-    private final Person person1 = new Person(1L, "이름", 10, "이메일@a.com");
-    private final Person person2 = new Person(1L, "이름2", 20, "이메일@a.com");
+    private final Person5 person0 = new Person5();
+    private final Person5 person1 = new Person5(1L, "이름", 10, "이메일@a.com");
+    private final Person5 person2 = new Person5(1L, "이름2", 20, "이메일@a.com");
 
     @Test
     void changes() {
@@ -58,8 +69,8 @@ class EntitySnapshotTest {
         );
     }
 
-    private ValueMap changes(Person p1, Person p2) {
-        return EntitySnapshot.of(p1).diff(EntitySnapshot.of(p2));
+    private ValueMap changes(Person5 p1, Person5 p2) {
+        return EntitySnapshot.of(persistentClass, p1).diff(EntitySnapshot.of(persistentClass, p2));
     }
 
 }

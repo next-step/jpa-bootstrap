@@ -1,13 +1,13 @@
-package persistence.entity;
+package persistence.bootstrap;
 
-import database.sql.ddl.Create;
-import entity.*;
+import app.entity.EagerLoadTestOrder;
+import app.entity.EagerLoadTestOrderItem;
+import app.entity.LazyLoadTestOrder;
+import app.entity.LazyLoadTestOrderItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.bootstrap.Initializer;
-import persistence.bootstrap.MetadataImpl;
-import persistence.entity.context.PersistentClass;
+import persistence.entitymanager.EntityManager;
 import testsupport.H2DatabaseTest;
 
 import java.util.List;
@@ -20,29 +20,23 @@ class OneToManyScenarioTest extends H2DatabaseTest {
 
     @BeforeEach
     void setUp() {
-        Initializer entity = new Initializer("entity", jdbcTemplate, dialect);
-        entity.bootUp();
+        Initializer initializer = new Initializer("app.entity", jdbcTemplate, dialect);
+        initializer.initialize();
+        EntityManagerFactory entityManagerFactory = initializer.createEntityManagerFactory();
 
-        entityManager = entity.newEntityManager();
+        entityManager = entityManagerFactory.openSession();
 
+        entityManager.dropTable(EagerLoadTestOrder.class, true);
+        entityManager.createTable(EagerLoadTestOrder.class);
 
-        jdbcTemplate.execute("DROP TABLE eagerload_orders IF EXISTS");
-        jdbcTemplate.execute("DROP TABLE eagerload_order_items IF EXISTS");
-        jdbcTemplate.execute("DROP TABLE lazyload_orders IF EXISTS");
-        jdbcTemplate.execute("DROP TABLE lazyload_order_items IF EXISTS");
+        entityManager.dropTable(EagerLoadTestOrderItem.class, true);
+        entityManager.createTable(EagerLoadTestOrderItem.class);
 
-        List<Class<?>> entities = List.of(
-                EagerLoadTestOrder.class,
-                EagerLoadTestOrderItem.class,
-                LazyLoadTestOrder.class,
-                LazyLoadTestOrderItem.class
-        );
-        MetadataImpl.INSTANCE.setComponents(entities);
+        entityManager.dropTable(LazyLoadTestOrder.class, true);
+        entityManager.createTable(LazyLoadTestOrder.class);
 
-        jdbcTemplate.execute(Create.from(PersistentClass.from(EagerLoadTestOrder.class), dialect).buildQuery());
-        jdbcTemplate.execute(Create.from(PersistentClass.from(EagerLoadTestOrderItem.class), dialect).buildQuery());
-        jdbcTemplate.execute(Create.from(PersistentClass.from(LazyLoadTestOrder.class), dialect).buildQuery());
-        jdbcTemplate.execute(Create.from(PersistentClass.from(LazyLoadTestOrderItem.class), dialect).buildQuery());
+        entityManager.dropTable(LazyLoadTestOrderItem.class, true);
+        entityManager.createTable(LazyLoadTestOrderItem.class);
 
         jdbcTemplate.execute("INSERT INTO eagerload_orders (orderNumber) VALUES (1234)");
         jdbcTemplate.execute("INSERT INTO eagerload_order_items (product, quantity, order_id) VALUES ('product1', 5, 1)");
@@ -81,8 +75,9 @@ class OneToManyScenarioTest extends H2DatabaseTest {
     @Test
     @DisplayName("FetchType.LAZY 연관관계를 가진 객체를 가져오기")
     void scenario7() {
-        LazyLoadTestOrder res = entityManager.find(LazyLoadTestOrder.class, 1L);
-        List<LazyLoadTestOrderItem> orderItems = res.getOrderItems();
+        LazyLoadTestOrder lazyLoadTestOrder = entityManager.find(LazyLoadTestOrder.class, 1L);
+        List<LazyLoadTestOrderItem> orderItems = lazyLoadTestOrder.getOrderItems();
+        assertThat(orderItems.size()).isEqualTo(2);
 
         assertAll(
                 () -> assertThat(orderItems.size()).isEqualTo(2),

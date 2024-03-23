@@ -1,10 +1,10 @@
-package entity;
+package app.entity;
 
 import jakarta.persistence.*;
 
 @Table(name = "users")
 @Entity
-public class Person4 {
+public class OldPerson3 {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,15 +22,4 @@ public class Person4 {
     @Transient
     private Integer index;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 }

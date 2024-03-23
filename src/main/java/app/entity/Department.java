@@ -1,25 +1,26 @@
-package entity;
+package app.entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
-public class Employee {
+public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
-    @Column(name = "department_id")
-    private Long departmentId;
-    // getter, setter, constructors, 등등
+    @OneToMany
+    @JoinColumn(name = "department_id")
+    private List<Employee> employees;
 
-    public Employee() {
+    public Department() {
     }
 
-    public Employee(String name, Long departmentId) {
+    public Department(String name) {
         this.name = name;
-        this.departmentId = departmentId;
     }
 
     public Long getId() {
@@ -30,16 +31,16 @@ public class Employee {
         return name;
     }
 
-    public Long getDepartmentId() {
-        return departmentId;
+    public List<Employee> getEmployees() {
+        return employees;
     }
 
     @Override
     public String toString() {
-        return "Employee{" +
+        return "Department{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", departmentId=" + departmentId +
+                ", employees=" + employees +
                 '}';
     }
 }

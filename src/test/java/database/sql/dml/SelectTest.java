@@ -1,16 +1,28 @@
 package database.sql.dml;
 
+import app.entity.Person4;
 import database.sql.dml.part.WhereMap;
-import entity.Person4;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import persistence.entity.context.PersistentClass;
+import persistence.bootstrap.Metadata;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static testsupport.EntityTestUtils.initializer;
 
 class SelectTest {
+    private Metadata metadata;
+
+    @BeforeEach
+    void setUp() {
+        metadata = initializer(null).getMetadata();
+    }
+
+    private Select newSelect() {
+        return Select.from(metadata.getPersistentClass(Person4.class), metadata);
+    }
 
     @Test
     void buildSelectQuery() {
@@ -39,10 +51,4 @@ class SelectTest {
                                                           .buildQuery());
         assertThat(exception.getMessage()).isEqualTo("Invalid query: aaaaa");
     }
-
-    private Select newSelect() {
-        PersistentClass<Person4> persistentClass = PersistentClass.from(Person4.class);
-        return Select.from(persistentClass, List.of());
-    }
-
 }

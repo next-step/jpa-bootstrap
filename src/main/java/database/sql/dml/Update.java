@@ -20,9 +20,10 @@ public class Update {
     private WhereClause where;
 
     public static <T> Update from(PersistentClass<T> persistentClass) {
-        return new Update(persistentClass.getTableName(),
-                          persistentClass.getGeneralColumns(),
-                          persistentClass.getPrimaryKey());
+        return new Update(
+                persistentClass.getTableName(),
+                persistentClass.getGeneralColumns(),
+                persistentClass.getPrimaryKey());
     }
 
     private Update(String tableName, List<GeneralEntityColumn> generalColumns, PrimaryKeyEntityColumn primaryKey) {

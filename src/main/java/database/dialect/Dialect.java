@@ -12,5 +12,9 @@ public interface Dialect {
 
     String primaryKeyDefinition();
 
-    String nullableDefinition(boolean nullable);
+    String nullableDefinition();
+
+    String notNullDefinition();
+
+    String createTableClause();
 }

@@ -54,11 +54,8 @@ public class ColumnsMetadata {
     }
 
     public PrimaryKeyEntityColumn getPrimaryKey() {
-        return (PrimaryKeyEntityColumn) EntityColumnFactory.fromField(this.getPrimaryKeyField());
-    }
-
-    public Long getPrimaryKeyValue(Object entity) {
-        return (Long) this.getPrimaryKey().getValue(entity);
+        Field primaryKeyField = this.getPrimaryKeyField();
+        return (PrimaryKeyEntityColumn) EntityColumnFactory.fromField(primaryKeyField);
     }
 
     // ---------- general columns -----------

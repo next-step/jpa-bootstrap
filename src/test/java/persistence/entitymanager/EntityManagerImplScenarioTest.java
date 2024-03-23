@@ -1,9 +1,10 @@
-package persistence.entity;
+package persistence.entitymanager;
 
-import entity.Person5;
+import app.entity.Person5;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.bootstrap.EntityManagerFactory;
 import persistence.bootstrap.Initializer;
 import persistence.entity.context.ObjectNotFoundException;
 import testsupport.H2DatabaseTest;
@@ -18,9 +19,10 @@ class EntityManagerImplScenarioTest extends H2DatabaseTest {
 
     @BeforeEach
     void setUp() {
-        Initializer entity = new Initializer("entity", jdbcTemplate, dialect);
-        entity.bootUp();
-        entityManager = entity.newEntityManager();
+        Initializer initializer = new Initializer("app.entity", jdbcTemplate, dialect);
+        initializer.initialize();
+        EntityManagerFactory entityManagerFactory = initializer.createEntityManagerFactory();
+        entityManager = entityManagerFactory.openSession();
     }
 
     @Test

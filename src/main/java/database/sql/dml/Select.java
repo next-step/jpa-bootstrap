@@ -2,6 +2,7 @@ package database.sql.dml;
 
 import database.sql.dml.part.WhereClause;
 import database.sql.dml.part.WhereMap;
+import persistence.bootstrap.Metadata;
 import persistence.entity.context.PersistentClass;
 
 import java.util.ArrayList;
@@ -12,26 +13,26 @@ public class Select {
     private static final String COLUMNS_DELIMITER = ", ";
 
     private final String tableName;
-    private final List<String> allColumnNamesWithAssociations;
     private final String primaryKeyColumnName;
     private final List<String> generalEntityColumnNames;
+    private final List<String> allColumnNamesWithAssociations;
     private WhereClause where;
 
-    public static <T> Select from(PersistentClass<T> persistentClass, List<Class<?>> entities) {
-        return new Select(persistentClass.getTableName(),
-                          persistentClass.getAllColumnNamesWithAssociations(entities),
-                          persistentClass.getPrimaryKeyName(),
-                          persistentClass.getGeneralColumnNames());
+    public static <T> Select from(PersistentClass<T> persistentClass, Metadata metadata) {
+        return new Select(
+                persistentClass.getTableName(),
+                persistentClass.getPrimaryKeyName(),
+                persistentClass.getGeneralColumnNames(),
+                metadata.getAllColumnNamesWithAssociations(persistentClass)
+        );
     }
 
-    private Select(String tableName, List<String> allColumnNamesWithAssociations,
-                  String primaryKeyColumnName,
-                  List<String> generalEntityColumnNames
-    ) {
+    private Select(String tableName, String primaryKeyColumnName, List<String> generalEntityColumnNames,
+                   List<String> allColumnNamesWithAssociations) {
         this.tableName = tableName;
-        this.allColumnNamesWithAssociations = allColumnNamesWithAssociations;
         this.primaryKeyColumnName = primaryKeyColumnName;
         this.generalEntityColumnNames = generalEntityColumnNames;
+        this.allColumnNamesWithAssociations = allColumnNamesWithAssociations;
         this.where = null;
     }
 
@@ -61,7 +62,6 @@ public class Select {
 
         return query.toString();
     }
-
 
     private String joinAllColumnNames() {
         List<String> columns = new ArrayList<>();

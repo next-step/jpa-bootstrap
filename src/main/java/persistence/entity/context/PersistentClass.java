@@ -8,8 +8,9 @@ import database.mapping.TableMetadata;
 import database.mapping.column.EntityColumn;
 import database.mapping.column.GeneralEntityColumn;
 import database.mapping.column.PrimaryKeyEntityColumn;
-import database.sql.ddl.Create;
-import persistence.bootstrap.MetadataImpl;
+import database.mapping.rowmapper.JoinedRowMapper;
+import database.mapping.rowmapper.SingleRowMapperFactory;
+import jdbc.RowMapper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -20,7 +21,6 @@ import java.util.stream.Collectors;
 public class PersistentClass<T> {
 
     private final Class<T> mappedClass;
-    private final List<Class<?>> allEntities;
     private final String mappedClassName;
     private final String tableName;
     private final String primaryKeyName;
@@ -29,42 +29,40 @@ public class PersistentClass<T> {
     private final PrimaryKeyEntityColumn primaryKey;
     private final List<GeneralEntityColumn> generalColumns;
     private final List<EntityColumn> allEntityColumns;
+
     private final EntityAssociationMetadata entityAssociationMetadata;
     private final boolean hasAssociation;
     private final List<Association> associations;
     private final ColumnsMetadata columnsMetadata;
 
-    public static <T> PersistentClass<T> from(Class<T> mappedClass, MetadataImpl metadata) {
+    private final RowMapper<T> rowMapper;
+    private final JoinedRowMapper<T> joinedRowMapper;
+
+    public static <T> PersistentClass<T> fromInternal(Class<T> mappedClass, Dialect dialect) {
         TableMetadata tableMetadata = new TableMetadata(mappedClass);
         ColumnsMetadata columnsMetadata = ColumnsMetadata.fromClass(mappedClass);
         EntityAssociationMetadata entityAssociationMetadata = new EntityAssociationMetadata(mappedClass);
 
-        List<Class<?>> allEntities = metadata.getComponents();
-        return new PersistentClass<>(mappedClass,
-                                     mappedClass.getName(),
-                                     allEntities,
-                                     tableMetadata.getTableName(),
-                                     ColumnsMetadata.fromClass(mappedClass),
-                                     columnsMetadata.getPrimaryKey(),
-                                     columnsMetadata.getPrimaryKey().getColumnName(),
-                                     columnsMetadata.isRequiredId(),
-                                     columnsMetadata.getGeneralColumns(),
-                                     columnsMetadata.getGeneralColumnNames(),
-                                     columnsMetadata.getAllEntityColumns(),
-                                     entityAssociationMetadata,
-                                     entityAssociationMetadata.hasAssociations(),
-                                     entityAssociationMetadata.getAssociations()
+        return new PersistentClass<>(
+                mappedClass,
+                mappedClass.getName(),
+                tableMetadata.getTableName(),
+                ColumnsMetadata.fromClass(mappedClass),
+                columnsMetadata.getPrimaryKey(),
+                columnsMetadata.getPrimaryKey().getColumnName(),
+                columnsMetadata.isRequiredId(),
+                columnsMetadata.getGeneralColumns(),
+                columnsMetadata.getGeneralColumnNames(),
+                columnsMetadata.getAllEntityColumns(),
+                entityAssociationMetadata,
+                entityAssociationMetadata.hasAssociations(),
+                entityAssociationMetadata.getAssociations(),
+                dialect
         );
-    }
-
-    @Deprecated
-    public static <T> PersistentClass<T> from(Class<T> clazz) {
-        return from(clazz, MetadataImpl.INSTANCE);
     }
 
     private PersistentClass(Class<T> mappedClass,
                             String mappedClassName,
-                            List<Class<?>> allEntities,
                             String tableName,
                             ColumnsMetadata columnsMetadata,
                             PrimaryKeyEntityColumn primaryKey,
@@ -75,10 +73,10 @@ public class PersistentClass<T> {
                             List<EntityColumn> allEntityColumns,
                             EntityAssociationMetadata entityAssociationMetadata,
                             boolean hasAssociation,
-                            List<Association> associations) {
+                            List<Association> associations,
+                            Dialect dialect) {
 
         this.mappedClass = mappedClass;
-        this.allEntities = allEntities;
 
         this.tableName = tableName;
         this.mappedClassName = mappedClassName;
@@ -94,6 +92,9 @@ public class PersistentClass<T> {
         this.entityAssociationMetadata = entityAssociationMetadata;
         this.hasAssociation = hasAssociation;
         this.associations = associations;
+
+        this.rowMapper = SingleRowMapperFactory.create(this, dialect);
+        this.joinedRowMapper = new JoinedRowMapper<>(this, dialect);
     }
 
     public Class<T> getMappedClass() {
@@ -140,7 +141,15 @@ public class PersistentClass<T> {
         return allEntityColumns;
     }
 
-    public T newInstance() {
+    public RowMapper<T> getRowMapper() {
+        return rowMapper;
+    }
+
+    public JoinedRowMapper<T> getJoinedRowMapper() {
+        return joinedRowMapper;
+    }
+
+    public T newEntity() {
         try {
             return mappedClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
@@ -149,42 +158,32 @@ public class PersistentClass<T> {
         }
     }
 
-    public List<String> getAllColumnNamesWithAssociations(List<Class<?>> allEntities) {
-        List<String> allColumnsWithAssociation = new ArrayList<>();
-
-        allColumnsWithAssociation.add(primaryKeyName);
-        allColumnsWithAssociation.addAll(generalColumnNames);
-        allColumnsWithAssociation.addAll(this.getAssociationsRelatedTo(allEntities).stream()
-                                                 .map(Association::getForeignKeyColumnName)
-                                                 .collect(Collectors.toList()));
-        return allColumnsWithAssociation;
-    }
-
     public Field getFieldByFieldName(String fieldName) {
         return columnsMetadata.getFieldByFieldName(fieldName);
-    }
-
-    public List<Association> getAssociationsRelatedTo(List<Class<?>> entities) {
-        return entityAssociationMetadata.getAssociationsRelatedTo(entities);
-    }
-
-    public List<Association> getAssociationsRelatedTo() {
-        return entityAssociationMetadata.getAssociationsRelatedTo(allEntities);
-    }
-
-    public Long getRowId(Object entity) {
-        return columnsMetadata.getPrimaryKeyValue(entity);
     }
 
     public Field getFieldByColumnName(String columnName) {
         return columnsMetadata.getFieldByColumnName(columnName);
     }
 
-    public Long getPrimaryKeyValue(Object entity) {
-        return columnsMetadata.getPrimaryKeyValue(entity);
+    public List<String> getAllColumnNamesWithAssociations(List<Class<?>> entityClasses) {
+        List<String> allColumnsWithAssociation = new ArrayList<>();
+
+        allColumnsWithAssociation.add(primaryKeyName);
+        allColumnsWithAssociation.addAll(generalColumnNames);
+
+        List<Association> associationsRelatedTo = this.getAssociationsRelatedTo(entityClasses);
+        allColumnsWithAssociation.addAll(associationsRelatedTo.stream()
+                                                 .map(Association::getForeignKeyColumnName)
+                                                 .collect(Collectors.toList()));
+        return allColumnsWithAssociation;
     }
 
-    public String createQuery(Dialect dialect) {
-        return Create.from(this, dialect).buildQuery();
+    public List<Association> getAssociationsRelatedTo(List<Class<?>> entityClasses) {
+        return entityAssociationMetadata.getAssociationsRelatedTo(entityClasses);
+    }
+
+    public Long getRowId(Object entity) {
+        return (Long) primaryKey.getValue(entity);
     }
 }
