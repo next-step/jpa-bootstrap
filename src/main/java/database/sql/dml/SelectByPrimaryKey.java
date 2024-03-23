@@ -1,22 +1,22 @@
 package database.sql.dml;
 
+import persistence.entity.context.PersistentClass;
+
 import java.util.List;
 
-public class SelectByPrimaryKey {
+public class SelectByPrimaryKey<T> {
     private final Select select;
     private Long id;
 
-    public SelectByPrimaryKey(String tableName,
-                              List<String> allColumnNamesWithAssociations,
-                              String primaryKeyColumnName,
-                              List<String> generalEntityColumnNames) {
-        select = new Select(tableName,
-                            allColumnNamesWithAssociations,
-                            primaryKeyColumnName,
-                            generalEntityColumnNames);
+    public static <T> SelectByPrimaryKey<T> from(PersistentClass<T> persistentClass, List<Class<?>> entities) {
+        return new SelectByPrimaryKey<>(persistentClass, entities);
     }
 
-    public SelectByPrimaryKey byId(Long id) {
+    private SelectByPrimaryKey(PersistentClass<T> persistentClass, List<Class<?>> entities) {
+        select = Select.from(persistentClass, entities);
+    }
+
+    public SelectByPrimaryKey<T> byId(Long id) {
         this.id = id;
         return this;
     }

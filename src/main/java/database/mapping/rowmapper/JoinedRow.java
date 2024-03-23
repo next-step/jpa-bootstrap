@@ -1,21 +1,19 @@
 package database.mapping.rowmapper;
 
-import database.mapping.EntityMetadata;
-import database.mapping.EntityMetadataFactory;
 import database.mapping.column.EntityColumn;
+import persistence.entity.context.PersistentClass;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
 // TODO: 테스트 추가
 public class JoinedRow<T> {
-    private final Class<T> clazz;
+    private final PersistentClass<T> persistentClass;
     private final Map<String, Object> map;
 
-    public JoinedRow(Class<T> clazz) {
-        this.clazz = clazz;
+    public JoinedRow(PersistentClass<T> persistentClass) {
+        this.persistentClass = persistentClass;
         this.map = new HashMap<>();
     }
 
@@ -24,40 +22,29 @@ public class JoinedRow<T> {
     }
 
     public T getOwnerEntity() {
-        return mapValues(clazz);
+        return mapValues(persistentClass);
     }
 
-    public <R> R mapValues(Class<R> clazz) {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(clazz);
-
-        R entity = initiate(clazz);
-        for (EntityColumn allEntityColumn : entityMetadata.getAllEntityColumns()) {
+    public <R> R mapValues(PersistentClass<R> persistentClass) {
+        R entity = persistentClass.newInstance();
+        for (EntityColumn allEntityColumn : persistentClass.getAllEntityColumns()) {
             setField(entity, allEntityColumn.getColumnName());
         }
         return entity;
     }
 
-    private <R> R initiate(Class<R> clazz) {
-        try {
-            return clazz.getDeclaredConstructor().newInstance();
-        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException |
-                 InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private <R> void setField(R entity, String columnName) {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(entity.getClass());
-        String tableName = entityMetadata.getTableName();
+        PersistentClass<?> persistentClass = PersistentClass.from(entity.getClass());
+        String tableName = persistentClass.getTableName();
         Object value = map.get(mapKey(tableName, columnName));
 
         setFieldValue(entity, columnName, value);
     }
 
     private <R> void setFieldValue(R entity, String columnName, Object value) {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(entity.getClass());
+        PersistentClass<?> persistentClass = PersistentClass.from(entity.getClass());
 
-        Field field = entityMetadata.getFieldByColumnName(columnName);
+        Field field = persistentClass.getFieldByColumnName(columnName);
         field.setAccessible(true);
         try {
             field.set(entity, value);

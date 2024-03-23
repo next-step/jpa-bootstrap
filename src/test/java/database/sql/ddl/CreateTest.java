@@ -2,13 +2,14 @@ package database.sql.ddl;
 
 import database.dialect.Dialect;
 import database.dialect.MySQLDialect;
-import database.mapping.AllEntities;
 import entity.Person;
-import jakarta.persistence.*;
-import org.junit.jupiter.api.BeforeAll;
+import entity.TestDepartment;
+import entity.TestEmployee;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import persistence.bootstrap.MetadataImpl;
+import persistence.entity.context.PersistentClass;
 
 import java.util.List;
 
@@ -17,16 +18,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CreateTest {
     private final Dialect dialect = MySQLDialect.getInstance();
 
-    @BeforeAll
-    static void setUpEntities() {
-        AllEntities.register(Departure.class);
-    }
-
     @ParameterizedTest
     @CsvSource(value = {
-            "database.sql.ddl.OldPerson1:CREATE TABLE OldPerson1 (id BIGINT PRIMARY KEY, name VARCHAR(255) NULL, age INT NULL)",
-            "database.sql.ddl.OldPerson2:CREATE TABLE OldPerson2 (id BIGINT AUTO_INCREMENT PRIMARY KEY, nick_name VARCHAR(255) NULL, old INT NULL, email VARCHAR(255) NOT NULL)",
-            "database.sql.ddl.OldPerson3:CREATE TABLE users (id BIGINT AUTO_INCREMENT PRIMARY KEY, nick_name VARCHAR(255) NULL, old INT NULL, email VARCHAR(255) NOT NULL)"
+            "entity.OldPerson1:CREATE TABLE OldPerson1 (id BIGINT PRIMARY KEY, name VARCHAR(255) NULL, age INT NULL)",
+            "entity.OldPerson2:CREATE TABLE OldPerson2 (id BIGINT AUTO_INCREMENT PRIMARY KEY, nick_name VARCHAR(255) NULL, old INT NULL, email VARCHAR(255) NOT NULL)",
+            "entity.OldPerson3:CREATE TABLE users (id BIGINT AUTO_INCREMENT PRIMARY KEY, nick_name VARCHAR(255) NULL, old INT NULL, email VARCHAR(255) NOT NULL)"
     }, delimiter = ':')
     void buildCreateQuery(Class<?> clazz, String expected) {
         assertCreateQuery(clazz, expected);
@@ -34,34 +30,16 @@ class CreateTest {
 
     @Test
     void buildCreateQueryForAssociatedEntity() {
-        assertCreateQuery(Departure.class, "CREATE TABLE Departure (id BIGINT PRIMARY KEY)");
-        assertCreateQuery(Employee.class, "CREATE TABLE Employee (id BIGINT PRIMARY KEY, name VARCHAR(255) NULL, departure_id BIGINT NOT NULL)");
+        assertCreateQuery(TestDepartment.class, "CREATE TABLE department (id BIGINT PRIMARY KEY)");
+        assertCreateQuery(TestEmployee.class, "CREATE TABLE employee (id BIGINT PRIMARY KEY, name VARCHAR(255) NULL, departure_id BIGINT NOT NULL)");
     }
 
-    private void assertCreateQuery(Class<?> clazz, String expected) {
-        Create create = new Create(clazz, dialect);
+    private <T> void assertCreateQuery(Class<T> clazz, String expected) {
+        MetadataImpl.INSTANCE.setComponents(List.of(TestDepartment.class));
+        PersistentClass<T> persistentClass = MetadataImpl.INSTANCE.getPersistentClass(clazz);
+        Create<T> create = Create.from(persistentClass, dialect);
         String actual = create.buildQuery();
         assertThat(actual).isEqualTo(expected);
-    }
-
-    @Entity
-    static class Departure {
-        @Id
-        @GeneratedValue
-        Long id;
-
-        @OneToMany
-        @JoinColumn(name = "departure_id")
-        List<Employee> employees;
-    }
-
-    @Entity
-    static class Employee {
-        @Id
-        @GeneratedValue
-        Long id;
-
-        String name;
     }
 
     @Test

@@ -1,9 +1,10 @@
 package persistence.entity;
 
-import database.sql.dml.NoAutoIncrementUser;
-import entity.Person;
+import entity.NoAutoIncrementUser;
+import entity.Person5;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import persistence.bootstrap.Initializer;
 import persistence.entity.database.PrimaryKeyMissingException;
 import testsupport.H2DatabaseTest;
 
@@ -14,24 +15,26 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static testsupport.EntityTestUtils.*;
 
 class EntityManagerImplTest extends H2DatabaseTest {
-    private EntityManagerImpl entityManager;
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
-        entityManager = EntityManagerImpl.from(jdbcTemplate, dialect);
+        Initializer entity = new Initializer("entity", jdbcTemplate, dialect);
+        entity.bootUp();
+        entityManager = entity.newEntityManager();
     }
 
     @Test
     void findMissingRecord() {
-        assertThat(entityManager.find(Person.class, 1L)).isNull();
+        assertThat(entityManager.find(Person5.class, 1L)).isNull();
     }
 
     @Test
     void persistAndFind() {
-        Person person = newPerson(null, "abc123", 14, "c123@d.com");
+        Person5 person = newPerson(null, "abc123", 14, "c123@d.com");
         entityManager.persist(person);
 
-        Person found = entityManager.find(Person.class, 1L);
+        Person5 found = entityManager.find(Person5.class, 1L);
 
         assertSamePerson(found, person, false);
     }
@@ -41,17 +44,17 @@ class EntityManagerImplTest extends H2DatabaseTest {
         NoAutoIncrementUser user = new NoAutoIncrementUser(null, "abc123", 14, "c123@d.com");
 
         PrimaryKeyMissingException ex = assertThrows(PrimaryKeyMissingException.class, () -> entityManager.persist(user));
-        assertThat(ex.getMessage()).isEqualTo("Primary key is not assigned when inserting: database.sql.dml.NoAutoIncrementUser");
+        assertThat(ex.getMessage()).isEqualTo("Primary key is not assigned when inserting: entity.NoAutoIncrementUser");
     }
 
     @Test
     void persistNewRow() {
-        Person person = newPerson(null, "abc123", 14, "c123@d.com");
+        Person5 person = newPerson(null, "abc123", 14, "c123@d.com");
         entityManager.persist(person);
-        Person person2 = newPerson(null, "zzzzzz", 44, "zzzzz@d.com");
+        Person5 person2 = newPerson(null, "zzzzzz", 44, "zzzzz@d.com");
         entityManager.persist(person2);
 
-        List<Person> people = findPeople(jdbcTemplate);
+        List<Person5> people = findPeople(jdbcTemplate);
         assertThat(people).hasSize(2);
         assertSamePerson(people.get(0), person, false);
         assertSamePerson(people.get(1), person2, false);
@@ -59,27 +62,27 @@ class EntityManagerImplTest extends H2DatabaseTest {
 
     @Test
     void persistToUpdate() {
-        Person person = newPerson(null, "abc123", 14, "c123@d.com");
+        Person5 person = newPerson(null, "abc123", 14, "c123@d.com");
         entityManager.persist(person);
 
-        Person personToUpdate = newPerson(getLastSavedId(jdbcTemplate), "abc123", 15, "zzzzz@d.com");
+        Person5 personToUpdate = newPerson(getLastSavedId(jdbcTemplate), "abc123", 15, "zzzzz@d.com");
         entityManager.persist(personToUpdate);
         entityManager.persist(personToUpdate);
 
-        List<Person> people = findPeople(jdbcTemplate);
+        List<Person5> people = findPeople(jdbcTemplate);
         assertThat(people).hasSize(1);
         assertSamePerson(people.get(0), personToUpdate, true);
     }
 
     @Test
     void remove() {
-        Person person = newPerson(null, "abc123", 14, "c123@d.com");
+        Person5 person = newPerson(null, "abc123", 14, "c123@d.com");
         entityManager.persist(person);
 
-        Person person1 = entityManager.find(Person.class, getLastSavedId(jdbcTemplate));
+        Person5 person1 = entityManager.find(Person5.class, getLastSavedId(jdbcTemplate));
         entityManager.remove(person1);
 
-        List<Person> people = findPeople(jdbcTemplate);
+        List<Person5> people = findPeople(jdbcTemplate);
         assertThat(people).hasSize(0);
     }
 }

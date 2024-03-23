@@ -1,14 +1,13 @@
 package persistence.entity;
 
-import database.mapping.AllEntities;
 import database.sql.ddl.Create;
+import entity.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.entity.testentities.EagerLoadTestOrder;
-import persistence.entity.testentities.EagerLoadTestOrderItem;
-import persistence.entity.testentities.LazyLoadTestOrder;
-import persistence.entity.testentities.LazyLoadTestOrderItem;
+import persistence.bootstrap.Initializer;
+import persistence.bootstrap.MetadataImpl;
+import persistence.entity.context.PersistentClass;
 import testsupport.H2DatabaseTest;
 
 import java.util.List;
@@ -17,27 +16,33 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class OneToManyScenarioTest extends H2DatabaseTest {
-    private EntityManagerImpl entityManager;
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
-        entityManager = EntityManagerImpl.from(jdbcTemplate, dialect);
+        Initializer entity = new Initializer("entity", jdbcTemplate, dialect);
+        entity.bootUp();
 
-        AllEntities.register(EagerLoadTestOrder.class);
-        AllEntities.register(EagerLoadTestOrderItem.class);
-        AllEntities.register(LazyLoadTestOrder.class);
-        AllEntities.register(LazyLoadTestOrderItem.class);
+        entityManager = entity.newEntityManager();
+
 
         jdbcTemplate.execute("DROP TABLE eagerload_orders IF EXISTS");
         jdbcTemplate.execute("DROP TABLE eagerload_order_items IF EXISTS");
         jdbcTemplate.execute("DROP TABLE lazyload_orders IF EXISTS");
         jdbcTemplate.execute("DROP TABLE lazyload_order_items IF EXISTS");
 
-        jdbcTemplate.execute(new Create(EagerLoadTestOrder.class, dialect).buildQuery());
-        jdbcTemplate.execute(new Create(EagerLoadTestOrderItem.class, dialect).buildQuery());
+        List<Class<?>> entities = List.of(
+                EagerLoadTestOrder.class,
+                EagerLoadTestOrderItem.class,
+                LazyLoadTestOrder.class,
+                LazyLoadTestOrderItem.class
+        );
+        MetadataImpl.INSTANCE.setComponents(entities);
 
-        jdbcTemplate.execute(new Create(LazyLoadTestOrder.class, dialect).buildQuery());
-        jdbcTemplate.execute(new Create(LazyLoadTestOrderItem.class, dialect).buildQuery());
+        jdbcTemplate.execute(Create.from(PersistentClass.from(EagerLoadTestOrder.class), dialect).buildQuery());
+        jdbcTemplate.execute(Create.from(PersistentClass.from(EagerLoadTestOrderItem.class), dialect).buildQuery());
+        jdbcTemplate.execute(Create.from(PersistentClass.from(LazyLoadTestOrder.class), dialect).buildQuery());
+        jdbcTemplate.execute(Create.from(PersistentClass.from(LazyLoadTestOrderItem.class), dialect).buildQuery());
 
         jdbcTemplate.execute("INSERT INTO eagerload_orders (orderNumber) VALUES (1234)");
         jdbcTemplate.execute("INSERT INTO eagerload_order_items (product, quantity, order_id) VALUES ('product1', 5, 1)");
@@ -59,7 +64,7 @@ class OneToManyScenarioTest extends H2DatabaseTest {
                 () -> assertThat(order)
                         .hasFieldOrPropertyWithValue("id", 1L)
                         .hasFieldOrPropertyWithValue("orderNumber", "1234"),
-                ()->assertThat(order.getOrderItems()).hasSize(2),
+                () -> assertThat(order.getOrderItems()).hasSize(2),
                 () -> assertThat(order.getOrderItems().get(0))
                         .hasFieldOrPropertyWithValue("id", 1L)
                         .hasFieldOrPropertyWithValue("product", "product1")

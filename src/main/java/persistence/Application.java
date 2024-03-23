@@ -3,14 +3,13 @@ package persistence;
 import database.DatabaseServer;
 import database.H2;
 import database.dialect.MySQLDialect;
-import database.sql.ddl.Create;
-import entity.Order;
-import entity.OrderItem;
+import entity.Department;
+import entity.Employee;
 import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.bootstrap.Initializer;
 import persistence.entity.EntityManager;
-import persistence.entity.EntityManagerImpl;
 
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
@@ -22,24 +21,19 @@ public class Application {
             server.start();
 
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-            MySQLDialect dialect = MySQLDialect.getInstance();
 
-            jdbcTemplate.execute(new Create(Order.class, dialect).buildQuery());
-            jdbcTemplate.execute(new Create(OrderItem.class, dialect).buildQuery());
-//
-            EntityManager entityManager = EntityManagerImpl.from(jdbcTemplate, dialect);
+            Initializer initializer = new Initializer("entity", jdbcTemplate, MySQLDialect.getInstance());
+            initializer.bootUp();
+            initializer.createTables();
 
-            Order order = entityManager.persist(new Order("1234"));
-            OrderItem orderItem1 = entityManager.persist(new OrderItem("product1", 5, order.getId()));
-            OrderItem orderItem2 = entityManager.persist(new OrderItem("product20", 50, order.getId()));
+            EntityManager entityManager = initializer.newEntityManager();
 
-            System.out.println(order);
-            System.out.println(orderItem1);
-            System.out.println(orderItem2);
+            entityManager.persist(new Department("A팀"));
+            entityManager.persist(new Employee("김선생", 1L));
+            entityManager.persist(new Employee("이선생", 1L));
 
-            Order res = entityManager.find(Order.class, order.getId());
-            System.out.println("--------");
-            System.out.println(res);
+            System.out.println(entityManager.find(Department.class, 1L));
+            // Department{id=1, name='A팀', employees=[Employee{id=1, name='김선생', departmentId=1}, Employee{id=2, name='이선생', departmentId=1}]}
 
             server.stop();
         } catch (Exception e) {
@@ -48,5 +42,4 @@ public class Application {
             logger.info("Application finished");
         }
     }
-
 }

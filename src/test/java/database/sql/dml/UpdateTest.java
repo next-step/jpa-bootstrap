@@ -1,21 +1,14 @@
 package database.sql.dml;
 
-import database.mapping.EntityMetadata;
-import database.mapping.EntityMetadataFactory;
+import entity.Person4;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import persistence.entity.context.PersistentClass;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UpdateTest {
-    private final Update update;
-
-    {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(Person4.class);
-        update = new Update(entityMetadata.getTableName(),
-                            entityMetadata.getGeneralColumns(),
-                            entityMetadata.getPrimaryKey());
-    }
+    private final Update update = Update.from(PersistentClass.from(Person4.class));
 
     enum TestCases {
         WITH_NULL_FIELDS(123L, newPerson4("닉네임", null, null), "UPDATE users SET nick_name = '닉네임', old = NULL, email = NULL WHERE id = 123"),

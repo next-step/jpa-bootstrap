@@ -1,10 +1,10 @@
-package persistence.entity.testentities;
+package entity;
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "eagerload_order_items")
-public class EagerLoadTestOrderItem {
+@Table(name = "lazyload_order_items")
+public class LazyLoadTestOrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,18 +14,22 @@ public class EagerLoadTestOrderItem {
 
     private Integer quantity;
 
-    public EagerLoadTestOrderItem(String product, int quantity) {
+//    // 테이블 생성때문에 필요함
+//    @Column(name = "order_id", nullable = false)
+//    private Long orderId;
+
+    public LazyLoadTestOrderItem(String product, int quantity) {
         this.product = product;
         this.quantity = quantity;
     }
 
-    public EagerLoadTestOrderItem(String product, Integer quantity, Long orderId) {
+    public LazyLoadTestOrderItem(String product, Integer quantity, Long orderId) {
         this.product = product;
         this.quantity = quantity;
 //        this.orderId = orderId;
     }
 
-    public EagerLoadTestOrderItem() {
+    public LazyLoadTestOrderItem() {
     }
 
     public Long getId() {

@@ -2,6 +2,7 @@ package database.mapping.rowmapper;
 
 import database.dialect.Dialect;
 import jdbc.RowMapper;
+import persistence.entity.context.PersistentClass;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -9,11 +10,11 @@ import java.sql.SQLException;
 
 // TODO: 테스트 추가
 public class JoinedRowMapper<T> implements RowMapper<JoinedRow<T>> {
-    private final Class<T> clazz;
     private final Dialect dialect;
+    private final PersistentClass<T> persistentClass;
 
-    public JoinedRowMapper(Class<T> clazz, Dialect dialect) {
-        this.clazz = clazz;
+    public JoinedRowMapper(PersistentClass<T> persistentClass, Dialect dialect) {
+        this.persistentClass = persistentClass;
         this.dialect = dialect;
     }
 
@@ -21,7 +22,7 @@ public class JoinedRowMapper<T> implements RowMapper<JoinedRow<T>> {
     public JoinedRow<T> mapRow(ResultSet resultSet) throws SQLException {
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
 
-        JoinedRow<T> joinedRow = new JoinedRow<>(clazz);
+        JoinedRow<T> joinedRow = new JoinedRow<>(persistentClass);
         for (int columnIndex = 1; columnIndex < resultSetMetaData.getColumnCount() + 1; columnIndex++) {
             joinedRow.add(getTableName(resultSetMetaData, columnIndex),
                           getColumnName(resultSetMetaData, columnIndex),

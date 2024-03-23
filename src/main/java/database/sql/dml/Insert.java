@@ -3,6 +3,7 @@ package database.sql.dml;
 import database.mapping.column.GeneralEntityColumn;
 import database.mapping.column.PrimaryKeyEntityColumn;
 import database.sql.dml.part.ValueMap;
+import persistence.entity.context.PersistentClass;
 
 import java.util.List;
 import java.util.StringJoiner;
@@ -18,6 +19,12 @@ public class Insert {
     private Long id;
     private boolean includeIdField;
     private ValueMap values;
+
+    public static <T> Insert from(PersistentClass<T> persistentClass) {
+        return new Insert(persistentClass.getTableName(),
+                          persistentClass.getPrimaryKey(),
+                          persistentClass.getGeneralColumns());
+    }
 
     public Insert(String tableName, PrimaryKeyEntityColumn primaryKey, List<GeneralEntityColumn> generalColumns) {
         this.tableName = tableName;

@@ -4,8 +4,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,6 +13,10 @@ public class EntityAssociationMetadata {
     private final Class<?> clazz;
     private final List<Field> associationFields;
 
+    public static List<Association> associationsOf(Class<?> clazz) {
+        return new EntityAssociationMetadata(clazz).getAssociations();
+    }
+
     public EntityAssociationMetadata(Class<?> clazz) {
         this.clazz = clazz;
 
@@ -23,8 +25,8 @@ public class EntityAssociationMetadata {
                 .collect(Collectors.toList());
     }
 
-    public List<Association> getAssociationRelatedToOtherEntities() {
-        return AllEntities.getEntities().stream()
+    public List<Association> getAssociationsRelatedTo(List<Class<?>> entities) {
+        return entities.stream()
                 .filter(this::exceptMe)
                 .flatMap(this::getAssociationsBetweenMeAndOther)
                 .collect(Collectors.toList());
@@ -34,15 +36,10 @@ public class EntityAssociationMetadata {
         return entity != clazz;
     }
 
-    private Stream<Association> getAssociationsBetweenMeAndOther(Class<?> entity) {
-        return getAssociationsOf(entity)
+    private Stream<Association> getAssociationsBetweenMeAndOther(Class<?> other) {
+        return associationsOf(other)
                 .stream()
                 .filter(this::isConnectedToMe);
-    }
-
-    private static List<Association> getAssociationsOf(Class<?> entity) {
-        EntityMetadata entityMetadata = EntityMetadataFactory.get(entity);
-        return entityMetadata.getAssociations();
     }
 
     private boolean isConnectedToMe(Association association) {
@@ -56,11 +53,8 @@ public class EntityAssociationMetadata {
                 .collect(Collectors.toList());
     }
 
-    public List<Type> getAssociatedTypes() {
-        return associationFields.stream()
-                .filter(EntityAssociationMetadata::checkAssociationAnnotation)
-                .map(field -> ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0])
-                .collect(Collectors.toList());
+    public boolean hasAssociations() {
+        return associationFields.stream().anyMatch(EntityAssociationMetadata::checkAssociationAnnotation);
     }
 
     private static boolean checkAssociationAnnotation(Field field) {
