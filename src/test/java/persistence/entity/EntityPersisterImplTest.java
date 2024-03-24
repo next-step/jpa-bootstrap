@@ -2,6 +2,7 @@ package persistence.entity;
 
 import database.DatabaseServer;
 import database.H2;
+import database.HibernateEnvironment;
 import domain.Person;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
@@ -28,7 +29,6 @@ class EntityPersisterImplTest {
     private TableColumn table;
     private EntityPersister entityPersister;
     private EntityManager entityManager;
-    private Dialect dialect;
 
 
     @BeforeEach
@@ -39,9 +39,12 @@ class EntityPersisterImplTest {
 
         Class<Person> personEntity = Person.class;
         table = new TableColumn(personEntity);
-        dialect = new MysqlDialect();
+        Dialect dialect = new MysqlDialect();
         entityPersister = new EntityPersisterImpl(jdbcTemplate, dialect);
-        entityManager = new EntityManagerImpl(jdbcTemplate, dialect);
+        EntityManagerFactory entityManagerFactory = new EntityManagerFactoryImpl(
+                new HibernateEnvironment(dialect, server.getDataSourceProperties(), server.getConnection())
+        );
+        entityManager = entityManagerFactory.createEntityManager();
         createTable(personEntity, dialect);
     }
 

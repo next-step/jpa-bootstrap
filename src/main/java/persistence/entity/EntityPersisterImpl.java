@@ -1,5 +1,6 @@
 package persistence.entity;
 
+import bootstrap.MetaModelImpl;
 import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

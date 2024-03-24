@@ -2,6 +2,7 @@ package persistence.jpa;
 
 import database.DatabaseServer;
 import database.H2;
+import database.HibernateEnvironment;
 import domain.Person;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.EntityManager;
+import persistence.entity.EntityManagerFactory;
+import persistence.entity.EntityManagerFactoryImpl;
 import persistence.entity.EntityManagerImpl;
 import persistence.sql.column.Columns;
 import persistence.sql.column.IdColumn;
@@ -27,7 +30,6 @@ class CustomJpaRepositoryTest {
 
     private JdbcTemplate jdbcTemplate;
     private TableColumn table;
-    private Dialect dialect;
     private JpaRepository<Person, Long> jpaRepository;
     private EntityManager entityManager;
 
@@ -36,16 +38,20 @@ class CustomJpaRepositoryTest {
         DatabaseServer server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        entityManager = new EntityManagerImpl(jdbcTemplate, new MysqlDialect());
+        Dialect dialect = new MysqlDialect();
+
+        EntityManagerFactory entityManagerFactory = new EntityManagerFactoryImpl(
+                new HibernateEnvironment(dialect, server.getDataSourceProperties(), server.getConnection())
+        );
+        entityManager = entityManagerFactory.createEntityManager();
         jpaRepository = new CustomJpaRepository<>(entityManager);
         Class<Person> personEntity = Person.class;
         table = new TableColumn(personEntity);
-        dialect = new MysqlDialect();
 
-        createTable(personEntity);
+        createTable(personEntity, dialect);
     }
 
-    private void createTable(Class<Person> personEntity) {
+    private void createTable(Class<Person> personEntity, Dialect dialect) {
         Columns columns = new Columns(personEntity.getDeclaredFields());
         IdColumn idColumn = new IdColumn(personEntity.getDeclaredFields());
 

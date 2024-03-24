@@ -1,7 +1,7 @@
 package persistence.entity;
 
-import persistence.entity.event.DeleteEvent;
-import persistence.entity.event.UpdateEvent;
+import persistence.entity.event.delete.DeleteEvent;
+import persistence.entity.event.update.UpdateEvent;
 import persistence.jpa.Cache;
 import persistence.jpa.SnapShot;
 
@@ -12,15 +12,11 @@ public class HibernatePersistContext implements PersistenceContext {
     private final Cache cache;
     private final SnapShot snapshot;
     private final Map<EntityKey, EntityEntry> entityEntries;
-    private final Queue<UpdateEvent> updateActionQueue;
-    private final Queue<DeleteEvent> deleteActionQueue;
 
     public HibernatePersistContext() {
         this.cache = new Cache();
         this.snapshot = new SnapShot();
         this.entityEntries = new HashMap<>();
-        this.updateActionQueue = new LinkedList<>();
-        this.deleteActionQueue = new LinkedList<>();
     }
 
     @Override
@@ -50,34 +46,15 @@ public class HibernatePersistContext implements PersistenceContext {
     }
 
     @Override
-    public Queue<DeleteEvent> getDeleteActionQueue() {
-        return deleteActionQueue;
-    }
-
-    @Override
-    public Queue<UpdateEvent> getUpdateActionQueue() {
-        return updateActionQueue;
-    }
-
-    @Override
-    public void addDeleteActionQueue(DeleteEvent event) {
-        deleteActionQueue.add(event);
-    }
-
-    @Override
-    public void addUpdateActionQueue(UpdateEvent event) {
-        updateActionQueue.add(event);
-    }
-
-    @Override
-    public void updateEntityEntryToGone(Object entity, Object id) {
-        EntityKey entityKey = new EntityKey(entity.getClass(), id);
-        entityEntries.put(entityKey, new EntityEntry(EntityStatus.GONE));
-    }
-
-    @Override
     public <T> EntityMetaData getSnapshot(T entity, Object id) {
         return snapshot.get(new EntityKey(entity.getClass(), id));
+    }
+
+    @Override
+    public void clear() {
+        cache.clear();
+        snapshot.clear();
+        entityEntries.clear();
     }
 
 }

@@ -24,7 +24,7 @@ public class EntityLoaderImpl implements EntityLoader {
     }
 
     @Override
-    public <T> T find(Class<T> clazz, Long id) {
+    public <T, ID> T find(Class<T> clazz, ID id) {
         SelectQueryBuilder queryBuilder = selectQueryBuilder.build(clazz);
         TableColumn tableColumn = new TableColumn(clazz);
         JoinTableColumns joinTableColumns = tableColumn.getJoinTableColumns();
@@ -34,7 +34,7 @@ public class EntityLoaderImpl implements EntityLoader {
         }
         return getInstance(clazz, id, joinTableColumns);
     }
-    private <T> T getInstance(Class<T> clazz, Long id, JoinTableColumns joinTableColumns) {
+    private <T, ID> T getInstance(Class<T> clazz, ID id, JoinTableColumns joinTableColumns) {
         SelectQueryBuilder queryBuilder = selectQueryBuilder.build(clazz);
         if (joinTableColumns.hasEager()) {
             JoinTableColumns eagerJoinTables = joinTableColumns.getEagerJoinTables();

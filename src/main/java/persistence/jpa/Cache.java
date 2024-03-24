@@ -25,4 +25,8 @@ public class Cache {
     public void remove(EntityKey entityKey) {
         cache.remove(entityKey);
     }
+
+    public void clear() {
+        cache.clear();
+    }
 }
