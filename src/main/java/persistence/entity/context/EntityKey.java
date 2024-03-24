@@ -3,13 +3,8 @@ package persistence.entity.context;
 import java.util.Objects;
 
 public class EntityKey {
-    private final String entityClass;
+    private final String className;
     private final Long id;
-
-    private EntityKey(String entityClass, Long id) {
-        this.entityClass = entityClass;
-        this.id = id;
-    }
 
     public static EntityKey of(Class<?> clazz, Long id) {
         if (id == null) {
@@ -18,15 +13,9 @@ public class EntityKey {
         return new EntityKey(clazz.getName(), id);
     }
 
-    public static EntityKey of(String className, Long id) {
-        if (id == null) {
-            throw new RuntimeException("id is null");
-        }
-        return new EntityKey(className, id);
-    }
-
-    public static <T> EntityKey of(PersistentClass<T> persistentClass, Long id) {
-        return EntityKey.of(persistentClass.getMappedClassName(), id);
+    private EntityKey(String className, Long id) {
+        this.className = className;
+        this.id = id;
     }
 
     @Override
@@ -34,11 +23,11 @@ public class EntityKey {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         EntityKey entityKey = (EntityKey) object;
-        return Objects.equals(entityClass, entityKey.entityClass) && Objects.equals(id, entityKey.id);
+        return Objects.equals(className, entityKey.className) && Objects.equals(id, entityKey.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entityClass, id);
+        return Objects.hash(className, id);
     }
 }

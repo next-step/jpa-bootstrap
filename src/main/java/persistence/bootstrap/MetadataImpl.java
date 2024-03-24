@@ -2,6 +2,7 @@ package persistence.bootstrap;
 
 import database.dialect.Dialect;
 import database.mapping.Association;
+import persistence.entity.context.EntityKey;
 import persistence.entity.context.PersistentClass;
 
 import java.util.ArrayList;
@@ -56,5 +57,15 @@ public class MetadataImpl implements Metadata {
     @Override
     public <T> List<String> getAllColumnNamesWithAssociations(PersistentClass<T> persistentClass) {
         return persistentClass.getAllColumnNamesWithAssociations(entityClasses);
+    }
+
+    @Override
+    public <T> EntityKey entityKeyOf(PersistentClass<T> persistentClass, Long id) {
+        return EntityKey.of(persistentClass.getMappedClass(), id);
+    }
+
+    @Override
+    public EntityKey entityKeyOfObject(Object entity) {
+        return EntityKey.of(entity.getClass(), getRowId(entity));
     }
 }
