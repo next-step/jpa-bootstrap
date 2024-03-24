@@ -18,4 +18,7 @@ public enum EventType {
         this.baseListenerInterface = baseListenerInterface;
     }
 
+    public String getEventName() {
+        return eventName;
+    }
 }

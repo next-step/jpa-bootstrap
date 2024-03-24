@@ -1,6 +1,8 @@
 package persistence.entity.event.load;
 
-public interface LoadEventListener {
+import persistence.entity.event.EventListener;
+
+public interface LoadEventListener extends EventListener {
 
     <ID, T> T onLoad(LoadEvent<ID> event);
 }
