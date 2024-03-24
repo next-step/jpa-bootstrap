@@ -51,7 +51,7 @@ public class EntityManagerImpl implements EntityManager {
         Object entity = persistContext.getEntity(clazz, id)
                 .orElseGet(() -> {
                     EventListenerGroup<LoadEventListener> eventListenerGroup = eventListenerRegistry.getEventListenerGroup(EventType.LOAD);
-                    LoadEventListener eventListener = eventListenerGroup.getListener(EventType.LOAD);
+                    LoadEventListener eventListener = eventListenerGroup.getListener();
                     T findEntity = eventListener.onLoad(new LoadEvent<>(id, clazz));
                     savePersistence(findEntity, id);
                     return findEntity;
@@ -65,7 +65,7 @@ public class EntityManagerImpl implements EntityManager {
         IdColumn idColumn = new IdColumn(entity);
         GenerationType generationType = idColumn.getIdGeneratedStrategy(dialect).getGenerationType();
         EventListenerGroup<EventListener> eventListenerGroup = eventListenerRegistry.getEventListenerGroup(EventType.SAVE);
-        EventListener eventListener = eventListenerGroup.getListener(EventType.SAVE);
+        EventListener eventListener = eventListenerGroup.getListener();
 
         if (dialect.getIdGeneratedStrategy(generationType).isAutoIncrement()) {
             Long id = idColumn.getValue();
@@ -104,7 +104,9 @@ public class EntityManagerImpl implements EntityManager {
     @Override
     public void remove(Object entity) {
         IdColumn idColumn = new IdColumn(entity);
-        PersistEventListener eventListener = fastEventSessionService.getPersistEventListener(EventType.DELETE);
+        EventListenerGroup<EventListener> eventListenerGroup = eventListenerRegistry.getEventListenerGroup(
+            EventType.DELETE);
+        EventListener eventListener = eventListenerGroup.getListener();
         eventListener.fireEvent(new DeleteEvent<>(idColumn.getValue(), entity));
         persistContext.removeEntity(entity.getClass(), idColumn.getValue());
     }
@@ -115,7 +117,9 @@ public class EntityManagerImpl implements EntityManager {
         EntityMetaData entityMetaData = new EntityMetaData(entity);
         EntityMetaData previousEntity = persistContext.getSnapshot(entity, idColumn.getValue());
         if (entityMetaData.isDirty(previousEntity)) {
-            PersistEventListener eventListener = fastEventSessionService.getPersistEventListener(EventType.UPDATE);
+            EventListenerGroup<EventListener> eventListenerGroup = eventListenerRegistry.getEventListenerGroup(
+                EventType.UPDATE);
+            EventListener eventListener = eventListenerGroup.getListener();
             eventListener.fireEvent(new UpdateEvent<>(idColumn.getValue(), entity));
             savePersistence(entity, idColumn.getValue());
             return entity;

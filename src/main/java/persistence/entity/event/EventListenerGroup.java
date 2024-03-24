@@ -1,18 +1,17 @@
 package persistence.entity.event;
 
-
-import java.util.Map;
-
 public class EventListenerGroup <T extends EventListener > {
 
-    private final Map<EventType, T> listeners;
+    private final EventType eventType;
+    private final T listener;
 
-    public EventListenerGroup(Map<EventType, T> listeners) {
-        this.listeners = listeners;
+    public EventListenerGroup(EventType eventType, T listener) {
+        this.eventType = eventType;
+        this.listener = listener;
     }
 
-    public T getListener(EventType eventType) {
-        return listeners.get(eventType);
+    public T getListener() {
+        return listener;
     }
 
 }

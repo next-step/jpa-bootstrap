@@ -2,6 +2,7 @@ package persistence.entity.event.load;
 
 import bootstrap.MetaModel;
 import persistence.entity.EntityLoader;
+import persistence.entity.event.PersistEvent;
 
 public class DefaultLoadEventListener implements LoadEventListener {
 
@@ -17,4 +18,8 @@ public class DefaultLoadEventListener implements LoadEventListener {
         return (T) entityLoader.find(event.getClazz(), event.getId());
     }
 
+    @Override
+    public <T, ID> void fireEvent(PersistEvent<T, ID> event) {
+        throw new UnsupportedOperationException();
+    }
 }
