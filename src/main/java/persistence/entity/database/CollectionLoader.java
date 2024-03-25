@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class CollectionLoader<T> {
-    private final JdbcTemplate jdbcTemplate;
-    private final Metamodel metamodel;
     private final PersistentClass<T> persistentClass;
     private final Metadata metadata;
+    private final JdbcTemplate jdbcTemplate;
+    private final Metamodel metamodel;
 
     public CollectionLoader(PersistentClass<T> persistentClass, Metadata metadata, JdbcTemplate jdbcTemplate,
                             Metamodel metamodel) {

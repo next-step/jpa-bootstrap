@@ -39,10 +39,11 @@ public class EntityManagerImpl extends AbstractEntityManager {
 
     private <T> void loadEntity(PersistentClass<T> persistentClass, Long id) {
         if (persistentClass.hasAssociation()) {
-            CollectionLoader<T> collectionLoader = getCollectionLoader(persistentClass);
+            CollectionLoader<T> collectionLoader = getCollectionLoader(persistentClass.getMappedClass());
             collectionLoader.load(id).ifPresent(persistenceContext::addEntity);
         } else {
-            getEntityLoader(persistentClass).load(id).ifPresent(persistenceContext::addEntity);
+            getEntityLoader(persistentClass.getMappedClass()).load(id)
+                    .ifPresent(persistenceContext::addEntity);
         }
     }
 
@@ -67,8 +68,8 @@ public class EntityManagerImpl extends AbstractEntityManager {
     }
 
     private <T> T insertEntity(PersistentClass<T> persistentClass, Object object) {
-        EntityPersister<T> entityPersister = getEntityPersister(persistentClass);
-        EntityLoader<T> entityLoader = getEntityLoader(persistentClass);
+        EntityPersister<T> entityPersister = getEntityPersister(persistentClass.getMappedClass());
+        EntityLoader<T> entityLoader = getEntityLoader(persistentClass.getMappedClass());
 
         Long newId = entityPersister.insert(object);
         T load = entityLoader.load(newId).get();
@@ -86,7 +87,7 @@ public class EntityManagerImpl extends AbstractEntityManager {
         ValueMap diff = EntitySnapshot.of(persistentClass, oldEntity).diff(EntitySnapshot.of(persistentClass, entity));
 
         if (!diff.isEmpty()) {
-            EntityPersister<T> entityPersister = getEntityPersister(persistentClass);
+            EntityPersister<T> entityPersister = getEntityPersister(persistentClass.getMappedClass());
             entityPersister.update(id, diff);
             persistenceContext.addEntity(entity);
         }
@@ -102,7 +103,7 @@ public class EntityManagerImpl extends AbstractEntityManager {
         PersistentClass<?> persistentClass = metadata.getPersistentClass(entity.getClass());
         Long id = metadata.getRowId(entity);
 
-        EntityPersister<?> entityPersister = getEntityPersister(persistentClass);
+        EntityPersister<?> entityPersister = getEntityPersister(persistentClass.getMappedClass());
         entityPersister.delete(id);
 
         persistenceContext.removeEntity(entity);

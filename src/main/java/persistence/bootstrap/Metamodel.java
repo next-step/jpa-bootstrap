@@ -5,9 +5,9 @@ import persistence.entity.database.EntityLoader;
 import persistence.entity.database.EntityPersister;
 
 public interface Metamodel {
-    <T> EntityPersister<T> getEntityPersister(Class<T> entityClass);
+    <T> EntityPersister<T> getEntityPersister(Class<T> clazz);
 
-    <T> EntityLoader<T> getEntityLoader(Class<T> entityClass);
+    <T> EntityLoader<T> getEntityLoader(Class<T> clazz);
 
-    <T> CollectionLoader<T> getCollectionLoader(Class<T> entityClass);
+    <T> CollectionLoader<T> getCollectionLoader(Class<T> clazz);
 }
