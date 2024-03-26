@@ -5,8 +5,10 @@ import database.mapping.Association;
 import database.mapping.column.GeneralEntityColumn;
 import database.mapping.column.PrimaryKeyEntityColumn;
 import persistence.bootstrap.Metadata;
+import database.mapping.EntityColumns;
 import persistence.entity.context.PersistentClass;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -14,65 +16,49 @@ public class Create {
     private final String tableName;
     private final Dialect dialect;
     private final Metadata metadata;
-    private final List<Association> associationRelatedToOtherEntities;
+
     private final PrimaryKeyEntityColumn primaryKey;
     private final List<GeneralEntityColumn> generalColumns;
-
-    private String sql;
+    private final List<Association> associationColumns;
 
     public static Create from(PersistentClass<?> persistentClass, Metadata metadata, Dialect dialect) {
-        Create create = new Create(
+        EntityColumns entityColumns = persistentClass.getEntityColumns(metadata.getEntityClasses());
+        return new Create(
                 persistentClass.getTableName(),
-                persistentClass.getPrimaryKey(),
-                persistentClass.getGeneralColumns(),
-                metadata.getAssociationsRelatedTo(persistentClass),
                 metadata,
-                dialect
+                dialect,
+                entityColumns.getPrimaryKey(),
+                entityColumns.getGeneralColumns(),
+                entityColumns.getAssociationColumns()
         );
-        create.buildSql();
-        return create;
     }
 
     private Create(
             String tableName,
+            Metadata metadata,
+            Dialect dialect,
             PrimaryKeyEntityColumn primaryKey,
             List<GeneralEntityColumn> generalColumns,
-            List<Association> associationRelatedToOtherEntities,
-            Metadata metadata,
-            Dialect dialect) {
+            List<Association> associationColumns) {
         this.tableName = tableName;
+        this.metadata = metadata;
+        this.dialect = dialect;
         this.primaryKey = primaryKey;
         this.generalColumns = generalColumns;
-        this.associationRelatedToOtherEntities = associationRelatedToOtherEntities;
-
-        this.metadata = metadata;
-
-        this.dialect = dialect;
-
-        this.sql = null;
+        this.associationColumns = associationColumns;
     }
 
-    private void buildSql() {
-        ColumnsBuilder columnsBuilder = new ColumnsBuilder();
-        columnsBuilder.add(primaryKey.getColumnName(), getPrimaryKeyColumnDefinition());
-        for (GeneralEntityColumn generalEntityColumn : generalColumns) {
-            columnsBuilder.add(generalEntityColumn.getColumnName(), getGeneralColumnDefinition(generalEntityColumn));
-        }
-        for (Association association : associationRelatedToOtherEntities) {
-            columnsBuilder.add(association.getForeignKeyColumnName(), getAssociationFieldDefinition(association));
-        }
-
-        this.sql = String.format(dialect.createTableClause(), tableName, String.join(", ", columnsBuilder.toList()));
-    }
-
-    private String getPrimaryKeyColumnDefinition() {
+    private String getPrimaryKeyColumnDefinition(PrimaryKeyEntityColumn primaryKey) {
         StringJoiner definitionJoiner = new StringJoiner(" ");
         definitionJoiner.add(primaryKey.getColumnName());
+
         definitionJoiner.add(dialect.convertToSqlTypeDefinition(primaryKey.getType(), primaryKey.getColumnLength()));
+
         if (primaryKey.isAutoIncrement()) {
             definitionJoiner.add(dialect.autoIncrementDefinition());
         }
         definitionJoiner.add(dialect.primaryKeyDefinition());
+
         return definitionJoiner.toString();
     }
 
@@ -95,6 +81,16 @@ public class Create {
     }
 
     public String toSql() {
-        return sql;
+        List<String> list = new ArrayList<>();
+
+        list.add(getPrimaryKeyColumnDefinition(primaryKey));
+        for (GeneralEntityColumn generalEntityColumn : generalColumns) {
+            list.add(getGeneralColumnDefinition(generalEntityColumn));
+        }
+        for (Association association : associationColumns) {
+            list.add(getAssociationFieldDefinition(association));
+        }
+
+        return String.format(dialect.createTableClause(), tableName, String.join(", ", list));
     }
 }

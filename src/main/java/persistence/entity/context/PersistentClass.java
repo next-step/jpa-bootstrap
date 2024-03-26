@@ -1,10 +1,7 @@
 package persistence.entity.context;
 
 import database.dialect.Dialect;
-import database.mapping.Association;
-import database.mapping.ColumnsMetadata;
-import database.mapping.EntityAssociationMetadata;
-import database.mapping.TableMetadata;
+import database.mapping.*;
 import database.mapping.column.EntityColumn;
 import database.mapping.column.GeneralEntityColumn;
 import database.mapping.column.PrimaryKeyEntityColumn;
@@ -178,5 +175,9 @@ public class PersistentClass<T> {
 
     public Long getRowId(Object entity) {
         return (Long) primaryKey.getValue(entity);
+    }
+
+    public EntityColumns getEntityColumns(List<Class<?>> entityClasses) {
+        return EntityColumns.columns(this, entityClasses);
     }
 }
