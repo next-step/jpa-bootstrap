@@ -1,7 +1,6 @@
 package persistence.entity.database;
 
 import database.sql.dml.Select;
-import database.sql.dml.SelectByPrimaryKey;
 import database.sql.dml.part.WhereMap;
 import jdbc.JdbcTemplate;
 import jdbc.RowMapper;
@@ -14,18 +13,24 @@ import java.util.Optional;
 public class EntityLoader<T> {
     private final JdbcTemplate jdbcTemplate;
     private final PersistentClass<T> persistentClass;
-    private final Metadata metadata;
+    private final Select selectQuery;
 
-    public EntityLoader(PersistentClass<T> persistentClass, Metadata metadata, JdbcTemplate jdbcTemplate) {
+    public static <T> EntityLoader<T> from(PersistentClass<T> persistentClass,
+                                           Metadata metadata,
+                                           JdbcTemplate jdbcTemplate) {
+        return new EntityLoader<>(persistentClass,
+                                  jdbcTemplate,
+                                  Select.from(persistentClass, metadata));
+    }
+
+    private EntityLoader(PersistentClass<T> persistentClass, JdbcTemplate jdbcTemplate, Select selectQuery) {
         this.persistentClass = persistentClass;
-        this.metadata = metadata;
         this.jdbcTemplate = jdbcTemplate;
+        this.selectQuery = selectQuery;
     }
 
     public Optional<T> load(Long id) {
-        String query = SelectByPrimaryKey.from(persistentClass, metadata)
-                .byId(id)
-                .buildQuery();
+        String query = selectQuery.toSql(id);
         return jdbcTemplate.query(query, persistentClass.getRowMapper()).stream().findFirst();
     }
 
@@ -34,9 +39,7 @@ public class EntityLoader<T> {
     }
 
     private List<T> select(WhereMap whereMap, RowMapper<T> rowMapper) {
-        String query = Select.from(persistentClass, metadata)
-                .where(whereMap)
-                .buildQuery();
+        String query = selectQuery.toSql(whereMap);
         return jdbcTemplate.query(query, rowMapper);
     }
 }

@@ -23,7 +23,7 @@ class DropTest {
             "app.entity.OldPerson3:DROP TABLE users"
     }, delimiter = ':')
     void buildDeleteQuery(Class<?> clazz, String expected) {
-        String actual = Drop.from(metadata.getPersistentClass(clazz)).buildQuery();
+        String actual = Drop.from(metadata.getPersistentClass(clazz)).toSql(false);
         assertThat(actual).isEqualTo(expected);
     }
 }

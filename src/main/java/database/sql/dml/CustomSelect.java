@@ -38,7 +38,8 @@ public class CustomSelect {
     }
 
     private CustomSelect(String tableName, List<EntityColumn> allEntityColumns,
-                         List<Association> associations, List<String> allColumnNamesWithAssociations, Metadata metadata) {
+                         List<Association> associations, List<String> allColumnNamesWithAssociations,
+                         Metadata metadata) {
         this.tableName = tableName;
         this.allEntityColumns = allEntityColumns;
         this.associations = associations;
@@ -46,17 +47,17 @@ public class CustomSelect {
         this.metadata = metadata;
     }
 
-    public String buildQuery(WhereMap whereMap) {
-        return String.format(QUERY_WITH_WHERE, buildQuery(), whereClause(whereMap));
-    }
-
-    public String buildQuery() {
+    public String toSql() {
         String columns = String.join(COLUMNS_DELIMITER, selectColumns());
         String query = String.format(SELECT, columns, tableWithAlias(this.tableName, TABLE_ALIAS));
         if (!joins().isEmpty()) {
             query = query + " " + String.join(" ", joins());
         }
         return query;
+    }
+
+    public String toSql(WhereMap whereMap) {
+        return String.format(QUERY_WITH_WHERE, toSql(), whereClause(whereMap));
     }
 
     private List<String> selectColumns() {

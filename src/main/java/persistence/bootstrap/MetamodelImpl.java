@@ -29,9 +29,9 @@ public class MetamodelImpl implements Metamodel {
         metadata.getEntityClasses().forEach(mappedClass -> {
             PersistentClass<?> persistentClass = metadata.getPersistentClass((Class<?>) mappedClass);
 
-            entityPersisterMap.put(mappedClass, new EntityPersister<>(persistentClass, metadata, jdbcTemplate, dialect));
-            entityLoaderMap.put(mappedClass, new EntityLoader<>(persistentClass, metadata, jdbcTemplate));
-            collectionLoaderMap.put(mappedClass, new CollectionLoader<>(persistentClass, metadata, jdbcTemplate, this));
+            entityPersisterMap.put(mappedClass, EntityPersister.from(persistentClass, metadata, jdbcTemplate, dialect));
+            entityLoaderMap.put(mappedClass, EntityLoader.from(persistentClass, metadata, jdbcTemplate));
+            collectionLoaderMap.put(mappedClass, CollectionLoader.from(persistentClass, metadata, jdbcTemplate, dialect, this));
         });
     }
 

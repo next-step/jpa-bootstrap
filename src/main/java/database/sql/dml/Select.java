@@ -16,7 +16,6 @@ public class Select {
     private final String primaryKeyColumnName;
     private final List<String> generalEntityColumnNames;
     private final List<String> allColumnNamesWithAssociations;
-    private WhereClause where;
 
     public static <T> Select from(PersistentClass<T> persistentClass, Metadata metadata) {
         return new Select(
@@ -33,23 +32,26 @@ public class Select {
         this.primaryKeyColumnName = primaryKeyColumnName;
         this.generalEntityColumnNames = generalEntityColumnNames;
         this.allColumnNamesWithAssociations = allColumnNamesWithAssociations;
-        this.where = null;
     }
 
-    public Select where(WhereMap whereMap) {
-        this.where = WhereClause.from(whereMap, allColumnNamesWithAssociations);
-        return this;
+    public String toSql(List<Long> ids) {
+        return toSql(WhereMap.of("id", ids));
     }
 
-    public Select id(Long id) {
-        return where(WhereMap.of("id", id));
+    public String toSql(Long id) {
+        return toSql(WhereMap.of("id", id));
     }
 
-    public Select ids(List<Long> ids) {
-        return where(WhereMap.of("id", ids));
+    public String toSql(WhereMap whereMap) {
+        WhereClause whereClause = WhereClause.from(whereMap, allColumnNamesWithAssociations);
+        return toSql(whereClause);
     }
 
-    public String buildQuery() {
+    public String toSql() {
+        return toSql((WhereClause) null);
+    }
+
+    private String toSql(WhereClause where) {
         StringJoiner query = new StringJoiner(" ")
                 .add("SELECT")
                 .add(joinAllColumnNames())

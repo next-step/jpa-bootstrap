@@ -40,19 +40,14 @@ class InsertTest {
     @ParameterizedTest
     @MethodSource("testCases")
     void buildInsertQuery(ValueMap valueMap, String expected) {
-        String actual = Insert.from(metadata.getPersistentClass(Person4.class))
-                .values(valueMap)
-                .toQueryString();
+        String actual = Insert.from(metadata.getPersistentClass(Person4.class)).toSql(null, valueMap);
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     void insertQueryWithId() {
         ValueMap valueMap = ValueMap.from(Map.of("nick_name", "abc", "old", 14, "email", "a@b.com"));
-        String actual = Insert.from(metadata.getPersistentClass(Person4.class))
-                .id(10L)
-                .values(valueMap)
-                .toQueryString();
+        String actual = Insert.from(metadata.getPersistentClass(Person4.class)).toSql(10L, valueMap);
         assertThat(actual).isEqualTo("INSERT INTO users (id, nick_name, old, email) VALUES (10, 'abc', 14, 'a@b.com')");
     }
 
@@ -60,9 +55,7 @@ class InsertTest {
     void insertIntoEntityWithNoId() {
         ValueMap valueMap = ValueMap.from(Map.of("nick_name", "abc", "old", 14, "email", "a@b.com"));
         String actual = Insert.from(metadata.getPersistentClass(NoAutoIncrementUser.class))
-                .id(10L)
-                .values(valueMap)
-                .toQueryString();
+                .toSql(10L, valueMap);
         assertThat(actual)
                 .isEqualTo("INSERT INTO users_no_auto_increment (id, nick_name, old, email) VALUES (10, 'abc', 14, 'a@b.com')");
     }

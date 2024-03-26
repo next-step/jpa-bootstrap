@@ -13,42 +13,43 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static testsupport.EntityTestUtils.initializer;
 
 class SelectTest {
-    private Metadata metadata;
+    private Select selectQuery;
 
     @BeforeEach
     void setUp() {
-        metadata = initializer(null).getMetadata();
-    }
-
-    private Select newSelect() {
-        return Select.from(metadata.getPersistentClass(Person4.class), metadata);
+        Metadata metadata = initializer(null).getMetadata();
+        selectQuery = Select.from(metadata.getPersistentClass(Person4.class), metadata);
     }
 
     @Test
     void buildSelectQuery() {
-        String actual = newSelect().buildQuery();
+        String actual = selectQuery.toSql();
         assertThat(actual).isEqualTo("SELECT id, nick_name, old, email FROM users");
     }
 
     @Test
     void buildSelectQueryWithCollection() {
-        String query = newSelect().ids(List.of(1L, 2L)).buildQuery();
+        String query = selectQuery.toSql(List.of(1L, 2L));
         assertThat(query).isEqualTo("SELECT id, nick_name, old, email FROM users WHERE id IN (1, 2)");
 
     }
 
     @Test
     void buildSelectQueryWithEmptyCollection() {
-        String emptyArrayQuery = newSelect().ids(List.of()).buildQuery();
+        String emptyArrayQuery = selectQuery.toSql(List.of());
         assertThat(emptyArrayQuery).isEqualTo("SELECT id, nick_name, old, email FROM users WHERE id IN ()");
     }
 
     @Test
     void buildSelectQueryWithInvalidColumn() {
         RuntimeException exception = assertThrows(RuntimeException.class,
-                                                  () -> newSelect()
-                                                          .where(WhereMap.of("aaaaa", List.of()))
-                                                          .buildQuery());
+                                                  () -> selectQuery.toSql(WhereMap.of("aaaaa", List.of())));
         assertThat(exception.getMessage()).isEqualTo("Invalid query: aaaaa");
+    }
+
+    @Test
+    void buildSelectPrimaryKeyQuery() {
+        String actual = selectQuery.toSql(1L);
+        assertThat(actual).isEqualTo("SELECT id, nick_name, old, email FROM users WHERE id = 1");
     }
 }

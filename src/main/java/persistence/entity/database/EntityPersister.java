@@ -19,63 +19,85 @@ public class EntityPersister<T> {
     private final PersistentClass<T> persistentClass;
     private final Metadata metadata;
     private final JdbcTemplate jdbcTemplate;
-    private final Dialect dialect;
+    private final Insert insertQuery;
+    private final Update updateQuery;
+    private final Delete deleteQuery;
+    private final Create createQuery;
+    private final Drop dropQuery;
 
-    public EntityPersister(PersistentClass<T> persistentClass, Metadata metadata, JdbcTemplate jdbcTemplate,
-                           Dialect dialect) {
+    public static <T> EntityPersister<T> from(PersistentClass<T> persistentClass,
+                                              Metadata metadata,
+                                              JdbcTemplate jdbcTemplate,
+                                              Dialect dialect) {
+        return new EntityPersister<>(persistentClass,
+                                     metadata,
+                                     jdbcTemplate,
+                                     Insert.from(persistentClass),
+                                     Update.from(persistentClass),
+                                     Delete.from(persistentClass, metadata),
+                                     Create.from(persistentClass, metadata, dialect),
+                                     Drop.from(persistentClass));
+    }
+
+    private EntityPersister(PersistentClass<T> persistentClass,
+                            Metadata metadata,
+                            JdbcTemplate jdbcTemplate,
+                            Insert insertQuery,
+                            Update updateQuery,
+                            Delete deleteQuery,
+                            Create createQuery,
+                            Drop dropQuery) {
         this.persistentClass = persistentClass;
         this.metadata = metadata;
         this.jdbcTemplate = jdbcTemplate;
-        this.dialect = dialect;
+
+        this.insertQuery = insertQuery;
+        this.updateQuery = updateQuery;
+        this.deleteQuery = deleteQuery;
+        this.createQuery = createQuery;
+        this.dropQuery = dropQuery;
     }
 
     public Long insert(Object entity) {
         Long id = metadata.getRowId(entity);
-        checkGenerationStrategy(persistentClass.requiresIdWhenInserting(), id, persistentClass.getMappedClassName());
-        id = persistentClass.requiresIdWhenInserting() ? id : null;
+        checkGenerationStrategy(id);
 
-        String query = Insert.from(persistentClass)
-                .id(id)
-                .valuesFromEntity(entity).toQueryString();
+        if (!persistentClass.requiresIdWhenInserting()) {
+            id = null;
+        }
+
+        String query = insertQuery.toSqlFromEntity(id, entity);
         return jdbcTemplate.execute(query);
     }
 
-    private void checkGenerationStrategy(boolean requiresIdWhenInserting, Long id, String entityClassName) {
-        if (requiresIdWhenInserting && id == null) {
-            throw new PrimaryKeyMissingException(entityClassName);
+    private void checkGenerationStrategy(Long id) {
+        if (persistentClass.requiresIdWhenInserting() && id == null) {
+            throw new PrimaryKeyMissingException(persistentClass.getMappedClassName());
         }
     }
 
     public void update(Long id, ValueMap changes) {
-        String query = Update.from(persistentClass)
-                .changes(changes)
-                .byId(id)
-                .buildQuery();
+        String query = updateQuery.toSql(changes, id);
         jdbcTemplate.execute(query);
     }
 
     public void updateEntity(Long id, Object entity) {
-        String query = Update.from(persistentClass)
-                .changesFromEntity(entity)
-                .byId(id)
-                .buildQuery();
+        String query = updateQuery.toSqlFromEntity(entity, id);
         jdbcTemplate.execute(query);
     }
 
     public void delete(Long id) {
-        String query = Delete.from(persistentClass, metadata)
-                .id(id)
-                .buildQuery();
+        String query = deleteQuery.toSql(id);
         jdbcTemplate.execute(query);
     }
 
     public void createTable() {
-        String query = Create.from(persistentClass, metadata, dialect).buildQuery();
+        String query = createQuery.toSql();
         jdbcTemplate.execute(query);
     }
 
     public void dropTable(boolean ifExists) {
-        String query = Drop.from(persistentClass).ifExists(ifExists).buildQuery();
+        String query = dropQuery.toSql(ifExists);
         jdbcTemplate.execute(query);
     }
 }

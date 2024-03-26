@@ -16,20 +16,17 @@ import java.util.stream.Collectors;
 
 // TODO: 테스트 추가
 public class JoinedRowsCombiner<T> {
-    private final List<JoinedRow<T>> joinedRows;
     private final PersistentClass<T> persistentClass;
     private final Metadata metadata;
     private final Metamodel metamodel;
 
-    public JoinedRowsCombiner(List<JoinedRow<T>> joinedRows,
-                              PersistentClass<T> persistentClass, Metadata metadata, Metamodel metamodel) {
-        this.joinedRows = joinedRows;
+    public JoinedRowsCombiner(PersistentClass<T> persistentClass, Metadata metadata, Metamodel metamodel) {
         this.persistentClass = persistentClass;
         this.metadata = metadata;
         this.metamodel = metamodel;
     }
 
-    public Optional<T> merge() {
+    public Optional<T> merge(List<JoinedRow<T>> joinedRows) {
         if (joinedRows.isEmpty()) {
             return Optional.empty();
         }
@@ -38,18 +35,18 @@ public class JoinedRowsCombiner<T> {
 
         for (Association association : this.persistentClass.getAssociations()) {
             String fieldName = association.getFieldName();
-            Object value = getFieldValue(association, entity);
+            Object value = getFieldValue(association, entity, joinedRows);
             setFieldValue(entity, fieldName, value);
         }
 
         return Optional.of(entity);
     }
 
-    private Object getFieldValue(Association association, T entity) {
+    private Object getFieldValue(Association association, T entity, List<JoinedRow<T>> joinedRows) {
         if (association.isLazyLoad()) {
             return buildLazyLoadProxy(association, metadata.getRowId(entity));
         }
-        return filterEntitiesByType(association.getGenericTypeClass(metadata));
+        return filterEntitiesByType(association.getGenericTypeClass(metadata), joinedRows);
     }
 
     private <R> Object buildLazyLoadProxy(Association association, Long id) {
@@ -61,7 +58,7 @@ public class JoinedRowsCombiner<T> {
         });
     }
 
-    private <R> List<R> filterEntitiesByType(PersistentClass<R> persistentClass) {
+    private <R> List<R> filterEntitiesByType(PersistentClass<R> persistentClass, List<JoinedRow<T>> joinedRows) {
         return joinedRows.stream()
                 .map(joinedRow -> joinedRow.mapValues(persistentClass))
                 .collect(Collectors.toList());

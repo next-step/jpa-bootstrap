@@ -16,8 +16,6 @@ public class Update {
     private final String tableName;
     private final List<GeneralEntityColumn> generalColumns;
     private final PrimaryKeyEntityColumn primaryKey;
-    private ValueMap changes;
-    private WhereClause where;
 
     public static <T> Update from(PersistentClass<T> persistentClass) {
         return new Update(
@@ -30,35 +28,23 @@ public class Update {
         this.tableName = tableName;
         this.generalColumns = generalColumns;
         this.primaryKey = primaryKey;
-        this.changes = null;
-        this.where = null;
     }
 
-    public Update changes(ValueMap from) {
-        this.changes = from;
-        return this;
-    }
-
-    public Update changesFromEntity(Object entity) {
-        return this.changes(ValueMap.fromEntity(entity, generalColumns));
-    }
-
-    public Update byId(long id) {
-        this.where = WhereClause.from(
+    public String toSql(ValueMap changes, Long id) {
+        WhereClause where = WhereClause.from(
                 WhereMap.of(primaryKey.getColumnName(), id),
-                List.of(primaryKey.getColumnName()))
-        ;
-        return this;
-    }
-
-    public String buildQuery() {
+                List.of(primaryKey.getColumnName()));
         return String.format("UPDATE %s SET %s %s",
                              tableName,
-                             setClauses(),
+                             setClauses(changes),
                              where.toQuery());
     }
 
-    private String setClauses() {
+    public String toSqlFromEntity(Object entity, Long id) {
+        return toSql(ValueMap.fromEntity(entity, generalColumns), id);
+    }
+
+    private String setClauses(ValueMap changes) {
         StringJoiner joiner = new StringJoiner(", ");
         for (GeneralEntityColumn generalColumn : generalColumns) {
             String columnName = generalColumn.getColumnName();

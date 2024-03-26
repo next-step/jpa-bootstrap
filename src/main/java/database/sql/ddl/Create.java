@@ -18,14 +18,10 @@ public class Create {
     private final PrimaryKeyEntityColumn primaryKey;
     private final List<GeneralEntityColumn> generalColumns;
 
-    private final String autoIncrementClause;
-    private final String primaryKeyClause;
-    private final String nullableClause;
-    private final String notNullClause;
-    private final String createTableClause;
+    private String sql;
 
     public static Create from(PersistentClass<?> persistentClass, Metadata metadata, Dialect dialect) {
-        return new Create(
+        Create create = new Create(
                 persistentClass.getTableName(),
                 persistentClass.getPrimaryKey(),
                 persistentClass.getGeneralColumns(),
@@ -33,6 +29,8 @@ public class Create {
                 metadata,
                 dialect
         );
+        create.buildSql();
+        return create;
     }
 
     private Create(
@@ -50,50 +48,42 @@ public class Create {
         this.metadata = metadata;
 
         this.dialect = dialect;
-        this.createTableClause = dialect.createTableClause();
-        this.autoIncrementClause = dialect.autoIncrementDefinition();
-        this.primaryKeyClause = dialect.primaryKeyDefinition();
-        this.nullableClause = dialect.nullableDefinition();
-        this.notNullClause = dialect.notNullDefinition();
+
+        this.sql = null;
     }
 
-    public String buildQuery() {
+    private void buildSql() {
         ColumnsBuilder columnsBuilder = new ColumnsBuilder();
-        columnsBuilder.add(primaryKey.getColumnName(), getPrimaryKeyColumnDefinition(primaryKey));
-        generalColumns.forEach(generalEntityColumn -> columnsBuilder.add(generalEntityColumn.getColumnName(), getGeneralColumnDefinition(generalEntityColumn)));
-        associationRelatedToOtherEntities.forEach(association -> columnsBuilder.add(association.getForeignKeyColumnName(), getAssociationFieldDefinition(association)));
+        columnsBuilder.add(primaryKey.getColumnName(), getPrimaryKeyColumnDefinition());
+        for (GeneralEntityColumn generalEntityColumn : generalColumns) {
+            columnsBuilder.add(generalEntityColumn.getColumnName(), getGeneralColumnDefinition(generalEntityColumn));
+        }
+        for (Association association : associationRelatedToOtherEntities) {
+            columnsBuilder.add(association.getForeignKeyColumnName(), getAssociationFieldDefinition(association));
+        }
 
-        return String.format(createTableClause, tableName, String.join(", ", columnsBuilder.toList()));
+        this.sql = String.format(dialect.createTableClause(), tableName, String.join(", ", columnsBuilder.toList()));
     }
 
-    private String getPrimaryKeyColumnDefinition(PrimaryKeyEntityColumn entityColumn) {
-        String columnName = entityColumn.getColumnName();
-        Class<?> type = entityColumn.getType();
-        Integer columnLength = entityColumn.getColumnLength();
-        boolean autoIncrement = entityColumn.isAutoIncrement();
-
+    private String getPrimaryKeyColumnDefinition() {
         StringJoiner definitionJoiner = new StringJoiner(" ");
-        definitionJoiner.add(columnName);
-        definitionJoiner.add(dialect.convertToSqlTypeDefinition(type, columnLength));
-
-        if (autoIncrement) {
-            definitionJoiner.add(autoIncrementClause);
+        definitionJoiner.add(primaryKey.getColumnName());
+        definitionJoiner.add(dialect.convertToSqlTypeDefinition(primaryKey.getType(), primaryKey.getColumnLength()));
+        if (primaryKey.isAutoIncrement()) {
+            definitionJoiner.add(dialect.autoIncrementDefinition());
         }
-        definitionJoiner.add(primaryKeyClause);
+        definitionJoiner.add(dialect.primaryKeyDefinition());
         return definitionJoiner.toString();
     }
 
     private String getGeneralColumnDefinition(GeneralEntityColumn entityColumn) {
-        String columnName = entityColumn.getColumnName();
-        Class<?> type = entityColumn.getType();
-        Integer columnLength = entityColumn.getColumnLength();
-        String typeDefinition = dialect.convertToSqlTypeDefinition(type, columnLength);
-        boolean nullable = entityColumn.isNullable();
         return String.format(
                 "%s %s %s",
-                columnName,
-                typeDefinition,
-                nullable ? nullableClause : notNullClause);
+                entityColumn.getColumnName(),
+                dialect.convertToSqlTypeDefinition(
+                        entityColumn.getType(),
+                        entityColumn.getColumnLength()),
+                entityColumn.isNullable() ? dialect.nullableDefinition() : dialect.notNullDefinition());
     }
 
     private String getAssociationFieldDefinition(Association associationColumn) {
@@ -101,6 +91,10 @@ public class Create {
                 "%s %s %s",
                 associationColumn.getForeignKeyColumnName(),
                 associationColumn.getForeignKeyColumnType(metadata, dialect),
-                notNullClause);
+                dialect.notNullDefinition());
+    }
+
+    public String toSql() {
+        return sql;
     }
 }

@@ -34,7 +34,7 @@ class CreateTest {
 
     private <T> void assertCreateQuery(Class<T> clazz, String expected) {
         Create create = Create.from(metadata.getPersistentClass(clazz), metadata, dialect);
-        String actual = create.buildQuery();
+        String actual = create.toSql();
         assertThat(actual).isEqualTo(expected);
     }
 }

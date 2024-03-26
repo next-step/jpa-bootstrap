@@ -46,6 +46,6 @@ class DeleteTest {
         WhereMap whereMap = testCases.whereMap;
         String expectedQuery = testCases.expectedQuery;
 
-        assertThat(delete.where(whereMap).buildQuery()).isEqualTo(expectedQuery);
+        assertThat(delete.toSql(whereMap)).isEqualTo(expectedQuery);
     }
 }

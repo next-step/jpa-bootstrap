@@ -8,7 +8,6 @@ import database.mapping.TableMetadata;
 import database.mapping.column.EntityColumn;
 import database.mapping.column.GeneralEntityColumn;
 import database.mapping.column.PrimaryKeyEntityColumn;
-import database.mapping.rowmapper.JoinedRowMapper;
 import database.mapping.rowmapper.SingleRowMapperFactory;
 import jdbc.RowMapper;
 
@@ -36,7 +35,6 @@ public class PersistentClass<T> {
     private final ColumnsMetadata columnsMetadata;
 
     private final RowMapper<T> rowMapper;
-    private final JoinedRowMapper<T> joinedRowMapper;
 
     public static <T> PersistentClass<T> fromInternal(Class<T> mappedClass, Dialect dialect) {
         TableMetadata tableMetadata = new TableMetadata(mappedClass);
@@ -94,7 +92,6 @@ public class PersistentClass<T> {
         this.associations = associations;
 
         this.rowMapper = SingleRowMapperFactory.create(this, dialect);
-        this.joinedRowMapper = new JoinedRowMapper<>(this, dialect);
     }
 
     public Class<T> getMappedClass() {
@@ -143,10 +140,6 @@ public class PersistentClass<T> {
 
     public RowMapper<T> getRowMapper() {
         return rowMapper;
-    }
-
-    public JoinedRowMapper<T> getJoinedRowMapper() {
-        return joinedRowMapper;
     }
 
     public T newEntity() {

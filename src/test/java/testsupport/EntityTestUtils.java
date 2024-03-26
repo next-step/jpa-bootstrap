@@ -35,7 +35,7 @@ public class EntityTestUtils {
         Metadata metadata = initializer(jdbcTemplate).getMetadata();
         PersistentClass<Person5> persistentClass = metadata.getPersistentClass(Person5.class);
 
-        String query = Select.from(persistentClass, metadata).buildQuery();
+        String query = Select.from(persistentClass, metadata).toSql();
         return jdbcTemplate.query(query, resultSet -> new Person5(
                 resultSet.getLong("id"),
                 resultSet.getString("nick_name"),
