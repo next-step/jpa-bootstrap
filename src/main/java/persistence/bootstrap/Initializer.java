@@ -2,7 +2,9 @@ package persistence.bootstrap;
 
 import database.dialect.Dialect;
 import jdbc.JdbcTemplate;
+import persistence.entitymanager.AbstractEntityManager;
 import persistence.entitymanager.EntityManager;
+import persistence.entitymanager.SessionContract;
 
 import java.util.List;
 
@@ -59,7 +61,7 @@ public class Initializer {
     public void createTables() {
         EntityManager entityManager = createEntityManagerFactory().openSession();
         for (Class<?> clazz : entityClasses) {
-            entityManager.createTable(clazz);
+            ((SessionContract) entityManager).getEntityPersister(clazz).createTable();
         }
     }
 

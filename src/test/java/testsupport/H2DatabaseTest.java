@@ -11,7 +11,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import persistence.bootstrap.EntityManagerFactory;
 import persistence.bootstrap.Initializer;
+import persistence.entity.database.EntityPersister;
+import persistence.entitymanager.AbstractEntityManager;
 import persistence.entitymanager.EntityManager;
+import persistence.entitymanager.SessionContract;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -53,9 +56,10 @@ abstract public class H2DatabaseTest {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
         jdbcTemplate.execute("DROP TABLE users IF EXISTS");
 
-        EntityManager entityManager = entityManagerFactory.openSession();
-        entityManager.dropTable(Person5.class, true);
-        entityManager.createTable(Person5.class);
+        SessionContract sessionContract = (SessionContract) entityManagerFactory.openSession();
+        EntityPersister<Person5> entityPersister = sessionContract.getEntityPersister(Person5.class);
+        entityPersister.dropTable(true);
+        entityPersister.createTable();
         executedQueries.clear();
     }
 

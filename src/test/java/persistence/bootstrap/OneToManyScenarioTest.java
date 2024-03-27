@@ -7,7 +7,9 @@ import app.entity.LazyLoadTestOrderItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.entity.database.EntityPersister;
 import persistence.entitymanager.EntityManager;
+import persistence.entitymanager.SessionContract;
 import testsupport.H2DatabaseTest;
 
 import java.util.List;
@@ -26,17 +28,12 @@ class OneToManyScenarioTest extends H2DatabaseTest {
 
         entityManager = entityManagerFactory.openSession();
 
-        entityManager.dropTable(EagerLoadTestOrder.class, true);
-        entityManager.createTable(EagerLoadTestOrder.class);
-
-        entityManager.dropTable(EagerLoadTestOrderItem.class, true);
-        entityManager.createTable(EagerLoadTestOrderItem.class);
-
-        entityManager.dropTable(LazyLoadTestOrder.class, true);
-        entityManager.createTable(LazyLoadTestOrder.class);
-
-        entityManager.dropTable(LazyLoadTestOrderItem.class, true);
-        entityManager.createTable(LazyLoadTestOrderItem.class);
+        List<Class<?>> classes = List.of(EagerLoadTestOrder.class, EagerLoadTestOrderItem.class, LazyLoadTestOrder.class, LazyLoadTestOrderItem.class);
+        for (Class<?> clazz : classes) {
+            EntityPersister<?> entityPersister = ((SessionContract) entityManager).getEntityPersister(clazz);
+            entityPersister.dropTable(true);
+            entityPersister.createTable();
+        }
 
         jdbcTemplate.execute("INSERT INTO eagerload_orders (orderNumber) VALUES (1234)");
         jdbcTemplate.execute("INSERT INTO eagerload_order_items (product, quantity, order_id) VALUES ('product1', 5, 1)");
