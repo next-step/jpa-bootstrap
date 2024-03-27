@@ -5,7 +5,7 @@ import persistence.entity.database.CollectionLoader;
 import persistence.entity.database.EntityLoader;
 import persistence.entity.database.EntityPersister;
 
-public abstract class AbstractEntityManager implements SessionContract, EntityManager {
+public abstract class AbstractEntityManager implements SessionContract, EntityManager, Session {
     protected final Metamodel metamodel;
 
     protected AbstractEntityManager(Metamodel metamodel) {

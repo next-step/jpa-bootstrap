@@ -31,6 +31,10 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     @Override
     public EntityManager openSession() {
 //        Session session = sessionContext.createSession(metamodel);
-        return EntityManagerImpl.newEntityManager(metamodel, metadata, eventListenerRegistry);
+        return EntityManagerImpl.newEntityManager(
+                metamodel,
+                metadata,
+                eventListenerRegistry
+        );
     }
 }

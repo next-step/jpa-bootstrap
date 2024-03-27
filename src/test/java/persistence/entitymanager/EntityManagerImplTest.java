@@ -83,6 +83,7 @@ class EntityManagerImplTest extends H2DatabaseTest {
 
         Person5 person1 = entityManager.find(Person5.class, getLastSavedId(jdbcTemplate));
         entityManager.remove(person1);
+        entityManager.flush();
 
         List<Person5> people = findPeople(jdbcTemplate);
         assertThat(people).hasSize(0);

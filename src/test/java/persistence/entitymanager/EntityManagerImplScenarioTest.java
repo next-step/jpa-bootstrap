@@ -37,6 +37,7 @@ class EntityManagerImplScenarioTest extends H2DatabaseTest {
         entityManager.find(Person5.class, 1L);
 
         entityManager.remove(fetchedPerson);
+        entityManager.flush();
 
         assertAll(
                 () -> assertSamePerson(fetchedPerson, person, false),
@@ -56,6 +57,7 @@ class EntityManagerImplScenarioTest extends H2DatabaseTest {
 
         Person5 fetchedPerson = entityManager.find(Person5.class, 1L);
         entityManager.remove(fetchedPerson);
+        entityManager.flush();
 
         assertThrows(ObjectNotFoundException.class, () ->
                 entityManager.persist(new Person5(fetchedPerson.getId(), "newname", 8, "newemail@test.com"))
@@ -93,6 +95,7 @@ class EntityManagerImplScenarioTest extends H2DatabaseTest {
 
         entityManager.remove(fetchedPerson);
         entityManager.remove(fetchedPerson);
+        entityManager.flush();
 
         assertThat(executedQueries).containsExactly(
                 "INSERT INTO users (nick_name, old, email) VALUES ('가나다라', 22, 'email2@test.com')",

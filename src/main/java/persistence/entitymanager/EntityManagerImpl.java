@@ -6,6 +6,7 @@ import persistence.entity.context.EntityEntries;
 import persistence.entity.context.FirstLevelCache;
 import persistence.entity.context.PersistenceContext;
 import persistence.entity.context.PersistenceContextImpl;
+import persistence.entitymanager.action.ActionQueue;
 import persistence.entitymanager.event.EventListenerRegistry;
 import persistence.entitymanager.event.event.DeleteEvent;
 import persistence.entitymanager.event.event.LoadEvent;
@@ -19,14 +20,20 @@ import static persistence.entitymanager.event.event.EventType.*;
 public class EntityManagerImpl extends AbstractEntityManager {
     private final PersistenceContext persistenceContext;
     private final EventListenerRegistry eventListenerRegistry;
+    private final ActionQueue actionQueue;
     // 액션큐
 
-    public static EntityManager newEntityManager(Metamodel metamodel, Metadata metadata,
-                                                 EventListenerRegistry eventListenerRegistry) {
+    public static EntityManager newEntityManager(
+            Metamodel metamodel,
+            Metadata metadata,
+            EventListenerRegistry eventListenerRegistry) {
         return new EntityManagerImpl(metadata, metamodel, eventListenerRegistry);
     }
 
-    private EntityManagerImpl(Metadata metadata, Metamodel metamodel, EventListenerRegistry eventListenerRegistry) {
+    private EntityManagerImpl(
+            Metadata metadata,
+            Metamodel metamodel,
+            EventListenerRegistry eventListenerRegistry) {
         super(metamodel);
 
         this.persistenceContext = new PersistenceContextImpl(
@@ -35,6 +42,7 @@ public class EntityManagerImpl extends AbstractEntityManager {
                 new EntityEntries(),
                 this);
         this.eventListenerRegistry = eventListenerRegistry;
+        this.actionQueue = new ActionQueue(persistenceContext);
     }
 
     @Override
@@ -62,12 +70,27 @@ public class EntityManagerImpl extends AbstractEntityManager {
 
     @Override
     public void remove(Object entity) {
-        DeleteEvent event = new DeleteEvent(entity, persistenceContext);
+        DeleteEvent event = new DeleteEvent(entity, this);
         fireDelete(event);
     }
 
     private void fireDelete(DeleteEvent event) {
         eventListenerRegistry.getEventListenerGroup(DELETE)
                 .fireEventOnEachListener(event, DeleteEventListener::onDelete);
+    }
+
+    @Override
+    public void flush() {
+        actionQueue.flush();
+    }
+
+    @Override
+    public void clear() {
+        actionQueue.clear();
+    }
+
+    @Override
+    public ActionQueue getActionQueue() {
+        return actionQueue;
     }
 }

@@ -1,21 +1,21 @@
 package persistence.entitymanager.event.event;
 
-import persistence.entity.context.PersistenceContext;
+import persistence.entitymanager.Session;
 
 public class DeleteEvent implements Event {
     private final Object entity;
-    private final PersistenceContext persistenceContext;
+    private final Session session;
 
-    public DeleteEvent(Object entity, PersistenceContext persistenceContext) {
+    public DeleteEvent(Object entity, Session session) {
         this.entity = entity;
-        this.persistenceContext = persistenceContext;
+        this.session = session;
     }
 
     public Object getEntity() {
         return entity;
     }
 
-    public PersistenceContext getPersistenceContext() {
-        return persistenceContext;
+    public Session getSession() {
+        return session;
     }
 }
