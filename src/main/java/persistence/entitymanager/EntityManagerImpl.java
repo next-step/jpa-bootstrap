@@ -6,38 +6,68 @@ import persistence.entity.context.EntityEntries;
 import persistence.entity.context.FirstLevelCache;
 import persistence.entity.context.PersistenceContext;
 import persistence.entity.context.PersistenceContextImpl;
+import persistence.entitymanager.event.EventListenerRegistry;
+import persistence.entitymanager.event.event.DeleteEvent;
+import persistence.entitymanager.event.event.LoadEvent;
+import persistence.entitymanager.event.event.PersistEvent;
+import persistence.entitymanager.event.listeners.DeleteEventListener;
+import persistence.entitymanager.event.listeners.LoadEventListener;
+import persistence.entitymanager.event.listeners.PersistEventListener;
+
+import static persistence.entitymanager.event.event.EventType.*;
 
 public class EntityManagerImpl extends AbstractEntityManager {
-    private final Metadata metadata;
     private final PersistenceContext persistenceContext;
+    private final EventListenerRegistry eventListenerRegistry;
+    // 액션큐
 
-    public static EntityManager newEntityManager(Metamodel metamodel, Metadata metadata) {
-        return new EntityManagerImpl(metadata, metamodel);
+    public static EntityManager newEntityManager(Metamodel metamodel, Metadata metadata,
+                                                 EventListenerRegistry eventListenerRegistry) {
+        return new EntityManagerImpl(metadata, metamodel, eventListenerRegistry);
     }
 
-    private EntityManagerImpl(Metadata metadata, Metamodel metamodel) {
+    private EntityManagerImpl(Metadata metadata, Metamodel metamodel, EventListenerRegistry eventListenerRegistry) {
         super(metamodel);
 
-        this.metadata = metadata;
         this.persistenceContext = new PersistenceContextImpl(
                 metadata,
                 new FirstLevelCache(),
                 new EntityEntries(),
                 this);
+        this.eventListenerRegistry = eventListenerRegistry;
     }
 
     @Override
     public <T> T find(Class<T> entityClass, Long id) {
-        return persistenceContext.getEntity(metadata.getPersistentClass(entityClass), id);
+        LoadEvent event = new LoadEvent(entityClass, id, persistenceContext);
+        fireLoad(event);
+        return (T) event.getResult();
+    }
+
+    private void fireLoad(LoadEvent event) {
+        eventListenerRegistry.getEventListenerGroup(LOAD)
+                .fireEventOnEachListener(event, LoadEventListener::onLoad);
     }
 
     @Override
     public void persist(Object entity) {
-        persistenceContext.addEntity(entity);
+        PersistEvent event = new PersistEvent(entity, persistenceContext);
+        firePersist(event);
+    }
+
+    private void firePersist(PersistEvent event) {
+        eventListenerRegistry.getEventListenerGroup(PERSIST)
+                .fireEventOnEachListener(event, PersistEventListener::onPersist);
     }
 
     @Override
     public void remove(Object entity) {
-        persistenceContext.removeEntity(entity);
+        DeleteEvent event = new DeleteEvent(entity, persistenceContext);
+        fireDelete(event);
+    }
+
+    private void fireDelete(DeleteEvent event) {
+        eventListenerRegistry.getEventListenerGroup(DELETE)
+                .fireEventOnEachListener(event, DeleteEventListener::onDelete);
     }
 }
