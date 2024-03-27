@@ -26,25 +26,22 @@ public class JoinedRow<T> {
     }
 
     public <R> R mapValues(PersistentClass<R> persistentClass) {
-        R entity = persistentClass.newInstance();
-        for (EntityColumn allEntityColumn : persistentClass.getAllEntityColumns()) {
-            setField(entity, allEntityColumn.getColumnName());
+        R entity = persistentClass.newEntity();
+        for (EntityColumn column : persistentClass.getAllEntityColumns()) {
+            setField(entity, column.getColumnName(), persistentClass);
         }
         return entity;
     }
 
-    private <R> void setField(R entity, String columnName) {
-        PersistentClass<?> persistentClass = PersistentClass.from(entity.getClass());
+    private <R> void setField(R entity, String columnName, PersistentClass<R> persistentClass) {
         String tableName = persistentClass.getTableName();
         Object value = map.get(mapKey(tableName, columnName));
 
-        setFieldValue(entity, columnName, value);
+        Field field = persistentClass.getFieldByColumnName(columnName);
+        setFieldValue(entity, field, value);
     }
 
-    private <R> void setFieldValue(R entity, String columnName, Object value) {
-        PersistentClass<?> persistentClass = PersistentClass.from(entity.getClass());
-
-        Field field = persistentClass.getFieldByColumnName(columnName);
+    private <R> void setFieldValue(R entity, Field field, Object value) {
         field.setAccessible(true);
         try {
             field.set(entity, value);

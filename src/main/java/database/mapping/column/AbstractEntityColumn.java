@@ -40,7 +40,7 @@ public abstract class AbstractEntityColumn implements EntityColumn {
         field.setAccessible(true);
         try {
             return field.get(entity);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | IllegalArgumentException e) {
             throw new RuntimeException(e);
         }
     }

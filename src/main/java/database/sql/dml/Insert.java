@@ -16,44 +16,31 @@ public class Insert {
     private final List<GeneralEntityColumn> generalColumns;
     private final PrimaryKeyEntityColumn primaryKey;
 
-    private Long id;
-    private boolean includeIdField;
-    private ValueMap values;
-
     public static <T> Insert from(PersistentClass<T> persistentClass) {
-        return new Insert(persistentClass.getTableName(),
-                          persistentClass.getPrimaryKey(),
-                          persistentClass.getGeneralColumns());
+        return new Insert(
+                persistentClass.getTableName(),
+                persistentClass.getPrimaryKey(),
+                persistentClass.getGeneralColumns());
     }
 
     public Insert(String tableName, PrimaryKeyEntityColumn primaryKey, List<GeneralEntityColumn> generalColumns) {
         this.tableName = tableName;
         this.primaryKey = primaryKey;
         this.generalColumns = generalColumns;
-
-        id = null;
-        includeIdField = false;
     }
 
-    public Insert id(Long id) {
-        this.includeIdField = id != null;
-        this.id = id;
-        return this;
+    public String toSqlFromEntity(Long id, Object entity) {
+        return toSql(id, ValueMap.fromEntity(entity, generalColumns));
     }
 
-    public Insert values(ValueMap valueMap) {
-        this.values = valueMap;
-        return this;
-    }
-
-    public Insert valuesFromEntity(Object entity) {
-        return this.values(ValueMap.fromEntity(entity, generalColumns));
-    }
-
-    public String toQueryString() {
+    public String toSql(Long id, ValueMap values) {
         if (values == null) throw new RuntimeException("values are required");
 
-        return String.format("INSERT INTO %s (%s) VALUES (%s)", tableName, columnClauses(), valueClauses());
+        boolean includeIdField = id != null;
+        return String.format("INSERT INTO %s (%s) VALUES (%s)",
+                             tableName,
+                             columnClauses(includeIdField, values),
+                             valueClauses(includeIdField, id, values));
     }
 
     private List<String> columns(ValueMap valueMap) {
@@ -63,7 +50,7 @@ public class Insert {
                 .collect(Collectors.toList());
     }
 
-    private String columnClauses() {
+    private String columnClauses(boolean includeIdField, ValueMap values) {
         StringJoiner joiner = new StringJoiner(", ");
         if (includeIdField) {
             joiner.add(primaryKey.getColumnName());
@@ -72,7 +59,7 @@ public class Insert {
         return joiner.toString();
     }
 
-    private String valueClauses() {
+    private String valueClauses(boolean includeIdField, Long id, ValueMap values) {
         StringJoiner joiner = new StringJoiner(", ");
         if (includeIdField) {
             joiner.add(quote(id));

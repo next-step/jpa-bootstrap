@@ -1,11 +1,11 @@
 package database.mapping.rowmapper;
 
-import database.dialect.Dialect;
 import database.mapping.Association;
 import database.sql.dml.part.WhereMap;
-import jdbc.JdbcTemplate;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.LazyLoader;
+import persistence.bootstrap.Metadata;
+import persistence.bootstrap.Metamodel;
 import persistence.entity.context.PersistentClass;
 import persistence.entity.database.EntityLoader;
 
@@ -16,67 +16,51 @@ import java.util.stream.Collectors;
 
 // TODO: 테스트 추가
 public class JoinedRowsCombiner<T> {
-    private final List<JoinedRow<T>> joinedRows;
     private final PersistentClass<T> persistentClass;
-    private final List<Association> associations;
-    private final JdbcTemplate jdbcTemplate;
-    private final Dialect dialect;
-    private final List<Class<?>> entities;
+    private final Metadata metadata;
+    private final Metamodel metamodel;
 
-    public JoinedRowsCombiner(List<JoinedRow<T>> joinedRows,
-                              PersistentClass<T> persistentClass,
-                              List<Association> associations,
-                              JdbcTemplate jdbcTemplate,
-                              Dialect dialect,
-                              List<Class<?>> entities) {
-        this.joinedRows = joinedRows;
+    public JoinedRowsCombiner(PersistentClass<T> persistentClass, Metadata metadata, Metamodel metamodel) {
         this.persistentClass = persistentClass;
-        this.associations = associations;
-        this.jdbcTemplate = jdbcTemplate;
-        this.dialect = dialect;
-        this.entities = entities;
+        this.metadata = metadata;
+        this.metamodel = metamodel;
     }
 
-    public Optional<T> merge() {
+    public Optional<T> merge(List<JoinedRow<T>> joinedRows) {
         if (joinedRows.isEmpty()) {
             return Optional.empty();
         }
 
         T entity = joinedRows.get(0).getOwnerEntity();
 
-        for (Association association : this.associations) {
+        for (Association association : this.persistentClass.getAssociations()) {
             String fieldName = association.getFieldName();
-            Object value = getFieldValue(association, entity);
+            Object value = getFieldValue(association, entity, joinedRows);
             setFieldValue(entity, fieldName, value);
         }
 
         return Optional.of(entity);
     }
 
-    private Object getFieldValue(Association association, T entity) {
+    private Object getFieldValue(Association association, T entity, List<JoinedRow<T>> joinedRows) {
         if (association.isLazyLoad()) {
-            return lazyLoadProxy(association, persistentClass.getPrimaryKeyValue(entity));
+            return buildLazyLoadProxy(association, metadata.getRowId(entity));
         }
-        return filterEntitiesByType(association.getFieldGenericType());
+        return filterEntitiesByType(association.getGenericTypeClass(metadata), joinedRows);
     }
 
-    private <R> Object lazyLoadProxy(Association association, Long id) {
-        return Enhancer.create(association.getFieldType(), (LazyLoader) () -> {
-            Class<R> genericType = (Class<R>) association.getFieldGenericType();
-
-            // TODO: entityloader 생성을 다른곳에 맡기면 좋겠는데? entities 등의 세션정보를 받아올 필요가 있다.
-            PersistentClass<R> persistentClass = PersistentClass.from(genericType);
-            EntityLoader<R> entityLoaderForProxy = new EntityLoader<>(persistentClass, jdbcTemplate, dialect, entities);
-
-            WhereMap whereMap = WhereMap.of(association.getForeignKeyColumnName(), id);
-            return entityLoaderForProxy.load(whereMap);
+    private <R> Object buildLazyLoadProxy(Association association, Long id) {
+        Class<?> fieldType = association.getFieldType();
+        return Enhancer.create(fieldType, (LazyLoader) () -> {
+            Class<?> genericType = association.getFieldGenericType();
+            EntityLoader<R> entityLoaderForProxy = metamodel.getEntityLoader((Class<R>) genericType);
+            return entityLoaderForProxy.load(WhereMap.of(association.getForeignKeyColumnName(), id));
         });
     }
 
-    private <R> List<R> filterEntitiesByType(Class<R> associatedType) {
-        PersistentClass<R> persistentClass1 = PersistentClass.from(associatedType);
+    private <R> List<R> filterEntitiesByType(PersistentClass<R> persistentClass, List<JoinedRow<T>> joinedRows) {
         return joinedRows.stream()
-                .map(joinedRow -> joinedRow.mapValues(persistentClass1))
+                .map(joinedRow -> joinedRow.mapValues(persistentClass))
                 .collect(Collectors.toList());
     }
 

@@ -1,13 +1,14 @@
 package persistence.entity.database;
 
 import database.dialect.Dialect;
-import database.mapping.Association;
 import database.mapping.rowmapper.JoinedRow;
 import database.mapping.rowmapper.JoinedRowMapper;
 import database.mapping.rowmapper.JoinedRowsCombiner;
 import database.sql.dml.CustomSelect;
 import database.sql.dml.part.WhereMap;
 import jdbc.JdbcTemplate;
+import persistence.bootstrap.Metadata;
+import persistence.bootstrap.Metamodel;
 import persistence.entity.context.PersistentClass;
 
 import java.util.List;
@@ -15,31 +16,32 @@ import java.util.Optional;
 
 public class CollectionLoader<T> {
     private final JdbcTemplate jdbcTemplate;
-    private final Dialect dialect;
-    private final PersistentClass<T> persistentClass;
-    private final List<Class<?>> entities;
+    private final CustomSelect customSelectQuery;
+    private final JoinedRowMapper<T> joinedRowMapper;
+    private final JoinedRowsCombiner<T> joinedRowsCombiner;
 
-    public CollectionLoader(PersistentClass<T> persistentClass, JdbcTemplate jdbcTemplate, Dialect dialect,
-                            List<Class<?>> entities) {
+    public static <T> CollectionLoader<T> from(PersistentClass<T> persistentClass,
+                                               Metadata metadata,
+                                               JdbcTemplate jdbcTemplate,
+                                               Dialect dialect,
+                                               Metamodel metamodel) {
+        return new CollectionLoader<>(jdbcTemplate,
+                                      CustomSelect.from(persistentClass, metadata),
+                                      new JoinedRowMapper<>(persistentClass, dialect),
+                                      new JoinedRowsCombiner<>(persistentClass, metadata, metamodel));
+    }
+
+    private CollectionLoader(JdbcTemplate jdbcTemplate, CustomSelect customSelectQuery,
+                             JoinedRowMapper<T> joinedRowMapper, JoinedRowsCombiner<T> joinedRowsCombiner) {
         this.jdbcTemplate = jdbcTemplate;
-        this.dialect = dialect;
-        this.persistentClass = persistentClass;
-
-        this.entities = entities;
+        this.customSelectQuery = customSelectQuery;
+        this.joinedRowMapper = joinedRowMapper;
+        this.joinedRowsCombiner = joinedRowsCombiner;
     }
 
     public Optional<T> load(Long id) {
-        String query = CustomSelect.from(persistentClass, entities).buildQuery(WhereMap.of("id", id));
-        JoinedRowMapper<T> rowMapper = new JoinedRowMapper<>(persistentClass, dialect);
-        List<JoinedRow<T>> joinedRows = jdbcTemplate.query(query, rowMapper);
-
-        // TODO: 조만간 clazz 대신 가져올 객체 통해서 얻을 수 있을거라고 믿고 여기 둠
-        List<Association> associations = getAssociations();
-
-        return new JoinedRowsCombiner<>(joinedRows, persistentClass, associations, jdbcTemplate, dialect, entities).merge();
-    }
-
-    private List<Association> getAssociations() {
-        return persistentClass.getAssociations();
+        String query = customSelectQuery.toSql(WhereMap.of("id", id));
+        List<JoinedRow<T>> joinedRows = jdbcTemplate.query(query, joinedRowMapper);
+        return joinedRowsCombiner.merge(joinedRows);
     }
 }

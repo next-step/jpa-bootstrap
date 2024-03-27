@@ -1,25 +1,61 @@
 package persistence.entity.context;
 
+import database.sql.dml.part.ValueMap;
+import persistence.bootstrap.Metadata;
+import persistence.entity.data.EntitySnapshot;
+import persistence.entity.database.CollectionLoader;
+import persistence.entity.database.EntityPersister;
+import persistence.entitymanager.SessionContract;
+
+import java.util.Objects;
+import java.util.Optional;
+
 public class PersistenceContextImpl implements PersistenceContext {
+    private final Metadata metadata;
     private final FirstLevelCache firstLevelCache;
     private final EntityEntries entityEntries;
+    private final SessionContract sessionContract;
 
-    public PersistenceContextImpl() {
-        firstLevelCache = new FirstLevelCache();
-        entityEntries = new EntityEntries();
+    public PersistenceContextImpl(Metadata metadata, FirstLevelCache firstLevelCache, EntityEntries entityEntries,
+                                  SessionContract sessionContract) {
+        this.metadata = metadata;
+        this.firstLevelCache = firstLevelCache;
+        this.entityEntries = entityEntries;
+        this.sessionContract = sessionContract;
     }
 
     @Override
-    public <T> Object getEntity(PersistentClass<T> persistentClass, Long id) {
-        EntityKey entityKey = EntityKey.of(persistentClass, id);
+    public <T> T getEntity(PersistentClass<T> persistentClass, Long id) {
+        Object cached = readFromCache(persistentClass, id);
+        if (Objects.isNull(cached)) {
+            readFromDatabase(persistentClass, id)
+                    .ifPresent(this::writeToCache);
+        }
+        return readFromCache(persistentClass, id);
+    }
+
+    // handles database
+
+    private <T> T readFromCache(PersistentClass<T> persistentClass, Long id) {
+        EntityKey entityKey = metadata.entityKeyOf(persistentClass, id);
 
         if (!entityEntries.isReadable(entityKey)) return null;
-        return firstLevelCache.find(entityKey);
+        return (T) firstLevelCache.find(entityKey);
     }
 
-    @Override
-    public void addEntity(Object entity) {
-        EntityKey entityKey = EntityKey.of(entity);
+    private <T> Optional<T> readFromDatabase(PersistentClass<T> persistentClass, Long id) {
+        Optional<T> load;
+        if (persistentClass.hasAssociation()) {
+            CollectionLoader<T> collectionLoader = sessionContract.getCollectionLoader(persistentClass.getMappedClass());
+            load = collectionLoader.load(id);
+        } else {
+            load = sessionContract.getEntityLoader(persistentClass.getMappedClass()).load(id);
+        }
+        return load;
+    }
+
+    private <T> void writeToCache(T entity) {
+        EntityKey entityKey = metadata.entityKeyOfObject(entity);
 
         if (entityEntries.isAssignable(entityKey)) {
             firstLevelCache.store(entityKey, entity);
@@ -28,15 +64,74 @@ public class PersistenceContextImpl implements PersistenceContext {
     }
 
     @Override
-    public boolean isRemoved(Object entity) {
-        EntityKey entityKey = EntityKey.of(entity);
+    public <T> void addEntity(T entity) {
+        Class<T> aClass = (Class<T>) entity.getClass();
+        PersistentClass<T> persistentClass = metadata.getPersistentClass(aClass);
+        T saved = writeToDatabase(entity, persistentClass);
+        writeToCache(saved);
+    }
 
-        return entityEntries.isRemoved(entityKey);
+    private <T> T writeToDatabase(T entity, PersistentClass<T> persistentClass) {
+        T saved;
+        if (isInsertOperation(persistentClass, entity)) {
+            saved = insertEntityIntoDatabase(persistentClass, entity);
+        } else {
+            saved = updateEntityInDatabase(persistentClass, entity);
+        }
+        return saved;
+    }
+
+    private <T> boolean isInsertOperation(PersistentClass<T> persistentClass, Object entity) {
+        Long id = metadata.getRowId(entity);
+
+        return id == null || readFromCache(persistentClass, id) == null;
+    }
+
+    private <T> T insertEntityIntoDatabase(PersistentClass<T> persistentClass, Object object) {
+        Class<T> mappedClass = persistentClass.getMappedClass();
+        Long newId = sessionContract.getEntityPersister(mappedClass).insert(object);
+        return sessionContract.getEntityLoader(mappedClass).load(newId).orElseThrow();
+    }
+
+    private <T> T updateEntityInDatabase(PersistentClass<T> persistentClass, T entity) {
+        Long id = metadata.getRowId(entity);
+        EntitySnapshot oldSnapshot = EntitySnapshot.of(persistentClass, (T) getEntity(persistentClass, id));
+        EntitySnapshot newSnapshot = EntitySnapshot.of(persistentClass, entity);
+
+        ValueMap diff = oldSnapshot.diff(newSnapshot);
+
+        if (!diff.isEmpty()) {
+            EntityPersister<T> entityPersister = sessionContract.getEntityPersister(persistentClass.getMappedClass());
+            entityPersister.update(id, diff);
+        }
+        return entity;
     }
 
     @Override
     public void removeEntity(Object entity) {
-        EntityKey entityKey = EntityKey.of(entity);
+        if (isRemovedInCache(entity)) {
+            // 아무것도 안함
+            return;
+        }
+        removeEntityFromDatabase(entity);
+        removeEntityFromCache(entity);
+    }
+
+    private boolean isRemovedInCache(Object entity) {
+        EntityKey entityKey = metadata.entityKeyOfObject(entity);
+        return entityEntries.isRemoved(entityKey);
+    }
+
+    private void removeEntityFromDatabase(Object entity) {
+        PersistentClass<?> persistentClass = metadata.getPersistentClass(entity.getClass());
+        Long id = metadata.getRowId(entity);
+
+        EntityPersister<?> entityPersister = sessionContract.getEntityPersister(persistentClass.getMappedClass());
+        entityPersister.delete(id);
+    }
+
+    private void removeEntityFromCache(Object entity) {
+        EntityKey entityKey = metadata.entityKeyOfObject(entity);
 
         if (entityEntries.isRemovable(entityKey)) {
             entityEntries.deleted(entityKey);

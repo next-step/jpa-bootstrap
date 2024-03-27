@@ -1,14 +1,22 @@
 package database.sql.dml;
 
-import entity.Person4;
+import app.entity.Person4;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import persistence.entity.context.PersistentClass;
+import persistence.bootstrap.Metadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static testsupport.EntityTestUtils.initializer;
 
 class UpdateTest {
-    private final Update update = Update.from(PersistentClass.from(Person4.class));
+    private Update update;
+
+    @BeforeEach
+    void setUp() {
+        Metadata metadata = initializer(null).getMetadata();
+        update = Update.from(metadata.getPersistentClass(Person4.class));
+    }
 
     enum TestCases {
         WITH_NULL_FIELDS(123L, newPerson4("닉네임", null, null), "UPDATE users SET nick_name = '닉네임', old = NULL, email = NULL WHERE id = 123"),
@@ -30,9 +38,7 @@ class UpdateTest {
     @EnumSource(TestCases.class)
     void buildUpdateQuery(TestCases testCase) {
         String actual = update
-                .changesFromEntity(testCase.entity)
-                .byId(testCase.id)
-                .buildQuery();
+                .toSqlFromEntity(testCase.entity, testCase.id);
         assertThat(actual).isEqualTo(testCase.expectedQuery);
     }
 

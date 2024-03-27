@@ -1,15 +1,16 @@
 package persistence;
 
+import app.entity.Department;
+import app.entity.Employee;
 import database.DatabaseServer;
 import database.H2;
 import database.dialect.MySQLDialect;
-import entity.Department;
-import entity.Employee;
 import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.bootstrap.EntityManagerFactory;
 import persistence.bootstrap.Initializer;
-import persistence.entity.EntityManager;
+import persistence.entitymanager.EntityManager;
 
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
@@ -22,11 +23,11 @@ public class Application {
 
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
 
-            Initializer initializer = new Initializer("entity", jdbcTemplate, MySQLDialect.getInstance());
-            initializer.bootUp();
+            Initializer initializer = new Initializer("app.entity", jdbcTemplate, MySQLDialect.getInstance());
+            initializer.initialize();
             initializer.createTables();
-
-            EntityManager entityManager = initializer.newEntityManager();
+            EntityManagerFactory entityManagerFactory = initializer.createEntityManagerFactory();
+            EntityManager entityManager = entityManagerFactory.openSession();
 
             entityManager.persist(new Department("A팀"));
             entityManager.persist(new Employee("김선생", 1L));

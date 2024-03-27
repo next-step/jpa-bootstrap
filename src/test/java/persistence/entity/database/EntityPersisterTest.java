@@ -1,9 +1,12 @@
 package persistence.entity.database;
 
-import entity.NoAutoIncrementUser;
-import entity.Person5;
+import app.entity.NoAutoIncrementUser;
+import app.entity.Person5;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import persistence.entity.context.PersistentClass;
+import persistence.bootstrap.EntityManagerFactory;
+import persistence.bootstrap.Initializer;
+import persistence.entitymanager.SessionContract;
 import testsupport.H2DatabaseTest;
 
 import java.util.List;
@@ -13,11 +16,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static testsupport.EntityTestUtils.*;
 
 class EntityPersisterTest extends H2DatabaseTest {
+    private SessionContract sessionContract;
+
+    @BeforeEach
+    void setUp() {
+        Initializer initializer = new Initializer("app.entity", jdbcTemplate, dialect);
+        initializer.initialize();
+        EntityManagerFactory entityManagerFactory = initializer.createEntityManagerFactory();
+
+        sessionContract = (SessionContract) entityManagerFactory.openSession();
+    }
+
     @Test
     void insert() {
-        // row 두개를 추가하면
-        EntityPersister<Person5> entityPersister = new EntityPersister<>(PersistentClass.from(Person5.class), jdbcTemplate, List.of());
+        EntityPersister<Person5> entityPersister = sessionContract.getEntityPersister(Person5.class);
 
+        // row 두개를 추가하면
         Person5 person = newPerson(null, "some name", 11, "some@name.com");
         entityPersister.insert(person);
         Person5 person2 = newPerson(null, "another name", 22, "another@name.com");
@@ -33,7 +47,7 @@ class EntityPersisterTest extends H2DatabaseTest {
 
     @Test
     void insertIntoEntityWithNoIdGenerationStrategy() {
-        EntityPersister<NoAutoIncrementUser> entityPersister = new EntityPersister<>(PersistentClass.from(NoAutoIncrementUser.class), jdbcTemplate, List.of());
+        EntityPersister<NoAutoIncrementUser> entityPersister = sessionContract.getEntityPersister(NoAutoIncrementUser.class);
 
         NoAutoIncrementUser person = new NoAutoIncrementUser(null, "some name", 11, "some@name.com");
         assertThrows(PrimaryKeyMissingException.class, () -> entityPersister.insert(person));
@@ -41,7 +55,8 @@ class EntityPersisterTest extends H2DatabaseTest {
 
     @Test
     void update() {
-        EntityPersister<Person5> entityPersister = new EntityPersister<>(PersistentClass.from(Person5.class), jdbcTemplate, List.of());
+        EntityPersister<Person5> entityPersister = sessionContract.getEntityPersister(Person5.class);
+
         // row 한 개를 삽입하고,
         Person5 person = newPerson(null, "some name", 11, "some@name.com");
         entityPersister.insert(person);
@@ -50,7 +65,7 @@ class EntityPersisterTest extends H2DatabaseTest {
         Long savedId = getLastSavedId(jdbcTemplate);
         Person5 personUpdating = newPerson(savedId, "updated name", 20, "updated@email.com");
 
-        entityPersister.update(savedId, personUpdating);
+        entityPersister.updateEntity(savedId, personUpdating);
 
         // 남아있는 한개의 row 가 잘 업데이트돼야 한다
         List<Person5> people = findPeople(jdbcTemplate);
@@ -61,7 +76,8 @@ class EntityPersisterTest extends H2DatabaseTest {
 
     @Test
     void delete() {
-        EntityPersister<Person5> entityPersister = new EntityPersister<>(PersistentClass.from(Person5.class), jdbcTemplate, List.of());
+        EntityPersister<Person5> entityPersister = sessionContract.getEntityPersister(Person5.class);
+
         // row 한 개를 저장 후에
         Person5 person = newPerson(null, "some name", 11, "some@name.com");
         entityPersister.insert(person);

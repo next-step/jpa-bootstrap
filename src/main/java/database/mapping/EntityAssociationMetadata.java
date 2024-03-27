@@ -25,8 +25,8 @@ public class EntityAssociationMetadata {
                 .collect(Collectors.toList());
     }
 
-    public List<Association> getAssociationsRelatedTo(List<Class<?>> entities) {
-        return entities.stream()
+    public List<Association> getAssociationsRelatedTo(List<Class<?>> entityClasses) {
+        return entityClasses.stream()
                 .filter(this::exceptMe)
                 .flatMap(this::getAssociationsBetweenMeAndOther)
                 .collect(Collectors.toList());

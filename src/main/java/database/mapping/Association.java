@@ -4,11 +4,11 @@ import database.dialect.Dialect;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import persistence.bootstrap.Metadata;
 import persistence.entity.context.PersistentClass;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 public class Association {
 
@@ -36,21 +36,25 @@ public class Association {
     }
 
     public Class<?> getFieldGenericType() {
-        return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+        ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+        return (Class<?>) genericType.getActualTypeArguments()[0];
     }
 
-    public String getTableName() {
-        return getGenericPersistentClass().getTableName();
+    public PersistentClass<?> getGenericTypeClass(Metadata metadata) {
+        return metadata.getPersistentClass(this.getFieldGenericType());
     }
 
-    private <T> PersistentClass<T> getGenericPersistentClass() {
-        return (PersistentClass<T>) PersistentClass.from(this.getFieldGenericType());
+    public String getTableName(Metadata metadata) {
+        return getGenericTypeClass(metadata).getTableName();
     }
 
-    public String getForeignKeyColumnType(Dialect dialect) {
-        Type foreignKeyColumnType = getGenericPersistentClass().getPrimaryKey().getFieldType();
+    public String getForeignKeyColumnType(Metadata metadata, Dialect dialect) {
+        Class<?> foreignKeyColumnType =
+                (Class<?>) getGenericTypeClass(metadata)
+                        .getPrimaryKey()
+                        .getFieldType();
 
-        return dialect.convertToSqlTypeDefinition((Class<?>) foreignKeyColumnType, 0);
+        return dialect.convertToSqlTypeDefinition(foreignKeyColumnType, 0);
     }
 
     public boolean isLazyLoad() {

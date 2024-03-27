@@ -1,80 +1,71 @@
 package persistence.bootstrap;
 
+import database.dialect.Dialect;
+import database.mapping.Association;
+import persistence.entity.context.EntityKey;
 import persistence.entity.context.PersistentClass;
-import persistence.entity.database.CollectionLoader;
-import persistence.entity.database.EntityLoader;
-import persistence.entity.database.EntityPersister;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-// TODO: 바인더?
-// org.hibernate.boot.model.internal 참조
+/**
+ * - 각 클래스 metadata 를 여기서 전부 모을 것
+ * - sessionfactory 에 metadata 넘길 것
+ * -
+ */
+public class MetadataImpl implements Metadata {
+    private final Dialect dialect;
+    private final List<Class<?>> entityClasses;
+    private final Map<Class<?>, PersistentClass<?>> persistentClassMap;
 
-public class MetadataImpl {
-    public static MetadataImpl INSTANCE = new MetadataImpl();
-
-    private final Map<Class<?>, EntityPersister<?>> entityPersisterMap = new ConcurrentHashMap<>();
-    private final Map<Class<?>, EntityLoader<?>> entityLoaderMap = new ConcurrentHashMap<>();
-    private final Map<Class<?>, CollectionLoader<?>> collectionLoaderMap = new ConcurrentHashMap<>();
-    private List<Class<?>> components = null;
-//    private final Map<Class<?>, CollectionPersister> collectionPersisterMap = new ConcurrentHashMap<>();
-
-    private MetadataImpl() {
+    public MetadataImpl(Dialect dialect) {
+        this.dialect = dialect;
+        this.entityClasses = new ArrayList<>();
+        this.persistentClassMap = new ConcurrentHashMap<>();
     }
 
-    public <T> void register(PersistentClass<T> persistentClass,
-                             EntityPersister<T> entityPersister,
-                             EntityLoader<T> entityLoader,
-                             CollectionLoader<T> collectionLoader) {
-        Class<?> clazz = persistentClass.getMappedClass();
-
-        entityPersisterMap.put(clazz, entityPersister);
-        entityLoaderMap.put(clazz, entityLoader);
-        collectionLoaderMap.put(clazz, collectionLoader);
+    @Override
+    public void register(Class<?> entityClass) {
+        this.entityClasses.add(entityClass);
+        this.persistentClassMap.put(entityClass, PersistentClass.fromInternal(entityClass, dialect));
     }
 
+    @Override
     public <T> PersistentClass<T> getPersistentClass(Class<T> clazz) {
-        return PersistentClass.from(clazz, this);
-    }
-
-    public <T> EntityLoader<T> getEntityLoader(PersistentClass<T> persistentClass) {
-        Class<T> mappedClass = persistentClass.getMappedClass();
-        return getEntityLoader(mappedClass);
-    }
-
-    private <T> EntityLoader<T> getEntityLoader(Class<T> mappedClass) {
         //noinspection unchecked
-        return (EntityLoader<T>) entityLoaderMap.get(mappedClass);
+        return (PersistentClass<T>) persistentClassMap.get(clazz);
     }
 
-    public <T> EntityPersister<T> getEntityPersister(PersistentClass<T> persistentClass) {
-        Class<T> mappedClass = persistentClass.getMappedClass();
-        return getEntityPersister(mappedClass);
+    @Override
+    public List<Class<?>> getEntityClasses() {
+        return entityClasses;
     }
 
-    private <T> EntityPersister<T> getEntityPersister(Class<T> mappedClass) {
-        //noinspection unchecked
-        return (EntityPersister<T>) entityPersisterMap.get(mappedClass);
+    @Override
+    public Long getRowId(Object entity) {
+        Class<?> clazz = entity.getClass();
+        return getPersistentClass(clazz).getRowId(entity);
     }
 
-    public <T> CollectionLoader<T> getCollectionLoader(PersistentClass<T> persistentClass) {
-        Class<T> mappedClass = persistentClass.getMappedClass();
-        return getCollectionLoader(mappedClass);
+    @Override
+    public <T> List<Association> getAssociationsRelatedTo(PersistentClass<T> persistentClass) {
+        return persistentClass.getAssociationsRelatedTo(entityClasses);
     }
 
-    private <T> CollectionLoader<T> getCollectionLoader(Class<T> mappedClass) {
-        //noinspection unchecked
-        return (CollectionLoader<T>) collectionLoaderMap.get(mappedClass);
+    @Override
+    public <T> List<String> getAllColumnNamesWithAssociations(PersistentClass<T> persistentClass) {
+        return persistentClass.getAllColumnNamesWithAssociations(entityClasses);
     }
 
-    public void setComponents(List<Class<?>> components) {
-        this.components = components;
-
+    @Override
+    public <T> EntityKey entityKeyOf(PersistentClass<T> persistentClass, Long id) {
+        return EntityKey.of(persistentClass.getMappedClass(), id);
     }
 
-    public List<Class<?>> getComponents() {
-        return components;
+    @Override
+    public EntityKey entityKeyOfObject(Object entity) {
+        return EntityKey.of(entity.getClass(), getRowId(entity));
     }
 }

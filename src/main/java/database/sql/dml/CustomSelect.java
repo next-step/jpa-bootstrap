@@ -4,6 +4,7 @@ import database.mapping.Association;
 import database.mapping.column.EntityColumn;
 import database.sql.dml.part.WhereClause;
 import database.sql.dml.part.WhereMap;
+import persistence.bootstrap.Metadata;
 import persistence.entity.context.PersistentClass;
 
 import java.util.ArrayList;
@@ -22,36 +23,41 @@ public class CustomSelect {
 
     private final String tableName;
     private final List<EntityColumn> allEntityColumns;
-    private final List<String> allColumnNamesWithAssociations;
     private final List<Association> associations;
+    private final List<String> allColumnNamesWithAssociations;
+    private final Metadata metadata;
 
-    public static <T> CustomSelect from(PersistentClass<T> persistentClass, List<Class<?>> entities) {
+    public static <T> CustomSelect from(PersistentClass<T> persistentClass, Metadata metadata) {
         return new CustomSelect(
                 persistentClass.getTableName(),
                 persistentClass.getAllEntityColumns(),
-                persistentClass.getAllColumnNamesWithAssociations(entities),
-                persistentClass.getAssociations());
+                persistentClass.getAssociations(),
+                metadata.getAllColumnNamesWithAssociations(persistentClass),
+                metadata
+        );
     }
 
     private CustomSelect(String tableName, List<EntityColumn> allEntityColumns,
-                         List<String> allColumnNamesWithAssociations, List<Association> associations) {
+                         List<Association> associations, List<String> allColumnNamesWithAssociations,
+                         Metadata metadata) {
         this.tableName = tableName;
         this.allEntityColumns = allEntityColumns;
-        this.allColumnNamesWithAssociations = allColumnNamesWithAssociations;
         this.associations = associations;
+        this.allColumnNamesWithAssociations = allColumnNamesWithAssociations;
+        this.metadata = metadata;
     }
 
-    public String buildQuery(WhereMap whereMap) {
-        return String.format(QUERY_WITH_WHERE, buildQuery(), whereClause(whereMap));
-    }
-
-    public String buildQuery() {
+    public String toSql() {
         String columns = String.join(COLUMNS_DELIMITER, selectColumns());
         String query = String.format(SELECT, columns, tableWithAlias(this.tableName, TABLE_ALIAS));
         if (!joins().isEmpty()) {
             query = query + " " + String.join(" ", joins());
         }
         return query;
+    }
+
+    public String toSql(WhereMap whereMap) {
+        return String.format(QUERY_WITH_WHERE, toSql(), whereClause(whereMap));
     }
 
     private List<String> selectColumns() {
@@ -73,9 +79,8 @@ public class CustomSelect {
 
     private List<String> associatedTableColumns(int index) {
         Association association = associations.get(index);
-        PersistentClass<?> genericType = PersistentClass.from(association.getFieldGenericType());
         String tableAlias = associatedTableAliasOf(index);
-        List<EntityColumn> allEntityColumns = genericType.getAllEntityColumns();
+        List<EntityColumn> allEntityColumns = association.getGenericTypeClass(metadata).getAllEntityColumns();
 
         String foreignKeyColumnName = association.getForeignKeyColumnName();
 
@@ -97,9 +102,10 @@ public class CustomSelect {
 
     private String eachJoin(int index) {
         Association association = associations.get(index);
-        String tableName = association.getTableName();
-        String tableAlias = associatedTableAliasOf(index);
+
+        String tableName = association.getTableName(metadata);
         String foreignKeyColumnName = association.getForeignKeyColumnName();
+        String tableAlias = associatedTableAliasOf(index);
 
         return String.format(LEFT_JOIN_CLAUSE,
                              tableWithAlias(tableName, tableAlias),

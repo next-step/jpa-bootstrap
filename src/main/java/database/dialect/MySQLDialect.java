@@ -29,7 +29,6 @@ public class MySQLDialect implements Dialect {
         javaTypeMap.put(javaTypeName, sqlType);
     }
 
-    // TODO: 첫번째 인자 타입 Type 으로 변경?
     @Override
     public String convertToSqlTypeDefinition(Class<?> type, Integer columnLength) {
         String sqlType = javaTypeToSqlType(type);
@@ -74,7 +73,17 @@ public class MySQLDialect implements Dialect {
     }
 
     @Override
-    public String nullableDefinition(boolean nullable) {
-        return nullable ? "NULL" : "NOT NULL";
+    public String nullableDefinition() {
+        return "NULL";
+    }
+
+    @Override
+    public String notNullDefinition() {
+        return "NOT NULL";
+    }
+
+    @Override
+    public String createTableClause() {
+        return "CREATE TABLE %s (%s)";
     }
 }
