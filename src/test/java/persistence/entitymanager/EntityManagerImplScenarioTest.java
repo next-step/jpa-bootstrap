@@ -30,6 +30,7 @@ class EntityManagerImplScenarioTest extends H2DatabaseTest {
     void scenario1() {
         Person5 person = new Person5("abc", 7, "def@example.com");
         entityManager.persist(person);
+        entityManager.flush();
 
         Person5 fetchedPerson = entityManager.find(Person5.class, 1L);
         entityManager.find(Person5.class, 1L);
@@ -37,6 +38,7 @@ class EntityManagerImplScenarioTest extends H2DatabaseTest {
         entityManager.find(Person5.class, 1L);
 
         entityManager.remove(fetchedPerson);
+        entityManager.flush();
 
         assertAll(
                 () -> assertSamePerson(fetchedPerson, person, false),
@@ -53,12 +55,16 @@ class EntityManagerImplScenarioTest extends H2DatabaseTest {
     void scenario2() {
         Person5 person = new Person5("abc", 7, "def@example.com");
         entityManager.persist(person);
+        entityManager.flush();
 
         Person5 fetchedPerson = entityManager.find(Person5.class, 1L);
         entityManager.remove(fetchedPerson);
+        entityManager.flush();
 
-        assertThrows(ObjectNotFoundException.class, () ->
-                entityManager.persist(new Person5(fetchedPerson.getId(), "newname", 8, "newemail@test.com"))
+        assertThrows(ObjectNotFoundException.class, () -> {
+                         entityManager.persist(new Person5(fetchedPerson.getId(), "newname", 8, "newemail@test.com"));
+                         entityManager.flush();
+                     }
         );
     }
 
@@ -66,16 +72,18 @@ class EntityManagerImplScenarioTest extends H2DatabaseTest {
     @DisplayName("1st 캐시에 없는 row 를 id 로 업데이트하려고 해도 insert 됨. (IDENTITY 전략) load 후에 persist 하면 update 됨")
     void scenario3() {
         jdbcTemplate.execute("INSERT INTO users (id, nick_name, old, email) VALUES (20, '가나다', 21, 'email@test.com')");
+        executedQueries.clear();
 
         // id 20 무시됨
         entityManager.persist(new Person5(20L, "가나다라", 22, "email2@test.com"));
+        entityManager.flush();
 
         entityManager.find(Person5.class, 20L);
         entityManager.find(Person5.class, 20L);
         entityManager.persist(new Person5(20L, "가나다라마", 22, "email2@test.com"));
+        entityManager.flush();
 
         assertThat(executedQueries).containsExactly(
-                "INSERT INTO users (id, nick_name, old, email) VALUES (20, '가나다', 21, 'email@test.com')",
                 "INSERT INTO users (nick_name, old, email) VALUES ('가나다라', 22, 'email2@test.com')",
                 "SELECT id, nick_name, old, email FROM users WHERE id = 1",
                 "SELECT id, nick_name, old, email FROM users WHERE id = 20",
@@ -88,11 +96,13 @@ class EntityManagerImplScenarioTest extends H2DatabaseTest {
     void scenario4() {
         Person5 person = new Person5("가나다라", 22, "email2@test.com");
         entityManager.persist(person);
+        entityManager.flush();
 
         Person5 fetchedPerson = entityManager.find(Person5.class, 1L);
 
         entityManager.remove(fetchedPerson);
         entityManager.remove(fetchedPerson);
+        entityManager.flush();
 
         assertThat(executedQueries).containsExactly(
                 "INSERT INTO users (nick_name, old, email) VALUES ('가나다라', 22, 'email2@test.com')",
@@ -108,8 +118,10 @@ class EntityManagerImplScenarioTest extends H2DatabaseTest {
 
         Person5 person = new Person5(20L, "가나다라", 22, "email2@test.com");
         entityManager.persist(person);
+        entityManager.flush();
 
         Person5 fetched = entityManager.find(Person5.class, 1L);
+
         assertAll(
                 () -> assertSamePerson(fetched, person, false),
                 () -> assertThat(executedQueries).containsExactly(

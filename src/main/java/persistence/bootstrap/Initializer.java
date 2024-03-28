@@ -2,9 +2,10 @@ package persistence.bootstrap;
 
 import database.dialect.Dialect;
 import jdbc.JdbcTemplate;
-import persistence.entitymanager.AbstractEntityManager;
 import persistence.entitymanager.EntityManager;
 import persistence.entitymanager.SessionContract;
+import persistence.entitymanager.listener.EventListenerRegistry;
+import persistence.entitymanager.listener.EventListenerRegistryImpl;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class Initializer {
 
     private boolean bootstrapped;
     private Metamodel metamodel;
+    private EventListenerRegistry eventListenerRegistry;
 
     public Initializer(String basePackage, JdbcTemplate jdbcTemplate, Dialect dialect) {
         this.basePackage = basePackage;
@@ -33,6 +35,7 @@ public class Initializer {
     public void initialize() {
         scanComponents();
         buildMetadata();
+        buildEventListenerGroups();
         buildMetamodel();
 
         bootstrapped = true;
@@ -45,6 +48,10 @@ public class Initializer {
     private void buildMetadata() {
         metadata = new MetadataImpl(dialect);
         entityClasses.forEach(metadata::register);
+    }
+
+    private void buildEventListenerGroups() {
+        this.eventListenerRegistry = EventListenerRegistryImpl.buildEventListenerRegistry(metadata);
     }
 
     private void buildMetamodel() {
@@ -70,7 +77,8 @@ public class Initializer {
             throw new RuntimeException("아직 초기화가 되지 않았어요");
         }
 
-        EntityManagerFactoryImpl entityManagerFactory = new EntityManagerFactoryImpl(metadata, metamodel);
+        EntityManagerFactoryImpl entityManagerFactory = new EntityManagerFactoryImpl(
+                metadata, metamodel, eventListenerRegistry);
         entityManagerFactory.initialize();
         return entityManagerFactory;
     }

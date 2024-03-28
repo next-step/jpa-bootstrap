@@ -26,3 +26,15 @@
 - [x] EntityKey 를 metadata로
 - [x] dml, ddl 들을 미리 생성해서 EntityPersister, EntityLoader, CollectionLoader 에 넣어두기
 - [x] ColumnsBuilder 를 없애고, 생성할 컬럼 목록을 EntityColumns 를 통해 PersistentClass 가 돌려주도록 변경
+
+
+### 🚀 3단계 - Event
+
+- [x] 요구사항 1 - EventType 을 활용해 리팩터링 해보기
+  - EntityManager 가 제공하는 3가지 기능 - Load, Persist, Delete 를 이벤트로 변경
+- [x] 요구사항 2 - ActionQueue 를 활용해 쓰기 지연 구현해보기
+  - 액션을 총 세개로 나눴습니다. PersistEvent 는 entity.id 상태와 entity class 의 정의에 따라 Insert/Update 로 분기됩니다. 
+    - DeleteEvent -> DeleteAction
+    - PersistEvent -> InsertAction, UpdateAction
+  - actionQueue.flush() 를 통해서 일괄 실행
+  - Select 동작은 큐를 통하지 않음

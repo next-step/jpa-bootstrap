@@ -35,6 +35,7 @@ class EntityManagerImplTest extends H2DatabaseTest {
     void persistAndFind() {
         Person5 person = newPerson(null, "abc123", 14, "c123@d.com");
         entityManager.persist(person);
+        entityManager.flush();
 
         Person5 found = entityManager.find(Person5.class, 1L);
 
@@ -45,7 +46,10 @@ class EntityManagerImplTest extends H2DatabaseTest {
     void persistNoAutoIncrementEntityWithoutId() {
         NoAutoIncrementUser user = new NoAutoIncrementUser(null, "abc123", 14, "c123@d.com");
 
-        PrimaryKeyMissingException ex = assertThrows(PrimaryKeyMissingException.class, () -> entityManager.persist(user));
+        PrimaryKeyMissingException ex = assertThrows(PrimaryKeyMissingException.class, () -> {
+            entityManager.persist(user);
+            entityManager.flush();
+        });
         assertThat(ex.getMessage()).isEqualTo("Primary key is not assigned when inserting: app.entity.NoAutoIncrementUser");
     }
 
@@ -55,6 +59,7 @@ class EntityManagerImplTest extends H2DatabaseTest {
         entityManager.persist(person);
         Person5 person2 = newPerson(null, "zzzzzz", 44, "zzzzz@d.com");
         entityManager.persist(person2);
+        entityManager.flush();
 
         List<Person5> people = findPeople(jdbcTemplate);
         assertThat(people).hasSize(2);
@@ -66,11 +71,12 @@ class EntityManagerImplTest extends H2DatabaseTest {
     void persistToUpdate() {
         Person5 person = newPerson(null, "abc123", 14, "c123@d.com");
         entityManager.persist(person);
+        entityManager.flush();
 
         Person5 personToUpdate = newPerson(getLastSavedId(jdbcTemplate), "abc123", 15, "zzzzz@d.com");
         entityManager.persist(personToUpdate);
         entityManager.persist(personToUpdate);
-
+        entityManager.flush();
         List<Person5> people = findPeople(jdbcTemplate);
         assertThat(people).hasSize(1);
         assertSamePerson(people.get(0), personToUpdate, true);
@@ -80,11 +86,25 @@ class EntityManagerImplTest extends H2DatabaseTest {
     void remove() {
         Person5 person = newPerson(null, "abc123", 14, "c123@d.com");
         entityManager.persist(person);
+        entityManager.flush();
 
         Person5 person1 = entityManager.find(Person5.class, getLastSavedId(jdbcTemplate));
         entityManager.remove(person1);
+        entityManager.flush();
 
         List<Person5> people = findPeople(jdbcTemplate);
         assertThat(people).hasSize(0);
+    }
+
+    @Test
+    void clear() {
+        Person5 person = newPerson(null, "abc123", 14, "c123@d.com");
+        entityManager.persist(person);
+        entityManager.clear();
+        entityManager.flush();
+
+        List<Person5> people = findPeople(jdbcTemplate);
+        assertThat(people).hasSize(0);
+        assertThat(executedQueries).containsAll(List.of("SELECT id, nick_name, old, email FROM users"));
     }
 }
