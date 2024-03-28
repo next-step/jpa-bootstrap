@@ -4,8 +4,8 @@ import database.dialect.Dialect;
 import jdbc.JdbcTemplate;
 import persistence.entitymanager.EntityManager;
 import persistence.entitymanager.SessionContract;
-import persistence.entitymanager.event.EventListenerRegistry;
-import persistence.entitymanager.event.EventListenerRegistryImpl;
+import persistence.entitymanager.listener.EventListenerRegistry;
+import persistence.entitymanager.listener.EventListenerRegistryImpl;
 
 import java.util.List;
 

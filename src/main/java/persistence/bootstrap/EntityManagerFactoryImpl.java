@@ -2,7 +2,7 @@ package persistence.bootstrap;
 
 import persistence.entitymanager.EntityManager;
 import persistence.entitymanager.EntityManagerImpl;
-import persistence.entitymanager.event.EventListenerRegistry;
+import persistence.entitymanager.listener.EventListenerRegistry;
 
 public class EntityManagerFactoryImpl implements EntityManagerFactory {
 

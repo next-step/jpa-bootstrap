@@ -1,10 +1,10 @@
-package persistence.entitymanager.event;
+package persistence.entitymanager.listener;
 
 import persistence.bootstrap.Metadata;
-import persistence.entitymanager.event.event.EventType;
-import persistence.entitymanager.event.listeners.DeleteEventListener;
-import persistence.entitymanager.event.listeners.LoadEventListener;
-import persistence.entitymanager.event.listeners.PersistEventListener;
+import persistence.entitymanager.listener.events.EventType;
+import persistence.entitymanager.listener.listeners.DeleteEventListener;
+import persistence.entitymanager.listener.listeners.LoadEventListener;
+import persistence.entitymanager.listener.listeners.PersistEventListener;
 
 import java.util.HashMap;
 import java.util.Map;

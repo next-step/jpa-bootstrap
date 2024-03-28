@@ -1,9 +1,9 @@
-package persistence.entitymanager.event.listeners;
+package persistence.entitymanager.listener.listeners;
 
-import persistence.entitymanager.action.ActionQueue;
-import persistence.entitymanager.action.InsertAction;
-import persistence.entitymanager.action.UpdateAction;
-import persistence.entitymanager.event.event.PersistEvent;
+import persistence.entitymanager.actionqueue.ActionQueue;
+import persistence.entitymanager.actionqueue.actions.InsertAction;
+import persistence.entitymanager.actionqueue.actions.UpdateAction;
+import persistence.entitymanager.listener.events.PersistEvent;
 
 public class PersistEventListener {
     public void onPersist(PersistEvent event) {

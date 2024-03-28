@@ -2,15 +2,15 @@ package persistence.entitymanager;
 
 import persistence.bootstrap.Metadata;
 import persistence.bootstrap.Metamodel;
-import persistence.entitymanager.event.EventListenerRegistry;
-import persistence.entitymanager.event.event.DeleteEvent;
-import persistence.entitymanager.event.event.LoadEvent;
-import persistence.entitymanager.event.event.PersistEvent;
-import persistence.entitymanager.event.listeners.DeleteEventListener;
-import persistence.entitymanager.event.listeners.LoadEventListener;
-import persistence.entitymanager.event.listeners.PersistEventListener;
+import persistence.entitymanager.listener.EventListenerRegistry;
+import persistence.entitymanager.listener.events.DeleteEvent;
+import persistence.entitymanager.listener.events.LoadEvent;
+import persistence.entitymanager.listener.events.PersistEvent;
+import persistence.entitymanager.listener.listeners.DeleteEventListener;
+import persistence.entitymanager.listener.listeners.LoadEventListener;
+import persistence.entitymanager.listener.listeners.PersistEventListener;
 
-import static persistence.entitymanager.event.event.EventType.*;
+import static persistence.entitymanager.listener.events.EventType.*;
 
 public class EntityManagerImpl extends AbstractEntityManager {
     private final EventListenerRegistry eventListenerRegistry;

@@ -1,8 +1,8 @@
-package persistence.entitymanager.event.event;
+package persistence.entitymanager.listener.events;
 
-import persistence.entitymanager.event.listeners.DeleteEventListener;
-import persistence.entitymanager.event.listeners.LoadEventListener;
-import persistence.entitymanager.event.listeners.PersistEventListener;
+import persistence.entitymanager.listener.listeners.DeleteEventListener;
+import persistence.entitymanager.listener.listeners.LoadEventListener;
+import persistence.entitymanager.listener.listeners.PersistEventListener;
 
 public class EventType<T> {
     public static final EventType<LoadEventListener> LOAD = create("load", LoadEventListener.class);

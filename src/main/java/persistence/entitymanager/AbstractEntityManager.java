@@ -9,7 +9,7 @@ import persistence.entity.context.PersistenceContextImpl;
 import persistence.entity.database.CollectionLoader;
 import persistence.entity.database.EntityLoader;
 import persistence.entity.database.EntityPersister;
-import persistence.entitymanager.action.ActionQueue;
+import persistence.entitymanager.actionqueue.ActionQueue;
 
 public abstract class AbstractEntityManager implements SessionContract, EntityManager, Session {
     protected final Metamodel metamodel;

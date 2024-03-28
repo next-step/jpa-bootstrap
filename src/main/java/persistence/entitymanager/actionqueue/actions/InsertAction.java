@@ -1,4 +1,4 @@
-package persistence.entitymanager.action;
+package persistence.entitymanager.actionqueue.actions;
 
 public class InsertAction implements Action {
     private final Object entity;

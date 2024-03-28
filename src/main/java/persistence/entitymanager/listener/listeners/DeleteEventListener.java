@@ -1,8 +1,8 @@
-package persistence.entitymanager.event.listeners;
+package persistence.entitymanager.listener.listeners;
 
-import persistence.entitymanager.action.ActionQueue;
-import persistence.entitymanager.action.DeleteAction;
-import persistence.entitymanager.event.event.DeleteEvent;
+import persistence.entitymanager.actionqueue.ActionQueue;
+import persistence.entitymanager.actionqueue.actions.DeleteAction;
+import persistence.entitymanager.listener.events.DeleteEvent;
 
 public class DeleteEventListener implements EventListener {
     public void onDelete(DeleteEvent event) {

@@ -1,7 +1,7 @@
 package persistence.entitymanager;
 
 import persistence.entity.context.PersistenceContext;
-import persistence.entitymanager.action.ActionQueue;
+import persistence.entitymanager.actionqueue.ActionQueue;
 
 public interface Session {
     ActionQueue getActionQueue();

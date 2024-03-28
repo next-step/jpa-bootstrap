@@ -1,6 +1,6 @@
-package persistence.entitymanager.event;
+package persistence.entitymanager.listener;
 
-import persistence.entitymanager.event.event.EventType;
+import persistence.entitymanager.listener.events.EventType;
 
 public interface EventListenerRegistry {
     <T> void register(EventType<T> eventType, T listener);

@@ -1,4 +1,4 @@
-package persistence.entitymanager.event.event;
+package persistence.entitymanager.listener.events;
 
 import persistence.entity.context.PersistenceContext;
 

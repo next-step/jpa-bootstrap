@@ -1,9 +1,9 @@
-package persistence.entitymanager.event.listeners;
+package persistence.entitymanager.listener.listeners;
 
 import persistence.bootstrap.Metadata;
 import persistence.entity.context.PersistenceContext;
 import persistence.entity.context.PersistentClass;
-import persistence.entitymanager.event.event.LoadEvent;
+import persistence.entitymanager.listener.events.LoadEvent;
 
 public class LoadEventListener {
     private final Metadata metadata;
