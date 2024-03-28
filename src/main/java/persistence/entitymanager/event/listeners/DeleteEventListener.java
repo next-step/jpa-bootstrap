@@ -8,6 +8,6 @@ public class DeleteEventListener implements EventListener {
     public void onDelete(DeleteEvent event) {
         ActionQueue actionQueue = event.getSession().getActionQueue();
 
-        actionQueue.addDeleteAction(new DeleteAction(event.getEntity()));
+        actionQueue.addAction(new DeleteAction(event.getEntity()));
     }
 }

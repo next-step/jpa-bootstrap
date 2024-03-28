@@ -5,15 +5,10 @@ import persistence.entity.context.PersistenceContext;
 import java.util.LinkedList;
 import java.util.Queue;
 
-/*
-요구사항 2 - ActionQueue 를 활용해 쓰기 지연 구현해보기
-ActionQueue 어디에서 초기화를 하는 것이 좋을까?
- */
 public class ActionQueue {
     private final Queue<InsertAction> insertActions;
     private final Queue<UpdateAction> updateActions;
     private final Queue<DeleteAction> deleteActions;
-    private final Queue<SelectAction> selectActions;
     private final PersistenceContext persistenceContext;
 
     public ActionQueue(PersistenceContext persistenceContext) {
@@ -22,38 +17,38 @@ public class ActionQueue {
         insertActions = new LinkedList<>();
         updateActions = new LinkedList<>();
         deleteActions = new LinkedList<>();
-        selectActions = new LinkedList<>();
     }
 
-    public void addInsertAction(InsertAction action) {
+    public void addAction(InsertAction action) {
         insertActions.add(action);
     }
 
-    public void addUpdateAction(UpdateAction action) {
+    public void addAction(UpdateAction action) {
         updateActions.add(action);
     }
 
-    public void addDeleteAction(DeleteAction action) {
+    public void addAction(DeleteAction action) {
         deleteActions.add(action);
-    }
-
-    public void addSelectAction(SelectAction action) {
-        selectActions.add(action);
     }
 
     public void flush() {
         executeInsert();
         executeUpdate();
         executeDelete();
-        executeSelect();
+
+        clear();
     }
 
     private void executeInsert() {
-
+        for (InsertAction insertAction : insertActions) {
+            persistenceContext.insertEntity(insertAction.getEntity());
+        }
     }
 
     private void executeUpdate() {
-
+        for (UpdateAction updateAction : updateActions) {
+            persistenceContext.updateEntity(updateAction.getEntity());
+        }
     }
 
     private void executeDelete() {
@@ -62,14 +57,9 @@ public class ActionQueue {
         }
     }
 
-    private void executeSelect() {
-
-    }
-
     public void clear() {
         insertActions.clear();
         updateActions.clear();
         deleteActions.clear();
-        selectActions.clear();
     }
 }

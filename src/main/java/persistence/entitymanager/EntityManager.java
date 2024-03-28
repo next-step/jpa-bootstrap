@@ -10,6 +10,5 @@ public interface EntityManager {
 
     void flush();
 
-    // XXX: clear 테스트
     void clear();
 }

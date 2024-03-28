@@ -1,7 +1,6 @@
 package persistence.bootstrap;
 
 import database.dialect.Dialect;
-import database.mapping.Association;
 import persistence.entity.context.EntityKey;
 import persistence.entity.context.PersistentClass;
 
@@ -47,11 +46,6 @@ public class MetadataImpl implements Metadata {
     public Long getRowId(Object entity) {
         Class<?> clazz = entity.getClass();
         return getPersistentClass(clazz).getRowId(entity);
-    }
-
-    @Override
-    public <T> List<Association> getAssociationsRelatedTo(PersistentClass<T> persistentClass) {
-        return persistentClass.getAssociationsRelatedTo(entityClasses);
     }
 
     @Override

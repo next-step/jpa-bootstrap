@@ -2,11 +2,6 @@ package persistence.entitymanager;
 
 import persistence.bootstrap.Metadata;
 import persistence.bootstrap.Metamodel;
-import persistence.entity.context.EntityEntries;
-import persistence.entity.context.FirstLevelCache;
-import persistence.entity.context.PersistenceContext;
-import persistence.entity.context.PersistenceContextImpl;
-import persistence.entitymanager.action.ActionQueue;
 import persistence.entitymanager.event.EventListenerRegistry;
 import persistence.entitymanager.event.event.DeleteEvent;
 import persistence.entitymanager.event.event.LoadEvent;
@@ -18,10 +13,7 @@ import persistence.entitymanager.event.listeners.PersistEventListener;
 import static persistence.entitymanager.event.event.EventType.*;
 
 public class EntityManagerImpl extends AbstractEntityManager {
-    private final PersistenceContext persistenceContext;
     private final EventListenerRegistry eventListenerRegistry;
-    private final ActionQueue actionQueue;
-    // 액션큐
 
     public static EntityManager newEntityManager(
             Metamodel metamodel,
@@ -34,15 +26,9 @@ public class EntityManagerImpl extends AbstractEntityManager {
             Metadata metadata,
             Metamodel metamodel,
             EventListenerRegistry eventListenerRegistry) {
-        super(metamodel);
+        super(metamodel, metadata);
 
-        this.persistenceContext = new PersistenceContextImpl(
-                metadata,
-                new FirstLevelCache(),
-                new EntityEntries(),
-                this);
         this.eventListenerRegistry = eventListenerRegistry;
-        this.actionQueue = new ActionQueue(persistenceContext);
     }
 
     @Override
@@ -59,7 +45,7 @@ public class EntityManagerImpl extends AbstractEntityManager {
 
     @Override
     public void persist(Object entity) {
-        PersistEvent event = new PersistEvent(entity, persistenceContext);
+        PersistEvent event = new PersistEvent(entity, this);
         firePersist(event);
     }
 
@@ -77,20 +63,5 @@ public class EntityManagerImpl extends AbstractEntityManager {
     private void fireDelete(DeleteEvent event) {
         eventListenerRegistry.getEventListenerGroup(DELETE)
                 .fireEventOnEachListener(event, DeleteEventListener::onDelete);
-    }
-
-    @Override
-    public void flush() {
-        actionQueue.flush();
-    }
-
-    @Override
-    public void clear() {
-        actionQueue.clear();
-    }
-
-    @Override
-    public ActionQueue getActionQueue() {
-        return actionQueue;
     }
 }

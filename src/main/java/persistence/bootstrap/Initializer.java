@@ -6,10 +6,6 @@ import persistence.entitymanager.EntityManager;
 import persistence.entitymanager.SessionContract;
 import persistence.entitymanager.event.EventListenerRegistry;
 import persistence.entitymanager.event.EventListenerRegistryImpl;
-import persistence.entitymanager.event.event.EventType;
-import persistence.entitymanager.event.listeners.DeleteEventListener;
-import persistence.entitymanager.event.listeners.LoadEventListener;
-import persistence.entitymanager.event.listeners.PersistEventListener;
 
 import java.util.List;
 
@@ -55,11 +51,7 @@ public class Initializer {
     }
 
     private void buildEventListenerGroups() {
-        EventListenerRegistry registry = new EventListenerRegistryImpl();
-        registry.register(EventType.LOAD, new LoadEventListener(metadata));
-        registry.register(EventType.PERSIST, new PersistEventListener());
-        registry.register(EventType.DELETE, new DeleteEventListener());
-        this.eventListenerRegistry = registry;
+        this.eventListenerRegistry = EventListenerRegistryImpl.buildEventListenerRegistry(metadata);
     }
 
     private void buildMetamodel() {

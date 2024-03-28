@@ -1,6 +1,10 @@
 package persistence.entitymanager.event;
 
+import persistence.bootstrap.Metadata;
 import persistence.entitymanager.event.event.EventType;
+import persistence.entitymanager.event.listeners.DeleteEventListener;
+import persistence.entitymanager.event.listeners.LoadEventListener;
+import persistence.entitymanager.event.listeners.PersistEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +14,15 @@ public class EventListenerRegistryImpl implements EventListenerRegistry {
 
     private final Map<EventType<?>, Object> listenerGroupMap;
 
-    public EventListenerRegistryImpl() {
+    public static EventListenerRegistry buildEventListenerRegistry(Metadata metadata) {
+        EventListenerRegistry registry = new EventListenerRegistryImpl();
+        registry.register(EventType.LOAD, new LoadEventListener(metadata));
+        registry.register(EventType.PERSIST, new PersistEventListener());
+        registry.register(EventType.DELETE, new DeleteEventListener());
+        return registry;
+    }
+
+    private EventListenerRegistryImpl() {
         this.listeners = new HashMap<>();
         this.listenerGroupMap = new HashMap<>();
     }
