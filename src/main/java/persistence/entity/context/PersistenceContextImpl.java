@@ -64,27 +64,26 @@ public class PersistenceContextImpl implements PersistenceContext {
     }
 
     @Override
-    public <T> void addEntity(T entity) {
+    public boolean guessEntityIsNewOrNot(Object entity) {
+        PersistentClass<?> persistentClass = metadata.getPersistentClass(entity.getClass());
+        Long id = metadata.getRowId(entity);
+        return id == null || readFromCache(persistentClass, id) == null;
+    }
+
+    @Override
+    public <T> void insertEntity(T entity) {
         Class<T> aClass = (Class<T>) entity.getClass();
         PersistentClass<T> persistentClass = metadata.getPersistentClass(aClass);
-        T saved = writeToDatabase(entity, persistentClass);
-        writeToCache(saved);
+        T inserted = insertEntityIntoDatabase(persistentClass, entity);
+        writeToCache(inserted);
     }
 
-    private <T> T writeToDatabase(T entity, PersistentClass<T> persistentClass) {
-        T saved;
-        if (isInsertOperation(persistentClass, entity)) {
-            saved = insertEntityIntoDatabase(persistentClass, entity);
-        } else {
-            saved = updateEntityInDatabase(persistentClass, entity);
-        }
-        return saved;
-    }
-
-    private <T> boolean isInsertOperation(PersistentClass<T> persistentClass, Object entity) {
-        Long id = metadata.getRowId(entity);
-
-        return id == null || readFromCache(persistentClass, id) == null;
+    @Override
+    public <T> void updateEntity(T entity) {
+        Class<T> aClass = (Class<T>) entity.getClass();
+        PersistentClass<T> persistentClass = metadata.getPersistentClass(aClass);
+        T updated = updateEntityInDatabase(persistentClass, entity);
+        writeToCache(updated);
     }
 
     private <T> T insertEntityIntoDatabase(PersistentClass<T> persistentClass, Object object) {
@@ -95,7 +94,7 @@ public class PersistenceContextImpl implements PersistenceContext {
 
     private <T> T updateEntityInDatabase(PersistentClass<T> persistentClass, T entity) {
         Long id = metadata.getRowId(entity);
-        EntitySnapshot oldSnapshot = EntitySnapshot.of(persistentClass, (T) getEntity(persistentClass, id));
+        EntitySnapshot oldSnapshot = EntitySnapshot.of(persistentClass, getEntity(persistentClass, id));
         EntitySnapshot newSnapshot = EntitySnapshot.of(persistentClass, entity);
 
         ValueMap diff = oldSnapshot.diff(newSnapshot);
