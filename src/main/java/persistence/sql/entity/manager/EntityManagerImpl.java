@@ -1,6 +1,13 @@
 package persistence.sql.entity.manager;
 
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import persistence.action.ActionQueue;
+import persistence.event.EventListenerRegistry;
+import persistence.event.delete.DeleteEvent;
+import persistence.event.load.LoadEvent;
+import persistence.event.merge.MergeEvent;
+import persistence.event.persist.PersistEvent;
 import persistence.metadata.MetaModel;
 import persistence.sql.dml.exception.FieldSetValueException;
 import persistence.sql.entity.EntityMappingTable;
@@ -11,8 +18,6 @@ import persistence.sql.entity.context.PersistenceContext;
 import persistence.sql.entity.context.PersistenceContextImpl;
 import persistence.sql.entity.exception.ReadOnlyException;
 import persistence.sql.entity.exception.RemoveEntityException;
-import persistence.sql.entity.loader.EntityEagerLoader;
-import persistence.sql.entity.loader.EntityLoader;
 import persistence.sql.entity.model.DomainType;
 
 import java.lang.reflect.Field;
@@ -22,12 +27,15 @@ import java.util.List;
 public class EntityManagerImpl implements EntityManager {
 
     private final MetaModel metaModel;
+    private final EventListenerRegistry eventListenerRegistry;
     private final PersistenceContext persistenceContext;
     private final LazyLoadingManager lazyLoadingManager;
     private final CollectionPersister collectionPersister;
 
-    public EntityManagerImpl(final MetaModel metaModel) {
+    public EntityManagerImpl(final MetaModel metaModel,
+                             final EventListenerRegistry eventListenerRegistry) {
         this.metaModel = metaModel;
+        this.eventListenerRegistry = eventListenerRegistry;
         this.collectionPersister = new CollectionPersisterImpl();
         this.persistenceContext = new PersistenceContextImpl();
         this.lazyLoadingManager = new LazyLoadingManager();
@@ -35,27 +43,28 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <T> List<T> findAll(final Class<T> clazz) {
-        return metaModel.getEntityLoader(clazz).findAll(clazz);
+        return eventListenerRegistry.getLoadEventListener()
+                .onLoadAll(new LoadEvent<T>(clazz, null));
     }
 
     @Override
     public <T> T find(final Class<T> clazz, final Object id) {
         T persistenceEntity = persistenceContext.getEntity(clazz, id);
-        if(persistenceEntity != null && persistenceContext.isGone(persistenceEntity)) {
+        if (persistenceEntity != null && persistenceContext.isGone(persistenceEntity)) {
             throw new RemoveEntityException();
         }
 
-        if(persistenceEntity != null) {
+        if (persistenceEntity != null) {
             persistenceContext.loading(persistenceEntity, id);
             return persistenceEntity;
         }
 
-        T entity = getEntityLoader(clazz,id);
-        if(lazyLoadingManager.isLazyLoading(clazz)) {
+        T entity = getEntityLoader(clazz, id);
+        if (lazyLoadingManager.isLazyLoading(clazz)) {
             entity = lazyLoadingManager.setLazyLoading(entity, collectionPersister, metaModel.getCollectionLoader(clazz));
         }
 
-        if(entity != null) {
+        if (entity != null) {
             insertEntityLoader(entity, id);
             persistenceContext.loading(entity, id);
         }
@@ -63,30 +72,32 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     private <T> T getEntityLoader(final Class<T> clazz, final Object id) {
-        EntityEagerLoader entityEagerLoader = metaModel.getEntityEagerLoader(clazz);
-        EntityLoader entityLoader = metaModel.getEntityLoader(clazz);
-
-        if(entityEagerLoader.isEagerFetchType(clazz)) {
-            return entityEagerLoader.find(clazz, id);
+        final EntityMappingTable entityMappingTable = EntityMappingTable.from(clazz);
+        if (entityMappingTable.hasFetchType(FetchType.EAGER)) {
+            return eventListenerRegistry.getLoadEventListener()
+                    .onEagerLoad(new LoadEvent<T>(clazz, id));
         }
 
-        return entityLoader.find(clazz, id);
+        return eventListenerRegistry.getLoadEventListener()
+                .onLoad(new LoadEvent<T>(clazz, id));
     }
 
     @Override
     public <T> T findOfReadOnly(Class<T> clazz, Object id) {
         T persistenceEntity = persistenceContext.getEntity(clazz, id);
-        if(persistenceEntity != null) {
+        if (persistenceEntity != null) {
             persistenceContext.readOnly(persistenceEntity, id);
             return persistenceEntity;
         }
 
-        T entity = metaModel.getEntityLoader(clazz).find(clazz, id);
-        if(lazyLoadingManager.isLazyLoading(clazz)) {
+        T entity = eventListenerRegistry.getLoadEventListener()
+                .onLoad(new LoadEvent<T>(clazz, id));
+
+        if (lazyLoadingManager.isLazyLoading(clazz)) {
             entity = lazyLoadingManager.setLazyLoading(entity, collectionPersister, metaModel.getCollectionLoader(clazz));
         }
 
-        if(entity != null) {
+        if (entity != null) {
             insertEntityLoader(entity, id);
             persistenceContext.readOnly(entity, id);
         }
@@ -94,8 +105,13 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     @Override
+    public void flush() {
+        eventListenerRegistry.flush();
+    }
+
+    @Override
     public void persist(final Object entity) {
-        if(persistenceContext.isReadOnly(entity)) {
+        if (persistenceContext.isReadOnly(entity)) {
             throw new ReadOnlyException();
         }
 
@@ -104,25 +120,27 @@ public class EntityManagerImpl implements EntityManager {
         final Object key = pkDomainType.getValue();
 
         final Object cacheEntity = persistenceContext.getEntity(entity.getClass(), key);
-        if(cacheEntity == null) {
+        if (cacheEntity == null) {
             insertEntity(entity);
         }
 
         final Object snapshotEntity = persistenceContext.getDatabaseSnapshot(entity.getClass(), key);
-        if(key != null && !entity.equals(snapshotEntity)) {
+        if (key != null && !entity.equals(snapshotEntity)) {
             updateEntity(entity, key);
             persistenceContext.saving(entity);
         }
     }
 
     private void insertEntity(final Object entity) {
-        Object newKey = metaModel.getEntityPersister(entity.getClass()).insertWithPk(entity);
+        Object newKey = eventListenerRegistry.getPersisterEventListener()
+                .onPersisterwithPk(PersistEvent.createEvent(entity));
         newInstance(entity, newKey);
         insertEntityLoader(entity, newKey);
     }
 
     private void updateEntity(final Object entity, final Object key) {
-        metaModel.getEntityPersister(entity.getClass()).update(entity);
+        eventListenerRegistry.getMergeEventListener()
+                .onMerge(new MergeEvent<>(entity));
         insertEntityLoader(entity, key);
     }
 
@@ -142,19 +160,20 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     private void insertEntityLoader(final Object entity, final Object id) {
-        if(entity != null) {
+        if (entity != null) {
             persistenceContext.addEntity(entity, id);
         }
     }
 
     @Override
     public void remove(final Object entity) {
-        if(persistenceContext.isReadOnly(entity)) {
+        if (persistenceContext.isReadOnly(entity)) {
             throw new ReadOnlyException();
         }
 
         persistenceContext.removeEntity(entity);
-        metaModel.getEntityPersister(entity.getClass()).delete(entity);
+        eventListenerRegistry.getDeleteEventListener()
+                .onDelete(new DeleteEvent<>(entity));
         persistenceContext.goneEntity(entity);
     }
 
@@ -162,5 +181,10 @@ public class EntityManagerImpl implements EntityManager {
     public void removeAll(final Class<?> clazz) {
         metaModel.getEntityPersister(clazz).deleteAll(clazz);
         persistenceContext.removeAll();
+    }
+
+    @Override
+    public ActionQueue getActionQueue() {
+        return eventListenerRegistry.getActionQueue();
     }
 }

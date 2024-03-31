@@ -1,5 +1,7 @@
 package persistence.sql.entity.manager;
 
+import persistence.action.ActionQueue;
+
 import java.util.List;
 
 public interface EntityManager {
@@ -10,9 +12,13 @@ public interface EntityManager {
 
     <T> T findOfReadOnly(Class<T> clazz, Object id);
 
+    void flush();
+
     void persist(Object entity);
 
     void remove(Object entity);
 
     void removeAll(Class<?> clazz);
+
+    ActionQueue getActionQueue();
 }

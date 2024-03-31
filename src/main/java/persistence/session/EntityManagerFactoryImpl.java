@@ -1,5 +1,8 @@
 package persistence.session;
 
+import persistence.action.ActionQueue;
+import persistence.action.ActionQueueImpl;
+import persistence.event.EventListenerRegistry;
 import persistence.metadata.MetaModel;
 import persistence.session.exception.NotFoundEntityManagerException;
 import persistence.sql.dialect.Dialect;
@@ -34,7 +37,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
     @Override
     public void create() {
-        final EntityManager entityManager = new EntityManagerImpl(metaModel);
+        final ActionQueue actionQueue = new ActionQueueImpl();
+        final EventListenerRegistry eventListenerRegistry = EventListenerRegistry.create(metaModel, actionQueue);
+        final EntityManager entityManager = new EntityManagerImpl(metaModel, eventListenerRegistry);
         currentSessionContext.create(entityManager);
     }
 
