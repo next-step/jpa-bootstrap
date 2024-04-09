@@ -9,13 +9,12 @@ import persistence.sql.ddl.PersonV3;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@JdbcServerTest
 public abstract class JdbcServerDmlQueryTestSupport extends EntityMetaDataTestSupport {
 
     protected static JdbcTemplate jdbcTemplate;
 
     @BeforeAll
-    static void beforeAll() {
+    static void setUpJdbcServerDmlQueryTestSupport() {
         jdbcTemplate = TestJdbcServerExtension.getJdbcTemplate();
 
         final String ddl = "create table users (\n" +
@@ -48,7 +47,7 @@ public abstract class JdbcServerDmlQueryTestSupport extends EntityMetaDataTestSu
     }
 
     @AfterAll
-    static void afterAll() {
+    static void clearJdbcServerDmlQueryTestSupport() {
         List<String> tableNames = jdbcTemplate
                 .query("SELECT table_name FROM information_schema.tables WHERE table_schema='PUBLIC'", resultSet -> resultSet.getString("table_name"));
 

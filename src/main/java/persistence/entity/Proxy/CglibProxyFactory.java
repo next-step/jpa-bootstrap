@@ -6,7 +6,6 @@ import persistence.entity.collection.AbstractPersistentCollection;
 import persistence.entity.collection.mapping.PersistentCollectionMappings;
 import persistence.entity.loader.CollectionEntityLoader;
 import persistence.model.PersistentClass;
-import persistence.model.PersistentClassMapping;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,8 +13,7 @@ import java.util.List;
 public class CglibProxyFactory implements ProxyFactory {
 
     @Override
-    public <T> Collection<T> generateCollectionProxy(final Class<?> fieldType, final CollectionEntityLoader collectionEntityLoader, final Class<T> joinedEntityClass, final String joinedTableSelectQuery) {
-        final PersistentClass<?> persistentClass = PersistentClassMapping.getPersistentClass(joinedEntityClass);
+    public <T> Collection<T> generateCollectionProxy(final PersistentClass<?> persistentClass, final Class<?> fieldType, final CollectionEntityLoader collectionEntityLoader, final Class<T> joinedEntityClass, final String joinedTableSelectQuery) {
         final LazyLoader lazyLoader = () -> {
             final List<?> values = collectionEntityLoader.queryWithLazyColumn(persistentClass, joinedTableSelectQuery);
             final AbstractPersistentCollection<?> collection = PersistentCollectionMappings.getInstance().findMapping(fieldType)

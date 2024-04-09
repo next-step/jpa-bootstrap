@@ -2,8 +2,11 @@ package persistence.sql.ddl;
 
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.model.PersistentClass;
+import persistence.model.PersistentClassMapping;
 import persistence.sql.JdbcServerTest;
 import persistence.sql.TestJdbcServerExtension;
 import persistence.sql.dialect.Dialect;
@@ -19,9 +22,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DefaultDdlQueryBuilderIntegrationTest {
 
     private final TableBinder tableBinder = new TableBinder();
+    private static PersistentClassMapping persistentClassMapping = new PersistentClassMapping();
 
     private final Dialect dialect= new H2Dialect();
     private final DdlQueryBuilder queryBuilder = new DefaultDdlQueryBuilder(dialect);
+
+    @BeforeAll
+    static void beforeAll() {
+        persistentClassMapping.putPersistentClass(PersonV3.class);
+    }
 
     @AfterEach
     void tearDown() {
@@ -39,8 +48,8 @@ class DefaultDdlQueryBuilderIntegrationTest {
     @Test
     public void createTable() throws Exception {
         // given
-        final Class<PersonV3> clazz = PersonV3.class;
-        final Table table = tableBinder.createTable(clazz);
+        final PersistentClass<PersonV3> persistentClass = persistentClassMapping.getPersistentClass(PersonV3.class);
+        final Table table = tableBinder.createTable(persistentClass);
         final JdbcTemplate jdbcTemplate = TestJdbcServerExtension.getJdbcTemplate();
         final String createQuery = queryBuilder.buildCreateQuery(table);
 
@@ -58,8 +67,8 @@ class DefaultDdlQueryBuilderIntegrationTest {
     @Test
     public void dropTable() throws Exception {
         // given
-        final Class<PersonV3> clazz = PersonV3.class;
-        final Table table = tableBinder.createTable(clazz);
+        final PersistentClass<PersonV3> persistentClass = persistentClassMapping.getPersistentClass(PersonV3.class);
+        final Table table = tableBinder.createTable(persistentClass);
         final JdbcTemplate jdbcTemplate = TestJdbcServerExtension.getJdbcTemplate();
         final String createQuery = queryBuilder.buildCreateQuery(table);
         jdbcTemplate.execute(createQuery);

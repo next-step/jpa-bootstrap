@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import persistence.EntityMetaDataTestSupport;
 import persistence.PersonV3FixtureFactory;
 import persistence.entity.context.cache.EntitySnapshot;
+import persistence.model.PersistentClass;
 import persistence.sql.ddl.PersonV3;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +20,8 @@ class PersistenceContextTest extends EntityMetaDataTestSupport {
     public void getEntity() throws Exception {
         // given
         final PersonV3 person = PersonV3FixtureFactory.generatePersonV3Stub();
-        persistenceContext.addEntity(person.getId(), person);
+        final PersistentClass<PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(PersonV3.class);
+        persistenceContext.addEntity(person.getId(), person, persistentClass);
 
         // when
         final Object cachedEntity = persistenceContext.getEntity(person.getId(), person.getClass().getName());
@@ -33,9 +35,10 @@ class PersistenceContextTest extends EntityMetaDataTestSupport {
     public void addEntity() throws Exception {
         // given
         final PersonV3 person = PersonV3FixtureFactory.generatePersonV3Stub();
+        final PersistentClass<PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(PersonV3.class);
 
         // when
-        persistenceContext.addEntity(person.getId(), person);
+        persistenceContext.addEntity(person.getId(), person, persistentClass);
 
         // then
         final Object cachedEntity = persistenceContext.getEntity(person.getId(), person.getClass().getName());
@@ -47,7 +50,8 @@ class PersistenceContextTest extends EntityMetaDataTestSupport {
     public void removeEntity() throws Exception {
         // given
         final PersonV3 person = PersonV3FixtureFactory.generatePersonV3Stub();
-        persistenceContext.addEntity(person.getId(), person);
+        final PersistentClass<PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(PersonV3.class);
+        persistenceContext.addEntity(person.getId(), person, persistentClass);
 
         // when
         persistenceContext.removeEntity(person.getId(), person);
@@ -63,11 +67,12 @@ class PersistenceContextTest extends EntityMetaDataTestSupport {
         // given
         final PersonV3 person1 = PersonV3FixtureFactory.generatePersonV3Stub(1L);
         final PersonV3 person2 = PersonV3FixtureFactory.generatePersonV3Stub(2L);
-        persistenceContext.addEntity(person1.getId(), person1);
+        final PersistentClass<PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(PersonV3.class);
+        persistenceContext.addEntity(person1.getId(), person1, persistentClass);
 
         // when
-        final EntitySnapshot snapshot1 = persistenceContext.getDatabaseSnapshot(person1.getId(), person1);
-        final EntitySnapshot snapshot2 = persistenceContext.getDatabaseSnapshot(person2.getId(), person2);
+        final EntitySnapshot snapshot1 = persistenceContext.getDatabaseSnapshot(person1.getId(), person1, persistentClass);
+        final EntitySnapshot snapshot2 = persistenceContext.getDatabaseSnapshot(person2.getId(), person2, persistentClass);
 
         // then
         assertAll(

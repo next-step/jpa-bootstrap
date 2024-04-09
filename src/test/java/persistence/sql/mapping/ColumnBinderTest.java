@@ -6,7 +6,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.EntityMetaDataTestSupport;
 import persistence.model.PersistentClass;
-import persistence.model.PersistentClassMapping;
 import persistence.sql.ddl.PersonV3;
 
 import java.lang.reflect.Field;
@@ -29,7 +28,7 @@ class ColumnBinderTest extends EntityMetaDataTestSupport {
         // given
         final Class<PersonV3> clazz = PersonV3.class;
         final int fieldsNum = (int) Arrays.stream(clazz.getDeclaredFields()).filter(field -> !field.isAnnotationPresent(Transient.class)).count();
-        final PersistentClass<?> persistentClass = PersistentClassMapping.getPersistentClass(clazz.getName());
+        final PersistentClass<?> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(clazz.getName());
 
         // when
         final List<Column> columns = columnBinder.createColumns("users", persistentClass);
@@ -52,7 +51,7 @@ class ColumnBinderTest extends EntityMetaDataTestSupport {
         final PersonV3 person = new PersonV3(id, name, age, mail, index);
         final Class<? extends PersonV3> clazz = person.getClass();
         final int fieldsNum = (int) Arrays.stream(clazz.getDeclaredFields()).filter(field -> !field.isAnnotationPresent(Transient.class)).count();
-        final PersistentClass<?> persistentClass = PersistentClassMapping.getPersistentClass(clazz.getName());
+        final PersistentClass<?> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(clazz.getName());
 
         // when
         final List<Column> columns = columnBinder.createColumns("users", persistentClass, person);

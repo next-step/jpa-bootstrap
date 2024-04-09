@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.EntityMetaDataTestSupport;
 import persistence.PersonV3FixtureFactory;
+import persistence.model.PersistentClass;
 import persistence.sql.ddl.PersonV3;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,8 +18,9 @@ class EntitySnapshotTest extends EntityMetaDataTestSupport {
         // given
         final PersonV3 person1 = PersonV3FixtureFactory.generatePersonV3Stub(1L);
         final PersonV3 person2 = PersonV3FixtureFactory.generatePersonV3Stub(2L);
-        final EntitySnapshot snapshot1 = new EntitySnapshot(person1);
-        final EntitySnapshot snapshot2 = new EntitySnapshot(person2);
+        final PersistentClass<? extends PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(PersonV3.class);
+        final EntitySnapshot snapshot1 = new EntitySnapshot(persistentClass, person1);
+        final EntitySnapshot snapshot2 = new EntitySnapshot(persistentClass, person2);
         person2.setName("update name");
 
         // when

@@ -1,6 +1,7 @@
 package persistence.entity;
 
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,7 @@ import persistence.PersonV3FixtureFactory;
 import persistence.entity.Proxy.CglibProxyFactory;
 import persistence.entity.loader.EntityLoader;
 import persistence.entity.loader.SingleEntityLoader;
-import persistence.model.PersistentClassMapping;
+import persistence.model.PersistentClass;
 import persistence.sql.Order;
 import persistence.sql.ddl.PersonV3;
 import persistence.sql.dialect.Dialect;
@@ -26,11 +27,16 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class SingleEntityLoaderTest extends JdbcServerDmlQueryTestSupport {
 
-    private final TableBinder tableBinder = new TableBinder();
-    private final Dialect dialect = new H2Dialect();
-    private final DefaultDmlQueryBuilder dmlQueryBuilder = new DefaultDmlQueryBuilder(dialect);
+    private static final TableBinder tableBinder = new TableBinder();
+    private static final Dialect dialect = new H2Dialect();
+    private static final DefaultDmlQueryBuilder dmlQueryBuilder = new DefaultDmlQueryBuilder(dialect);
 
-    private final EntityLoader entityLoader = new SingleEntityLoader(tableBinder, PersistentClassMapping.getCollectionPersistentClassBinder(), new CglibProxyFactory(), dmlQueryBuilder, jdbcTemplate);
+    private static EntityLoader entityLoader;
+
+    @BeforeAll
+    static void beforeAll() {
+        entityLoader = new SingleEntityLoader(tableBinder, metaModel.getPersistentClassMapping(), new CglibProxyFactory(), dmlQueryBuilder, jdbcTemplate);
+    }
 
     @BeforeEach
     void setUp() {
@@ -44,7 +50,7 @@ class SingleEntityLoaderTest extends JdbcServerDmlQueryTestSupport {
     @Test
     public void load() throws Exception {
         // given
-        final Class<PersonV3> clazz = PersonV3.class;
+        final PersistentClass<PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(PersonV3.class);
         final long key = 1L;
         final PersonV3 person = PersonV3FixtureFactory.generatePersonV3Stub();
         final String insertQuery = generateUserTableStubInsertQuery(person);
@@ -52,7 +58,7 @@ class SingleEntityLoaderTest extends JdbcServerDmlQueryTestSupport {
         jdbcTemplate.execute(insertQuery);
 
         // when
-        final PersonV3 entity = entityLoader.load(clazz, key).get(0);
+        final PersonV3 entity = entityLoader.load(persistentClass, key).get(0);
 
         // then
         assertThat(entity).isNotNull()
@@ -64,7 +70,7 @@ class SingleEntityLoaderTest extends JdbcServerDmlQueryTestSupport {
     @Test
     public void loadEagerJoin() throws Exception {
         // given
-        final Class<Order> clazz = Order.class;
+        final PersistentClass<Order> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(Order.class);
         final long key = 4L;
         final Order order1 = OrderFixtureFactory.generateOrderStub(key);
         final Order order2 = OrderFixtureFactory.generateOrderStub(5L, List.of(), List.of());
@@ -80,7 +86,7 @@ class SingleEntityLoaderTest extends JdbcServerDmlQueryTestSupport {
         jdbcTemplate.execute(orderItemInsertQuery);
 
         // when
-        final List<Order> results = entityLoader.load(clazz, null);
+        final List<Order> results = entityLoader.load(persistentClass, null);
 
         // then
         assertAll(
@@ -104,7 +110,7 @@ class SingleEntityLoaderTest extends JdbcServerDmlQueryTestSupport {
     @Test
     public void loadEagerAndLazyJoin() throws Exception {
         // given
-        final Class<Order> clazz = Order.class;
+        final PersistentClass<Order> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(Order.class);
         final long key = 1L;
         final Order order1 = OrderFixtureFactory.generateOrderStub(key);
         final Order order2 = OrderFixtureFactory.generateOrderStub(2L, OrderFixtureFactory.generateEagerOrderItemsStub(4L, 5L), List.of());
@@ -127,7 +133,7 @@ class SingleEntityLoaderTest extends JdbcServerDmlQueryTestSupport {
         jdbcTemplate.execute(lazyOrderItemInsertQuery2);
 
         // when
-        final List<Order> results = entityLoader.load(clazz, null);
+        final List<Order> results = entityLoader.load(persistentClass, null);
 
         // then
         assertAll(
