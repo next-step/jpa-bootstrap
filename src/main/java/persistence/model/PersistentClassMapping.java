@@ -8,16 +8,16 @@ import java.util.stream.Collectors;
 
 public class PersistentClassMapping {
 
-    private static final Map<String, PersistentClass<?>> persistentClassMap = new HashMap<>();
-    private static final CollectionPersistentClassBinder collectionPersistentClassBinder = new CollectionPersistentClassBinder();
-    private static final EntityJoinFieldMapper entityJoinFieldMapper = new EntityJoinFieldMapper();
+    private final Map<String, PersistentClass<?>> persistentClassMap = new HashMap<>();
+    private final CollectionPersistentClassBinder collectionPersistentClassBinder = new CollectionPersistentClassBinder();
+    private final EntityJoinFieldMapper entityJoinFieldMapper = new EntityJoinFieldMapper();
 
-    public static <T> void putPersistentClass(final Class<T> entityClass) {
+    public <T> void putPersistentClass(final Class<T> entityClass) {
         final PersistentClass<T> persistentClass = createPersistentClass(entityClass);
         persistentClassMap.putIfAbsent(persistentClass.getEntityName(), persistentClass);
     }
 
-    private static <T> PersistentClass<T> createPersistentClass(final Class<T> entityClass) {
+    private <T> PersistentClass<T> createPersistentClass(final Class<T> entityClass) {
         final PersistentClass<T> persistentClass = new PersistentClass<>(entityClass);
         final List<AbstractEntityField> entityFields = extractEntityFields(entityClass);
         persistentClass.addEntityFields(entityFields);
@@ -25,15 +25,15 @@ public class PersistentClassMapping {
         return persistentClass;
     }
 
-    private static <T> List<AbstractEntityField> extractEntityFields(final Class<?> entityClass) {
-        return Arrays.stream(entityClass.getDeclaredFields()).filter(PersistentClassMapping::isColumnField).map(AbstractEntityField::createEntityField).collect(Collectors.toList());
+    private <T> List<AbstractEntityField> extractEntityFields(final Class<?> entityClass) {
+        return Arrays.stream(entityClass.getDeclaredFields()).filter(this::isColumnField).map(AbstractEntityField::createEntityField).collect(Collectors.toList());
     }
 
-    private static boolean isColumnField(final Field field) {
+    private boolean isColumnField(final Field field) {
         return !field.isAnnotationPresent(Transient.class);
     }
 
-    private static <T> void createCollectionPersistentClass(final PersistentClass<T> persistentClass, final AbstractEntityField entityField) {
+    private <T> void createCollectionPersistentClass(final PersistentClass<T> persistentClass, final AbstractEntityField entityField) {
         final Field field = entityField.getField();
         final EntityJoinField entityJoinField = (EntityJoinField) entityField;
 
@@ -49,7 +49,7 @@ public class PersistentClassMapping {
         collectionPersistentClass.addAssociation(persistentClass, lazy);
     }
 
-    public static void setCollectionPersistentClassBinder() {
+    public void setCollectionPersistentClassBinder() {
         persistentClassMap.values().forEach(persistentClass -> {
             final List<EntityJoinField> joinFields = persistentClass.getFields().stream()
                     .filter(AbstractEntityField::isJoinField)
@@ -59,11 +59,11 @@ public class PersistentClassMapping {
         });
     }
 
-    public static <T> PersistentClass<T> getPersistentClass(final Class<T> clazz) {
+    public <T> PersistentClass<T> getPersistentClass(final Class<T> clazz) {
         return (PersistentClass<T>) getPersistentClass(clazz.getName());
     }
 
-    public static PersistentClass<?> getPersistentClass(final String entityName) {
+    public PersistentClass<?> getPersistentClass(final String entityName) {
         final PersistentClass<?> persistentClass = persistentClassMap.get(entityName);
 
         if (Objects.isNull(persistentClass)) {
@@ -73,7 +73,7 @@ public class PersistentClassMapping {
         return persistentClass;
     }
 
-    public static CollectionPersistentClassBinder getCollectionPersistentClassBinder() {
+    public CollectionPersistentClassBinder getCollectionPersistentClassBinder() {
         return collectionPersistentClassBinder;
     }
 

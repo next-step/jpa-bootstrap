@@ -3,7 +3,7 @@ package persistence.sql.dml;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.EntityMetaDataTestSupport;
-import persistence.model.CollectionPersistentClassBinder;
+import persistence.model.PersistentClass;
 import persistence.model.PersistentClassMapping;
 import persistence.sql.Order;
 import persistence.sql.ddl.PersonV3;
@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DefaultDmlQueryBuilderTest extends EntityMetaDataTestSupport {
 
     private final TableBinder tableBinder = new TableBinder();
-    private final CollectionPersistentClassBinder collectionPersistentClassBinder = PersistentClassMapping.getCollectionPersistentClassBinder();
     private final Dialect dialect = new H2Dialect();
 
     private final DmlQueryBuilder queryBuilder = new DefaultDmlQueryBuilder(dialect);
@@ -32,7 +31,8 @@ class DefaultDmlQueryBuilderTest extends EntityMetaDataTestSupport {
     public void buildInsertQuery() throws Exception {
         // given
         final PersonV3 person = new PersonV3(1L, "name", 1, "email@domain.com", 0);
-        final Table table = tableBinder.createTable(person);
+        final PersistentClass<? extends PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(person.getClass());
+        final Table table = tableBinder.createTable(persistentClass, person);
 
         final Insert insert = new Insert(table);
 
@@ -54,8 +54,8 @@ class DefaultDmlQueryBuilderTest extends EntityMetaDataTestSupport {
     @Test
     public void buildFindAllQuery() throws Exception {
         // given
-        final Class<PersonV3> clazz = PersonV3.class;
-        final Table table = tableBinder.createTable(clazz);
+        final PersistentClass<PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(PersonV3.class);
+        final Table table = tableBinder.createTable(persistentClass);
         final Select select = new Select(table);
 
         final String dml = "select\n" +
@@ -74,8 +74,9 @@ class DefaultDmlQueryBuilderTest extends EntityMetaDataTestSupport {
     @Test
     public void buildFindAllQueryWithLeftJoin() throws Exception {
         // given
-        final Class<Order> clazz = Order.class;
-        final Table table = tableBinder.createTable(clazz, collectionPersistentClassBinder);
+        final PersistentClassMapping persistentClassMapping = metaModel.getPersistentClassMapping();
+        final PersistentClass<Order> persistentClass = persistentClassMapping.getPersistentClass(Order.class);
+        final Table table = tableBinder.createTable(persistentClass, persistentClassMapping);
         final Select select = new Select(table);
 
         final String dml = "select\n" +
@@ -98,8 +99,8 @@ class DefaultDmlQueryBuilderTest extends EntityMetaDataTestSupport {
     @Test
     public void buildFindByIdQuery() throws Exception {
         // given
-        final Class<PersonV3> clazz = PersonV3.class;
-        final Table table = tableBinder.createTable(clazz);
+        final PersistentClass<PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(PersonV3.class);
+        final Table table = tableBinder.createTable(persistentClass);
         final Column column = table.getColumn("id");
         final Value value = new Value(Long.class, Types.BIGINT, 1);
         final List<Where> wheres = List.of(new Where(column, value, LogicalOperator.NONE, new ComparisonOperator(ComparisonOperator.Comparisons.EQ)));
@@ -123,8 +124,9 @@ class DefaultDmlQueryBuilderTest extends EntityMetaDataTestSupport {
     @Test
     public void buildFindByIdQueryWithLeftJoin() throws Exception {
         // given
-        final Class<Order> clazz = Order.class;
-        final Table table = tableBinder.createTable(clazz, collectionPersistentClassBinder);
+        final PersistentClassMapping persistentClassMapping = metaModel.getPersistentClassMapping();
+        final PersistentClass<Order> persistentClass = persistentClassMapping.getPersistentClass(Order.class);
+        final Table table = tableBinder.createTable(persistentClass, persistentClassMapping);
         final Column column = table.getColumn("id");
         final Value value = new Value(Long.class, Types.BIGINT, 1);
         final List<Where> wheres = List.of(new Where(column, value, LogicalOperator.NONE, new ComparisonOperator(ComparisonOperator.Comparisons.EQ)));
@@ -157,7 +159,8 @@ class DefaultDmlQueryBuilderTest extends EntityMetaDataTestSupport {
         final int age = 1;
         final String mail = "email@domain.com";
         final PersonV3 person = new PersonV3(id, name, age, mail, 0);
-        final Table table = tableBinder.createTable(person);
+        final PersistentClass<? extends PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(person.getClass());
+        final Table table = tableBinder.createTable(persistentClass, person);
         final Update update = new Update(table);
 
         final String dml = "update\n" +
@@ -178,8 +181,8 @@ class DefaultDmlQueryBuilderTest extends EntityMetaDataTestSupport {
     @Test
     public void buildDeleteById() throws Exception {
         // given
-        final Class<PersonV3> clazz = PersonV3.class;
-        final Table table = tableBinder.createTable(clazz);
+        final PersistentClass<PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(PersonV3.class);
+        final Table table = tableBinder.createTable(persistentClass);
         final Column column = table.getColumn("id");
         final Value value = new Value(Long.class, Types.BIGINT, 1);
         final List<Where> wheres = List.of(new Where(column, value, LogicalOperator.NONE, new ComparisonOperator(ComparisonOperator.Comparisons.EQ)));

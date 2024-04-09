@@ -1,5 +1,6 @@
 package persistence.model;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.EntityMetaDataTestSupport;
@@ -14,12 +15,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PersistentClassTest extends EntityMetaDataTestSupport {
 
+    private static PersistentClassMapping persistentClassMapping;
+
+    @BeforeAll
+    static void beforeAll() {
+        persistentClassMapping = metaModel.getPersistentClassMapping();
+    }
+
     @DisplayName("메타 데이터에 있는 필드들을 이용해 entity 객체에서 필드 값들을 추출한다")
     @Test
     public void extractValues() throws Exception {
         // given
         final PersonV3 person = PersonV3FixtureFactory.generatePersonV3Stub();
-        final PersistentClass<?> persistentClass = PersistentClassMapping.getPersistentClass(person.getClass().getName());
+        final PersistentClass<?> persistentClass = persistentClassMapping.getPersistentClass(person.getClass().getName());
 
         // when
         final Map<String, Object> values = persistentClass.extractValues(person);
@@ -35,7 +43,7 @@ class PersistentClassTest extends EntityMetaDataTestSupport {
     public void extractValuesNotEqualClassType() throws Exception {
         // given
         final PersonV3 person = PersonV3FixtureFactory.generatePersonV3Stub();
-        final PersistentClass<?> persistentClass = PersistentClassMapping.getPersistentClass(PersonV1.class.getName());
+        final PersistentClass<?> persistentClass = persistentClassMapping.getPersistentClass(PersonV1.class.getName());
 
         // when then
         assertThatThrownBy(() -> persistentClass.extractValues(person))

@@ -6,6 +6,7 @@ import persistence.JdbcServerDmlQueryTestSupport;
 import persistence.PersonV3FixtureFactory;
 import persistence.entity.persister.EntityPersister;
 import persistence.entity.persister.SingleTableEntityPersister;
+import persistence.model.PersistentClass;
 import persistence.model.PersistentClassMapping;
 import persistence.sql.ddl.PersonV3;
 import persistence.sql.dialect.Dialect;
@@ -21,12 +22,20 @@ import static org.assertj.core.groups.Tuple.tuple;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class SingleTableEntityPersisterTest extends JdbcServerDmlQueryTestSupport {
 
-    private final TableBinder tableBinder = new TableBinder();
-    private final Dialect dialect = new H2Dialect();
-    private final DefaultDmlQueryBuilder dmlQueryBuilder = new DefaultDmlQueryBuilder(dialect);
-    private final Class<PersonV3> personV3Class = PersonV3.class;
-    private final EntityPersister entityPersister = new SingleTableEntityPersister(personV3Class.getName(), tableBinder, dmlQueryBuilder, jdbcTemplate, personV3Class);
-    private final RowMapper<PersonV3> rowMapper = new SingleEntityRowMapper<>(PersistentClassMapping.getPersistentClass((personV3Class)));
+    private static final TableBinder tableBinder = new TableBinder();
+    private static final Dialect dialect = new H2Dialect();
+    private static final DefaultDmlQueryBuilder dmlQueryBuilder = new DefaultDmlQueryBuilder(dialect);
+    private static final Class<PersonV3> personV3Class = PersonV3.class;
+    private static EntityPersister entityPersister;
+    private static RowMapper<PersonV3> rowMapper;
+
+    @BeforeAll
+    static void beforeAll() {
+        final PersistentClassMapping persistentClassMapping = metaModel.getPersistentClassMapping();
+        final PersistentClass<PersonV3> persistentClass = persistentClassMapping.getPersistentClass((personV3Class));
+        entityPersister = new SingleTableEntityPersister(personV3Class.getName(), persistentClassMapping, tableBinder, dmlQueryBuilder, jdbcTemplate, persistentClass);
+        rowMapper = new SingleEntityRowMapper<>(persistentClass);
+    }
 
     @AfterEach
     void tearDown() {

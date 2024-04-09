@@ -4,6 +4,7 @@ import persistence.entity.context.cache.EntityKey;
 import persistence.entity.context.cache.EntitySnapshot;
 import persistence.entity.context.cache.EntitySnapshots;
 import persistence.entity.context.cache.PersistenceCache;
+import persistence.model.PersistentClass;
 
 public class StatefulPersistenceContext implements PersistenceContext {
 
@@ -18,10 +19,10 @@ public class StatefulPersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public void addEntity(final Object key, final Object entity) {
+    public void addEntity(final Object key, final Object entity, final PersistentClass<?> persistentClass) {
         final EntityKey entityKey = generateEntityKey(key, entity.getClass().getName());
         this.cache.add(entityKey, entity);
-        this.snapshots.add(entityKey, entity);
+        this.snapshots.add(entityKey, entity, persistentClass);
         this.entityEntryContext.add(entityKey);
     }
 
@@ -33,9 +34,9 @@ public class StatefulPersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public EntitySnapshot getDatabaseSnapshot(final Object key, final Object entity) {
+    public EntitySnapshot getDatabaseSnapshot(final Object key, final Object entity, final PersistentClass<?> persistentClass) {
         final EntityKey entityKey = generateEntityKey(key, entity.getClass().getName());
-        return this.snapshots.get(entityKey, entity);
+        return this.snapshots.get(entityKey, entity, persistentClass);
     }
 
     @Override

@@ -1,8 +1,6 @@
 package persistence.sql.mapping;
 
 import jakarta.persistence.Entity;
-import persistence.ReflectionUtils;
-import persistence.model.CollectionPersistentClassBinder;
 import persistence.model.EntityJoinField;
 import persistence.model.PersistentClass;
 import persistence.model.PersistentClassMapping;
@@ -16,40 +14,38 @@ public class TableBinder {
 
     private final ColumnBinder columnBinder = new ColumnBinder(ColumnTypeMapper.getInstance());
 
-    public Table createTable(final Object object) {
+    public Table createTable(final PersistentClass<?> persistentClass, final Object object) {
         final Class<?> entityClass = object.getClass();
         final Table table = new Table(toTableName(entityClass));
-        final List<Column> columns = columnBinder.createColumns(table.getName(), PersistentClassMapping.getPersistentClass(entityClass.getName()), object);
+        final List<Column> columns = columnBinder.createColumns(table.getName(), persistentClass, object);
         table.addColumns(columns);
 
         return table;
     }
 
-    public Table createTable(final Class<?> clazz) {
-        final Table table = new Table(toTableName(clazz));
-        final PersistentClass<?> persistentClass = PersistentClassMapping.getPersistentClass(clazz.getName());
+    public Table createTable(final PersistentClass<?> persistentClass) {
+        final Table table = new Table(toTableName(persistentClass.getEntityClass()));
         final List<Column> columns = columnBinder.createColumns(table.getName(), persistentClass);
         table.addColumns(columns);
 
         return table;
     }
 
-    public Table createTable(final Class<?> clazz, final CollectionPersistentClassBinder collectionPersistentClassBinder) {
-        final Table table = this.createTable(clazz);
-        final PersistentClass<?> persistentClass = PersistentClassMapping.getPersistentClass(clazz.getName());
-        final List<TableJoin> tableJoins = extractTableJoins(table, persistentClass, collectionPersistentClassBinder);
+    public Table createTable(final PersistentClass<?> persistentClass, final PersistentClassMapping persistentClassMapping) {
+        final Table table = this.createTable(persistentClass);
+        final List<TableJoin> tableJoins = extractTableJoins(table, persistentClass, persistentClassMapping);
         table.addTableJoins(tableJoins);
 
         return table;
     }
 
-    private List<TableJoin> extractTableJoins(final Table table, final PersistentClass<?> persistentClass, final CollectionPersistentClassBinder collectionPersistentClassBinder) {
+    private List<TableJoin> extractTableJoins(final Table table, final PersistentClass<?> persistentClass, final PersistentClassMapping persistentClassMapping) {
         return persistentClass.getFields()
                 .stream()
                 .filter(field -> field.isJoinField() && ((EntityJoinField) field).isEager())
                 .map(field -> {
                     final EntityJoinField joinField = (EntityJoinField) field;
-                    final Table joinedTable = createTable(collectionPersistentClassBinder.getCollectionPersistentClass(ReflectionUtils.mapToGenericClassName(joinField.getField())).getEntityClass());
+                    final Table joinedTable = createTable(persistentClassMapping.getPersistentClass(joinField.getEntityClass()));
                     final JoinColumn predicate = new JoinColumn(table.getPrimaryKey().getColumns().get(0).getName(), joinField.getJoinedColumnName(), ComparisonOperator.Comparisons.EQ);
                     return new TableJoin(persistentClass.getEntityName(), table.getName(), joinedTable, SqlAstJoinType.LEFT, predicate);
                 }).collect(Collectors.toList());

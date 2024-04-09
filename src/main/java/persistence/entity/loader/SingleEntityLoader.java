@@ -16,23 +16,22 @@ import java.util.stream.Collectors;
 public class SingleEntityLoader implements EntityLoader {
 
     private final TableBinder tableBinder;
-    private final CollectionPersistentClassBinder collectionPersistentClassBinder;
+    private final PersistentClassMapping persistentClassMapping;
     private final ProxyFactory proxyFactory;
     private final DmlQueryBuilder dmlQueryBuilder;
     private final JdbcTemplate jdbcTemplate;
 
-    public SingleEntityLoader(final TableBinder tableBinder, final CollectionPersistentClassBinder collectionPersistentClassBinder, final ProxyFactory proxyFactory, final DmlQueryBuilder dmlQueryBuilder, final JdbcTemplate jdbcTemplate) {
+    public SingleEntityLoader(final TableBinder tableBinder, final PersistentClassMapping persistentClassMapping, final ProxyFactory proxyFactory, final DmlQueryBuilder dmlQueryBuilder, final JdbcTemplate jdbcTemplate) {
         this.tableBinder = tableBinder;
-        this.collectionPersistentClassBinder = collectionPersistentClassBinder;
+        this.persistentClassMapping = persistentClassMapping;
         this.proxyFactory = proxyFactory;
         this.dmlQueryBuilder = dmlQueryBuilder;
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public <T> List<T> load(final Class<T> clazz, final Object key) {
-        final PersistentClass<T> persistentClass = PersistentClassMapping.getPersistentClass(clazz);
-        final Select select = generateSelect(clazz, key);
+    public <T> List<T> load(final PersistentClass<T> persistentClass, final Object key) {
+        final Select select = generateSelect(persistentClass, key);
 
         final String selectQuery = dmlQueryBuilder.buildSelectQuery(select);
         log.debug("\n" + selectQuery);
@@ -65,9 +64,11 @@ public class SingleEntityLoader implements EntityLoader {
             final Object idValue = ReflectionUtils.getFieldValue(entityId.getField(), entity);
 
             lazyJoinFields.forEach(joinField -> {
-                final Select joinedEntitySelect = generateSelect(joinField.getEntityClass(), joinField.getJoinedColumnName(), idValue);
+                final PersistentClass<?> joinedPersistentClass = persistentClassMapping.getPersistentClass(joinField.getEntityClass());
+                final Select joinedEntitySelect = generateSelect(joinedPersistentClass, joinField.getJoinedColumnName(), idValue);
                 final String joinedTableSelectQuery = dmlQueryBuilder.buildSelectQuery(joinedEntitySelect);
-                final Collection<?> values = proxyFactory.generateCollectionProxy(joinField.getFieldClass(), collectionEntityLoader, joinField.getEntityClass(), joinedTableSelectQuery);
+                final Collection<?> values =
+                        proxyFactory.generateCollectionProxy(joinedPersistentClass, joinField.getFieldClass(), collectionEntityLoader, joinField.getEntityClass(), joinedTableSelectQuery);
 
                 ReflectionUtils.setCollectionFieldValue(joinField.getField(), entity, values);
             });
@@ -77,7 +78,7 @@ public class SingleEntityLoader implements EntityLoader {
     private <T> List<T> getEntities(final PersistentClass<T> persistentClass, final Optional<EntityJoinField> eagerJoinField, final String query) {
         if (eagerJoinField.isPresent()) {
             final CollectionEntityLoader collectionEntityLoader = new CollectionEntityLoader(jdbcTemplate);
-            return collectionEntityLoader.queryWithEagerColumn(persistentClass.getEntityClass(), eagerJoinField.get(), this.collectionPersistentClassBinder, query);
+            return collectionEntityLoader.queryWithEagerColumn(persistentClass.getEntityClass(), eagerJoinField.get(), persistentClassMapping.getCollectionPersistentClassBinder(), query);
         }
 
         final RowMapper<T> rowMapper = new SingleEntityRowMapper<>(persistentClass);
@@ -89,8 +90,8 @@ public class SingleEntityLoader implements EntityLoader {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    private <T> Select generateSelect(final Class<T> clazz, final Object key) {
-        final Table table = tableBinder.createTable(clazz, this.collectionPersistentClassBinder);
+    private <T> Select generateSelect(final PersistentClass<T> persistentClass, final Object key) {
+        final Table table = tableBinder.createTable(persistentClass, persistentClassMapping);
 
         final Select select = new Select(table);
 
@@ -115,8 +116,8 @@ public class SingleEntityLoader implements EntityLoader {
                 .orElseThrow(() -> new QueryException("not found id column"));
     }
 
-    private <T> Select generateSelect(final Class<T> clazz, final String columnName, final Object value) {
-        final Table table = tableBinder.createTable(clazz, this.collectionPersistentClassBinder);
+    private <T> Select generateSelect(final PersistentClass<T> persistentClass, final String columnName, final Object value) {
+        final Table table = tableBinder.createTable(persistentClass, persistentClassMapping);
 
         final Select select = new Select(table);
         final Value columnValue = new Value(value.getClass(), ColumnTypeMapper.getInstance().toSqlType(value.getClass()), value);

@@ -3,6 +3,7 @@ package persistence.sql.dml;
 import org.junit.jupiter.api.*;
 import persistence.JdbcServerDmlQueryTestSupport;
 import persistence.PersonV3FixtureFactory;
+import persistence.model.PersistentClass;
 import persistence.sql.ddl.PersonV3;
 import persistence.sql.dialect.Dialect;
 import persistence.sql.dialect.H2Dialect;
@@ -33,7 +34,8 @@ public class DefaultDmlQueryBuilderIntegrationTest extends JdbcServerDmlQueryTes
     public void insertEntity() throws Exception {
         // given
         final PersonV3 person = new PersonV3(0L, "name", 20, "email@domain.com", 1);
-        final Table table = tableBinder.createTable(person);
+        final PersistentClass<? extends PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(person.getClass());
+        final Table table = tableBinder.createTable(persistentClass, person);
 
         final Insert insert = new Insert(table);
         final String insertQuery = dmlQueryBuilder.buildInsertQuery(insert);
@@ -53,7 +55,8 @@ public class DefaultDmlQueryBuilderIntegrationTest extends JdbcServerDmlQueryTes
     public void findAll() throws Exception {
         // given
         final PersonV3 person = PersonV3FixtureFactory.generatePersonV3Stub();
-        final Table table = tableBinder.createTable(person.getClass());
+        final PersistentClass<? extends PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(person.getClass());
+        final Table table = tableBinder.createTable(persistentClass, person);
         final String insertQuery = generateUserTableStubInsertQuery(person);
         jdbcTemplate.execute(insertQuery);
 
@@ -75,7 +78,8 @@ public class DefaultDmlQueryBuilderIntegrationTest extends JdbcServerDmlQueryTes
     public void findById() throws Exception {
         // given
         final PersonV3 person = PersonV3FixtureFactory.generatePersonV3Stub(1L);
-        final Table table = tableBinder.createTable(person);
+        final PersistentClass<? extends PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(person.getClass());
+        final Table table = tableBinder.createTable(persistentClass, person);
         final String insertQuery = generateUserTableStubInsertQuery(person);
         jdbcTemplate.execute(insertQuery);
 
@@ -98,7 +102,8 @@ public class DefaultDmlQueryBuilderIntegrationTest extends JdbcServerDmlQueryTes
     public void delete() throws Exception {
         // given
         final PersonV3 person = new PersonV3(0L, "name", 20, "email@domain.com", 1);
-        final Table table = tableBinder.createTable(person);
+        final PersistentClass<? extends PersonV3> persistentClass = metaModel.getPersistentClassMapping().getPersistentClass(person.getClass());
+        final Table table = tableBinder.createTable(persistentClass, person);
 
         final Column idColumn = table.getColumn("id");
         final Where where = new Where(idColumn, idColumn.getValue(), LogicalOperator.NONE, new ComparisonOperator(ComparisonOperator.Comparisons.EQ));

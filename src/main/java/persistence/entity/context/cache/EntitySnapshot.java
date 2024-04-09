@@ -1,7 +1,6 @@
 package persistence.entity.context.cache;
 
 import persistence.model.PersistentClass;
-import persistence.model.PersistentClassMapping;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,8 +11,8 @@ public class EntitySnapshot {
     private final PersistentClass<?> persistentClass;
     private final Map<String, Object> values = new HashMap<>();
 
-    public EntitySnapshot(final Object entity) {
-        this.persistentClass = PersistentClassMapping.getPersistentClass(entity.getClass().getName());
+    public EntitySnapshot(final PersistentClass<?> persistentClass, final Object entity) {
+        this.persistentClass = persistentClass;
         values.putAll(persistentClass.extractValues(entity));
     }
 
