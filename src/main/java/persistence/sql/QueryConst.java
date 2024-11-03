@@ -10,6 +10,8 @@ public class QueryConst {
     public static final String WHERE_CLAUSE = "WHERE";
     public static final String INNER_JOIN__CLAUSE = "INNER JOIN";
     public static final String ON_CLAUSE = "ON";
+    public static final String INSERT_INTO_CLAUSE = "INSERT INTO";
+    public static final String VALUES_CLAUSE = "VALUES";
 
     public static final String COLUMN_DELIMITER = ", ";
     public static final String COLUMN_ALIAS_DELIMITER = ".";
@@ -17,4 +19,6 @@ public class QueryConst {
 
     public static final String BLANK = " ";
     public static final String EQUAL = " = ";
+    public static final String LEFT_PARENTHESES = " (";
+    public static final String RIGHT_PARENTHESES = ") ";
 }

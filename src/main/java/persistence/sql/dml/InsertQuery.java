@@ -6,14 +6,13 @@ import persistence.meta.EntityTable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static persistence.sql.QueryConst.*;
-
 public class InsertQuery {
-    private static final String QUERY_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s)";
-
     public String insert(Object entity) {
         final EntityTable entityTable = new EntityTable(entity);
-        return QUERY_TEMPLATE.formatted(entityTable.getTableName(), getColumnClause(entityTable), getValueClause(entityTable));
+        return new InsertQueryBuilder()
+                .insertInto(entityTable.getTableName(), getColumns(entityTable))
+                .values(getValues(entityTable))
+                .build();
     }
 
     @SuppressWarnings("rawtypes")
@@ -24,36 +23,43 @@ public class InsertQuery {
         final List joinEntities = (List) joinEntityColumn.getValue();
 
         if (joinEntities.contains(entity)) {
-            return QUERY_TEMPLATE.formatted(entityTable.getTableName(), getColumnClause(entityTable, parentEntityTable),
-                    getValueClause(entityTable, parentEntityTable));
+            return new InsertQueryBuilder()
+                    .insertInto(entityTable.getTableName(), getColumns(entityTable, parentEntityTable))
+                    .values(getValues(entityTable, parentEntityTable))
+                    .build();
         }
-        return QUERY_TEMPLATE.formatted(entityTable.getTableName(), getColumnClause(entityTable), getValueClause(entityTable));
+        return new InsertQueryBuilder()
+                .insertInto(entityTable.getTableName(), getColumns(entityTable))
+                .values(getValues(entityTable))
+                .build();
     }
 
-    private String getColumnClause(EntityTable entityTable) {
+    private List<String> getColumns(EntityTable entityTable, EntityTable parentEntityTable) {
+        final List<String> columnClause = getColumns(entityTable);
+        columnClause.add(parentEntityTable.getJoinColumnName());
+        return columnClause;
+    }
+
+    private List<String> getColumns(EntityTable entityTable) {
         return entityTable.getEntityColumns()
                 .stream()
                 .filter(this::isAvailable)
                 .map(EntityColumn::getColumnName)
-                .collect(Collectors.joining(COLUMN_DELIMITER));
+                .collect(Collectors.toList());
     }
 
-    private String getValueClause(EntityTable entityTable) {
+    private List<Object> getValues(EntityTable entityTable, EntityTable parentEntityTable) {
+        final List<Object> valueClause = getValues(entityTable);
+        valueClause.add(parentEntityTable.getIdValue());
+        return valueClause;
+    }
+
+    private List<Object> getValues(EntityTable entityTable) {
         return entityTable.getEntityColumns()
                 .stream()
                 .filter(this::isAvailable)
-                .map(EntityColumn::getValueWithQuotes)
-                .collect(Collectors.joining(COLUMN_DELIMITER));
-    }
-
-    private String getColumnClause(EntityTable entityTable, EntityTable parentEntityTable) {
-        final String columnClause = getColumnClause(entityTable);
-        return columnClause + COLUMN_DELIMITER + parentEntityTable.getJoinColumnName();
-    }
-
-    private String getValueClause(EntityTable entityTable, EntityTable parentEntityTable) {
-        final String valueClause = getValueClause(entityTable);
-        return valueClause + COLUMN_DELIMITER + parentEntityTable.getIdValue();
+                .map(EntityColumn::getValue)
+                .collect(Collectors.toList());
     }
 
     private boolean isAvailable(EntityColumn entityColumn) {
