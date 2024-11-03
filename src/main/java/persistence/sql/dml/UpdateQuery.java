@@ -6,24 +6,25 @@ import persistence.meta.EntityTable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static persistence.sql.QueryConst.*;
-
 public class UpdateQuery {
-    private static final String QUERY_TEMPLATE = "UPDATE %s SET %s WHERE %s";
-
     public String update(Object entity, List<EntityColumn> entityColumns) {
         final EntityTable entityTable = new EntityTable(entity);
-        return QUERY_TEMPLATE.formatted(entityTable.getTableName(), getSetClause(entityColumns),
-                entityTable.getWhereClause());
+        return new UpdateQueryBuilder()
+                .update(entityTable.getTableName())
+                .set(getSetColumns(entityColumns), getSetValues(entityColumns))
+                .where(entityTable.getIdColumnName(), entityTable.getIdValue())
+                .build();
     }
 
-    private String getSetClause(List<EntityColumn> entityColumns) {
+    private List<String> getSetColumns(List<EntityColumn> entityColumns) {
         return entityColumns.stream()
-                .map(this::getSetClause)
-                .collect(Collectors.joining(COLUMN_DELIMITER));
+                .map(EntityColumn::getColumnName)
+                .collect(Collectors.toList());
     }
 
-    private String getSetClause(EntityColumn entityColumn) {
-        return entityColumn.getColumnName() + EQUAL + entityColumn.getValueWithQuotes();
+    private List<Object> getSetValues(List<EntityColumn> entityColumns) {
+        return entityColumns.stream()
+                .map(EntityColumn::getValue)
+                .collect(Collectors.toList());
     }
 }

@@ -12,6 +12,8 @@ public class QueryConst {
     public static final String ON_CLAUSE = "ON";
     public static final String INSERT_INTO_CLAUSE = "INSERT INTO";
     public static final String VALUES_CLAUSE = "VALUES";
+    public static final String UPDATE_CLAUSE = "UPDATE";
+    public static final String SET_CLAUSE = "SET";
 
     public static final String COLUMN_DELIMITER = ", ";
     public static final String COLUMN_ALIAS_DELIMITER = ".";

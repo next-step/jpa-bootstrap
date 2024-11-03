@@ -57,10 +57,6 @@ public class EntityTable {
         return entityColumns.getIdEntityColumn();
     }
 
-    public String getWhereClause() {
-        return getIdEntityColumn().getColumnName() + " = " + getIdEntityColumn().getValueWithQuotes();
-    }
-
     public String getWhereClause(Object id) {
         return getIdEntityColumn().getColumnName() + " = " + getValueWithQuotes(id);
     }
