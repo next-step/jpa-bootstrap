@@ -65,10 +65,6 @@ public class EntityTable {
         return getIdEntityColumn().getValue();
     }
 
-    public String getIdValueWithQuotes() {
-        return getIdEntityColumn().getValueWithQuotes();
-    }
-
     public boolean isIdGenerationFromDatabase() {
         return getIdEntityColumn().isIdGenerationFromDatabase();
     }

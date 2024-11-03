@@ -26,18 +26,4 @@ class EntityTableTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(EntityTable.NOT_ENTITY_FAILED_MESSAGE);
     }
-
-    @Test
-    @DisplayName("id 값을 반환한다.")
-    void getIdValue() {
-        // given
-        final EntityWithId entityWithId = new EntityWithId(1L, "Jaden", 30, "test@email.com");
-        final EntityTable entityTable = new EntityTable(entityWithId);
-
-        // when
-        final Object idValue = entityTable.getIdValueWithQuotes();
-
-        // then
-        assertThat(idValue).isEqualTo("1");
-    }
 }

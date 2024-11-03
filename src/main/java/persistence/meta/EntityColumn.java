@@ -74,10 +74,6 @@ public class EntityColumn {
         return Objects.hash(type, columnName, columnLength, columnIdOption, columnOption, columnValue);
     }
 
-    public String getValueWithQuotes() {
-        return columnValue.valueWithQuotes();
-    }
-
     public boolean isIdGenerationFromDatabase() {
         return columnIdOption.isIdGenerationFromDatabase();
     }
