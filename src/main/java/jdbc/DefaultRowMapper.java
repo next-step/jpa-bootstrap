@@ -14,7 +14,7 @@ import java.util.List;
 public class DefaultRowMapper<T> implements RowMapper<T> {
     private static final Logger logger = LoggerFactory.getLogger(DefaultRowMapper.class);
 
-    private static final String NOT_SUPPORTS_MAPPING_MESSAGE = "지원하는 mapping이 존재하지 않습니다.";
+    private static final String NOT_SUPPORTS_MAPPING_MESSAGE = "지원하는 FieldMapping이 존재하지 않습니다.";
 
     private final List<FieldMapping> fieldMappings = new ArrayList<>();
     private final Class<T> entityType;

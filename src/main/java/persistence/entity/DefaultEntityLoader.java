@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class DefaultEntityLoader implements EntityLoader {
+    private static final String PROXY_CREATION_FAILED_MESSAGE = "프록시 생성에 실패하였습니다.";
+
     private final JdbcTemplate jdbcTemplate;
     private final SelectQuery selectQuery;
     private final ProxyFactory proxyFactory;
@@ -63,7 +65,7 @@ public class DefaultEntityLoader implements EntityLoader {
             associationField.setAccessible(true);
             associationField.set(entity, proxy);
         } catch (IllegalAccessException e) {
-            throw new IllegalStateException("프록시 생성에 실패하였습니다", e);
+            throw new IllegalStateException(PROXY_CREATION_FAILED_MESSAGE, e);
         }
     }
 }

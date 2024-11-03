@@ -13,7 +13,7 @@ import java.util.List;
 public class JdbcTemplate {
     private static final Logger logger = LoggerFactory.getLogger(JdbcTemplate.class);
 
-    private static final String QUERY_EXECUTE_FAILED_MESSAGE = "쿼리 실행을 실패하였습니다.";
+    private static final String QUERY_EXECUTION_FAILED_MESSAGE = "쿼리 실행을 실패하였습니다.";
 
     private final Connection connection;
 
@@ -26,7 +26,7 @@ public class JdbcTemplate {
         try (final PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.execute();
         } catch (Exception e) {
-            throw new IllegalArgumentException(QUERY_EXECUTE_FAILED_MESSAGE, e);
+            throw new IllegalArgumentException(QUERY_EXECUTION_FAILED_MESSAGE, e);
         }
     }
 
@@ -39,7 +39,7 @@ public class JdbcTemplate {
                 idMapper.mapRow(generatedKeys);
             }
         } catch (Exception e) {
-            throw new IllegalArgumentException(QUERY_EXECUTE_FAILED_MESSAGE, e);
+            throw new IllegalArgumentException(QUERY_EXECUTION_FAILED_MESSAGE, e);
         }
     }
 
@@ -60,7 +60,7 @@ public class JdbcTemplate {
             }
             return result;
         } catch (Exception e) {
-            throw new IllegalArgumentException(QUERY_EXECUTE_FAILED_MESSAGE, e);
+            throw new IllegalArgumentException(QUERY_EXECUTION_FAILED_MESSAGE, e);
         }
     }
 }
