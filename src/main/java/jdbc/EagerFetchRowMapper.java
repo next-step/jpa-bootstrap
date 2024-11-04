@@ -10,19 +10,20 @@ import java.util.Collection;
 import java.util.List;
 
 public class EagerFetchRowMapper<T> extends AbstractRowMapper<T> {
-    private final Class<?> clazz;
-    private final Metamodel metamodel;
+    private final TableDefinition parentTableDefinition;
+    private final TableDefinition associatedTableDefinition;
 
-    public EagerFetchRowMapper(Class<T> clazz, Metamodel metamodel) {
+    public EagerFetchRowMapper(Class<T> clazz, TableDefinition parentTableDefinition,
+                               TableDefinition associatedTableDefinition, Metamodel metamodel) {
         super(clazz, metamodel);
-        this.clazz = clazz;
-        this.metamodel = metamodel;
+        this.parentTableDefinition = parentTableDefinition;
+        this.associatedTableDefinition = associatedTableDefinition;
     }
 
     @Override
     protected void setAssociation(ResultSet resultSet, T instance) throws NoSuchFieldException, SQLException {
         do {
-            List<TableAssociationDefinition> associations = metamodel.getTableDefinition(clazz).getAssociations();
+            List<TableAssociationDefinition> associations = parentTableDefinition.getAssociations();
             if (associations.isEmpty()) {
                 return;
             }
@@ -33,8 +34,7 @@ public class EagerFetchRowMapper<T> extends AbstractRowMapper<T> {
                 }
 
                 final Object associatedInstance = newInstance(association.getAssociatedEntityClass());
-                setColumns(resultSet, metamodel.getTableDefinition(association.getAssociatedEntityClass()),
-                        associatedInstance);
+                setColumns(resultSet, associatedTableDefinition, associatedInstance);
 
                 final Collection<Object> entityCollection = association.getCollectionField(instance);
                 entityCollection.add(associatedInstance);

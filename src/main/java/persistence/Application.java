@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import persistence.entity.EntityManager;
 import persistence.entity.EntityManagerImpl;
 import persistence.entity.StatefulPersistenceContext;
+import persistence.meta.Metamodel;
 import persistence.meta.MetamodelCollector;
 import persistence.sql.H2Dialect;
 import persistence.sql.ddl.query.CreateTableQueryBuilder;
@@ -32,10 +33,11 @@ public class Application {
             final MetamodelCollector metamodelCollector = new MetamodelCollector(jdbcTemplate);
             server.start();
 
-            final EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodelCollector.getMetamodel());
+            Metamodel metamodel = metamodelCollector.getMetamodel();
+            final EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(metamodel), metamodel);
 
-            CreateTableQueryBuilder createOrder = new CreateTableQueryBuilder(new H2Dialect(), Order.class, null);
-            CreateTableQueryBuilder createOrderItem = new CreateTableQueryBuilder(new H2Dialect(), OrderItem.class, List.of());
+            CreateTableQueryBuilder createOrder = new CreateTableQueryBuilder(new H2Dialect(), Order.class, metamodel, null);
+            CreateTableQueryBuilder createOrderItem = new CreateTableQueryBuilder(new H2Dialect(), OrderItem.class, metamodel, List.of());
             jdbcTemplate.execute(createOrder.build());
             jdbcTemplate.execute(createOrderItem.build());
 
@@ -57,8 +59,8 @@ public class Application {
         }
     }
 
-    private static void drop(JdbcTemplate jdbcTemplate) {
-        DropQueryBuilder dropQuery = new DropQueryBuilder(Person.class);
+    private static void drop(JdbcTemplate jdbcTemplate, Metamodel metamodel) {
+        DropQueryBuilder dropQuery = new DropQueryBuilder(Person.class, metamodel);
         String build = dropQuery.build();
         logger.info("Drop query: {}", build);
         jdbcTemplate.execute(build);

@@ -1,5 +1,7 @@
 package persistence.entity;
 
+import persistence.meta.Metamodel;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +9,12 @@ public class StatefulPersistenceContext implements PersistenceContext {
     private final Map<EntityKey, Object> managedEntities = new HashMap<>();
     private final Map<EntityKey, EntitySnapshot> entitySnapshots = new HashMap<>();
     private final Map<EntityKey, EntityEntry> entityEntries = new HashMap<>();
+
+    private final Metamodel metamodel;
+
+    public StatefulPersistenceContext(Metamodel metamodel) {
+        this.metamodel = metamodel;
+    }
 
     @Override
     public Object getEntity(EntityKey entityKey) {
@@ -30,7 +38,7 @@ public class StatefulPersistenceContext implements PersistenceContext {
 
     @Override
     public void addDatabaseSnapshot(EntityKey entityKey, Object entity) {
-        final EntitySnapshot entitySnapshot = new EntitySnapshot(entity);
+        final EntitySnapshot entitySnapshot = new EntitySnapshot(entity, metamodel.getTableDefinition(entity.getClass()));
         entitySnapshots.put(entityKey, entitySnapshot);
     }
 

@@ -102,7 +102,7 @@ public class EntityManagerImpl implements EntityManager {
         checkManagedEntity(entity, entityEntry);
 
         entityEntry.updateStatus(Status.DELETED);
-        entityPersister.delete(entity);
+        entityPersister.delete(entity, metamodel);
         persistenceContext.removeEntity(entityKey);
     }
 
@@ -114,7 +114,7 @@ public class EntityManagerImpl implements EntityManager {
         checkManagedEntity(entity, entityEntry);
 
         final EntitySnapshot entitySnapshot = persistenceContext.getDatabaseSnapshot(entityKey);
-        if (entitySnapshot.hasDirtyColumns(entity)) {
+        if (entitySnapshot.hasDirtyColumns(entity, metamodel.getTableDefinition(entity.getClass()))) {
             entityPersister.update(entity);
         }
 

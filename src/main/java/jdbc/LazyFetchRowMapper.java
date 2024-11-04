@@ -17,15 +17,18 @@ import java.util.List;
 public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
     private final Class<T> clazz;
     private final TableDefinition tableDefinition;
-    private final Metamodel metamodel;
     private final JdbcTemplate jdbcTemplate;
+    private final Metamodel metamodel;
 
-    public LazyFetchRowMapper(Class<T> clazz, Metamodel metamodel, JdbcTemplate jdbcTemplate) {
+    public LazyFetchRowMapper(Class<T> clazz,
+                              TableDefinition tableDefinition,
+                              JdbcTemplate jdbcTemplate,
+                              Metamodel metamodel) {
         super(clazz, metamodel);
         this.clazz = clazz;
-        this.tableDefinition = new TableDefinition(clazz);
-        this.metamodel = metamodel;
+        this.tableDefinition = tableDefinition;
         this.jdbcTemplate = jdbcTemplate;
+        this.metamodel = metamodel;
     }
 
     @Override
@@ -53,7 +56,7 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
 
     private EntityLazyLoader createLazyLoader(Class<?> elementClass) {
         return owner -> {
-            final TableDefinition ownerDefinition = new TableDefinition(owner.getClass());
+            final TableDefinition ownerDefinition = metamodel.getTableDefinition(owner.getClass());
 
             final String joinColumnName = ownerDefinition.getJoinColumnName(elementClass);
             final Object joinColumnValue = ownerDefinition.getValue(owner, joinColumnName);
@@ -63,7 +66,12 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
                     .build();
 
             return jdbcTemplate.query(query,
-                    RowMapperFactory.getInstance().createRowMapper(elementClass, metamodel, jdbcTemplate)
+                    new AbstractRowMapper(elementClass, metamodel) {
+                        @Override
+                        protected void setAssociation(ResultSet resultSet, Object instance) {
+                            // Do nothing
+                        }
+                    }
             );
         };
     }

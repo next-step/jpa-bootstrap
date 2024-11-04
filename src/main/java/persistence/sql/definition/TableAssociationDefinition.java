@@ -51,22 +51,10 @@ public class TableAssociationDefinition {
         return (Class<?>) actualTypeArguments[0];
     }
 
-//    public TableDefinition getAssociatedTableDefinition() {
-//        return associatedTableDefinition;
-//    }
-//
     public String getFieldName() {
         return fieldName;
     }
 
-//    public String getTableName() {
-//        return associatedTableDefinition.getTableName();
-//    }
-//
-//    public List<? extends ColumnDefinitionAware> getColumns() {
-//        return associatedTableDefinition.getColumns();
-//    }
-//
     public boolean isEager() {
         return fetchType == FetchType.EAGER;
     }
@@ -91,11 +79,6 @@ public class TableAssociationDefinition {
         }
 
         return entityCollection;
-    }
-
-    public void setCollectionField(Object instance, List collection) throws NoSuchFieldException {
-        final Field field = instance.getClass().getDeclaredField(getFieldName());
-        ReflectionFieldAccessUtils.accessAndSet(instance, field, collection);
     }
 
     public Class<?> getAssociatedEntityClass() {

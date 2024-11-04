@@ -120,10 +120,6 @@ public class TableDefinition {
         return associations;
     }
 
-    public boolean hasAssociations() {
-        return !associations.isEmpty();
-    }
-
     public Class<?> getEntityClass() {
         return entityClass;
     }

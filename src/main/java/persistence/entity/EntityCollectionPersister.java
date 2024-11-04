@@ -4,6 +4,7 @@ import common.ReflectionFieldAccessUtils;
 import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.meta.Metamodel;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;
 import persistence.sql.dml.query.InsertQueryBuilder;
@@ -22,17 +23,19 @@ public class EntityCollectionPersister {
 
     private final TableDefinition parentTableDefinition;
     private final TableDefinition elementTableDefinition;
+    private final Metamodel metamodel;
 
     private final JdbcTemplate jdbcTemplate;
     private final boolean isEager;
 
     public EntityCollectionPersister(TableDefinition parentTableDefinition, TableDefinition elementTableDefinition,
-                                     JdbcTemplate jdbcTemplate) {
+                                     JdbcTemplate jdbcTemplate, Metamodel metamodel) {
         this.parentTableDefinition = parentTableDefinition;
         this.elementTableDefinition = elementTableDefinition;
         final TableAssociationDefinition association = parentTableDefinition.getAssociation(
                 elementTableDefinition.getEntityClass());
 
+        this.metamodel = metamodel;
         this.isEager = association.isEager();
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -55,25 +58,11 @@ public class EntityCollectionPersister {
     }
 
     private Object doInsert(Object entity) {
-        final String query = insertQueryBuilder.build(entity);
+        final String query = insertQueryBuilder.build(entity, metamodel);
         final Serializable id = jdbcTemplate.insertAndReturnKey(query);
 
         bindId(id, entity);
         return entity;
-    }
-
-    public Collection<Object> getChildCollections(Object parentEntity) {
-        final List<TableAssociationDefinition> associations = parentTableDefinition.getAssociations();
-        final List<Object> childEntities = new ArrayList<>();
-
-        associations.forEach(association -> {
-            final Collection<?> associatedValues = parentTableDefinition.getIterableAssociatedValue(parentEntity, association);
-            if (associatedValues instanceof Iterable<?> iterable) {
-                iterable.forEach(childEntities::add);
-            }
-        });
-
-        return childEntities;
     }
 
     private void bindId(Serializable id, Object entity) {
@@ -87,7 +76,4 @@ public class EntityCollectionPersister {
         }
     }
 
-    public boolean isEager() {
-        return isEager;
-    }
 }

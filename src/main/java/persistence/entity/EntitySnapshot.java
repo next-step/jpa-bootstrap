@@ -11,8 +11,7 @@ import java.util.Objects;
 public class EntitySnapshot {
     private final Map<String, Object> columnSnapshots = new HashMap<>();
 
-    public EntitySnapshot(Object entity) {
-        TableDefinition tableDefinition = new TableDefinition(entity.getClass());
+    public EntitySnapshot(Object entity, TableDefinition tableDefinition) {
         final List<? extends ColumnDefinitionAware> columns = tableDefinition.getColumns();
 
         for (ColumnDefinitionAware column : columns) {
@@ -29,8 +28,7 @@ public class EntitySnapshot {
         return value instanceof String ? "'" + value + "'" : value.toString();
     }
 
-    public boolean hasDirtyColumns(Object managedEntity) {
-        final TableDefinition tableDefinition = new TableDefinition(managedEntity.getClass());
+    public boolean hasDirtyColumns(Object managedEntity, TableDefinition tableDefinition) {
         final List<? extends ColumnDefinitionAware> columns = tableDefinition.getColumns();
         return columns.stream()
                 .anyMatch(column -> {

@@ -20,23 +20,19 @@ public class SelectQueryBuilder implements BaseQueryBuilder {
     private final Map<String, String> conditions = new HashMap<>();
 
     private TableDefinition joinTableDefinition;
-    private final Metamodel metamodel;
     private final List<String> joinTableColumns = new ArrayList<>();
 
     public SelectQueryBuilder(Class<?> entityClass, Metamodel metamodel) {
-        final TableDefinition tableDefinition = new TableDefinition(entityClass);
+        final TableDefinition tableDefinition = metamodel.getTableDefinition(entityClass);
         this.tableDefinition = tableDefinition;
-        this.metamodel = metamodel;
         tableDefinition.getColumns().forEach(column -> {
                     columns.add(column.getDatabaseColumnName());
                 }
         );
     }
 
-    public SelectQueryBuilder join(TableAssociationDefinition tableAssociationDefinition) {
-        final TableDefinition joinTableDefinition = metamodel.getTableDefinition(tableAssociationDefinition.getAssociatedEntityClass());
-        this.joinTableDefinition = new TableDefinition(joinTableDefinition.getEntityClass());
-
+    public SelectQueryBuilder join(TableDefinition joinTableDefinition) {
+        this.joinTableDefinition = joinTableDefinition;
         this.joinTableDefinition.getColumns().forEach(column -> {
                     joinTableColumns.add(column.getDatabaseColumnName());
                 }
