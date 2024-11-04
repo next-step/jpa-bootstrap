@@ -2,6 +2,7 @@ package jdbc;
 
 import common.AliasRule;
 import common.ReflectionFieldAccessUtils;
+import persistence.meta.Metamodel;
 import persistence.sql.definition.ColumnDefinitionAware;
 import persistence.sql.definition.TableDefinition;
 
@@ -13,9 +14,9 @@ public abstract class AbstractRowMapper<T> implements RowMapper<T> {
     private final Class<T> clazz;
     private final TableDefinition tableDefinition;
 
-    protected AbstractRowMapper(Class<T> clazz) {
+    protected AbstractRowMapper(Class<T> clazz, Metamodel metamodel) {
         this.clazz = clazz;
-        this.tableDefinition = new TableDefinition(clazz);
+        this.tableDefinition = metamodel.getTableDefinition(clazz);
     }
 
     protected abstract void setAssociation(ResultSet resultSet, T instance) throws NoSuchFieldException, SQLException;

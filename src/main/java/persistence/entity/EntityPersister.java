@@ -4,6 +4,7 @@ import common.ReflectionFieldAccessUtils;
 import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.meta.Metamodel;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;
 import persistence.sql.dml.query.DeleteQueryBuilder;
@@ -24,19 +25,20 @@ public class EntityPersister {
 
     private final Logger logger = LoggerFactory.getLogger(EntityPersister.class);
     private final TableDefinition tableDefinition;
-    private final List<EntityCollectionPersister> entityCollectionPersisters;
 
     private final JdbcTemplate jdbcTemplate;
 
-    public EntityPersister(Class<?> entityClass, JdbcTemplate jdbcTemplate) {
-        // TODO Metamodel
-        this.tableDefinition = new TableDefinition(entityClass);
-        this.entityCollectionPersisters = tableDefinition.getAssociations().stream().filter(
-                TableAssociationDefinition::isCollection
-        ).map(association ->
-                new EntityCollectionPersister(entityClass, association.getEntityClass(), jdbcTemplate)
-        ).toList();
+    public EntityPersister(TableDefinition tableDefinition, JdbcTemplate jdbcTemplate) {
+        this.tableDefinition = tableDefinition;
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    private static TableDefinition getAssociatedTableDefinition(List<TableDefinition> collectionDefinitions,
+                                                                Class<?> associatedEntityClass) {
+        return collectionDefinitions.stream().filter(
+                        definition -> definition.getEntityClass().equals(associatedEntityClass)
+                )
+                .findFirst().orElseThrow();
     }
 
     public boolean hasId(Object entity) {
@@ -51,45 +53,41 @@ public class EntityPersister {
         return DEFAULT_ID_VALUE;
     }
 
-    public Object insert(Object entity) {
+    public Object insert(Object entity, Metamodel metamodel) {
         final String query = insertQueryBuilder.build(entity);
         final Serializable id = jdbcTemplate.insertAndReturnKey(query);
 
         bindId(id, entity);
 
-        entityCollectionPersisters.forEach(
-                collectionPersister -> {
-                    final Collection<Object> childEntities = collectionPersister.insertCollection(entity);
-                    childEntities.forEach(child -> updateAssociatedColumns(entity, child));
-                }
-        );
+//        for (TableAssociationDefinition association : getCollectionAssociations()) {
+//            EntityCollectionPersister entityCollectionPersister = metamodel.getEntityCollectionPersister(association);
+//            final Collection<Object> childEntities = entityCollectionPersister.insertCollection(entity, association);
+//            childEntities.forEach(child -> updateAssociatedColumns(entity, child, metamodel));
+//        }
 
         return entity;
     }
 
-    private void updateAssociatedColumns(Object parent, Object child) {
-        // TODO Metamodel
-        final TableDefinition parentDefinition = new TableDefinition(parent.getClass());
-        final TableDefinition childDefinition = new TableDefinition(child.getClass());
-        String updateQuery = updateQueryBuilder.build(parent, child, parentDefinition, childDefinition);
+    private void updateAssociatedColumns(Object parent, Object child, Metamodel metamodel) {
+        final TableDefinition childDefinition = metamodel.getTableDefinition(child.getClass());
+        String updateQuery = updateQueryBuilder.build(parent, child, tableDefinition, childDefinition);
 
         jdbcTemplate.execute(updateQuery);
     }
 
-    public Collection<Object> getChildCollections(Object parentEntity) {
-        // TODO Metamodel
-
-        for (TableAssociationDefinition association : tableDefinition.getAssociations()) {
-            if (association.isCollection()) {
-                // TODO Metamodel
-                final EntityCollectionPersister entityCollectionPersister = new EntityCollectionPersister(
-                        parentEntity.getClass(),
-                        association.getEntityClass(), jdbcTemplate);
-                return entityCollectionPersister.getChildCollections(parentEntity);
-            }
+    public Collection<Object> getChildCollections(Object parentEntity, Metamodel metamodel) {
+        for (TableAssociationDefinition association : getCollectionAssociations()) {
+            final EntityCollectionPersister entityCollectionPersister = metamodel.getEntityCollectionPersister(association);
+            return entityCollectionPersister.getChildCollections(parentEntity);
         }
 
         return new ArrayList<>();
+    }
+
+    public List<TableAssociationDefinition> getCollectionAssociations() {
+        return tableDefinition.getAssociations().stream().filter(
+                TableAssociationDefinition::isCollection
+        ).toList();
     }
 
     private void bindId(Serializable id, Object entity) {

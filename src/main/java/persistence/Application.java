@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.entity.EntityManager;
 import persistence.entity.EntityManagerImpl;
-import persistence.entity.EntityPersister;
-import persistence.entity.PersistenceContextImpl;
+import persistence.entity.StatefulPersistenceContext;
+import persistence.meta.MetamodelCollector;
 import persistence.sql.H2Dialect;
 import persistence.sql.ddl.query.CreateTableQueryBuilder;
 import persistence.sql.ddl.query.DropQueryBuilder;
@@ -28,10 +28,11 @@ public class Application {
         try {
             final DatabaseServer server = new H2();
             final Class<?> testClass = Person.class;
+            final JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
+            final MetamodelCollector metamodelCollector = new MetamodelCollector(jdbcTemplate);
             server.start();
 
-            final JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-            final EntityManager em = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
+            final EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodelCollector.getMetamodel());
 
             CreateTableQueryBuilder createOrder = new CreateTableQueryBuilder(new H2Dialect(), Order.class, null);
             CreateTableQueryBuilder createOrderItem = new CreateTableQueryBuilder(new H2Dialect(), OrderItem.class, List.of());
@@ -63,14 +64,14 @@ public class Application {
         jdbcTemplate.execute(build);
     }
 
-    private static void selectAll(JdbcTemplate jdbcTemplate, Class<?> testClass) {
-        String query = new SelectAllQueryBuilder().build(testClass);
-        List<Person> people = jdbcTemplate.query(query, new EagerFetchRowMapper<>(Person.class));
-
-        for (Person person : people) {
-            logger.info("Person: {}", person);
-        }
-    }
+//    private static void selectAll(JdbcTemplate jdbcTemplate, Class<?> testClass) {
+//        String query = new SelectAllQueryBuilder().build(testClass);
+//        List<Person> people = jdbcTemplate.query(query, new EagerFetchRowMapper<>(Person.class));
+//
+//        for (Person person : people) {
+//            logger.info("Person: {}", person);
+//        }
+//    }
 
     private static void select(EntityManager em, Object id) {
         Person person = em.find(Person.class, id);

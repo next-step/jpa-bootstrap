@@ -1,5 +1,6 @@
 package jdbc;
 
+import persistence.meta.Metamodel;
 import persistence.sql.definition.TableDefinition;
 
 import java.util.HashMap;
@@ -23,7 +24,7 @@ public class RowMapperFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> RowMapper<T> createRowMapper(Class<T> targetClass, JdbcTemplate jdbcTemplate) {
+    public <T> RowMapper<T> createRowMapper(Class<T> targetClass, Metamodel metamodel, JdbcTemplate jdbcTemplate) {
         RowMapper<T> rowMapper = findCachedRowMapper(targetClass);
         if (rowMapper != null) {
             return rowMapper;
@@ -33,12 +34,12 @@ public class RowMapperFactory {
         for (var association : tableDefinition.getAssociations()) {
             if (association.isEager()) {
                 return (RowMapper<T>) eagerFetchRowMappers.computeIfAbsent(targetClass,
-                        k -> new EagerFetchRowMapper<>(targetClass));
+                        k -> new EagerFetchRowMapper<>(targetClass, metamodel));
             }
         }
 
         return (RowMapper<T>) lazyFetchRowMappers.computeIfAbsent(targetClass,
-                k -> new LazyFetchRowMapper<>(targetClass, jdbcTemplate));
+                k -> new LazyFetchRowMapper<>(targetClass, metamodel, jdbcTemplate));
     }
 
     @SuppressWarnings("unchecked")

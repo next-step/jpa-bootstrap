@@ -25,7 +25,7 @@ class PersistenceContextTest {
 
     @Test
     void addEntity() {
-        PersistenceContextImpl persistenceContext = new PersistenceContextImpl();
+        StatefulPersistenceContext persistenceContext = new StatefulPersistenceContext();
         EntityKey entityKey = new EntityKey(1L, TestEntity.class);
         Object entity = new TestEntity(1L, "Test");
 
@@ -36,7 +36,7 @@ class PersistenceContextTest {
 
     @Test
     void shouldDoNothingWhenAddTwice() {
-        PersistenceContextImpl persistenceContext = new PersistenceContextImpl();
+        StatefulPersistenceContext persistenceContext = new StatefulPersistenceContext();
         EntityKey entityKey = new EntityKey(1L, TestEntity.class);
         Object entity = new TestEntity(1L, "Test");
 
@@ -48,7 +48,7 @@ class PersistenceContextTest {
 
     @Test
     void removeEntity() {
-        PersistenceContextImpl persistenceContext = new PersistenceContextImpl();
+        StatefulPersistenceContext persistenceContext = new StatefulPersistenceContext();
         EntityKey entityKey = new EntityKey(1L, TestEntity.class);
         Object entity = new TestEntity(1L, "Test");
 

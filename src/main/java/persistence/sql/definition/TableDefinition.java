@@ -46,7 +46,7 @@ public class TableDefinition {
         }
 
         return collectionFields.stream()
-                .map(TableAssociationDefinition::new)
+                .map(field -> new TableAssociationDefinition(entityClass, field))
                 .toList();
     }
 
@@ -134,7 +134,7 @@ public class TableDefinition {
 
     public TableAssociationDefinition getAssociation(Class<?> associatedEntityClass) {
         for (TableAssociationDefinition association : getAssociations()) {
-            if (association.getEntityClass().equals(associatedEntityClass)) {
+            if (association.getAssociatedEntityClass().equals(associatedEntityClass)) {
                 return association;
             }
         }

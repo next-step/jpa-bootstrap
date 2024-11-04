@@ -2,6 +2,7 @@ package jdbc;
 
 import common.ReflectionFieldAccessUtils;
 import persistence.entity.EntityLazyLoader;
+import persistence.meta.Metamodel;
 import persistence.proxy.PersistentList;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;
@@ -16,12 +17,14 @@ import java.util.List;
 public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
     private final Class<T> clazz;
     private final TableDefinition tableDefinition;
+    private final Metamodel metamodel;
     private final JdbcTemplate jdbcTemplate;
 
-    public LazyFetchRowMapper(Class<T> clazz, JdbcTemplate jdbcTemplate) {
-        super(clazz);
+    public LazyFetchRowMapper(Class<T> clazz, Metamodel metamodel, JdbcTemplate jdbcTemplate) {
+        super(clazz, metamodel);
         this.clazz = clazz;
         this.tableDefinition = new TableDefinition(clazz);
+        this.metamodel = metamodel;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -34,7 +37,7 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
             }
 
             final Field collectionField = clazz.getDeclaredField(association.getFieldName());
-            List proxy = createProxy(instance, association.getEntityClass());
+            List proxy = createProxy(instance, association.getAssociatedEntityClass());
             ReflectionFieldAccessUtils.accessAndSet(instance, collectionField, proxy);
         }
     }
@@ -55,12 +58,12 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
             final String joinColumnName = ownerDefinition.getJoinColumnName(elementClass);
             final Object joinColumnValue = ownerDefinition.getValue(owner, joinColumnName);
 
-            final String query = new SelectQueryBuilder(elementClass)
+            final String query = new SelectQueryBuilder(elementClass, metamodel)
                     .where(joinColumnName, joinColumnValue.toString())
                     .build();
 
             return jdbcTemplate.query(query,
-                    RowMapperFactory.getInstance().createRowMapper(elementClass, jdbcTemplate)
+                    RowMapperFactory.getInstance().createRowMapper(elementClass, metamodel, jdbcTemplate)
             );
         };
     }

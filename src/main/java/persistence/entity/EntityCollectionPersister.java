@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;
 import persistence.sql.dml.query.InsertQueryBuilder;
+import persistence.sql.dml.query.UpdateQueryBuilder;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -15,41 +16,41 @@ import java.util.Collection;
 import java.util.List;
 
 public class EntityCollectionPersister {
-
     private static final InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
-
+    private static final UpdateQueryBuilder updateQueryBuilder = new UpdateQueryBuilder();
     private final Logger logger = LoggerFactory.getLogger(EntityCollectionPersister.class);
-    private final TableDefinition tableDefinition;
+
+    private final TableDefinition parentTableDefinition;
+    private final TableDefinition elementTableDefinition;
 
     private final JdbcTemplate jdbcTemplate;
-
     private final boolean isEager;
 
-    public EntityCollectionPersister(Class<?> parentClass, Class<?> elementClass, JdbcTemplate jdbcTemplate) {
-        final TableDefinition parentTableDefinition = new TableDefinition(parentClass);
-        final TableAssociationDefinition association = parentTableDefinition.getAssociation(elementClass);
+    public EntityCollectionPersister(TableDefinition parentTableDefinition, TableDefinition elementTableDefinition,
+                                     JdbcTemplate jdbcTemplate) {
+        this.parentTableDefinition = parentTableDefinition;
+        this.elementTableDefinition = elementTableDefinition;
+        final TableAssociationDefinition association = parentTableDefinition.getAssociation(
+                elementTableDefinition.getEntityClass());
 
         this.isEager = association.isEager();
-        this.tableDefinition = new TableDefinition(elementClass);
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Collection<Object> insertCollection(Object parentEntity) {
-        // TODO Metamodel
-        final TableDefinition parentTableDefinition = new TableDefinition(parentEntity.getClass());
-        final List<TableAssociationDefinition> associations = parentTableDefinition.getAssociations();
+    public Collection<Object> insertCollection(Object parentEntity, TableAssociationDefinition association) {
         final List<Object> childEntities = new ArrayList<>();
+        final Collection<?> associatedValues = parentTableDefinition.getIterableAssociatedValue(parentEntity, association);
+        if (associatedValues instanceof Iterable<?> iterable) {
+            iterable.forEach(entity -> {
+                Object result = doInsert(entity);
+                childEntities.add(result);
+            });
+        }
 
-        associations.forEach(association -> {
-            final Collection<?> associatedValues = parentTableDefinition.getIterableAssociatedValue(parentEntity, association);
-            if (associatedValues instanceof Iterable<?> iterable) {
-                iterable.forEach(entity -> {
-                    Object result = doInsert(entity);
-                    childEntities.add(result);
-                });
-            }
+        childEntities.forEach(childEntity -> {
+            final String sql = updateQueryBuilder.build(parentEntity, childEntity, parentTableDefinition, elementTableDefinition);
+            jdbcTemplate.execute(sql);
         });
-
         return childEntities;
     }
 
@@ -62,8 +63,6 @@ public class EntityCollectionPersister {
     }
 
     public Collection<Object> getChildCollections(Object parentEntity) {
-        // TODO Metamodel
-        final TableDefinition parentTableDefinition = new TableDefinition(parentEntity.getClass());
         final List<TableAssociationDefinition> associations = parentTableDefinition.getAssociations();
         final List<Object> childEntities = new ArrayList<>();
 
@@ -79,8 +78,8 @@ public class EntityCollectionPersister {
 
     private void bindId(Serializable id, Object entity) {
         try {
-            final Field idField = tableDefinition.getEntityClass()
-                    .getDeclaredField(tableDefinition.getIdFieldName());
+            final Field idField = elementTableDefinition.getEntityClass()
+                    .getDeclaredField(elementTableDefinition.getIdFieldName());
 
             ReflectionFieldAccessUtils.accessAndSet(entity, idField, id);
         } catch (ReflectiveOperationException e) {

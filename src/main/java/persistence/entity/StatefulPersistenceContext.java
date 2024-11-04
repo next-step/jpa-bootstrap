@@ -3,7 +3,7 @@ package persistence.entity;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PersistenceContextImpl implements PersistenceContext {
+public class StatefulPersistenceContext implements PersistenceContext {
     private final Map<EntityKey, Object> managedEntities = new HashMap<>();
     private final Map<EntityKey, EntitySnapshot> entitySnapshots = new HashMap<>();
     private final Map<EntityKey, EntityEntry> entityEntries = new HashMap<>();
