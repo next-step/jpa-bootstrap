@@ -47,7 +47,7 @@ private Long id;
 }
 ```
 
-- [ ] Component Scanner를 통해 @Entity 어노테이션이 있는 클래스들만 가져와서 Metamodel에 저장한다.
-  - [ ] base scan package를 properties 파일로 관리할 수 있도록 수정...
-- [ ] EntityPersister, EntityLoader를 사전에 Metamodel에 만들어 두고, EntityManager에서는 Metamodel을 통해 가져와서 사용한다. 
+- [x] Component Scanner를 통해 @Entity 어노테이션이 있는 클래스들만 가져와서 Metamodel에 저장한다.
+  - [x] base scan package를 properties 파일로 관리할 수 있도록 수정...
+- [x] TableDefinition, EntityPersister를 사전에 Metamodel에 만들어 두고, EntityManager에서는 Metamodel을 의존하여 사용한다
 
