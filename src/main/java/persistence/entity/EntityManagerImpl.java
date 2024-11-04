@@ -9,15 +9,14 @@ import java.util.function.Supplier;
 public class EntityManagerImpl implements EntityManager {
     private final PersistenceContext persistenceContext;
     private final EntityLoader entityLoader;
-    private final EntityPersister entityPersister;
+    private final JdbcTemplate jdbcTemplate;
 
     public EntityManagerImpl(JdbcTemplate jdbcTemplate,
-                             PersistenceContext persistenceContext,
-                             EntityPersister entityPersister) {
+                             PersistenceContext persistenceContext) {
 
         this.persistenceContext = persistenceContext;
         this.entityLoader = new EntityLoader(jdbcTemplate);
-        this.entityPersister = entityPersister;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -50,6 +49,8 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void persist(Object entity) {
+        // TODO metamodel
+        final EntityPersister entityPersister = new EntityPersister(entity.getClass(), jdbcTemplate);
         if (entityPersister.hasId(entity)) {
             final EntityEntry entityEntry = persistenceContext.getEntityEntry(
                     new EntityKey(entityPersister.getEntityId(entity), entity.getClass())
@@ -89,8 +90,10 @@ public class EntityManagerImpl implements EntityManager {
 
         childCollections.forEach(childEntity -> {
             if (childEntity != null) {
-                if (entityPersister.hasId(childEntity)) {
-                    EntityKey entityKey = new EntityKey(entityPersister.getEntityId(childEntity), childEntity.getClass());
+                // TODO metamodel
+                final EntityPersister childEntityPersister = new EntityPersister(childEntity.getClass(), jdbcTemplate);
+                if (childEntityPersister.hasId(childEntity)) {
+                    EntityKey entityKey = new EntityKey(childEntityPersister.getEntityId(childEntity), childEntity.getClass());
                     addEntityInContext(entityKey, childEntity);
                     addManagedEntityEntry(entityKey, EntityEntry.inSaving());
                 }
@@ -100,6 +103,8 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void remove(Object entity) {
+        // TODO metamodel
+        final EntityPersister entityPersister = new EntityPersister(entity.getClass(), jdbcTemplate);
         final EntityKey entityKey = new EntityKey(entityPersister.getEntityId(entity), entity.getClass());
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entityKey);
         checkManagedEntity(entity, entityEntry);
@@ -111,6 +116,8 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <T> T merge(T entity) {
+        // TODO metamodel
+        final EntityPersister entityPersister = new EntityPersister(entity.getClass(), jdbcTemplate);
         final EntityKey entityKey = new EntityKey(entityPersister.getEntityId(entity), entity.getClass());
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entityKey);
         checkManagedEntity(entity, entityEntry);

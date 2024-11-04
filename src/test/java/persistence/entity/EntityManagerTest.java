@@ -135,7 +135,7 @@ public class EntityManagerTest {
     @DisplayName("Identity 전략을 사용하는 엔티티를 저장한다.")
     void testPersistWithIdentityId() throws Exception {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
         EntityManagerTestEntityWithIdentityId entity = new EntityManagerTestEntityWithIdentityId(null, "john_doe", 30);
         entityManager.persist(entity);
 
@@ -151,7 +151,7 @@ public class EntityManagerTest {
     @DisplayName("Identity 전략을 사용하지만, id값이 있는 경우 에러가 발생한다.")
     void testPersistWithIdentityIdButId() throws Exception {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
         EntityManagerTestEntityWithIdentityId entity = new EntityManagerTestEntityWithIdentityId(1L, "john_doe", 30);
 
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> entityManager.persist(entity));
@@ -162,7 +162,7 @@ public class EntityManagerTest {
     @DisplayName("같은 엔티티에대해 저장이 여러번 호출되면 예외가 발생하지 않는다.")
     void testPersistManyTimes() throws Exception {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
         EntityManagerTestEntityWithIdentityId entity = new EntityManagerTestEntityWithIdentityId(null, "john_doe", 30);
 
         entityManager.persist(entity);
@@ -180,7 +180,7 @@ public class EntityManagerTest {
     @DisplayName("EntityManager.update()를 통해 엔티티를 수정한다.")
     void testMerge() throws Exception {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
         EntityManagerTestEntityWithIdentityId entity = new EntityManagerTestEntityWithIdentityId("john_doe", 30);
         entityManager.persist(entity);
 
@@ -202,7 +202,7 @@ public class EntityManagerTest {
     @DisplayName("관리되고 있지 않은 엔티티를 EntityManager.merge()를 호출 하면 예외가 발생한다.")
     void testMergeNotManagedEntity() throws Exception {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
         EntityManagerTestEntityWithIdentityId entity = new EntityManagerTestEntityWithIdentityId(1L, "john_doe", 30);
 
         entity.name = "jane_doe";
@@ -216,7 +216,7 @@ public class EntityManagerTest {
     @DisplayName("EntityManager.remove()를 통해 엔티티를 삭제한다.")
     void testRemove() throws Exception {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
         EntityManagerTestEntityWithIdentityId entity = new EntityManagerTestEntityWithIdentityId(null, "john_doe", 30);
         entityManager.persist(entity);
 
@@ -234,7 +234,7 @@ public class EntityManagerTest {
     void testInsertWithoutAssociationTable() throws SQLException {
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
         Order order = new Order("order_number");
         entityManager.persist(order);
 
@@ -250,7 +250,7 @@ public class EntityManagerTest {
     @DisplayName("Insert 시 연관 테이블까지 Insert 되어야 한다.")
     void testInsertWithAssociationTable() throws SQLException {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityManager em = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+        EntityManager em = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
         Order order = new Order("order_number");
         OrderItem orderItem1 = new OrderItem("product1", 1);
         OrderItem orderItem2 = new OrderItem("product2", 2);
@@ -280,7 +280,7 @@ public class EntityManagerTest {
     @DisplayName("연관 데이터가 없다면 조회 시 빈 리스트를 반환한다.")
     void testFindWithoutAssociationTable() throws SQLException {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
         Order order = new Order("order_number");
         entityManager.persist(order);
 
@@ -296,7 +296,7 @@ public class EntityManagerTest {
     @DisplayName("Eager Fetch 전략을 사용하여 Join을 통해 데이터를 조회한다.")
     void testEagerFetch() throws Exception {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
         TestEagerOrder order = new TestEagerOrder("order_number");
         TestEagerOrderItem orderItem1 = new TestEagerOrderItem("product1", 1);
         TestEagerOrderItem orderItem2 = new TestEagerOrderItem("product2", 2);
@@ -326,7 +326,7 @@ public class EntityManagerTest {
     @DisplayName("Lazy Fetch 전략을 사용하여 데이터가 접근 될 때 쿼리가 발생한다.")
     void testLazyFetch() throws SQLException {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+        EntityManager entityManager = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl());
         TestLazyOrder order = new TestLazyOrder("order_number");
         TestLazyOrderItem orderItem1 = new TestLazyOrderItem("product1", 1);
         TestLazyOrderItem orderItem2 = new TestLazyOrderItem("product2", 2);

@@ -95,7 +95,7 @@ class EntityLoaderTest {
         EntityLoaderTestEntity1 entity1 = new EntityLoaderTestEntity1(1L, 30);
         EntityLoaderTestEntity1 entity2 = new EntityLoaderTestEntity1(2L, 40);
 
-        EntityPersister entityPersister = new EntityPersister(jdbcTemplate);
+        EntityPersister entityPersister = new EntityPersister(EntityLoaderTestEntity1.class, jdbcTemplate);
 
         entityPersister.insert(entity1);
         entityPersister.insert(entity2);
@@ -125,7 +125,8 @@ class EntityLoaderTest {
         EntityLoaderTestEntity2 entity1 = new EntityLoaderTestEntity2(1L, "John");
         EntityLoaderTestEntity2 entity2 = new EntityLoaderTestEntity2(2L, "Jane");
 
-        EntityPersister entityPersister = new EntityPersister(jdbcTemplate);
+        EntityPersister entityPersister = new EntityPersister(EntityLoaderTestEntity2.class, jdbcTemplate);
+
         entityPersister.insert(entity1);
         entityPersister.insert(entity2);
 

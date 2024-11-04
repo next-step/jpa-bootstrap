@@ -19,12 +19,14 @@ public class TableAssociationDefinition {
     private final JoinColumn joinColumn;
     private final FetchType fetchType;
     private final String fieldName;
+    private final boolean isCollection;
 
     public TableAssociationDefinition(Field field) {
         this.joinColumn = field.getAnnotation(JoinColumn.class);
         this.associatedTableDefinition = new TableDefinition(getGenericActualType(field));
         this.fieldName = field.getName();
         this.fetchType = getFetchType(field);
+        this.isCollection = Collection.class.isAssignableFrom(field.getType());
     }
 
     private static FetchType getFetchType(Field field) {
@@ -96,5 +98,9 @@ public class TableAssociationDefinition {
 
     public Class<?> getEntityClass() {
         return associatedTableDefinition.getEntityClass();
+    }
+
+    public boolean isCollection() {
+        return isCollection;
     }
 }

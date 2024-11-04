@@ -14,9 +14,6 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class EntityPersister {
     private static final Long DEFAULT_ID_VALUE = 0L;
@@ -25,25 +22,20 @@ public class EntityPersister {
     private static final DeleteQueryBuilder deleteQueryBuilder = new DeleteQueryBuilder();
 
     private final Logger logger = LoggerFactory.getLogger(EntityPersister.class);
-    private final Map<Class<?>, TableDefinition> tableDefinitions;
+    private final TableDefinition tableDefinition;
 
     private final JdbcTemplate jdbcTemplate;
 
-    public EntityPersister(JdbcTemplate jdbcTemplate) {
-        this.tableDefinitions = new HashMap<>();
+    public EntityPersister(Class<?> entityClass, JdbcTemplate jdbcTemplate) {
+        this.tableDefinition = new TableDefinition(entityClass);
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private TableDefinition getTableDefinition(Class<?> entityClass) {
-        return tableDefinitions.computeIfAbsent(entityClass, TableDefinition::new);
-    }
-
     public boolean hasId(Object entity) {
-        return getTableDefinition(entity.getClass()).hasId(entity);
+        return tableDefinition.hasId(entity);
     }
 
     public Serializable getEntityId(Object entity) {
-        final TableDefinition tableDefinition = getTableDefinition(entity.getClass());
         if (tableDefinition.hasId(entity)) {
             return tableDefinition.getIdValue(entity);
         }
@@ -52,65 +44,54 @@ public class EntityPersister {
     }
 
     public Object insert(Object entity) {
-        final TableDefinition tableDefinition = getTableDefinition(entity.getClass());
         final String query = insertQueryBuilder.build(entity);
         final Serializable id = jdbcTemplate.insertAndReturnKey(query);
 
         bindId(id, entity);
 
-        if (tableDefinition.hasAssociations()) {
-            final List<Object> persistedChildren = insertChildCollections(entity);
-            persistedChildren.forEach(child -> updateAssociatedColumns(entity, child));
-        }
+        tableDefinition.getAssociations().forEach(association -> {
+                    if (association.isCollection()) {
+                        // TODO Metamodel
+                        final EntityCollectionPersister entityCollectionPersister = new EntityCollectionPersister(
+                                association.getEntityClass(), jdbcTemplate);
+
+                        final Collection<Object> childEntities = entityCollectionPersister.insertCollection(entity);
+                        childEntities.forEach(child -> updateAssociatedColumns(entity, child));
+                    }
+                }
+        );
 
         return entity;
     }
 
     private void updateAssociatedColumns(Object parent, Object child) {
-        final TableDefinition parentDefinition = getTableDefinition(parent.getClass());
-        final TableDefinition childDefinition = getTableDefinition(child.getClass());
+        // TODO Metamodel
+        final TableDefinition parentDefinition = new TableDefinition(parent.getClass());
+        final TableDefinition childDefinition = new TableDefinition(child.getClass());
         String updateQuery = updateQueryBuilder.build(parent, child, parentDefinition, childDefinition);
 
         jdbcTemplate.execute(updateQuery);
     }
 
-    private List<Object> insertChildCollections(Object parentEntity) {
-        final TableDefinition parentTableDefinition = getTableDefinition(parentEntity.getClass());
-        final List<TableAssociationDefinition> associations = parentTableDefinition.getAssociations();
-        final List<Object> childEntities = new ArrayList<>();
+    public Collection<Object> getChildCollections(Object parentEntity) {
+        // TODO Metamodel
 
-        associations.forEach(association -> {
-            final Collection<?> associatedValues = parentTableDefinition.getIterableAssociatedValue(parentEntity, association);
-            if (associatedValues instanceof Iterable<?> iterable) {
-                iterable.forEach(entity -> {
-                    Object result = insert(entity);
-                    childEntities.add(result);
-                });
+        for (TableAssociationDefinition association : tableDefinition.getAssociations()) {
+            if (association.isCollection()) {
+                // TODO Metamodel
+                final EntityCollectionPersister entityCollectionPersister = new EntityCollectionPersister(
+                        association.getEntityClass(), jdbcTemplate);
+                return entityCollectionPersister.getChildCollections(parentEntity);
             }
-        });
+        }
 
-        return childEntities;
-    }
-
-    public Collection<Object> getChildCollections(Object childEntity) {
-        final TableDefinition childTableDefinition = getTableDefinition(childEntity.getClass());
-        final List<TableAssociationDefinition> associations = childTableDefinition.getAssociations();
-        final List<Object> childEntities = new ArrayList<>();
-
-        associations.forEach(association -> {
-            final Collection<?> associatedValues = childTableDefinition.getIterableAssociatedValue(childEntity, association);
-            if (associatedValues instanceof Iterable<?> iterable) {
-                iterable.forEach(childEntities::add);
-            }
-        });
-
-        return childEntities;
+        return new ArrayList<>();
     }
 
     private void bindId(Serializable id, Object entity) {
         try {
-            final TableDefinition tableDefinition = getTableDefinition(entity.getClass());
-            final Field idField = tableDefinition.getEntityClass().getDeclaredField(tableDefinition.getIdFieldName());
+            final Field idField = tableDefinition.getEntityClass()
+                    .getDeclaredField(tableDefinition.getIdFieldName());
 
             ReflectionFieldAccessUtils.accessAndSet(entity, idField, id);
         } catch (ReflectiveOperationException e) {
@@ -119,7 +100,7 @@ public class EntityPersister {
     }
 
     public void update(Object entity) {
-        final String query = updateQueryBuilder.build(entity, getTableDefinition(entity.getClass()));
+        final String query = updateQueryBuilder.build(entity, tableDefinition);
         jdbcTemplate.execute(query);
     }
 
