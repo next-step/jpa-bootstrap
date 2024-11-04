@@ -23,7 +23,13 @@ public class EntityCollectionPersister {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public EntityCollectionPersister(Class<?> elementClass, JdbcTemplate jdbcTemplate) {
+    private final boolean isEager;
+
+    public EntityCollectionPersister(Class<?> parentClass, Class<?> elementClass, JdbcTemplate jdbcTemplate) {
+        final TableDefinition parentTableDefinition = new TableDefinition(parentClass);
+        final TableAssociationDefinition association = parentTableDefinition.getAssociation(elementClass);
+
+        this.isEager = association.isEager();
         this.tableDefinition = new TableDefinition(elementClass);
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -80,5 +86,9 @@ public class EntityCollectionPersister {
         } catch (ReflectiveOperationException e) {
             logger.error("Failed to copy row to {}", entity.getClass().getName(), e);
         }
+    }
+
+    public boolean isEager() {
+        return isEager;
     }
 }

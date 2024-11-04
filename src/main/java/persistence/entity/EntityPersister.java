@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class EntityPersister {
     private static final Long DEFAULT_ID_VALUE = 0L;
@@ -23,11 +24,18 @@ public class EntityPersister {
 
     private final Logger logger = LoggerFactory.getLogger(EntityPersister.class);
     private final TableDefinition tableDefinition;
+    private final List<EntityCollectionPersister> entityCollectionPersisters;
 
     private final JdbcTemplate jdbcTemplate;
 
     public EntityPersister(Class<?> entityClass, JdbcTemplate jdbcTemplate) {
+        // TODO Metamodel
         this.tableDefinition = new TableDefinition(entityClass);
+        this.entityCollectionPersisters = tableDefinition.getAssociations().stream().filter(
+                TableAssociationDefinition::isCollection
+        ).map(association ->
+                new EntityCollectionPersister(entityClass, association.getEntityClass(), jdbcTemplate)
+        ).toList();
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -49,15 +57,10 @@ public class EntityPersister {
 
         bindId(id, entity);
 
-        tableDefinition.getAssociations().forEach(association -> {
-                    if (association.isCollection()) {
-                        // TODO Metamodel
-                        final EntityCollectionPersister entityCollectionPersister = new EntityCollectionPersister(
-                                association.getEntityClass(), jdbcTemplate);
-
-                        final Collection<Object> childEntities = entityCollectionPersister.insertCollection(entity);
-                        childEntities.forEach(child -> updateAssociatedColumns(entity, child));
-                    }
+        entityCollectionPersisters.forEach(
+                collectionPersister -> {
+                    final Collection<Object> childEntities = collectionPersister.insertCollection(entity);
+                    childEntities.forEach(child -> updateAssociatedColumns(entity, child));
                 }
         );
 
@@ -80,6 +83,7 @@ public class EntityPersister {
             if (association.isCollection()) {
                 // TODO Metamodel
                 final EntityCollectionPersister entityCollectionPersister = new EntityCollectionPersister(
+                        parentEntity.getClass(),
                         association.getEntityClass(), jdbcTemplate);
                 return entityCollectionPersister.getChildCollections(parentEntity);
             }
