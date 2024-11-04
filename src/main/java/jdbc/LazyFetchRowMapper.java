@@ -21,12 +21,11 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
     private final Metamodel metamodel;
 
     public LazyFetchRowMapper(Class<T> clazz,
-                              TableDefinition tableDefinition,
                               JdbcTemplate jdbcTemplate,
                               Metamodel metamodel) {
-        super(clazz, metamodel);
+        super(clazz, metamodel.getTableDefinition(clazz));
+        this.tableDefinition = metamodel.getTableDefinition(clazz);
         this.clazz = clazz;
-        this.tableDefinition = tableDefinition;
         this.jdbcTemplate = jdbcTemplate;
         this.metamodel = metamodel;
     }
@@ -56,22 +55,15 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
 
     private EntityLazyLoader createLazyLoader(Class<?> elementClass) {
         return owner -> {
-            final TableDefinition ownerDefinition = metamodel.getTableDefinition(owner.getClass());
-
-            final String joinColumnName = ownerDefinition.getJoinColumnName(elementClass);
-            final Object joinColumnValue = ownerDefinition.getValue(owner, joinColumnName);
+            final String joinColumnName = tableDefinition.getJoinColumnName(elementClass);
+            final Object joinColumnValue = tableDefinition.getValue(owner, joinColumnName);
 
             final String query = new SelectQueryBuilder(elementClass, metamodel)
                     .where(joinColumnName, joinColumnValue.toString())
                     .build();
 
             return jdbcTemplate.query(query,
-                    new AbstractRowMapper(elementClass, metamodel) {
-                        @Override
-                        protected void setAssociation(ResultSet resultSet, Object instance) {
-                            // Do nothing
-                        }
-                    }
+                    RowMapperFactory.getInstance().getRowMapper(elementClass, metamodel, jdbcTemplate)
             );
         };
     }

@@ -272,8 +272,8 @@ public class EntityManagerTest {
         entityManager.clear();
 
         TestEagerOrder persistedOrder = entityManager.find(TestEagerOrder.class, 1L);
-        System.out.println("-------------------------After Find----------------------------------");
         assertAll(
+                () -> assertThat(Proxy.isProxyClass(persistedOrder.getOrderItems().getClass())).isFalse(),
                 () -> assertThat(persistedOrder.getId()).isEqualTo(1L),
                 () -> assertThat(persistedOrder.getOrderNumber()).isEqualTo("order_number"),
                 () -> assertThat(persistedOrder.getOrderItems()).hasSize(2),

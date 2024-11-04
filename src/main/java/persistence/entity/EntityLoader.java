@@ -1,6 +1,7 @@
 package persistence.entity;
 
 import jdbc.JdbcTemplate;
+import jdbc.RowMapperFactory;
 import persistence.meta.Metamodel;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;
@@ -26,7 +27,8 @@ public class EntityLoader {
                 );
 
         final String query = queryBuilder.buildById(entityKey.id());
-        final Object queried = jdbcTemplate.queryForObject(query, metamodel.getRowMapper(entityClass));
+        final Object queried = jdbcTemplate.queryForObject(query,
+                RowMapperFactory.getInstance().getRowMapper(entityClass, metamodel, jdbcTemplate));
         return entityClass.cast(queried);
     }
 }

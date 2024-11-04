@@ -1,6 +1,5 @@
 package jdbc;
 
-import persistence.meta.Metamodel;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;
 
@@ -14,8 +13,8 @@ public class EagerFetchRowMapper<T> extends AbstractRowMapper<T> {
     private final TableDefinition associatedTableDefinition;
 
     public EagerFetchRowMapper(Class<T> clazz, TableDefinition parentTableDefinition,
-                               TableDefinition associatedTableDefinition, Metamodel metamodel) {
-        super(clazz, metamodel);
+                               TableDefinition associatedTableDefinition) {
+        super(clazz, parentTableDefinition);
         this.parentTableDefinition = parentTableDefinition;
         this.associatedTableDefinition = associatedTableDefinition;
     }
