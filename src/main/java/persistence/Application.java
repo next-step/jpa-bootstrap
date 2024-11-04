@@ -34,7 +34,7 @@ public class Application {
             server.start();
 
             Metamodel metamodel = metamodelCollector.getMetamodel();
-            final EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(metamodel), metamodel);
+            final EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
 
             CreateTableQueryBuilder createOrder = new CreateTableQueryBuilder(new H2Dialect(), Order.class, metamodel, null);
             CreateTableQueryBuilder createOrderItem = new CreateTableQueryBuilder(new H2Dialect(), OrderItem.class, metamodel, List.of());

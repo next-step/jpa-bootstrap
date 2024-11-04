@@ -10,9 +10,8 @@ import java.util.List;
 public class InsertQueryBuilder implements BaseQueryBuilder {
     private static final String EMPTY_STRING = "";
 
-    public String build(Object entity, Metamodel metamodel) {
+    public String build(Object entity, TableDefinition tableDefinition) {
         final StringBuilder query = new StringBuilder();
-        final TableDefinition tableDefinition = metamodel.getTableDefinition(entity.getClass());
         final List<? extends ColumnDefinitionAware> columns = tableDefinition.hasValueColumns(entity);
 
         query.append("INSERT INTO ");

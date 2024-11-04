@@ -4,7 +4,6 @@ import common.ReflectionFieldAccessUtils;
 import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import persistence.meta.Metamodel;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;
 import persistence.sql.dml.query.DeleteQueryBuilder;
@@ -17,6 +16,7 @@ import java.util.List;
 
 public class EntityPersister {
     private static final Long DEFAULT_ID_VALUE = 0L;
+
     private static final UpdateQueryBuilder updateQueryBuilder = new UpdateQueryBuilder();
     private static final InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
     private static final DeleteQueryBuilder deleteQueryBuilder = new DeleteQueryBuilder();
@@ -43,8 +43,8 @@ public class EntityPersister {
         return DEFAULT_ID_VALUE;
     }
 
-    public Object insert(Object entity, Metamodel metamodel) {
-        final String query = insertQueryBuilder.build(entity, metamodel);
+    public Object insert(Object entity) {
+        final String query = insertQueryBuilder.build(entity, tableDefinition);
         final Serializable id = jdbcTemplate.insertAndReturnKey(query);
 
         bindId(id, entity);
@@ -73,8 +73,8 @@ public class EntityPersister {
         jdbcTemplate.execute(query);
     }
 
-    public void delete(Object entity, Metamodel metamodel) {
-        String query = deleteQueryBuilder.build(entity, metamodel);
+    public void delete(Object entity) {
+        String query = deleteQueryBuilder.build(entity, tableDefinition);
         jdbcTemplate.execute(query);
     }
 

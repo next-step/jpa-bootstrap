@@ -3,6 +3,7 @@ package persistence.entity;
 import jdbc.JdbcTemplate;
 import persistence.meta.Metamodel;
 import persistence.sql.definition.TableAssociationDefinition;
+import persistence.sql.definition.TableDefinition;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -73,7 +74,7 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     private void persistEntity(Object entity, EntityPersister entityPersister) {
-        entityPersister.insert(entity, metamodel);
+        entityPersister.insert(entity);
 
         managePersistEntity(entity, entityPersister);
 
@@ -102,7 +103,7 @@ public class EntityManagerImpl implements EntityManager {
         checkManagedEntity(entity, entityEntry);
 
         entityEntry.updateStatus(Status.DELETED);
-        entityPersister.delete(entity, metamodel);
+        entityPersister.delete(entity);
         persistenceContext.removeEntity(entityKey);
     }
 
@@ -141,8 +142,10 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     private void addEntityInContext(EntityKey entityKey, Object entity) {
+        final TableDefinition tableDefinition = metamodel.getTableDefinition(entity.getClass());
+
         persistenceContext.addEntity(entityKey, entity);
-        persistenceContext.addDatabaseSnapshot(entityKey, entity);
+        persistenceContext.addDatabaseSnapshot(entityKey, entity, tableDefinition);
     }
 
     private void addManagedEntityEntry(EntityKey entityKey, EntityEntry entityEntry) {

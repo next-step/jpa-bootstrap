@@ -4,7 +4,6 @@ import common.ReflectionFieldAccessUtils;
 import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import persistence.meta.Metamodel;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;
 import persistence.sql.dml.query.InsertQueryBuilder;
@@ -19,24 +18,19 @@ import java.util.List;
 public class EntityCollectionPersister {
     private static final InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
     private static final UpdateQueryBuilder updateQueryBuilder = new UpdateQueryBuilder();
+
     private final Logger logger = LoggerFactory.getLogger(EntityCollectionPersister.class);
 
     private final TableDefinition parentTableDefinition;
     private final TableDefinition elementTableDefinition;
-    private final Metamodel metamodel;
 
     private final JdbcTemplate jdbcTemplate;
-    private final boolean isEager;
 
-    public EntityCollectionPersister(TableDefinition parentTableDefinition, TableDefinition elementTableDefinition,
-                                     JdbcTemplate jdbcTemplate, Metamodel metamodel) {
+    public EntityCollectionPersister(TableDefinition parentTableDefinition,
+                                     TableDefinition elementTableDefinition,
+                                     JdbcTemplate jdbcTemplate) {
         this.parentTableDefinition = parentTableDefinition;
         this.elementTableDefinition = elementTableDefinition;
-        final TableAssociationDefinition association = parentTableDefinition.getAssociation(
-                elementTableDefinition.getEntityClass());
-
-        this.metamodel = metamodel;
-        this.isEager = association.isEager();
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -50,15 +44,17 @@ public class EntityCollectionPersister {
             });
         }
 
-        childEntities.forEach(childEntity -> {
-            final String sql = updateQueryBuilder.build(parentEntity, childEntity, parentTableDefinition, elementTableDefinition);
-            jdbcTemplate.execute(sql);
-        });
+        childEntities.forEach(childEntity -> updateAssociatedColumns(parentEntity, childEntity));
         return childEntities;
     }
 
+    private void updateAssociatedColumns(Object parentEntity, Object childEntity) {
+        final String sql = updateQueryBuilder.build(parentEntity, childEntity, parentTableDefinition, elementTableDefinition);
+        jdbcTemplate.execute(sql);
+    }
+
     private Object doInsert(Object entity) {
-        final String query = insertQueryBuilder.build(entity, metamodel);
+        final String query = insertQueryBuilder.build(entity, elementTableDefinition);
         final Serializable id = jdbcTemplate.insertAndReturnKey(query);
 
         bindId(id, entity);

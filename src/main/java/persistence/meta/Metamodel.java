@@ -100,7 +100,7 @@ public class Metamodel {
                                 association -> new EntityCollectionPersister(
                                         tableDefinitions.get(association.getParentEntityClass()),
                                         tableDefinitions.get(association.getAssociatedEntityClass()),
-                                        jdbcTemplate, this
+                                        jdbcTemplate
                                 )
                         )
                 );
