@@ -1,55 +1,69 @@
-//package persistence.sql.dml.query;
-//
-//import domain.Order;
-//import domain.OrderItem;
-//import org.junit.jupiter.api.Test;
-//import persistence.sql.definition.TableDefinition;
-//
-//import static org.assertj.core.api.Assertions.assertThat;
-//
-//class SelectQueryBuilderTest {
-//
-//    @Test
-//    void testSelectSingleTable() {
-//        Order order = new Order("order_number");
-//        String selectQuery = new SelectQueryBuilder(order.getClass()).buildById(1);
-//        assertThat(selectQuery).isEqualTo(
-//                "SELECT orders.order_id AS orders_order_id, orders.orderNumber AS orders_orderNumber " +
-//                        "FROM orders WHERE orders.order_id = 1;");
-//    }
-//
-//    @Test
-//    void testSelectSingleTableWithJoin() {
-//        Order order = new Order("order_number");
-//        TableDefinition orderTableDefinition = new TableDefinition(order.getClass());
-//
-//        SelectQueryBuilder selectQuery = new SelectQueryBuilder(order.getClass());
-//        orderTableDefinition.getAssociations().forEach(association -> {
-//            selectQuery.join(association);
-//        });
-//
-//        assertThat(selectQuery.buildById(1)).isEqualTo(
-//                "SELECT " +
-//                        "orders.order_id AS orders_order_id, orders.orderNumber AS orders_orderNumber, " +
-//                        "order_items.id AS order_items_id, order_items.product AS order_items_product, order_items.quantity AS order_items_quantity " +
-//                        "FROM orders " +
-//                        "LEFT JOIN order_items " +
-//                        "ON order_items.order_id = orders.order_id " +
-//                        "WHERE orders.order_id = 1;");
-//    }
-//
-//    @Test
-//    void testFindAll() {
-//        Order order = new Order(1L, "order_number");
-//        TableDefinition orderTableDefinition = new TableDefinition(order.getClass());
-//        String joinColumnName = orderTableDefinition.getJoinColumnName(OrderItem.class);
-//        Object value = orderTableDefinition.getValue(order, joinColumnName);
-//
-//        OrderItem orderItem = new OrderItem("product", 1);
-//        String selectQuery = new SelectQueryBuilder(orderItem.getClass()).where(joinColumnName, value.toString()).build();
-//        assertThat(selectQuery).isEqualTo(
-//                "SELECT order_items.id AS order_items_id, order_items.product AS order_items_product, order_items.quantity AS order_items_quantity " +
-//                        "FROM order_items " +
-//                        "WHERE order_items.order_id = '1'");
-//    }
-//}
+package persistence.sql.dml.query;
+
+import org.junit.jupiter.api.Test;
+import persistence.fixtures.TestLazyOrder;
+import persistence.fixtures.TestLazyOrderItem;
+import persistence.meta.Metamodel;
+import persistence.meta.MetamodelCollector;
+import persistence.sql.definition.TableDefinition;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class SelectQueryBuilderTest {
+
+    private final Metamodel metamodel = new MetamodelCollector(null).getMetamodel();
+
+    @Test
+    void testSelectSingleTable() {
+        TestLazyOrder order = new TestLazyOrder("order_number");
+        String selectQuery = new SelectQueryBuilder(order.getClass(), metamodel).buildById(1);
+        assertThat(selectQuery).isEqualTo(
+                "SELECT " +
+                        "lazy_orders.order_id AS lazy_orders_order_id, " +
+                        "lazy_orders.orderNumber AS lazy_orders_orderNumber " +
+                        "FROM lazy_orders " +
+                        "WHERE lazy_orders.order_id = 1;");
+    }
+
+    @Test
+    void testSelectSingleTableWithJoin() {
+        TestLazyOrder order = new TestLazyOrder("order_number");
+        TableDefinition orderTableDefinition = metamodel.getTableDefinition(order.getClass());
+
+        SelectQueryBuilder selectQuery = new SelectQueryBuilder(order.getClass(), metamodel);
+        orderTableDefinition.getAssociations().forEach(association -> {
+            selectQuery.join(metamodel.getTableDefinition(association.getAssociatedEntityClass()));
+        });
+
+        assertThat(selectQuery.buildById(1)).isEqualTo(
+                "SELECT lazy_orders.order_id AS lazy_orders_order_id, " +
+                        "lazy_orders.orderNumber AS lazy_orders_orderNumber, " +
+                        "lazy_order_items.id AS lazy_order_items_id, " +
+                        "lazy_order_items.product AS lazy_order_items_product, " +
+                        "lazy_order_items.quantity AS lazy_order_items_quantity " +
+                        "FROM lazy_orders " +
+                        "LEFT JOIN lazy_order_items " +
+                        "ON lazy_order_items.order_id = lazy_orders.order_id " +
+                        "WHERE lazy_orders.order_id = 1;");
+    }
+
+    @Test
+    void testFindAll() {
+        TestLazyOrder order = new TestLazyOrder(1L, "order_number");
+        TableDefinition orderTableDefinition = metamodel.getTableDefinition(order.getClass());
+        String joinColumnName = orderTableDefinition.getJoinColumnName(TestLazyOrderItem.class);
+        Object joinColumnValue = orderTableDefinition.getValue(order, joinColumnName);
+
+        TestLazyOrderItem orderItem = new TestLazyOrderItem("product", 1);
+        String selectQuery = new SelectQueryBuilder(orderItem.getClass(), metamodel)
+                .where(joinColumnName, joinColumnValue.toString())
+                .build();
+
+        assertThat(selectQuery).isEqualTo(
+                "SELECT lazy_order_items.id AS lazy_order_items_id, " +
+                        "lazy_order_items.product AS lazy_order_items_product, " +
+                        "lazy_order_items.quantity AS lazy_order_items_quantity " +
+                        "FROM lazy_order_items " +
+                        "WHERE lazy_order_items.order_id = '1'");
+    }
+}

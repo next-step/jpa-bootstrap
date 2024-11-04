@@ -31,6 +31,11 @@ public class TestLazyOrder {
     public TestLazyOrder() {
     }
 
+    public TestLazyOrder(Long id, String orderNumber) {
+        this.id = id;
+        this.orderNumber = orderNumber;
+    }
+
     public TestLazyOrder(String orderNumber) {
         this.orderNumber = orderNumber;
     }
