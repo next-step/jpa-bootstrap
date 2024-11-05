@@ -99,8 +99,8 @@ class EntityLoaderTest {
         EntityLoaderTestEntity1 entity2 = new EntityLoaderTestEntity1(2L, 40);
 
 
-        metamodel.getEntityPersister(entity1.getClass()).insert(entity1);
-        metamodel.getEntityPersister(entity2.getClass()).insert(entity2);
+        metamodel.findEntityPersister(entity1.getClass()).insert(entity1);
+        metamodel.findEntityPersister(entity2.getClass()).insert(entity2);
 
         EntityKey entityKey1 = new EntityKey(1L, EntityLoaderTestEntity1.class);
         EntityKey entityKey2 = new EntityKey(2L, EntityLoaderTestEntity1.class);
@@ -126,7 +126,7 @@ class EntityLoaderTest {
         EntityLoaderTestEntity2 entity1 = new EntityLoaderTestEntity2(1L, "John");
         EntityLoaderTestEntity2 entity2 = new EntityLoaderTestEntity2(2L, "Jane");
 
-        EntityPersister entityPersister = metamodel.getEntityPersister(EntityLoaderTestEntity2.class);
+        EntityPersister entityPersister = metamodel.findEntityPersister(EntityLoaderTestEntity2.class);
 
         entityPersister.insert(entity1);
         entityPersister.insert(entity2);

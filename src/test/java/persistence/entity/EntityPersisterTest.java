@@ -64,7 +64,7 @@ class EntityPersisterTest {
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         metamodel = new MetamodelCollector(jdbcTemplate).getMetamodel();
-        entityPersister = new EntityPersister(metamodel.getTableDefinition(QueryTestEntityWithIdentityId.class), jdbcTemplate);
+        entityPersister = new EntityPersister(metamodel.findTableDefinition(QueryTestEntityWithIdentityId.class), jdbcTemplate);
 
         jdbcTemplate.execute(new CreateTableQueryBuilder(new H2Dialect(), QueryTestEntityWithIdentityId.class, metamodel, List.of()).build());
     }

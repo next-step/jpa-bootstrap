@@ -8,7 +8,7 @@ public class DropQueryBuilder {
 
     public DropQueryBuilder(Class<?> entityClass, Metamodel metamodel) {
         query = new StringBuilder();
-        TableDefinition tableDefinition = metamodel.getTableDefinition(entityClass);
+        TableDefinition tableDefinition = metamodel.findTableDefinition(entityClass);
 
         query.append("DROP TABLE ");
         query.append(tableDefinition.getTableName());

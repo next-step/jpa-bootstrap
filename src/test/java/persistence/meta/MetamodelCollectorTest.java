@@ -35,9 +35,9 @@ public class MetamodelCollectorTest {
         Metamodel metamodel = new MetamodelCollector(null).getMetamodel();
 
         assertAll(
-                () -> assertThat(metamodel.getTableDefinition(TestPerson.class)).isNull(),
-                () -> assertThat(metamodel.getTableDefinition(EntityPerson.class)).isNotNull(),
-                () -> assertThat(metamodel.getTableDefinition(Order.class)).isNull()
+                () -> assertThat(metamodel.findTableDefinition(TestPerson.class)).isNull(),
+                () -> assertThat(metamodel.findTableDefinition(EntityPerson.class)).isNotNull(),
+                () -> assertThat(metamodel.findTableDefinition(Order.class)).isNull()
         );
     }
 }

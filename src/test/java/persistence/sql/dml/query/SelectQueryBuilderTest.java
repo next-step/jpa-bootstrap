@@ -28,11 +28,11 @@ class SelectQueryBuilderTest {
     @Test
     void testSelectSingleTableWithJoin() {
         TestLazyOrder order = new TestLazyOrder("order_number");
-        TableDefinition orderTableDefinition = metamodel.getTableDefinition(order.getClass());
+        TableDefinition orderTableDefinition = metamodel.findTableDefinition(order.getClass());
 
         SelectQueryBuilder selectQuery = new SelectQueryBuilder(order.getClass(), metamodel);
         orderTableDefinition.getAssociations().forEach(association -> {
-            selectQuery.join(metamodel.getTableDefinition(association.getAssociatedEntityClass()));
+            selectQuery.join(metamodel.findTableDefinition(association.getAssociatedEntityClass()));
         });
 
         assertThat(selectQuery.buildById(1)).isEqualTo(
@@ -50,7 +50,7 @@ class SelectQueryBuilderTest {
     @Test
     void testFindAll() {
         TestLazyOrder order = new TestLazyOrder(1L, "order_number");
-        TableDefinition orderTableDefinition = metamodel.getTableDefinition(order.getClass());
+        TableDefinition orderTableDefinition = metamodel.findTableDefinition(order.getClass());
         String joinColumnName = orderTableDefinition.getJoinColumnName(TestLazyOrderItem.class);
         Object joinColumnValue = orderTableDefinition.getValue(order, joinColumnName);
 

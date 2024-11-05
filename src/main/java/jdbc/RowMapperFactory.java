@@ -29,13 +29,13 @@ public class RowMapperFactory {
         if (rowMapper != null) {
             return rowMapper;
         }
-        final TableDefinition tableDefinition = metamodel.getTableDefinition(targetClass);
+        final TableDefinition tableDefinition = metamodel.findTableDefinition(targetClass);
         for (var association : tableDefinition.getAssociations()) {
             if (association.isEager()) {
                 return (RowMapper<T>) eagerFetchRowMappers.computeIfAbsent(targetClass,
                         k -> new EagerFetchRowMapper<>(targetClass,
-                                metamodel.getTableDefinition(targetClass),
-                                metamodel.getTableDefinition(association.getAssociatedEntityClass())
+                                metamodel.findTableDefinition(targetClass),
+                                metamodel.findTableDefinition(association.getAssociatedEntityClass())
                         ));
             }
         }

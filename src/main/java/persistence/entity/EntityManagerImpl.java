@@ -53,7 +53,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void persist(Object entity) {
-        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
+        final EntityPersister entityPersister = metamodel.findEntityPersister(entity.getClass());
         if (entityPersister.hasId(entity)) {
             final EntityEntry entityEntry = persistenceContext.getEntityEntry(
                     new EntityKey(entityPersister.getEntityId(entity), entity.getClass())
@@ -79,10 +79,10 @@ public class EntityManagerImpl implements EntityManager {
         managePersistEntity(entity, entityPersister);
 
         for (TableAssociationDefinition association : entityPersister.getCollectionAssociations()) {
-            final EntityCollectionPersister entityCollectionPersister = metamodel.getEntityCollectionPersister(association);
+            final EntityCollectionPersister entityCollectionPersister = metamodel.findEntityCollectionPersister(association);
             final Collection<Object> childEntities = entityCollectionPersister.insertCollection(entity, association);
             childEntities.forEach(child -> {
-                managePersistEntity(child, metamodel.getEntityPersister(child.getClass()));
+                managePersistEntity(child, metamodel.findEntityPersister(child.getClass()));
             });
         }
     }
@@ -97,7 +97,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void remove(Object entity) {
-        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
+        final EntityPersister entityPersister = metamodel.findEntityPersister(entity.getClass());
         final EntityKey entityKey = new EntityKey(entityPersister.getEntityId(entity), entity.getClass());
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entityKey);
         checkManagedEntity(entity, entityEntry);
@@ -109,13 +109,13 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <T> T merge(T entity) {
-        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
+        final EntityPersister entityPersister = metamodel.findEntityPersister(entity.getClass());
         final EntityKey entityKey = new EntityKey(entityPersister.getEntityId(entity), entity.getClass());
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entityKey);
         checkManagedEntity(entity, entityEntry);
 
         final EntitySnapshot entitySnapshot = persistenceContext.getDatabaseSnapshot(entityKey);
-        if (entitySnapshot.hasDirtyColumns(entity, metamodel.getTableDefinition(entity.getClass()))) {
+        if (entitySnapshot.hasDirtyColumns(entity, metamodel.findTableDefinition(entity.getClass()))) {
             entityPersister.update(entity);
         }
 
@@ -142,7 +142,7 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     private void addEntityInContext(EntityKey entityKey, Object entity) {
-        final TableDefinition tableDefinition = metamodel.getTableDefinition(entity.getClass());
+        final TableDefinition tableDefinition = metamodel.findTableDefinition(entity.getClass());
 
         persistenceContext.addEntity(entityKey, entity);
         persistenceContext.addDatabaseSnapshot(entityKey, entity, tableDefinition);

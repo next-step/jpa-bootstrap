@@ -18,12 +18,12 @@ public class EntityLoader {
 
     public <T> T loadEntity(Class<T> entityClass, EntityKey entityKey) {
         final SelectQueryBuilder queryBuilder = new SelectQueryBuilder(entityKey.entityClass(), metamodel);
-        final TableDefinition tableDefinition = metamodel.getTableDefinition(entityClass);
+        final TableDefinition tableDefinition = metamodel.findTableDefinition(entityClass);
 
         tableDefinition.getAssociations().stream()
                 .filter(TableAssociationDefinition::isEager)
                 .forEach(association ->
-                        queryBuilder.join(metamodel.getTableDefinition(association.getAssociatedEntityClass()))
+                        queryBuilder.join(metamodel.findTableDefinition(association.getAssociatedEntityClass()))
                 );
 
         final String query = queryBuilder.buildById(entityKey.id());

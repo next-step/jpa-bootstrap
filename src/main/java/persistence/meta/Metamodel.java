@@ -60,15 +60,15 @@ public class Metamodel {
                 );
     }
 
-    public TableDefinition getTableDefinition(Class<?> clazz) {
+    public TableDefinition findTableDefinition(Class<?> clazz) {
         return tableDefinitions.get(clazz);
     }
 
-    public EntityPersister getEntityPersister(Class<?> clazz) {
+    public EntityPersister findEntityPersister(Class<?> clazz) {
         return entityPersisters.get(clazz);
     }
 
-    public EntityCollectionPersister getEntityCollectionPersister(TableAssociationDefinition association) {
+    public EntityCollectionPersister findEntityCollectionPersister(TableAssociationDefinition association) {
         return entityCollectionPersisters.get(association);
     }
 }

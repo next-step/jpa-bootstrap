@@ -23,8 +23,8 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
     public LazyFetchRowMapper(Class<T> clazz,
                               JdbcTemplate jdbcTemplate,
                               Metamodel metamodel) {
-        super(clazz, metamodel.getTableDefinition(clazz));
-        this.tableDefinition = metamodel.getTableDefinition(clazz);
+        super(clazz, metamodel.findTableDefinition(clazz));
+        this.tableDefinition = metamodel.findTableDefinition(clazz);
         this.clazz = clazz;
         this.jdbcTemplate = jdbcTemplate;
         this.metamodel = metamodel;
@@ -38,9 +38,10 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
                 continue;
             }
 
-            final Field collectionField = clazz.getDeclaredField(association.getFieldName());
-            List proxy = createProxy(instance, association.getAssociatedEntityClass());
-            ReflectionFieldAccessUtils.accessAndSet(instance, collectionField, proxy);
+            ReflectionFieldAccessUtils.accessAndSet(instance,
+                    clazz.getDeclaredField(association.getFieldName()),
+                    createProxy(instance, association.getAssociatedEntityClass())
+            );
         }
     }
 

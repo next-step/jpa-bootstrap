@@ -19,7 +19,7 @@ public class CreateTableQueryBuilder {
             Metamodel metamodel,
             List<ColumnDefinitionAware> additionalColumns
     ) {
-        TableDefinition tableDefinition = metamodel.getTableDefinition(entityClass);
+        TableDefinition tableDefinition = metamodel.findTableDefinition(entityClass);
         this.query = new StringBuilder();
         this.dialect = dialect;
 

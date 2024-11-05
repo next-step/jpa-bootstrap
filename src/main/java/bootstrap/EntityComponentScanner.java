@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EntityComponentScanner {
+    private static final String DOT = ".";
+    private static final String CLASS_FILE_EXTENSION = DOT + "class";
 
     public List<Class<?>> scan(String basePackage) throws ClassNotFoundException {
         List<Class<?>> classes = new ArrayList<>();
@@ -49,11 +51,15 @@ public class EntityComponentScanner {
     }
 
     private String extractClassName(String basePackage, File file) {
-        return basePackage + "." + file.getName().substring(0, file.getName().length() - 6);
+        return basePackage + DOT + removeClassFileExtension(file);
+    }
+
+    private String removeClassFileExtension(File file) {
+        return file.getName().substring(0, file.getName().length() - CLASS_FILE_EXTENSION.length());
     }
 
     private boolean isClassFile(File file) {
-        return file.getName().endsWith(".class");
+        return file.getName().endsWith(CLASS_FILE_EXTENSION);
     }
 
     private boolean isEntity(Class<?> aClass) {
