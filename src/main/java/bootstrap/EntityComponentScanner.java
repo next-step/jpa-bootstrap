@@ -5,38 +5,37 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EntityComponentScanner {
     private static final String DOT = ".";
     private static final String CLASS_FILE_EXTENSION = DOT + "class";
 
     public List<Class<?>> scan(String basePackage) throws ClassNotFoundException {
-        final URL resourcePath = getResourcePath(basePackage);
-        if (resourcePath == null) {
-            return new ArrayList<>();
-        }
+        final File baseDir = resolveBaseDir(basePackage);
 
-        final File baseDir = new File(resourcePath.getFile());
         if (isInvalidDirectory(baseDir)) {
             return new ArrayList<>();
         }
 
-        return Arrays.stream(Objects.requireNonNull(baseDir.listFiles()))
-                .reduce(new ArrayList<>(), (classes, file) -> {
+        return Arrays.stream(baseDir.listFiles())
+                .flatMap(file -> {
                     if (file.isDirectory()) {
-                        handleDirectory(basePackage, classes, file);
+                        return handleDirectory(basePackage, file).stream();
+                    } else if (isClassFile(file)) {
+                        return handleClassFile(basePackage, file).stream();
                     }
+                    return Stream.empty();
+                }).toList();
+    }
 
-                    if (isClassFile(file)) {
-                        handleClassFile(basePackage, classes, file);
-                    }
-
-                    return classes;
-                }, (origin, newClasses) -> {
-                    origin.addAll(newClasses);
-                    return origin;
-                });
+    private File resolveBaseDir(String basePackage) {
+        final URL resourcePath = getResourcePath(basePackage);
+        if (resourcePath == null) {
+            return new File("");
+        }
+        return new File(resourcePath.getFile());
     }
 
     private URL getResourcePath(String basePackage) {
@@ -44,29 +43,30 @@ public class EntityComponentScanner {
         return Thread.currentThread().getContextClassLoader().getResource(path);
     }
 
-    private void handleClassFile(String basePackage, ArrayList<Class<?>> classes, File file) {
+    private List<Class<?>> handleClassFile(String basePackage, File file) {
         String className = extractClassName(basePackage, file);
         try {
             Class<?> aClass = Class.forName(className);
             if (isEntity(aClass)) {
-                classes.add(aClass);
+                return List.of(aClass);
             }
-
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+
+        return new ArrayList<>();
     }
 
-    private void handleDirectory(String basePackage, ArrayList<Class<?>> classes, File file) {
+    private List<Class<?>> handleDirectory(String basePackage, File file) {
         try {
-            classes.addAll(scan(basePackage + "." + file.getName()));
+            return scan(basePackage + "." + file.getName());
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
     private boolean isInvalidDirectory(File file) {
-        return !file.exists() || !file.isDirectory();
+        return !file.exists() || !file.isDirectory() || file.listFiles() == null;
     }
 
     private String extractClassName(String basePackage, File file) {
