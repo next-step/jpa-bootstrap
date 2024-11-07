@@ -3,51 +3,68 @@ package bootstrap;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class EntityComponentScanner {
     private static final String DOT = ".";
     private static final String CLASS_FILE_EXTENSION = DOT + "class";
 
     public List<Class<?>> scan(String basePackage) throws ClassNotFoundException {
-        List<Class<?>> classes = new ArrayList<>();
         String path = basePackage.replace(".", "/");
         URL resourcePath = Thread.currentThread().getContextClassLoader().getResource(path);
 
         if (resourcePath == null) {
-            return classes;
+            return new ArrayList<>();
         }
 
         File baseDir = new File(resourcePath.getFile());
 
-        if (!baseDir.exists()) {
-            return classes;
+        if (isInvalidDirectory(baseDir)) {
+            return new ArrayList<>();
         }
 
-        if (!baseDir.isDirectory()) {
-            return classes;
-        }
+        return Arrays.stream(Objects.requireNonNull(baseDir.listFiles()))
+                .reduce(new ArrayList<>(), (classes, file) -> {
+                    if (file.isDirectory()) {
+                        handleDirectory(basePackage, classes, file);
+                    }
 
-        for (File file : baseDir.listFiles()) {
-            if (isDirectory(file)) {
-                classes.addAll(scan(basePackage + "." + file.getName()));
-                continue;
-            }
+                    if (isClassFile(file)) {
+                        handleClassFile(basePackage, classes, file);
+                    }
 
-            if (isClassFile(file)) {
-                String className = extractClassName(basePackage, file);
-                Class<?> aClass = Class.forName(className);
-                if (isEntity(aClass)) {
-                    classes.add(aClass);
-                }
-            }
-        }
-
-        return classes;
+                    return classes;
+                }, (origin, newClasses) -> {
+                    origin.addAll(newClasses);
+                    return origin;
+                });
     }
 
-    private boolean isDirectory(File file) {
-        return file.isDirectory();
+    private void handleClassFile(String basePackage, ArrayList<Class<?>> classes, File file) {
+        String className = extractClassName(basePackage, file);
+        try {
+            Class<?> aClass = Class.forName(className);
+            if (isEntity(aClass)) {
+                classes.add(aClass);
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void handleDirectory(String basePackage, ArrayList<Class<?>> classes, File file) {
+        try {
+            classes.addAll(scan(basePackage + "." + file.getName()));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private boolean isInvalidDirectory(File file) {
+        return !file.exists() || !file.isDirectory();
     }
 
     private String extractClassName(String basePackage, File file) {
