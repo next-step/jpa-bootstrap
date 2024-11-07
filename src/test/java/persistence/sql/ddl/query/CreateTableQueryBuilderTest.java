@@ -3,7 +3,7 @@ package persistence.sql.ddl.query;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.meta.Metamodel;
-import persistence.meta.MetamodelCollector;
+import persistence.meta.MetamodelInitializer;
 import persistence.sql.Dialect;
 import persistence.sql.H2Dialect;
 import persistence.sql.ddl.fixtures.TestEntityWithAutoIdStrategy;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CreateTableQueryBuilderTest {
     private final Dialect dialect = new H2Dialect();
-    private final Metamodel metamodel = new MetamodelCollector(null).getMetamodel();
+    private final Metamodel metamodel = new MetamodelInitializer(null).getMetamodel();
 
     @Test
     @DisplayName("Should create create table query for TestEntityWithAutoIdStrategy")

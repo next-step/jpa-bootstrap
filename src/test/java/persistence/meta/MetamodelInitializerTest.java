@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-public class MetamodelCollectorTest {
+public class MetamodelInitializerTest {
 
     public static class TestPerson {
         private Long id;
@@ -32,7 +32,7 @@ public class MetamodelCollectorTest {
     @Test
     @DisplayName("property의 package 이하의 Entity 어노테이션이 붙은 클래스를 찾아서 메타모델을 만든다.")
     void testReadEntity() {
-        Metamodel metamodel = new MetamodelCollector(null).getMetamodel();
+        Metamodel metamodel = new MetamodelInitializer(null).getMetamodel();
 
         assertAll(
                 () -> assertThat(metamodel.findTableDefinition(TestPerson.class)).isNull(),

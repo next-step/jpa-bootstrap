@@ -2,8 +2,6 @@ package persistence.entity;
 
 import database.DatabaseServer;
 import database.H2;
-import domain.Order;
-import domain.OrderItem;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,17 +16,14 @@ import persistence.fixtures.TestEagerOrderItem;
 import persistence.fixtures.TestLazyOrder;
 import persistence.fixtures.TestLazyOrderItem;
 import persistence.meta.Metamodel;
-import persistence.meta.MetamodelCollector;
+import persistence.meta.MetamodelInitializer;
 import persistence.proxy.PersistentList;
 import persistence.sql.H2Dialect;
-import persistence.sql.SqlType;
 import persistence.sql.ddl.query.CreateTableQueryBuilder;
 import persistence.sql.ddl.query.DropQueryBuilder;
-import persistence.sql.definition.ColumnDefinitionAware;
 
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,7 +66,7 @@ public class EntityManagerTest {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        metamodel = new MetamodelCollector(jdbcTemplate).getMetamodel();
+        metamodel = new MetamodelInitializer(jdbcTemplate).getMetamodel();
 
         String query = new CreateTableQueryBuilder(new H2Dialect(), EntityManagerTestEntityWithIdentityId.class, metamodel, List.of()).build();
         jdbcTemplate.execute(query);

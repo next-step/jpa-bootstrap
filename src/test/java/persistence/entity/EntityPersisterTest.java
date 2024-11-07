@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.meta.Metamodel;
-import persistence.meta.MetamodelCollector;
+import persistence.meta.MetamodelInitializer;
 import persistence.sql.H2Dialect;
 import persistence.sql.ddl.query.CreateTableQueryBuilder;
 import persistence.sql.ddl.query.DropQueryBuilder;
@@ -63,7 +63,7 @@ class EntityPersisterTest {
         server.start();
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        metamodel = new MetamodelCollector(jdbcTemplate).getMetamodel();
+        metamodel = new MetamodelInitializer(jdbcTemplate).getMetamodel();
         entityPersister = new EntityPersister(metamodel.findTableDefinition(QueryTestEntityWithIdentityId.class), jdbcTemplate);
 
         jdbcTemplate.execute(new CreateTableQueryBuilder(new H2Dialect(), QueryTestEntityWithIdentityId.class, metamodel, List.of()).build());

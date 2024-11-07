@@ -4,14 +4,14 @@ import org.junit.jupiter.api.Test;
 import persistence.fixtures.TestLazyOrder;
 import persistence.fixtures.TestLazyOrderItem;
 import persistence.meta.Metamodel;
-import persistence.meta.MetamodelCollector;
+import persistence.meta.MetamodelInitializer;
 import persistence.sql.definition.TableDefinition;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SelectQueryBuilderTest {
 
-    private final Metamodel metamodel = new MetamodelCollector(null).getMetamodel();
+    private final Metamodel metamodel = new MetamodelInitializer(null).getMetamodel();
 
     @Test
     void testSelectSingleTable() {
