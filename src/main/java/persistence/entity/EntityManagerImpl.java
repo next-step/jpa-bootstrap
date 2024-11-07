@@ -37,8 +37,8 @@ public class EntityManagerImpl implements EntityManager {
         }
 
         final T loaded = entityLoader.loadEntity(clazz, entityKey);
-        addEntityInContext(entityKey, loaded);
-        addManagedEntityEntry(entityKey, entityEntry);
+        storeEntityInContext(entityKey, loaded);
+        updateEntryToManaged(entityKey, entityEntry);
         return loaded;
     }
 
@@ -55,44 +55,55 @@ public class EntityManagerImpl implements EntityManager {
     public void persist(Object entity) {
         final EntityPersister entityPersister = metamodel.findEntityPersister(entity.getClass());
         if (entityPersister.hasId(entity)) {
-            final EntityEntry entityEntry = persistenceContext.getEntityEntry(
-                    new EntityKey(entityPersister.getEntityId(entity), entity.getClass())
-            );
-
-            if (entityEntry == null) {
-                throw new IllegalArgumentException("No Entity Entry with id: " + entityPersister.getEntityId(entity));
-            }
-
-            if (entityEntry.isManaged()) {
-                return;
-            }
-
-            throw new IllegalArgumentException("Entity already persisted");
+            throwIfNotManaged(entity, entityPersister);
+            return;
         }
 
-        persistEntity(entity, entityPersister);
+        doPersist(entity, entityPersister);
     }
 
-    private void persistEntity(Object entity, EntityPersister entityPersister) {
-        entityPersister.insert(entity);
+    private void throwIfNotManaged(Object entity, EntityPersister entityPersister) {
+        final EntityEntry entityEntry = persistenceContext.getEntityEntry(
+                new EntityKey(entityPersister.getEntityId(entity), entity.getClass())
+        );
 
-        managePersistEntity(entity, entityPersister);
+        if (entityEntry == null) {
+            throw new IllegalArgumentException("No Entity Entry with id: " + entityPersister.getEntityId(entity));
+        }
+
+        if (entityEntry.isManaged()) {
+            return;
+        }
+
+        throw new IllegalArgumentException("Entity already persisted");
+    }
+
+    private void doPersist(Object entity, EntityPersister entityPersister) {
+        final EntityEntry entityEntry = EntityEntry.inSaving();
+        entityPersister.insert(entity);
+        startManageEntity(entity, entityEntry, entityPersister.getEntityId(entity));
 
         for (TableAssociationDefinition association : entityPersister.getCollectionAssociations()) {
             final EntityCollectionPersister entityCollectionPersister = metamodel.findEntityCollectionPersister(association);
             final Collection<Object> childEntities = entityCollectionPersister.insertCollection(entity, association);
             childEntities.forEach(child -> {
-                managePersistEntity(child, metamodel.findEntityPersister(child.getClass()));
+                startManageEntity(child,
+                        EntityEntry.inSaving(),
+                        metamodel.findEntityPersister(child.getClass()).getEntityId(child));
             });
         }
     }
 
-    private void managePersistEntity(Object entity, EntityPersister entityPersister) {
-        final EntityEntry entityEntry = EntityEntry.inSaving();
-        final EntityKey entityKey = new EntityKey(entityPersister.getEntityId(entity), entity.getClass());
+    private void startManageEntity(Object entity,
+                                   EntityEntry entityEntry,
+                                   Serializable id) {
 
-        addEntityInContext(entityKey, entity);
-        addManagedEntityEntry(entityKey, entityEntry);
+        final EntityKey entityKey = new EntityKey(id, entity.getClass());
+        entityEntry.bindId(id);
+        entityEntry.updateStatus(Status.MANAGED);
+
+        storeEntityInContext(entityKey, entity);
+        updateEntryToManaged(entityKey, entityEntry);
     }
 
     @Override
@@ -119,8 +130,8 @@ public class EntityManagerImpl implements EntityManager {
             entityPersister.update(entity);
         }
 
-        addEntityInContext(entityKey, entity);
-        addManagedEntityEntry(entityKey, entityEntry);
+        storeEntityInContext(entityKey, entity);
+        updateEntryToManaged(entityKey, entityEntry);
         return entity;
     }
 
@@ -141,14 +152,14 @@ public class EntityManagerImpl implements EntityManager {
         }
     }
 
-    private void addEntityInContext(EntityKey entityKey, Object entity) {
+    private void storeEntityInContext(EntityKey entityKey, Object entity) {
         final TableDefinition tableDefinition = metamodel.findTableDefinition(entity.getClass());
 
         persistenceContext.addEntity(entityKey, entity);
         persistenceContext.addDatabaseSnapshot(entityKey, entity, tableDefinition);
     }
 
-    private void addManagedEntityEntry(EntityKey entityKey, EntityEntry entityEntry) {
+    private void updateEntryToManaged(EntityKey entityKey, EntityEntry entityEntry) {
         entityEntry.updateStatus(Status.MANAGED);
         persistenceContext.addEntry(entityKey, entityEntry);
     }

@@ -123,4 +123,8 @@ public class EntityPersister {
         }
         return value.toString();
     }
+
+    public List<TableAssociationDefinition> getAssociations() {
+        return tableDefinition.getAssociations();
+    }
 }
