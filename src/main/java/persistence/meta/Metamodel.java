@@ -2,7 +2,7 @@ package persistence.meta;
 
 import jdbc.JdbcTemplate;
 import org.jetbrains.annotations.NotNull;
-import persistence.entity.EntityCollectionPersister;
+import persistence.entity.CollectionPersister;
 import persistence.entity.EntityPersister;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;
@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
 public class Metamodel {
     private final Map<Class<?>, TableDefinition> tableDefinitions;
     private final Map<Class<?>, EntityPersister> entityPersisters;
-    private final Map<TableAssociationDefinition, EntityCollectionPersister> entityCollectionPersisters;
+    private final Map<TableAssociationDefinition, CollectionPersister> collectionPersisters;
 
     public Metamodel(List<Class<?>> entityClasses, JdbcTemplate jdbcTemplate) {
         this.tableDefinitions = collectTableDefinitions(entityClasses);
         this.entityPersisters = collectEntityPersisters(entityClasses, jdbcTemplate);
-        this.entityCollectionPersisters = collectCollectionPersisters(jdbcTemplate);
+        this.collectionPersisters = collectCollectionPersisters(jdbcTemplate);
     }
 
     @NotNull
@@ -43,7 +43,7 @@ public class Metamodel {
     }
 
     @NotNull
-    private Map<TableAssociationDefinition, EntityCollectionPersister> collectCollectionPersisters(JdbcTemplate jdbcTemplate) {
+    private Map<TableAssociationDefinition, CollectionPersister> collectCollectionPersisters(JdbcTemplate jdbcTemplate) {
         return tableDefinitions.values().stream().flatMap(tableDefinition ->
                         tableDefinition.getAssociations().stream()
                 )
@@ -51,7 +51,7 @@ public class Metamodel {
                 .collect(
                         Collectors.toUnmodifiableMap(
                                 association -> association,
-                                association -> new EntityCollectionPersister(
+                                association -> new CollectionPersister(
                                         entityPersisters.get(association.getParentEntityClass()),
                                         entityPersisters.get(association.getAssociatedEntityClass()),
                                         jdbcTemplate
@@ -68,7 +68,7 @@ public class Metamodel {
         return entityPersisters.get(clazz);
     }
 
-    public EntityCollectionPersister findEntityCollectionPersister(TableAssociationDefinition association) {
-        return entityCollectionPersisters.get(association);
+    public CollectionPersister findCollectionPersister(TableAssociationDefinition association) {
+        return collectionPersisters.get(association);
     }
 }

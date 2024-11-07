@@ -84,8 +84,8 @@ public class EntityManagerImpl implements EntityManager {
         startManageEntity(entity, entityEntry, entityPersister.getEntityId(entity));
 
         for (TableAssociationDefinition association : entityPersister.getCollectionAssociations()) {
-            final EntityCollectionPersister entityCollectionPersister = metamodel.findEntityCollectionPersister(association);
-            final Collection<Object> childEntities = entityCollectionPersister.insertCollection(entity, association);
+            final CollectionPersister collectionPersister = metamodel.findCollectionPersister(association);
+            final Collection<Object> childEntities = collectionPersister.insertCollection(entity, association);
             childEntities.forEach(child -> {
                 startManageEntity(child,
                         EntityEntry.inSaving(),

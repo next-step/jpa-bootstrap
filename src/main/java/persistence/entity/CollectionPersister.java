@@ -6,20 +6,19 @@ import persistence.sql.dml.query.UpdateQueryBuilder;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EntityCollectionPersister {
+public class CollectionPersister {
     private static final UpdateQueryBuilder updateQueryBuilder = new UpdateQueryBuilder();
 
     private final EntityPersister parentPersister;
     private final EntityPersister elementPersister;
     private final JdbcTemplate jdbcTemplate;
 
-    public EntityCollectionPersister(EntityPersister parentPersister,
-                                     EntityPersister elementPersister,
-                                     JdbcTemplate jdbcTemplate) {
+    public CollectionPersister(EntityPersister parentPersister,
+                               EntityPersister elementPersister,
+                               JdbcTemplate jdbcTemplate) {
         this.parentPersister = parentPersister;
         this.elementPersister = elementPersister;
         this.jdbcTemplate = jdbcTemplate;
