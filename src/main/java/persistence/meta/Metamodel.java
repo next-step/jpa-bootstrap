@@ -52,8 +52,8 @@ public class Metamodel {
                         Collectors.toUnmodifiableMap(
                                 association -> association,
                                 association -> new EntityCollectionPersister(
-                                        tableDefinitions.get(association.getParentEntityClass()),
-                                        tableDefinitions.get(association.getAssociatedEntityClass()),
+                                        entityPersisters.get(association.getParentEntityClass()),
+                                        entityPersisters.get(association.getAssociatedEntityClass()),
                                         jdbcTemplate
                                 )
                         )

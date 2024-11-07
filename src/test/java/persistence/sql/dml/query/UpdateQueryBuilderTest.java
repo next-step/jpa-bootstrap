@@ -8,6 +8,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.sql.definition.TableDefinition;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UpdateQueryBuilderTest {
@@ -39,9 +42,16 @@ class UpdateQueryBuilderTest {
     @Test
     @DisplayName("모든 필드에 대한 update 쿼리를 정상적으로 생성한다.")
     void shouldBuildUpdateQuery() {
-        HasNullableColumnEntity hasNullableColumnEntity = new HasNullableColumnEntity(1L, "john_doe", 30);
+        LinkedHashMap<String, Object> columnValues = new LinkedHashMap<>();
+        columnValues.put("name", "'john_doe'");
+        columnValues.put("age", 30);
         String query = new UpdateQueryBuilder()
-                .build(hasNullableColumnEntity, new TableDefinition(HasNullableColumnEntity.class));
+                .build(
+                        "HasNullableColumnEntity",
+                        "id",
+                        1,
+                        columnValues
+                );
 
         assertThat(query).isEqualTo(
                 "UPDATE HasNullableColumnEntity " +
@@ -51,12 +61,20 @@ class UpdateQueryBuilderTest {
     @Test
     @DisplayName("nullable 필드가 있어도 update 쿼리를 정상적으로 생성한다.")
     void shouldBuildUpdateQueryWhenHasNullableColumns() {
-        HasNullableColumnEntity hasNullableColumnEntity = new HasNullableColumnEntity(1L, 30);
+        LinkedHashMap<String, Object> columnValues = new LinkedHashMap<>();
+        columnValues.put("name", "null");
+        columnValues.put("age", 30);
+
         String query = new UpdateQueryBuilder()
-                .build(hasNullableColumnEntity, new TableDefinition(HasNullableColumnEntity.class));
+                .build(
+                        "HasNullableColumnEntity",
+                        "id",
+                        1,
+                        columnValues
+                );
 
         assertThat(query).isEqualTo(
                 "UPDATE HasNullableColumnEntity " +
-                "SET name = null, age = 30 WHERE id = 1;");
+                        "SET name = null, age = 30 WHERE id = 1;");
     }
 }

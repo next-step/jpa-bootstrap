@@ -22,15 +22,15 @@ public class InsertExecutor {
         this.tableDefinition = tableDefinition;
     }
 
-    public Object insertAndBindKey(Object entity, TableDefinition tableDefinition) {
+    public Object insertAndBindKey(Object entity) {
         final String query = insertQueryBuilder.build(entity, tableDefinition);
         final Serializable id = jdbcTemplate.insertAndReturnKey(query);
 
-        bindId(id, entity, tableDefinition);
+        bindId(id, entity);
         return entity;
     }
 
-    private void bindId(Serializable id, Object entity, TableDefinition tableDefinition) {
+    private void bindId(Serializable id, Object entity) {
         try {
             final Field idField = tableDefinition.getEntityClass()
                     .getDeclaredField(tableDefinition.getIdFieldName());
