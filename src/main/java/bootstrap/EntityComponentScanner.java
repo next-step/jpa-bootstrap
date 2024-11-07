@@ -12,15 +12,12 @@ public class EntityComponentScanner {
     private static final String CLASS_FILE_EXTENSION = DOT + "class";
 
     public List<Class<?>> scan(String basePackage) throws ClassNotFoundException {
-        String path = basePackage.replace(".", "/");
-        URL resourcePath = Thread.currentThread().getContextClassLoader().getResource(path);
-
+        final URL resourcePath = getResourcePath(basePackage);
         if (resourcePath == null) {
             return new ArrayList<>();
         }
 
-        File baseDir = new File(resourcePath.getFile());
-
+        final File baseDir = new File(resourcePath.getFile());
         if (isInvalidDirectory(baseDir)) {
             return new ArrayList<>();
         }
@@ -40,6 +37,11 @@ public class EntityComponentScanner {
                     origin.addAll(newClasses);
                     return origin;
                 });
+    }
+
+    private URL getResourcePath(String basePackage) {
+        String path = basePackage.replace(".", "/");
+        return Thread.currentThread().getContextClassLoader().getResource(path);
     }
 
     private void handleClassFile(String basePackage, ArrayList<Class<?>> classes, File file) {
