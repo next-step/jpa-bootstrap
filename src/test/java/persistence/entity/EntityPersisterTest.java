@@ -12,6 +12,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.meta.Metamodel;
+import persistence.meta.MetamodelInitializer;
 import persistence.sql.H2Dialect;
 import persistence.sql.ddl.query.CreateTableQueryBuilder;
 import persistence.sql.ddl.query.DropQueryBuilder;
@@ -48,11 +50,11 @@ class EntityPersisterTest {
             this.name = name;
             this.age = age;
         }
-
     }
 
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
+    private static Metamodel metamodel;
     private static EntityPersister entityPersister;
 
     @BeforeEach
@@ -61,14 +63,15 @@ class EntityPersisterTest {
         server.start();
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        String query2 = new CreateTableQueryBuilder(new H2Dialect(), QueryTestEntityWithIdentityId.class, List.of()).build();
-        jdbcTemplate.execute(query2);
-        entityPersister = new EntityPersister(jdbcTemplate);
+        metamodel = new MetamodelInitializer(jdbcTemplate).getMetamodel();
+        entityPersister = new EntityPersister(metamodel.findTableDefinition(QueryTestEntityWithIdentityId.class), jdbcTemplate);
+
+        jdbcTemplate.execute(new CreateTableQueryBuilder(new H2Dialect(), QueryTestEntityWithIdentityId.class, metamodel, List.of()).build());
     }
 
     @AfterEach
     void tearDown() throws SQLException {
-        String query2 = new DropQueryBuilder(QueryTestEntityWithIdentityId.class).build();
+        String query2 = new DropQueryBuilder(QueryTestEntityWithIdentityId.class, metamodel).build();
 
         jdbcTemplate.execute(query2);
         server.stop();
@@ -92,7 +95,7 @@ class EntityPersisterTest {
 
         entityPersister.insert(entity);
 
-        EntityManager em = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), entityPersister);
+        EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
         QueryTestEntityWithIdentityId saved = em.find(QueryTestEntityWithIdentityId.class, 1L);
         assertAll(
                 () -> assertThat(saved.id).isEqualTo(1L),
@@ -107,7 +110,7 @@ class EntityPersisterTest {
 
         entityPersister.insert(entity);
 
-        EntityManager em = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), entityPersister);
+        EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
         QueryTestEntityWithIdentityId saved = em.find(QueryTestEntityWithIdentityId.class, 1L);
         assertAll(
                 () -> assertThat(saved.id).isEqualTo(1L),
@@ -125,7 +128,7 @@ class EntityPersisterTest {
 
         entityPersister.update(updatedEntity);
 
-        EntityManager em = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), entityPersister);
+        EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
         QueryTestEntityWithIdentityId updated = em.find(QueryTestEntityWithIdentityId.class, 1L);
 
         assertAll(
@@ -142,7 +145,7 @@ class EntityPersisterTest {
         entityPersister.insert(entity);
         entityPersister.delete(entity);
 
-        EntityManager em = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), entityPersister);
+        EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
         assertThrows(RuntimeException.class, () -> em.find(QueryTestEntityWithIdentityId.class, 1L));
     }
 }

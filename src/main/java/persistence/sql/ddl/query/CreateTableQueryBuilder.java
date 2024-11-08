@@ -1,6 +1,7 @@
 package persistence.sql.ddl.query;
 
 import common.SqlLogger;
+import persistence.meta.Metamodel;
 import persistence.sql.Dialect;
 import persistence.sql.definition.ColumnDefinitionAware;
 import persistence.sql.definition.TableDefinition;
@@ -15,9 +16,10 @@ public class CreateTableQueryBuilder {
     public CreateTableQueryBuilder(
             Dialect dialect,
             Class<?> entityClass,
+            Metamodel metamodel,
             List<ColumnDefinitionAware> additionalColumns
     ) {
-        TableDefinition tableDefinition = new TableDefinition(entityClass);
+        TableDefinition tableDefinition = metamodel.findTableDefinition(entityClass);
         this.query = new StringBuilder();
         this.dialect = dialect;
 

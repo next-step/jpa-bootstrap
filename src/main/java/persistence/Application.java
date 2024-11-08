@@ -2,23 +2,17 @@ package persistence;
 
 import database.DatabaseServer;
 import database.H2;
-import domain.Order;
-import domain.OrderItem;
-import domain.Person;
-import jdbc.EagerFetchRowMapper;
+import domain.Department;
+import domain.Employee;
 import jdbc.JdbcTemplate;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.entity.EntityManager;
 import persistence.entity.EntityManagerImpl;
-import persistence.entity.EntityPersister;
-import persistence.entity.PersistenceContextImpl;
-import persistence.sql.H2Dialect;
-import persistence.sql.ddl.query.CreateTableQueryBuilder;
-import persistence.sql.ddl.query.DropQueryBuilder;
-import persistence.sql.dml.query.SelectAllQueryBuilder;
-
-import java.util.List;
+import persistence.entity.StatefulPersistenceContext;
+import persistence.meta.Metamodel;
+import persistence.meta.MetamodelInitializer;
 
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
@@ -27,27 +21,27 @@ public class Application {
         logger.info("Starting application...");
         try {
             final DatabaseServer server = new H2();
-            final Class<?> testClass = Person.class;
+            final JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
+            final MetamodelInitializer metamodelInitializer = new MetamodelInitializer(jdbcTemplate);
+
             server.start();
 
-            final JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-            final EntityManager em = new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), new EntityPersister(jdbcTemplate));
+            jdbcTemplate.execute("CREATE TABLE department (department_id BIGINT AUTO_INCREMENT, name VARCHAR(255), PRIMARY KEY (department_id));");
+            jdbcTemplate.execute("CREATE TABLE employee (id BIGINT AUTO_INCREMENT, name VARCHAR(255), department_id BIGINT, PRIMARY KEY (id), FOREIGN KEY (department_id) REFERENCES department(department_id));");
 
-            CreateTableQueryBuilder createOrder = new CreateTableQueryBuilder(new H2Dialect(), Order.class, null);
-            CreateTableQueryBuilder createOrderItem = new CreateTableQueryBuilder(new H2Dialect(), OrderItem.class, List.of());
-            jdbcTemplate.execute(createOrder.build());
-            jdbcTemplate.execute(createOrderItem.build());
+            final EntityManager em = getEntityManager(metamodelInitializer, jdbcTemplate);
 
-//            Order order = new Order("123");
-//            OrderItem orderItem = new OrderItem("item1", 1);
-//            OrderItem orderItem2 = new OrderItem("item2", 2);
-//            order.getOrderItems().add(orderItem);
-//            order.getOrderItems().add(orderItem2);
-//
-//            em.persist(order);
-//            em.clear();
+            Department department = new Department("IT");
+            Employee employee = new Employee("John Doe");
+            department.getEmployees().add(employee);
 
-            em.find(Order.class, 1L);
+            em.persist(department);
+            em.clear();
+
+            Department saved = em.find(Department.class, 1L);
+
+            logger.info("lazy loading...");
+            saved.getEmployees().forEach(emp -> logger.info(emp.getName()));
             server.stop();
         } catch (Exception e) {
             logger.error("Error occurred", e);
@@ -56,39 +50,10 @@ public class Application {
         }
     }
 
-    private static void drop(JdbcTemplate jdbcTemplate) {
-        DropQueryBuilder dropQuery = new DropQueryBuilder(Person.class);
-        String build = dropQuery.build();
-        logger.info("Drop query: {}", build);
-        jdbcTemplate.execute(build);
-    }
-
-    private static void selectAll(JdbcTemplate jdbcTemplate, Class<?> testClass) {
-        String query = new SelectAllQueryBuilder().build(testClass);
-        List<Person> people = jdbcTemplate.query(query, new EagerFetchRowMapper<>(Person.class));
-
-        for (Person person : people) {
-            logger.info("Person: {}", person);
-        }
-    }
-
-    private static void select(EntityManager em, Object id) {
-        Person person = em.find(Person.class, id);
-        logger.info("Person: {}", person);
-    }
-
-    private static void insert(EntityManager em, Person person) {
-        em.persist(person);
-        logger.info("Data inserted successfully!");
-    }
-
-    private static void update(EntityManager em, Person person) {
-        em.merge(person);
-        logger.info("Data updated successfully!");
-    }
-
-    private static void remove(EntityManager em, Person person) {
-        em.remove(person);
-        logger.info("Data deleted successfully!");
+    @NotNull
+    private static EntityManager getEntityManager(MetamodelInitializer metamodelInitializer, JdbcTemplate jdbcTemplate) {
+        Metamodel metamodel = metamodelInitializer.getMetamodel();
+        final EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
+        return em;
     }
 }

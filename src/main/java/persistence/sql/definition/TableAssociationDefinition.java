@@ -15,16 +15,20 @@ import java.util.Collection;
 import java.util.List;
 
 public class TableAssociationDefinition {
-    private final TableDefinition associatedTableDefinition;
+    private final Class<?> parentEntityClass;
+    private final Class<?> associatedEntityClass;
     private final JoinColumn joinColumn;
     private final FetchType fetchType;
     private final String fieldName;
+    private final boolean isCollection;
 
-    public TableAssociationDefinition(Field field) {
+    public TableAssociationDefinition(Class<?> parentEntityClass, Field field) {
+        this.parentEntityClass = parentEntityClass;
+        this.associatedEntityClass = getGenericActualType(field);
         this.joinColumn = field.getAnnotation(JoinColumn.class);
-        this.associatedTableDefinition = new TableDefinition(getGenericActualType(field));
         this.fieldName = field.getName();
         this.fetchType = getFetchType(field);
+        this.isCollection = Collection.class.isAssignableFrom(field.getType());
     }
 
     private static FetchType getFetchType(Field field) {
@@ -47,20 +51,8 @@ public class TableAssociationDefinition {
         return (Class<?>) actualTypeArguments[0];
     }
 
-    public TableDefinition getAssociatedTableDefinition() {
-        return associatedTableDefinition;
-    }
-
     public String getFieldName() {
         return fieldName;
-    }
-
-    public String getTableName() {
-        return associatedTableDefinition.getTableName();
-    }
-
-    public List<? extends ColumnDefinitionAware> getColumns() {
-        return associatedTableDefinition.getColumns();
     }
 
     public boolean isEager() {
@@ -89,12 +81,15 @@ public class TableAssociationDefinition {
         return entityCollection;
     }
 
-    public void setCollectionField(Object instance, List collection) throws NoSuchFieldException {
-        final Field field = instance.getClass().getDeclaredField(getFieldName());
-        ReflectionFieldAccessUtils.accessAndSet(instance, field, collection);
+    public Class<?> getAssociatedEntityClass() {
+        return associatedEntityClass;
     }
 
-    public Class<?> getEntityClass() {
-        return associatedTableDefinition.getEntityClass();
+    public boolean isCollection() {
+        return isCollection;
+    }
+
+    public Class<?> getParentEntityClass() {
+        return parentEntityClass;
     }
 }

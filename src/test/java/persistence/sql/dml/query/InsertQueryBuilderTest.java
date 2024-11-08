@@ -5,17 +5,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.sql.definition.TableDefinition;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class InsertQueryBuilderTest {
+
     @Test
     @DisplayName("Should build insert users query")
     void shouldBuildInsertUsersQuery() {
         Person person = new Person(1L, "john_doe", 30, "chanho0912@gmail.com", 1);
 
-        String query = new InsertQueryBuilder().build(person);
+        String query = new InsertQueryBuilder().build(person, new TableDefinition(Person.class));
 
         assertThat(query).isEqualTo("INSERT INTO users (id, nick_name, old, email) VALUES (1, 'john_doe', 30, 'chanho0912@gmail.com');");
     }
@@ -47,8 +49,8 @@ class InsertQueryBuilderTest {
         HasNullableColumnEntity hasNullableColumnEntity1 = new HasNullableColumnEntity(1L);
         HasNullableColumnEntity hasNullableColumnEntity2 = new HasNullableColumnEntity(2L, 10);
 
-        String query1 = new InsertQueryBuilder().build(hasNullableColumnEntity1);
-        String query2 = new InsertQueryBuilder().build(hasNullableColumnEntity2);
+        String query1 = new InsertQueryBuilder().build(hasNullableColumnEntity1, new TableDefinition(HasNullableColumnEntity.class));
+        String query2 = new InsertQueryBuilder().build(hasNullableColumnEntity2, new TableDefinition(HasNullableColumnEntity.class));
 
         assertAll(
                 () -> assertThat(query1).isEqualTo("INSERT INTO HasNullableColumnEntity (id) VALUES (1);"),

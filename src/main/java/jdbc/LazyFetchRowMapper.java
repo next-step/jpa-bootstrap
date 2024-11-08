@@ -2,6 +2,7 @@ package jdbc;
 
 import common.ReflectionFieldAccessUtils;
 import persistence.entity.EntityLazyLoader;
+import persistence.meta.Metamodel;
 import persistence.proxy.PersistentList;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;
@@ -17,12 +18,16 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
     private final Class<T> clazz;
     private final TableDefinition tableDefinition;
     private final JdbcTemplate jdbcTemplate;
+    private final Metamodel metamodel;
 
-    public LazyFetchRowMapper(Class<T> clazz, JdbcTemplate jdbcTemplate) {
-        super(clazz);
+    public LazyFetchRowMapper(Class<T> clazz,
+                              JdbcTemplate jdbcTemplate,
+                              Metamodel metamodel) {
+        super(clazz, metamodel.findTableDefinition(clazz));
+        this.tableDefinition = metamodel.findTableDefinition(clazz);
         this.clazz = clazz;
-        this.tableDefinition = new TableDefinition(clazz);
         this.jdbcTemplate = jdbcTemplate;
+        this.metamodel = metamodel;
     }
 
     @Override
@@ -33,9 +38,10 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
                 continue;
             }
 
-            final Field collectionField = clazz.getDeclaredField(association.getFieldName());
-            List proxy = createProxy(instance, association.getEntityClass());
-            ReflectionFieldAccessUtils.accessAndSet(instance, collectionField, proxy);
+            ReflectionFieldAccessUtils.accessAndSet(instance,
+                    clazz.getDeclaredField(association.getFieldName()),
+                    createProxy(instance, association.getAssociatedEntityClass())
+            );
         }
     }
 
@@ -50,17 +56,15 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
 
     private EntityLazyLoader createLazyLoader(Class<?> elementClass) {
         return owner -> {
-            final TableDefinition ownerDefinition = new TableDefinition(owner.getClass());
+            final String joinColumnName = tableDefinition.getJoinColumnName(elementClass);
+            final Object joinColumnValue = tableDefinition.getValue(owner, joinColumnName);
 
-            final String joinColumnName = ownerDefinition.getJoinColumnName(elementClass);
-            final Object joinColumnValue = ownerDefinition.getValue(owner, joinColumnName);
-
-            final String query = new SelectQueryBuilder(elementClass)
+            final String query = new SelectQueryBuilder(elementClass, metamodel)
                     .where(joinColumnName, joinColumnValue.toString())
                     .build();
 
             return jdbcTemplate.query(query,
-                    RowMapperFactory.getInstance().createRowMapper(elementClass, jdbcTemplate)
+                    RowMapperFactory.getInstance().getRowMapper(elementClass, metamodel, jdbcTemplate)
             );
         };
     }

@@ -1,9 +1,11 @@
 package persistence.entity;
 
+import persistence.sql.definition.TableDefinition;
+
 import java.util.HashMap;
 import java.util.Map;
 
-public class PersistenceContextImpl implements PersistenceContext {
+public class StatefulPersistenceContext implements PersistenceContext {
     private final Map<EntityKey, Object> managedEntities = new HashMap<>();
     private final Map<EntityKey, EntitySnapshot> entitySnapshots = new HashMap<>();
     private final Map<EntityKey, EntityEntry> entityEntries = new HashMap<>();
@@ -29,8 +31,8 @@ public class PersistenceContextImpl implements PersistenceContext {
     }
 
     @Override
-    public void addDatabaseSnapshot(EntityKey entityKey, Object entity) {
-        final EntitySnapshot entitySnapshot = new EntitySnapshot(entity);
+    public void addDatabaseSnapshot(EntityKey entityKey, Object entity, TableDefinition tableDefinition) {
+        final EntitySnapshot entitySnapshot = new EntitySnapshot(entity, tableDefinition);
         entitySnapshots.put(entityKey, entitySnapshot);
     }
 

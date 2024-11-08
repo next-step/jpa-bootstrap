@@ -10,6 +10,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.meta.Metamodel;
+import persistence.meta.MetamodelInitializer;
 import persistence.sql.Dialect;
 import persistence.sql.H2Dialect;
 import persistence.sql.ddl.query.CreateTableQueryBuilder;
@@ -57,6 +59,7 @@ class EntityLoaderTest {
     }
 
     private static DatabaseServer server;
+    private static Metamodel metamodel;
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -65,9 +68,10 @@ class EntityLoaderTest {
 
         Dialect dialect = new H2Dialect();
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
+        metamodel = new MetamodelInitializer(jdbcTemplate).getMetamodel();
 
-        String createTestEntity1TableQuery = new CreateTableQueryBuilder(dialect, EntityLoaderTestEntity1.class, List.of()).build();
-        String createTestEntity2TableQuery = new CreateTableQueryBuilder(dialect, EntityLoaderTestEntity2.class, List.of()).build();
+        String createTestEntity1TableQuery = new CreateTableQueryBuilder(dialect, EntityLoaderTestEntity1.class, metamodel, List.of()).build();
+        String createTestEntity2TableQuery = new CreateTableQueryBuilder(dialect, EntityLoaderTestEntity2.class, metamodel, List.of()).build();
 
         jdbcTemplate.execute(createTestEntity1TableQuery);
         jdbcTemplate.execute(createTestEntity2TableQuery);
@@ -77,8 +81,8 @@ class EntityLoaderTest {
     void tearDown() throws SQLException {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
 
-        String dropTestEntity1TableQuery = new DropQueryBuilder(EntityLoaderTestEntity1.class).build();
-        String dropTestEntity2TableQuery = new DropQueryBuilder(EntityLoaderTestEntity2.class).build();
+        String dropTestEntity1TableQuery = new DropQueryBuilder(EntityLoaderTestEntity1.class, metamodel).build();
+        String dropTestEntity2TableQuery = new DropQueryBuilder(EntityLoaderTestEntity2.class, metamodel).build();
 
         jdbcTemplate.execute(dropTestEntity1TableQuery);
         jdbcTemplate.execute(dropTestEntity2TableQuery);
@@ -89,16 +93,14 @@ class EntityLoaderTest {
     @DisplayName("Entity Loader는 EntityLoaderTestEntity1 클래스 타입으로 값을 읽어 반환 후 영속성 컨텍스트에 값을 추가한다.")
     void loadEntity() throws Exception {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        PersistenceContext persistenceContext = new PersistenceContextImpl();
-        EntityLoader entityLoader = new EntityLoader(jdbcTemplate);
+        EntityLoader entityLoader = new EntityLoader(jdbcTemplate, metamodel);
 
         EntityLoaderTestEntity1 entity1 = new EntityLoaderTestEntity1(1L, 30);
         EntityLoaderTestEntity1 entity2 = new EntityLoaderTestEntity1(2L, 40);
 
-        EntityPersister entityPersister = new EntityPersister(jdbcTemplate);
 
-        entityPersister.insert(entity1);
-        entityPersister.insert(entity2);
+        metamodel.findEntityPersister(entity1.getClass()).insert(entity1);
+        metamodel.findEntityPersister(entity2.getClass()).insert(entity2);
 
         EntityKey entityKey1 = new EntityKey(1L, EntityLoaderTestEntity1.class);
         EntityKey entityKey2 = new EntityKey(2L, EntityLoaderTestEntity1.class);
@@ -119,13 +121,13 @@ class EntityLoaderTest {
     @DisplayName("Entity Loader는 EntityLoaderTestEntity2 클래스 타입으로 값을 읽어 반환 후 영속성 컨텍스트에 값을 추가한다.")
     void loadEntityOtherClassType() throws SQLException {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        PersistenceContext persistenceContext = new PersistenceContextImpl();
-        EntityLoader entityLoader = new EntityLoader(jdbcTemplate);
+        EntityLoader entityLoader = new EntityLoader(jdbcTemplate, metamodel);
 
         EntityLoaderTestEntity2 entity1 = new EntityLoaderTestEntity2(1L, "John");
         EntityLoaderTestEntity2 entity2 = new EntityLoaderTestEntity2(2L, "Jane");
 
-        EntityPersister entityPersister = new EntityPersister(jdbcTemplate);
+        EntityPersister entityPersister = metamodel.findEntityPersister(EntityLoaderTestEntity2.class);
+
         entityPersister.insert(entity1);
         entityPersister.insert(entity2);
 

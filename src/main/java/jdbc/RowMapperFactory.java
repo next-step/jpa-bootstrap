@@ -1,5 +1,6 @@
 package jdbc;
 
+import persistence.meta.Metamodel;
 import persistence.sql.definition.TableDefinition;
 
 import java.util.HashMap;
@@ -23,22 +24,26 @@ public class RowMapperFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> RowMapper<T> createRowMapper(Class<T> targetClass, JdbcTemplate jdbcTemplate) {
+    public <T> RowMapper<T> getRowMapper(Class<T> targetClass, Metamodel metamodel, JdbcTemplate jdbcTemplate) {
         RowMapper<T> rowMapper = findCachedRowMapper(targetClass);
         if (rowMapper != null) {
             return rowMapper;
         }
-
-        final TableDefinition tableDefinition = new TableDefinition(targetClass);
+        final TableDefinition tableDefinition = metamodel.findTableDefinition(targetClass);
         for (var association : tableDefinition.getAssociations()) {
             if (association.isEager()) {
                 return (RowMapper<T>) eagerFetchRowMappers.computeIfAbsent(targetClass,
-                        k -> new EagerFetchRowMapper<>(targetClass));
+                        k -> new EagerFetchRowMapper<>(targetClass,
+                                metamodel.findTableDefinition(targetClass),
+                                metamodel.findTableDefinition(association.getAssociatedEntityClass())
+                        ));
             }
         }
-
         return (RowMapper<T>) lazyFetchRowMappers.computeIfAbsent(targetClass,
-                k -> new LazyFetchRowMapper<>(targetClass, jdbcTemplate));
+                k -> new LazyFetchRowMapper<>(targetClass,
+                        jdbcTemplate,
+                        metamodel
+                ));
     }
 
     @SuppressWarnings("unchecked")
@@ -46,12 +51,9 @@ public class RowMapperFactory {
         if (eagerFetchRowMappers.containsKey(targetClass)) {
             return (RowMapper<T>) eagerFetchRowMappers.get(targetClass);
         }
-
         if (lazyFetchRowMappers.containsKey(targetClass)) {
             return (RowMapper<T>) lazyFetchRowMappers.get(targetClass);
         }
-
         return null;
     }
-
 }

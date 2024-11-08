@@ -2,7 +2,7 @@ package persistence.sql.dml.query;
 
 import common.AliasRule;
 import common.SqlLogger;
-import persistence.sql.definition.TableAssociationDefinition;
+import persistence.meta.Metamodel;
 import persistence.sql.definition.TableDefinition;
 
 import java.io.Serializable;
@@ -21,8 +21,8 @@ public class SelectQueryBuilder implements BaseQueryBuilder {
     private TableDefinition joinTableDefinition;
     private final List<String> joinTableColumns = new ArrayList<>();
 
-    public SelectQueryBuilder(Class<?> entityClass) {
-        final TableDefinition tableDefinition = new TableDefinition(entityClass);
+    public SelectQueryBuilder(Class<?> entityClass, Metamodel metamodel) {
+        final TableDefinition tableDefinition = metamodel.findTableDefinition(entityClass);
         this.tableDefinition = tableDefinition;
         tableDefinition.getColumns().forEach(column -> {
                     columns.add(column.getDatabaseColumnName());
@@ -30,10 +30,8 @@ public class SelectQueryBuilder implements BaseQueryBuilder {
         );
     }
 
-    public SelectQueryBuilder join(TableAssociationDefinition tableAssociationDefinition) {
-        final TableDefinition joinTableDefinition = tableAssociationDefinition.getAssociatedTableDefinition();
-        this.joinTableDefinition = new TableDefinition(joinTableDefinition.getEntityClass());
-
+    public SelectQueryBuilder join(TableDefinition joinTableDefinition) {
+        this.joinTableDefinition = joinTableDefinition;
         this.joinTableDefinition.getColumns().forEach(column -> {
                     joinTableColumns.add(column.getDatabaseColumnName());
                 }

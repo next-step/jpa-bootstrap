@@ -1,6 +1,7 @@
 package persistence.sql.dml.query;
 
 import common.SqlLogger;
+import persistence.meta.Metamodel;
 import persistence.sql.definition.ColumnDefinitionAware;
 import persistence.sql.definition.TableDefinition;
 
@@ -9,9 +10,8 @@ import java.util.List;
 public class InsertQueryBuilder implements BaseQueryBuilder {
     private static final String EMPTY_STRING = "";
 
-    public String build(Object entity) {
+    public String build(Object entity, TableDefinition tableDefinition) {
         final StringBuilder query = new StringBuilder();
-        final TableDefinition tableDefinition = new TableDefinition(entity.getClass());
         final List<? extends ColumnDefinitionAware> columns = tableDefinition.hasValueColumns(entity);
 
         query.append("INSERT INTO ");

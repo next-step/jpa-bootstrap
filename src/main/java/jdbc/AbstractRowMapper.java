@@ -13,9 +13,9 @@ public abstract class AbstractRowMapper<T> implements RowMapper<T> {
     private final Class<T> clazz;
     private final TableDefinition tableDefinition;
 
-    protected AbstractRowMapper(Class<T> clazz) {
+    protected AbstractRowMapper(Class<T> clazz, TableDefinition tableDefinition) {
         this.clazz = clazz;
-        this.tableDefinition = new TableDefinition(clazz);
+        this.tableDefinition = tableDefinition;
     }
 
     protected abstract void setAssociation(ResultSet resultSet, T instance) throws NoSuchFieldException, SQLException;

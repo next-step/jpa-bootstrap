@@ -1,49 +1,40 @@
 package persistence.entity;
 
-import common.ReflectionFieldAccessUtils;
 import jdbc.JdbcTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import persistence.sql.definition.ColumnDefinitionAware;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;
 import persistence.sql.dml.query.DeleteQueryBuilder;
-import persistence.sql.dml.query.InsertQueryBuilder;
 import persistence.sql.dml.query.UpdateQueryBuilder;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EntityPersister {
     private static final Long DEFAULT_ID_VALUE = 0L;
+
     private static final UpdateQueryBuilder updateQueryBuilder = new UpdateQueryBuilder();
-    private static final InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
     private static final DeleteQueryBuilder deleteQueryBuilder = new DeleteQueryBuilder();
 
-    private final Logger logger = LoggerFactory.getLogger(EntityPersister.class);
-    private final Map<Class<?>, TableDefinition> tableDefinitions;
+    private final InsertExecutor insertExecutor;
+    private final TableDefinition tableDefinition;
 
     private final JdbcTemplate jdbcTemplate;
 
-    public EntityPersister(JdbcTemplate jdbcTemplate) {
-        this.tableDefinitions = new HashMap<>();
+    public EntityPersister(TableDefinition tableDefinition, JdbcTemplate jdbcTemplate) {
+        this.tableDefinition = tableDefinition;
         this.jdbcTemplate = jdbcTemplate;
-    }
-
-    private TableDefinition getTableDefinition(Class<?> entityClass) {
-        return tableDefinitions.computeIfAbsent(entityClass, TableDefinition::new);
+        this.insertExecutor = new InsertExecutor(jdbcTemplate, tableDefinition);
     }
 
     public boolean hasId(Object entity) {
-        return getTableDefinition(entity.getClass()).hasId(entity);
+        return tableDefinition.hasId(entity);
     }
 
     public Serializable getEntityId(Object entity) {
-        final TableDefinition tableDefinition = getTableDefinition(entity.getClass());
         if (tableDefinition.hasId(entity)) {
             return tableDefinition.getIdValue(entity);
         }
@@ -51,81 +42,89 @@ public class EntityPersister {
         return DEFAULT_ID_VALUE;
     }
 
+    public Collection<?> getIterableAssociatedValue(Object entity, TableAssociationDefinition association) {
+        return tableDefinition.getIterableAssociatedValue(entity, association);
+    }
+
     public Object insert(Object entity) {
-        final TableDefinition tableDefinition = getTableDefinition(entity.getClass());
-        final String query = insertQueryBuilder.build(entity);
-        final Serializable id = jdbcTemplate.insertAndReturnKey(query);
-
-        bindId(id, entity);
-
-        if (tableDefinition.hasAssociations()) {
-            final List<Object> persistedChildren = insertChildCollections(entity);
-            persistedChildren.forEach(child -> updateAssociatedColumns(entity, child));
-        }
-
-        return entity;
+        return insertExecutor.insertAndBindKey(entity);
     }
 
-    private void updateAssociatedColumns(Object parent, Object child) {
-        final TableDefinition parentDefinition = getTableDefinition(parent.getClass());
-        final TableDefinition childDefinition = getTableDefinition(child.getClass());
-        String updateQuery = updateQueryBuilder.build(parent, child, parentDefinition, childDefinition);
-
-        jdbcTemplate.execute(updateQuery);
-    }
-
-    private List<Object> insertChildCollections(Object parentEntity) {
-        final TableDefinition parentTableDefinition = getTableDefinition(parentEntity.getClass());
-        final List<TableAssociationDefinition> associations = parentTableDefinition.getAssociations();
-        final List<Object> childEntities = new ArrayList<>();
-
-        associations.forEach(association -> {
-            final Collection<?> associatedValues = parentTableDefinition.getIterableAssociatedValue(parentEntity, association);
-            if (associatedValues instanceof Iterable<?> iterable) {
-                iterable.forEach(entity -> {
-                    Object result = insert(entity);
-                    childEntities.add(result);
-                });
-            }
-        });
-
-        return childEntities;
-    }
-
-    public Collection<Object> getChildCollections(Object childEntity) {
-        final TableDefinition childTableDefinition = getTableDefinition(childEntity.getClass());
-        final List<TableAssociationDefinition> associations = childTableDefinition.getAssociations();
-        final List<Object> childEntities = new ArrayList<>();
-
-        associations.forEach(association -> {
-            final Collection<?> associatedValues = childTableDefinition.getIterableAssociatedValue(childEntity, association);
-            if (associatedValues instanceof Iterable<?> iterable) {
-                iterable.forEach(childEntities::add);
-            }
-        });
-
-        return childEntities;
-    }
-
-    private void bindId(Serializable id, Object entity) {
-        try {
-            final TableDefinition tableDefinition = getTableDefinition(entity.getClass());
-            final Field idField = tableDefinition.getEntityClass().getDeclaredField(tableDefinition.getIdFieldName());
-
-            ReflectionFieldAccessUtils.accessAndSet(entity, idField, id);
-        } catch (ReflectiveOperationException e) {
-            logger.error("Failed to copy row to {}", entity.getClass().getName(), e);
-        }
+    public List<TableAssociationDefinition> getCollectionAssociations() {
+        return tableDefinition.getAssociations().stream().filter(
+                TableAssociationDefinition::isCollection
+        ).toList();
     }
 
     public void update(Object entity) {
-        final String query = updateQueryBuilder.build(entity, getTableDefinition(entity.getClass()));
+        final String query = updateQueryBuilder.build(
+                getTableName(),
+                getIdName(),
+                getEntityId(entity),
+                getUpdateColumnMaps(entity)
+        );
         jdbcTemplate.execute(query);
+    }
+
+    private LinkedHashMap<String, Object> getUpdateColumnMaps(Object entity) {
+        return getColumns().stream()
+                .filter(column -> !column.isPrimaryKey())
+                .collect(
+                        Collectors.toMap(
+                                ColumnDefinitionAware::getDatabaseColumnName,
+                                column -> hasValue(entity, column)
+                                        ? getQuoted(getValue(entity, column)) : "null",
+                                (value1, value2) -> value2,
+                                LinkedHashMap::new
+                        )
+                );
     }
 
     public void delete(Object entity) {
-        String query = deleteQueryBuilder.build(entity);
+        String query = deleteQueryBuilder.build(entity, tableDefinition);
         jdbcTemplate.execute(query);
     }
 
+    public String getJoinColumnName(Class<?> entityClass) {
+        return tableDefinition.getJoinColumnName(entityClass);
+    }
+
+    public Class<?> getEntityClass() {
+        return tableDefinition.getEntityClass();
+    }
+
+    public Object getColumnValue(Object entity, String joinColumnName) {
+        return tableDefinition.getValue(entity, joinColumnName);
+    }
+
+    public String getTableName() {
+        return tableDefinition.getTableName();
+    }
+
+    public Serializable getIdName() {
+        return tableDefinition.getIdFieldName();
+    }
+
+    public List<? extends ColumnDefinitionAware> getColumns() {
+        return tableDefinition.getColumns();
+    }
+
+    public boolean hasValue(Object entity, ColumnDefinitionAware column) {
+        return tableDefinition.hasValue(entity, column);
+    }
+
+    public Object getValue(Object entity, ColumnDefinitionAware column) {
+        return tableDefinition.getValue(entity, column);
+    }
+
+    private String getQuoted(Object value) {
+        if (value instanceof String) {
+            return "'" + value + "'";
+        }
+        return value.toString();
+    }
+
+    public List<TableAssociationDefinition> getAssociations() {
+        return tableDefinition.getAssociations();
+    }
 }

@@ -35,4 +35,13 @@ public class EntityEntry {
     public boolean isNotReadable() {
         return status == Status.DELETED || status == Status.GONE;
     }
+
+    public void bindId(Serializable id) {
+        if (this.status == Status.SAVING) {
+            this.id = id;
+            return;
+        }
+
+        throw new IllegalStateException("Can not bind id to entity in status: " + status);
+    }
 }

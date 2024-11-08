@@ -1,62 +1,24 @@
 package persistence.sql.dml.query;
 
 import common.SqlLogger;
-import persistence.sql.definition.ColumnDefinitionAware;
-import persistence.sql.definition.TableDefinition;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class UpdateQueryBuilder implements BaseQueryBuilder {
+    public String build(String tableName,
+                        Serializable identifierKey,
+                        Object identifierValue,
+                        Map<String, Object> columns) {
 
-    public String build(Object entity, TableDefinition tableDefinition) {
-        final StringBuilder query = new StringBuilder("UPDATE ").append(tableDefinition.getTableName());
+        final StringBuilder query = new StringBuilder("UPDATE ").append(tableName);
         columnClause(
                 query,
-                tableDefinition.getColumns().stream()
-                        .filter(column -> !column.isPrimaryKey())
-                        .collect(
-                                Collectors.toMap(
-                                        ColumnDefinitionAware::getDatabaseColumnName,
-                                        column -> tableDefinition.hasValue(entity, column)
-                                                ? getQuoted(tableDefinition.getValue(entity, column)) : "null",
-                                        (value1, value2) -> value2,
-                                        LinkedHashMap::new
-                                )
-                        )
-
+                columns
         );
 
-        query.append(" WHERE ");
-        query.append(tableDefinition.getIdColumnName())
-                .append(" = ")
-                .append(tableDefinition.getIdValue(entity))
-                .append(";");
-
-        String sql = query.toString();
-        SqlLogger.infoUpdate(sql);
-        return sql;
-    }
-
-    public String build(Object parent, Object child,
-                        TableDefinition parentDefinition,
-                        TableDefinition childDefinition) {
-
-        final StringBuilder query = new StringBuilder("UPDATE ").append(childDefinition.getTableName());
-        columnClause(
-                query,
-                Map.of(
-                        parentDefinition.getJoinColumnName(childDefinition.getEntityClass()),
-                        parentDefinition.getIdValue(parent)
-                )
-        );
-
-        query.append(" WHERE ");
-        query.append(childDefinition.getIdColumnName())
-                .append(" = ")
-                .append(childDefinition.getIdValue(child))
-                .append(";");
+        byId(identifierKey, identifierValue, query);
 
         final String updateQuery = query.toString();
         SqlLogger.infoUpdate(updateQuery);
@@ -75,4 +37,11 @@ public class UpdateQueryBuilder implements BaseQueryBuilder {
         query.append(columnClause);
     }
 
+    private void byId(Serializable identifierKey, Object identifierValue, StringBuilder query) {
+        query.append(" WHERE ");
+        query.append(identifierKey)
+                .append(" = ")
+                .append(identifierValue)
+                .append(";");
+    }
 }
