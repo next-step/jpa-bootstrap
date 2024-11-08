@@ -2,6 +2,7 @@ package boot;
 
 import hibernate.AnnotationBinder;
 import jakarta.persistence.OneToMany;
+import jdbc.JdbcTemplate;
 import persistence.CollectionPersister;
 import persistence.EntityPersister;
 
@@ -17,13 +18,19 @@ public class MetamodelImpl implements Metamodel {
     private final Map<String, EntityPersister> entityPersisterMap = new HashMap<>();
     private final Map<String, CollectionPersister> collectionPersisterMap = new HashMap<>();
 
+    private final JdbcTemplate jdbcTemplate;
+
+    public MetamodelImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     @Override
     public void init() {
         AnnotationBinder annotationBinder = new AnnotationBinder("entity");
         List<Class<?>> entityClasses = annotationBinder.getEntityClasses();
 
         for (Class<?> entityClass : entityClasses) {
-            entityPersisterMap.put(entityClass.getSimpleName(), new EntityPersister(entityClass));
+            entityPersisterMap.put(entityClass.getSimpleName(), new EntityPersister(entityClass, jdbcTemplate));
             confirmOneToMany(entityClass);
         }
     }
@@ -34,8 +41,8 @@ public class MetamodelImpl implements Metamodel {
     }
 
     @Override
-    public EntityPersister collectionPersister(String roll) {
-        return entityPersisterMap.get(roll);
+    public CollectionPersister collectionPersister(String roll) {
+        return collectionPersisterMap.get(roll);
     }
 
     @Override
@@ -50,7 +57,7 @@ public class MetamodelImpl implements Metamodel {
         Arrays.stream(entityClass.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(OneToMany.class))
                 .forEach(field -> {
-                    CollectionPersister collectionPersister = new CollectionPersister(getRelatedEntityClass(field));
+                    CollectionPersister collectionPersister = new CollectionPersister(getRelatedEntityClass(field), jdbcTemplate);
                     collectionPersisterMap.put(entityClass.getSimpleName() + DOT + collectionPersister.getSimpleName(), collectionPersister);
                 });
     }

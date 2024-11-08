@@ -1,5 +1,6 @@
 package boot;
 
+import persistence.CollectionPersister;
 import persistence.EntityPersister;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public interface Metamodel {
 
     EntityPersister entityPersister(Class<?> entityClass);
 
-    EntityPersister collectionPersister(String roll);
+    CollectionPersister collectionPersister(String roll);
 
     List<String> getEntityClasses();
 }

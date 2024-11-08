@@ -1,5 +1,6 @@
 package persistence;
 
+import boot.Metamodel;
 import builder.dml.EntityData;
 import builder.dml.JoinEntityData;
 import builder.dml.builder.DeleteQueryBuilder;
@@ -12,37 +13,42 @@ import java.sql.SQLException;
 
 public class EntityPersister {
 
-    private JdbcTemplate jdbcTemplate;
+    private static final String DOT = ".";
 
     private final InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
     private final UpdateQueryBuilder updateQueryBuilder = new UpdateQueryBuilder();
     private final DeleteQueryBuilder deleteQueryBuilder = new DeleteQueryBuilder();
-    private final CollectionPersister collectionPersister = new CollectionPersister();
+    private final JdbcTemplate jdbcTemplate;
+    private Metamodel metamodel;
     private Class<?> entityClass;
 
-    public EntityPersister() {
-        this.jdbcTemplate = initializeJdbcTemplate();
+
+    public EntityPersister(JdbcTemplate jdbcTemplate, Metamodel metamodel) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.metamodel = metamodel;
     }
 
-    public EntityPersister(Class<?> entityClass) {
-        initializeJdbcTemplate();
+    public EntityPersister(Class<?> entityClass, JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.entityClass = entityClass;
-    }
-
-    private JdbcTemplate initializeJdbcTemplate() {
-        try {
-            return new H2DBConnection().start();
-        } catch (SQLException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
     }
 
     //데이터를 반영한다.
     public void persist(EntityData entityData) {
         jdbcTemplate.execute(insertQueryBuilder.buildQuery(entityData.getTableName(), entityData.getEntityColumn()));
         if (entityData.checkJoin()) {
-            collectionPersister.persist(entityData);
+            joinPersist(entityData);
         }
+    }
+
+    private void joinPersist(EntityData entityData) {
+        entityData.getJoinEntity().getJoinEntityData()
+                .forEach(joinEntityData ->
+                        this.metamodel.collectionPersister(
+                                entityData.getClazz().getSimpleName() +
+                                        DOT +
+                                        joinEntityData.getClazz().getSimpleName()).persist(joinEntityData)
+                );
     }
 
     //데이터를 수정한다.

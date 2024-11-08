@@ -9,32 +9,30 @@ import jdbc.JdbcTemplate;
 import java.sql.SQLException;
 
 public class CollectionPersister {
-    
+
     private final InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
     private final JdbcTemplate jdbcTemplate;
 
     private Class<?> entityClass;
 
-    public CollectionPersister(Class<?> entityClass) {
-        this.jdbcTemplate = initializeJdbcTemplate();
+    public CollectionPersister(Class<?> entityClass, JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.entityClass = entityClass;
     }
 
-    public CollectionPersister() {
-        this.jdbcTemplate = initializeJdbcTemplate();
+    public CollectionPersister(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public String getSimpleName() {
         return entityClass.getSimpleName();
     }
 
-    public void persist(EntityData entityData) {
-        entityData.getJoinEntity().getJoinEntityData()
-                .forEach(joinEntityData -> jdbcTemplate.execute(insertQueryBuilder.buildQuery(
-                                joinEntityData.getTableName(),
-                                joinEntityData.getJoinColumnData())
-                        )
-                );
+    public void persist(JoinEntityData joinEntityData) {
+        jdbcTemplate.execute(insertQueryBuilder.buildQuery(
+                joinEntityData.getTableName(),
+                joinEntityData.getJoinColumnData())
+        );
     }
 
     private JdbcTemplate initializeJdbcTemplate() {
