@@ -38,14 +38,18 @@ public class ComponentScanner {
         List<Class<?>> classes = new ArrayList<>();
 
         for (File file : Objects.requireNonNull(directory.listFiles())) {
-            if (file.isDirectory()) {
-                classes.addAll(scan(basePackage + DOT + file.getName()));
-            } else if (file.getName().endsWith(CLASS_EXTENSION)) {
-                classes.add(getClassFromFile(basePackage, file));
-            }
+            addClass(file, classes, basePackage);
         }
 
         return classes;
+    }
+
+    private static void addClass(File file, List<Class<?>> classes, String basePackage) {
+        if (file.isDirectory()) {
+            classes.addAll(scan(basePackage + DOT + file.getName()));
+        } else if (file.getName().endsWith(CLASS_EXTENSION)) {
+            classes.add(getClassFromFile(basePackage, file));
+        }
     }
 
     private static Class<?> getClassFromFile(String basePackage, File file) {
