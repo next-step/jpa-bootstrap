@@ -26,7 +26,7 @@ class DefaultEntityPersisterTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        entityLoader = new DefaultEntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory());
+        entityLoader = new EntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory());
         entityManager = DefaultEntityManager.of(jdbcTemplate);
 
         createTable(EntityWithId.class);

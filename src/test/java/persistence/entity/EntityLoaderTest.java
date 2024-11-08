@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static util.QueryUtils.*;
 
-class DefaultEntityLoaderTest {
+class EntityLoaderTest {
     private JdbcTemplate jdbcTemplate;
     private EntityPersister entityPersister;
 
@@ -44,7 +44,7 @@ class DefaultEntityLoaderTest {
     @DisplayName("엔티티를 로드한다.")
     void load() {
         // given
-        final EntityLoader entityLoader = new DefaultEntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory());
+        final EntityLoader entityLoader = new EntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory());
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
 
@@ -66,7 +66,7 @@ class DefaultEntityLoaderTest {
     @DisplayName("연관관계가 존재하는 엔티티를 로드한다.")
     void load_withAssociation() {
         // given
-        final EntityLoader entityLoader = new DefaultEntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory());
+        final EntityLoader entityLoader = new EntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory());
         final Order order = new Order("OrderNumber1");
         insertData(order);
         final OrderItem orderItem1 = new OrderItem("Product1", 10);

@@ -22,19 +22,22 @@ public class DefaultEntityManager implements EntityManager {
     private final PersistenceContext persistenceContext;
     private final EntityPersister entityPersister;
     private final EntityLoader entityLoader;
+    private final CollectionLoader collectionLoader;
 
     private DefaultEntityManager(PersistenceContext persistenceContext, EntityPersister entityPersister,
-                                 EntityLoader entityLoader) {
+                                 EntityLoader entityLoader, CollectionLoader collectionLoader) {
         this.persistenceContext = persistenceContext;
         this.entityPersister = entityPersister;
         this.entityLoader = entityLoader;
+        this.collectionLoader = collectionLoader;
     }
 
     public static DefaultEntityManager of(JdbcTemplate jdbcTemplate) {
         return new DefaultEntityManager(
                 new DefaultPersistenceContext(),
                 new DefaultEntityPersister(jdbcTemplate, new InsertQuery(), new UpdateQuery(), new DeleteQuery()),
-                new DefaultEntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory())
+                new EntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory()),
+                new CollectionLoader(jdbcTemplate, new SelectQuery())
         );
     }
 
