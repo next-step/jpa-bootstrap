@@ -1,5 +1,7 @@
 package persistence;
 
+import boot.Metamodel;
+import boot.MetamodelImpl;
 import builder.ddl.DDLBuilderData;
 import builder.ddl.builder.CreateQueryBuilder;
 import builder.ddl.builder.DropQueryBuilder;
@@ -43,7 +45,10 @@ class EntityManagerTest {
 
         this.persistenceContext = new PersistenceContextImpl();
 
-        this.entityManager = new EntityManagerImpl(persistenceContext, jdbcTemplate);
+        Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
+        metamodel.init();
+
+        this.entityManager = new EntityManagerImpl(persistenceContext, jdbcTemplate, metamodel);
     }
 
     //정확한 테스트를 위해 메소드마다 테이블 DROP 후 DB종료
