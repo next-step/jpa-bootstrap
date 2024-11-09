@@ -11,7 +11,10 @@ public class EntityComponentScannerTest {
 
     @Test
     void testScanEntities() throws Exception {
-        EntityComponentScanner scanner = new EntityComponentScanner();
+        EntityComponentScanner scanner = new EntityComponentScanner(
+                new FileSystemExplorer(),
+                new ClassFileProcessor()
+        );
         List<Class<?>> classes = scanner.scan("bootstrap.scantest.testpackage");
 
         assertAll(
@@ -22,7 +25,10 @@ public class EntityComponentScannerTest {
 
     @Test
     void testInvalidPackage() throws Exception {
-        EntityComponentScanner scanner = new EntityComponentScanner();
+        EntityComponentScanner scanner = new EntityComponentScanner(
+                new FileSystemExplorer(),
+                new ClassFileProcessor()
+        );
         List<Class<?>> classes = scanner.scan("invalid.package");
 
         assertThat(classes).isEmpty();
@@ -30,7 +36,10 @@ public class EntityComponentScannerTest {
 
     @Test
     void testEmptyPackage() throws Exception {
-        EntityComponentScanner scanner = new EntityComponentScanner();
+        EntityComponentScanner scanner = new EntityComponentScanner(
+                new FileSystemExplorer(),
+                new ClassFileProcessor()
+        );
         List<Class<?>> classes = scanner.scan("bootstrap.scantest.testpackage.empty");
 
         assertThat(classes).isEmpty();
@@ -38,7 +47,10 @@ public class EntityComponentScannerTest {
 
     @Test
     void testScanEntitiesWithSubpackage() throws Exception {
-        EntityComponentScanner scanner = new EntityComponentScanner();
+        EntityComponentScanner scanner = new EntityComponentScanner(
+                new FileSystemExplorer(),
+                new ClassFileProcessor()
+        );
         List<Class<?>> classes = scanner.scan("bootstrap.scantest.testpackage.subpackage");
 
         assertAll(

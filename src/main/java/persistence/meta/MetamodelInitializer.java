@@ -1,6 +1,8 @@
 package persistence.meta;
 
+import bootstrap.ClassFileProcessor;
 import bootstrap.EntityComponentScanner;
+import bootstrap.FileSystemExplorer;
 import jdbc.JdbcTemplate;
 
 import java.io.IOException;
@@ -22,7 +24,10 @@ public class MetamodelInitializer {
     private static List<Class<?>> scanEntityClasses(String packageName) {
         List<Class<?>> entityClasses;
         try {
-            entityClasses = new EntityComponentScanner().scan(packageName);
+            entityClasses = new EntityComponentScanner(
+                    new FileSystemExplorer(),
+                    new ClassFileProcessor()
+            ).scan(packageName);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
