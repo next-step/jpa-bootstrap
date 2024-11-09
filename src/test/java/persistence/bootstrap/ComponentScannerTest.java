@@ -1,5 +1,7 @@
 package persistence.bootstrap;
 
+import domain.Department;
+import domain.Employee;
 import domain.Order;
 import domain.OrderItem;
 import domain.OrderLazy;
@@ -30,11 +32,11 @@ class ComponentScannerTest {
 
         // then
         assertAll(
-                () -> assertThat(entities).hasSize(9),
+                () -> assertThat(entities).hasSize(11),
                 () -> assertThat(entities).contains(
                         Person.class, Order.class, OrderItem.class, OrderLazy.class, EntityWithId.class,
                         EntityWithOnlyId.class, EntityWithoutDefaultConstructor.class, EntityWithoutId.class,
-                        EntityWithoutTable.class
+                        EntityWithoutTable.class, Department.class, Employee.class
                 )
         );
     }
