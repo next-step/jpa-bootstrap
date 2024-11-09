@@ -14,10 +14,9 @@ public interface FieldMapping {
 
     <T> T getRow(ResultSet resultSet, Class<T> entityType) throws SQLException, IllegalAccessException;
 
-    default Class<?> getJoinColumnType(Class<?> entityType) {
-        final List<Field> fields = getPersistentFields(entityType);
+    default Class<?> getAssociationColumnType(Class<?> entityType) {
         final EntityTable entityTable = new EntityTable(entityType);
-        return entityTable.getJoinColumnType();
+        return entityTable.getAssociationColumnType();
     }
 
     default List<Field> getPersistentFields(Class<?> entityType) {

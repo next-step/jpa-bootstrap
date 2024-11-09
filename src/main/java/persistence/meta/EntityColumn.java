@@ -85,19 +85,19 @@ public class EntityColumn {
         return columnIdOption.isIdGenerationFromDatabase();
     }
 
-    public boolean isOneToManyAssociation() {
-        return columnOption.isOneToManyAssociation();
+    public boolean isOneToMany() {
+        return columnOption.isOneToMany();
     }
 
     public FetchType getFetchType() {
         return columnOption.getFetchType();
     }
 
-    public Class<?> getJoinColumnType() {
-        return columnOption.getJoinColumnType();
+    public Class<?> getAssociationColumnType() {
+        return columnOption.getAssociationColumnType();
     }
 
     public boolean isOneToManyAndLazy() {
-        return columnOption.isOneToManyAssociation() && columnOption.getFetchType() == FetchType.LAZY;
+        return columnOption.isOneToMany() && columnOption.getFetchType() == FetchType.LAZY;
     }
 }

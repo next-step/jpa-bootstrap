@@ -50,7 +50,7 @@ class ColumnOptionTest {
         final ColumnOption columnOption = new ColumnOption(field);
 
         // then
-        assertThat(columnOption.isOneToManyAssociation()).isTrue();
+        assertThat(columnOption.isOneToMany()).isTrue();
     }
 
     @Test
@@ -63,7 +63,7 @@ class ColumnOptionTest {
         final ColumnOption columnOption = new ColumnOption(field);
 
         // then
-        assertThat(columnOption.isOneToManyAssociation()).isFalse();
+        assertThat(columnOption.isOneToMany()).isFalse();
     }
 
     @Test
@@ -103,8 +103,8 @@ class ColumnOptionTest {
 
         // then
         assertAll(
-                () -> assertThat(columnOption.getJoinColumnName()).isEqualTo("order_id"),
-                () -> assertThat(columnOption.getJoinColumnType()).isEqualTo(OrderItem.class)
+                () -> assertThat(columnOption.getAssociationColumnName()).isEqualTo("order_id"),
+                () -> assertThat(columnOption.getAssociationColumnType()).isEqualTo(OrderItem.class)
         );
 
     }
@@ -120,8 +120,8 @@ class ColumnOptionTest {
 
         // then
         assertAll(
-                () -> assertThat(columnOption.getJoinColumnName()).isNull(),
-                () -> assertThat(columnOption.getJoinColumnType()).isNull()
+                () -> assertThat(columnOption.getAssociationColumnName()).isNull(),
+                () -> assertThat(columnOption.getAssociationColumnType()).isNull()
         );
     }
 }

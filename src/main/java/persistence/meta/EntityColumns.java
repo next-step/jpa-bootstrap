@@ -41,9 +41,9 @@ public class EntityColumns {
         return !field.isAnnotationPresent(Transient.class);
     }
 
-    public EntityColumn getJoinEntityColumn() {
+    public EntityColumn getAssociationEntityColumn() {
         return entityColumns.stream()
-                .filter(EntityColumn::isOneToManyAssociation)
+                .filter(EntityColumn::isOneToMany)
                 .findFirst()
                 .orElse(null);
     }

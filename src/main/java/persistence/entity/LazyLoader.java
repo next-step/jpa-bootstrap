@@ -19,11 +19,11 @@ public class LazyLoader<T> {
     }
 
     public List<T> load() {
-        return collectionLoader.load(entityType, parentEntityTable.getJoinColumnName(), parentEntityTable.getIdValue());
+        return collectionLoader.load(entityType, parentEntityTable.getAssociationColumnName(), parentEntityTable.getIdValue());
     }
 
     private void validate() {
-        if (!parentEntityTable.isOneToManyAssociation() || parentEntityTable.isEager()) {
+        if (!parentEntityTable.isOneToMany() || parentEntityTable.isEager()) {
             throw new IllegalArgumentException(NO_ONE_TO_ONE_LAZY_FAILED_MESSAGE);
         }
     }

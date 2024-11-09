@@ -12,7 +12,7 @@ public class SelectQuery {
     public String findAll(Class<?> entityType) {
         final EntityTable entityTable = new EntityTable(entityType);
 
-        if (entityTable.isOneToManyAssociation()) {
+        if (entityTable.isOneToMany()) {
             return getAssociationQuery(entityTable)
                     .build();
         }
@@ -23,7 +23,7 @@ public class SelectQuery {
     public String findById(Class<?> entityType, Object id) {
         final EntityTable entityTable = new EntityTable(entityType);
 
-        if (entityTable.isOneToManyAssociation() && entityTable.isEager()) {
+        if (entityTable.isOneToMany() && entityTable.isEager()) {
             return getAssociationQuery(entityTable)
                 .where(getColumnWithAliasClause(entityTable, entityTable.getIdColumnName()), id)
                     .build();
@@ -41,14 +41,14 @@ public class SelectQuery {
     }
 
     private SelectQueryBuilder getAssociationQuery(EntityTable entityTable) {
-        final EntityTable childEntityTable = new EntityTable(entityTable.getJoinColumnType());
+        final EntityTable childEntityTable = new EntityTable(entityTable.getAssociationColumnType());
         return new SelectQueryBuilder()
                 .select(getSelectClause(entityTable, childEntityTable))
                 .from(getTableWithAliasClause(entityTable))
                 .innerJoin(getTableWithAliasClause(childEntityTable))
                 .on(
                         getColumnWithAliasClause(entityTable, entityTable.getIdColumnName()),
-                        getColumnWithAliasClause(childEntityTable, entityTable.getJoinColumnName())
+                        getColumnWithAliasClause(childEntityTable, entityTable.getAssociationColumnName())
                 );
     }
 
@@ -82,7 +82,7 @@ public class SelectQuery {
     }
 
     private boolean isNotNeeded(EntityColumn entityColumn) {
-        return !entityColumn.isOneToManyAssociation();
+        return !entityColumn.isOneToMany();
     }
 
     private String getJoinColumnName(EntityTable entityTable, EntityColumn entityColumn) {

@@ -19,7 +19,7 @@ public class InsertQuery {
     public String insert(Object entity, Object parentEntity) {
         final EntityTable entityTable = new EntityTable(entity);
         final EntityTable parentEntityTable = new EntityTable(parentEntity);
-        final EntityColumn joinEntityColumn = parentEntityTable.getJoinEntityColumn();
+        final EntityColumn joinEntityColumn = parentEntityTable.getAssociationEntityColumn();
         final List joinEntities = (List) joinEntityColumn.getValue();
 
         if (joinEntities.contains(entity)) {
@@ -36,7 +36,7 @@ public class InsertQuery {
 
     private List<String> getColumns(EntityTable entityTable, EntityTable parentEntityTable) {
         final List<String> columnClause = getColumns(entityTable);
-        columnClause.add(parentEntityTable.getJoinColumnName());
+        columnClause.add(parentEntityTable.getAssociationColumnName());
         return columnClause;
     }
 
@@ -63,6 +63,6 @@ public class InsertQuery {
     }
 
     private boolean isAvailable(EntityColumn entityColumn) {
-        return !entityColumn.isGenerationValue() && !entityColumn.isOneToManyAssociation();
+        return !entityColumn.isGenerationValue() && !entityColumn.isOneToMany();
     }
 }

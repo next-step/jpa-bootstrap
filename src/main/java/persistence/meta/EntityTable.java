@@ -82,46 +82,42 @@ public class EntityTable {
         return getEntityColumns().get(index);
     }
 
-    public boolean isOneToManyAssociation() {
-        final EntityColumn joinEntityColumn = getJoinEntityColumn();
-        if (Objects.isNull(joinEntityColumn)) {
+    public boolean isOneToMany() {
+        final EntityColumn associationEntityColumn = getAssociationEntityColumn();
+        if (Objects.isNull(associationEntityColumn)) {
             return false;
         }
-        return joinEntityColumn.isOneToManyAssociation();
+        return associationEntityColumn.isOneToMany();
     }
 
     public boolean isEager() {
-        final EntityColumn joinEntityColumn = getJoinEntityColumn();
-        return joinEntityColumn.getFetchType() == FetchType.EAGER;
+        final EntityColumn associationEntityColumn = getAssociationEntityColumn();
+        return associationEntityColumn.getFetchType() == FetchType.EAGER;
     }
 
-    public EntityColumn getJoinEntityColumn() {
-        return entityColumns.getJoinEntityColumn();
+    public EntityColumn getAssociationEntityColumn() {
+        return entityColumns.getAssociationEntityColumn();
     }
 
-    public Class<?> getJoinColumnType() {
-        final EntityColumn joinEntityColumn = getJoinEntityColumn();
-        if (Objects.isNull(joinEntityColumn)) {
+    public Class<?> getAssociationColumnType() {
+        final EntityColumn associationEntityColumn = getAssociationEntityColumn();
+        if (Objects.isNull(associationEntityColumn)) {
             return Object.class;
         }
-        return joinEntityColumn.getJoinColumnType();
+        return associationEntityColumn.getAssociationColumnType();
     }
 
-    public String getJoinColumnName() {
-        return getJoinEntityColumn().getColumnName();
-    }
-
-    public Object getJoinColumnValue() {
-        return getJoinEntityColumn().getValue();
+    public String getAssociationColumnName() {
+        return getAssociationEntityColumn().getColumnName();
     }
 
     public Field getAssociationField() {
-        final EntityColumn joinEntityColumn = getJoinEntityColumn();
-        return joinEntityColumn.getField();
+        final EntityColumn associationEntityColumn = getAssociationEntityColumn();
+        return associationEntityColumn.getField();
     }
 
     public boolean isSimpleMapping() {
-        return Objects.isNull(getJoinEntityColumn()) || getJoinEntityColumn().isOneToManyAndLazy();
+        return Objects.isNull(getAssociationEntityColumn()) || getAssociationEntityColumn().isOneToManyAndLazy();
     }
 
     public String getAlias() {

@@ -27,7 +27,7 @@ public class EntityLoader {
         final T entity = jdbcTemplate.queryForObject(sql, new DefaultRowMapper<>(entityType));
 
         final EntityTable entityTable = new EntityTable(entityType);
-        if (entityTable.isOneToManyAssociation() && !entityTable.isEager()) {
+        if (entityTable.isOneToMany() && !entityTable.isEager()) {
             setProxy(entityTable, entity);
         }
 
@@ -37,7 +37,7 @@ public class EntityLoader {
     private void setProxy(EntityTable entityTable, Object entity) {
         final CollectionLoader collectionLoader = new CollectionLoader(jdbcTemplate, selectQuery);
         final List<?> proxy = proxyFactory.createProxy(
-                entity, new LazyLoader<>(entityTable.getJoinColumnType(), entity, collectionLoader)
+                entity, new LazyLoader<>(entityTable.getAssociationColumnType(), entity, collectionLoader)
         );
 
         try {

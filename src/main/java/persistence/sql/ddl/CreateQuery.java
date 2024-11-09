@@ -50,18 +50,18 @@ public class CreateQuery {
                 .collect(Collectors.toList());
 
         final EntityTable parentEntityTable = new EntityTable(parentEntityType);
-        if (parentEntityTable.getJoinColumnType() != entityTable.getType()) {
+        if (parentEntityTable.getAssociationColumnType() != entityTable.getType()) {
             throw new IllegalArgumentException();
         }
 
         columnDefinitions.add(
-                getForeignColumnDefinition(parentEntityTable.getJoinEntityColumn(), parentEntityTable.getIdEntityColumn()));
+                getForeignColumnDefinition(parentEntityTable.getAssociationEntityColumn(), parentEntityTable.getIdEntityColumn()));
 
         return String.join(COLUMN_DELIMITER, columnDefinitions);
     }
 
     private boolean isAvailable(EntityColumn entityColumn) {
-        return !entityColumn.isOneToManyAssociation();
+        return !entityColumn.isOneToMany();
     }
 
     private String getColumnDefinition(EntityColumn entityColumn) {
