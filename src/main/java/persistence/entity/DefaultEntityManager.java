@@ -21,23 +21,23 @@ public class DefaultEntityManager implements EntityManager {
 
     private final PersistenceContext persistenceContext;
     private final EntityPersister entityPersister;
+    private final CollectionPersister collectionPersister;
     private final EntityLoader entityLoader;
-    private final CollectionLoader collectionLoader;
 
     private DefaultEntityManager(PersistenceContext persistenceContext, EntityPersister entityPersister,
-                                 EntityLoader entityLoader, CollectionLoader collectionLoader) {
+                                 CollectionPersister collectionPersister, EntityLoader entityLoader) {
         this.persistenceContext = persistenceContext;
         this.entityPersister = entityPersister;
+        this.collectionPersister = collectionPersister;
         this.entityLoader = entityLoader;
-        this.collectionLoader = collectionLoader;
     }
 
     public static DefaultEntityManager of(JdbcTemplate jdbcTemplate) {
         return new DefaultEntityManager(
                 new DefaultPersistenceContext(),
-                new DefaultEntityPersister(jdbcTemplate, new InsertQuery(), new UpdateQuery(), new DeleteQuery()),
-                new EntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory()),
-                new CollectionLoader(jdbcTemplate, new SelectQuery())
+                new EntityPersister(jdbcTemplate, new InsertQuery(), new UpdateQuery(), new DeleteQuery()),
+                new CollectionPersister(jdbcTemplate, new InsertQuery()),
+                new EntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory())
         );
     }
 
@@ -56,19 +56,10 @@ public class DefaultEntityManager implements EntityManager {
     @Override
     public void persist(Object entity) {
         validatePersist(entity);
-        if (persistImmediately(entity)) {
-            return;
-        }
 
-        persistenceContext.addEntity(entity);
-        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
-        persistenceContext.addToPersistQueue(entity);
-    }
-
-    @Override
-    public void persist(Object entity, Object parentEntity) {
-        validatePersist(entity);
-        if (persistImmediately(entity, parentEntity)) {
+        final EntityTable entityTable = new EntityTable(entity);
+        if (entityTable.isIdGenerationFromDatabase()) {
+            persistImmediately(entity, entityTable);
             return;
         }
 
@@ -107,34 +98,27 @@ public class DefaultEntityManager implements EntityManager {
         }
     }
 
-    private boolean persistImmediately(Object entity) {
-        final EntityTable entityTable = new EntityTable(entity);
-        if (entityTable.isIdGenerationFromDatabase()) {
-            entityPersister.insert(entity);
-            persistenceContext.addEntity(entity);
-            persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean persistImmediately(Object entity, Object parentEntity) {
-        final EntityTable entityTable = new EntityTable(entity);
-        if (entityTable.isIdGenerationFromDatabase()) {
-            entityPersister.insert(entity, parentEntity);
-            persistenceContext.addEntity(entity);
-            persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
-            return true;
-        }
-        return false;
+    private void persistImmediately(Object entity, EntityTable entityTable) {
+        persist(entity, entityTable);
+        persistenceContext.addEntity(entity);
+        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
     }
 
     private void persistAll() {
         final Queue<Object> persistQueue = persistenceContext.getPersistQueue();
         while (!persistQueue.isEmpty()) {
             final Object entity = persistQueue.poll();
-            entityPersister.insert(entity);
+            final EntityTable entityTable = new EntityTable(entity);
+
+            persist(entity, entityTable);
             persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
+        }
+    }
+
+    private void persist(Object entity, EntityTable entityTable) {
+        entityPersister.insert(entity);
+        if (entityTable.isOneToMany()) {
+            collectionPersister.insert(entityTable.getAssociationColumnValue(), entity);
         }
     }
 

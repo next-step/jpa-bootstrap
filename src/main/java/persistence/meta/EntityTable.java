@@ -112,8 +112,8 @@ public class EntityTable {
         return getAssociationEntityColumn().getColumnName();
     }
 
-    public Object getAssociationColumnValue() {
-        return getAssociationEntityColumn().getValue();
+    public List<?> getAssociationColumnValue() {
+        return (List<?>) getAssociationEntityColumn().getValue();
     }
 
     public Field getAssociationField() {

@@ -67,8 +67,6 @@ class DefaultEntityManagerTest {
         order.addOrderItem(orderItem1);
         order.addOrderItem(orderItem2);
         insertData(order, entityManager);
-        insertData(orderItem1, order, entityManager);
-        insertData(orderItem2, order, entityManager);
         entityManager.clear();
 
         // when
@@ -225,9 +223,5 @@ class DefaultEntityManagerTest {
 
     private void insertData(Object entity, EntityManager entityManager) {
         entityManager.persist(entity);
-    }
-
-    private void insertData(Object entity, Object parentEntity, EntityManager entityManager) {
-        entityManager.persist(entity, parentEntity);
     }
 }

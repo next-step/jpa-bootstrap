@@ -15,22 +15,12 @@ public class InsertQuery {
                 .build();
     }
 
-    @SuppressWarnings("rawtypes")
     public String insert(Object entity, Object parentEntity) {
         final EntityTable entityTable = new EntityTable(entity);
         final EntityTable parentEntityTable = new EntityTable(parentEntity);
-        final EntityColumn joinEntityColumn = parentEntityTable.getAssociationEntityColumn();
-        final List joinEntities = (List) joinEntityColumn.getValue();
-
-        if (joinEntities.contains(entity)) {
-            return new InsertQueryBuilder()
-                    .insertInto(entityTable.getTableName(), getColumns(entityTable, parentEntityTable))
-                    .values(getValues(entityTable, parentEntityTable))
-                    .build();
-        }
         return new InsertQueryBuilder()
-                .insertInto(entityTable.getTableName(), getColumns(entityTable))
-                .values(getValues(entityTable))
+                .insertInto(entityTable.getTableName(), getColumns(entityTable, parentEntityTable))
+                .values(getValues(entityTable, parentEntityTable))
                 .build();
     }
 

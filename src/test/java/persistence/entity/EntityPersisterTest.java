@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static util.QueryUtils.*;
 
-class DefaultEntityPersisterTest {
+class EntityPersisterTest {
     private JdbcTemplate jdbcTemplate;
     private EntityLoader entityLoader;
     private EntityManager entityManager;
@@ -41,7 +41,7 @@ class DefaultEntityPersisterTest {
     @DisplayName("엔티티를 저장한다.")
     void insert() {
         // given
-        final EntityPersister entityPersister = new DefaultEntityPersister(jdbcTemplate, new InsertQuery(),
+        final EntityPersister entityPersister = new EntityPersister(jdbcTemplate, new InsertQuery(),
                 new UpdateQuery(), new DeleteQuery());
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
 
@@ -64,7 +64,7 @@ class DefaultEntityPersisterTest {
     @DisplayName("엔티티를 수정한다.")
     void update() {
         // given
-        final EntityPersister entityPersister = new DefaultEntityPersister(jdbcTemplate, new InsertQuery(),
+        final EntityPersister entityPersister = new EntityPersister(jdbcTemplate, new InsertQuery(),
                 new UpdateQuery(), new DeleteQuery());
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
@@ -90,7 +90,7 @@ class DefaultEntityPersisterTest {
     @DisplayName("엔티티를 삭제한다.")
     void delete() {
         // given
-        final EntityPersister entityPersister = new DefaultEntityPersister(jdbcTemplate, new InsertQuery(),
+        final EntityPersister entityPersister = new EntityPersister(jdbcTemplate, new InsertQuery(),
                 new UpdateQuery(), new DeleteQuery());
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);

@@ -10,10 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.fixture.EntityWithId;
-import persistence.sql.dml.DeleteQuery;
-import persistence.sql.dml.InsertQuery;
 import persistence.sql.dml.SelectQuery;
-import persistence.sql.dml.UpdateQuery;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,12 +18,12 @@ import static util.QueryUtils.*;
 
 class EntityLoaderTest {
     private JdbcTemplate jdbcTemplate;
-    private EntityPersister entityPersister;
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        entityPersister = new DefaultEntityPersister(jdbcTemplate, new InsertQuery(), new UpdateQuery(), new DeleteQuery());
+        entityManager = DefaultEntityManager.of(jdbcTemplate);
 
         createTable(EntityWithId.class);
         createTable(Order.class);
@@ -68,13 +65,11 @@ class EntityLoaderTest {
         // given
         final EntityLoader entityLoader = new EntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory());
         final Order order = new Order("OrderNumber1");
-        insertData(order);
         final OrderItem orderItem1 = new OrderItem("Product1", 10);
-        order.addOrderItem(orderItem1);
-        insertData(orderItem1, order);
         final OrderItem orderItem2 = new OrderItem("Product2", 20);
+        order.addOrderItem(orderItem1);
         order.addOrderItem(orderItem2);
-        insertData(orderItem2, order);
+        insertData(order);
 
         // when
         final Order managedOrder = entityLoader.load(order.getClass(), order.getId());
@@ -84,10 +79,6 @@ class EntityLoaderTest {
     }
 
     private void insertData(Object entity) {
-        entityPersister.insert(entity);
-    }
-
-    private void insertData(Object entity, Object parentEntity) {
-        entityPersister.insert(entity, parentEntity);
+        entityManager.persist(entity);
     }
 }
