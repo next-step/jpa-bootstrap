@@ -16,6 +16,7 @@ public class ThreadLocalCurrentSessionContext implements CurrentSessionContext {
 
     @Override
     public void closeSession() {
+        sessionHolder.get().clear();
         sessionHolder.remove();
     }
 }

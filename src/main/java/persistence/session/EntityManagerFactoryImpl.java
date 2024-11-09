@@ -37,4 +37,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         currentSessionContext.bindSession(newSession);
         return newSession;
     }
+
+    @Override
+    public void close() throws Exception {
+        currentSessionContext.closeSession();
+    }
 }

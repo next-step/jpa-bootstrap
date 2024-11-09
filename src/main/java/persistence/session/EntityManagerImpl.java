@@ -172,4 +172,8 @@ public class EntityManagerImpl implements EntityManager {
         persistenceContext.addEntry(entityKey, entityEntry);
     }
 
+    @Override
+    public void close() throws Exception {
+        clear();
+    }
 }
