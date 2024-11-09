@@ -20,12 +20,12 @@ public class SimpleFieldMapping implements FieldMapping {
 
     @Override
     public <T> T getRow(ResultSet resultSet, Class<T> entityType) throws SQLException, IllegalAccessException {
-        final List<Field> fields = getPersistentFields(entityType);
+        final EntityTable entityTable = new EntityTable(entityType);
         final T entity = new InstanceFactory<>(entityType).createInstance();
         final AtomicInteger fieldIndex = new AtomicInteger(0);
 
         for (int i = 0; i < getColumnCount(resultSet); i++) {
-            Field field = getField(fields, fieldIndex);
+            Field field = getField(entityTable.getFields(), fieldIndex);
             if (Objects.nonNull(field)) {
                 mapField(resultSet, entity, field, i + 1);
             }

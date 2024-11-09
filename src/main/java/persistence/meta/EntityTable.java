@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class EntityTable {
     public static final String NOT_ENTITY_FAILED_MESSAGE = "클래스에 @Entity 애노테이션이 없습니다.";
@@ -111,6 +112,10 @@ public class EntityTable {
         return getAssociationEntityColumn().getColumnName();
     }
 
+    public Object getAssociationColumnValue() {
+        return getAssociationEntityColumn().getValue();
+    }
+
     public Field getAssociationField() {
         final EntityColumn associationEntityColumn = getAssociationEntityColumn();
         return associationEntityColumn.getField();
@@ -122,6 +127,13 @@ public class EntityTable {
 
     public String getAlias() {
         return ALIAS_PREFIX + getTableName();
+    }
+
+    public List<Field> getFields() {
+        return entityColumns.getEntityColumns()
+                .stream()
+                .map(EntityColumn::getField)
+                .collect(Collectors.toList());
     }
 
     private void validate(Class<?> entityType) {
