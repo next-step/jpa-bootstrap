@@ -1,13 +1,9 @@
 package persistence.entity;
 
 import jdbc.JdbcTemplate;
-import persistence.entity.proxy.ProxyFactory;
+import persistence.bootstrap.Metamodel;
 import persistence.meta.EntityColumn;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.DeleteQuery;
-import persistence.sql.dml.InsertQuery;
-import persistence.sql.dml.SelectQuery;
-import persistence.sql.dml.UpdateQuery;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,25 +16,15 @@ public class DefaultEntityManager implements EntityManager {
     public static final String NOT_REMOVABLE_STATUS_FAILED_MESSAGE = "엔티티가 제거 가능한 상태가 아닙니다.";
 
     private final PersistenceContext persistenceContext;
-    private final EntityPersister entityPersister;
-    private final CollectionPersister collectionPersister;
-    private final EntityLoader entityLoader;
+    private final Metamodel metamodel;
 
-    private DefaultEntityManager(PersistenceContext persistenceContext, EntityPersister entityPersister,
-                                 CollectionPersister collectionPersister, EntityLoader entityLoader) {
+    private DefaultEntityManager(PersistenceContext persistenceContext, Metamodel metamodel) {
         this.persistenceContext = persistenceContext;
-        this.entityPersister = entityPersister;
-        this.collectionPersister = collectionPersister;
-        this.entityLoader = entityLoader;
+        this.metamodel = metamodel;
     }
 
-    public static DefaultEntityManager of(JdbcTemplate jdbcTemplate) {
-        return new DefaultEntityManager(
-                new PersistenceContext(),
-                new EntityPersister(jdbcTemplate, new InsertQuery(), new UpdateQuery(), new DeleteQuery()),
-                new CollectionPersister(jdbcTemplate, new InsertQuery()),
-                new EntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory())
-        );
+    public static DefaultEntityManager of(String basePackage, JdbcTemplate jdbcTemplate) {
+        return new DefaultEntityManager(new PersistenceContext(), new Metamodel(basePackage, jdbcTemplate));
     }
 
     @Override
@@ -48,6 +34,7 @@ public class DefaultEntityManager implements EntityManager {
             return managedEntity;
         }
 
+        final EntityLoader entityLoader = metamodel.getEntityLoader(entityType);
         final T entity = entityLoader.load(entityType, id);
         persistenceContext.addEntity(entity);
         return entity;
@@ -57,7 +44,9 @@ public class DefaultEntityManager implements EntityManager {
     public void persist(Object entity) {
         validatePersist(entity);
 
-        final EntityTable entityTable = new EntityTable(entity);
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
+                .setValue(entity);
+
         if (entityTable.isIdGenerationFromDatabase()) {
             persistImmediately(entity, entityTable);
             return;
@@ -108,7 +97,8 @@ public class DefaultEntityManager implements EntityManager {
         final Queue<Object> persistQueue = persistenceContext.getPersistQueue();
         while (!persistQueue.isEmpty()) {
             final Object entity = persistQueue.poll();
-            final EntityTable entityTable = new EntityTable(entity);
+            final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
+                    .setValue(entity);
 
             persist(entity, entityTable);
             persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
@@ -116,8 +106,11 @@ public class DefaultEntityManager implements EntityManager {
     }
 
     private void persist(Object entity, EntityTable entityTable) {
+        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
         entityPersister.insert(entity);
         if (entityTable.isOneToMany()) {
+            final CollectionPersister collectionPersister = metamodel.getCollectionPersister(
+                    entity.getClass(), entityTable.getAssociationColumnName());
             collectionPersister.insert(entityTable.getAssociationColumnValue(), entity);
         }
     }
@@ -126,6 +119,7 @@ public class DefaultEntityManager implements EntityManager {
         final Queue<Object> removeQueue = persistenceContext.getRemoveQueue();
         while (!removeQueue.isEmpty()) {
             final Object entity = removeQueue.poll();
+            final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
             entityPersister.delete(entity);
         }
     }
@@ -136,7 +130,9 @@ public class DefaultEntityManager implements EntityManager {
     }
 
     private void update(Object entity) {
-        final EntityTable entityTable = new EntityTable(entity);
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
+                .setValue(entity);
+
         final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue());
         if (Objects.isNull(snapshot)) {
             return;
@@ -147,13 +143,17 @@ public class DefaultEntityManager implements EntityManager {
             return;
         }
 
+        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
         entityPersister.update(entity, dirtiedEntityColumns);
         persistenceContext.addEntity(entity);
     }
 
     private List<EntityColumn> getDirtiedEntityColumns(Object entity, Object snapshot) {
-        final EntityTable entityTable = new EntityTable(entity);
-        final EntityTable snapshotEntityTable = new EntityTable(snapshot);
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
+                .setValue(entity);
+        final EntityTable snapshotEntityTable = metamodel.getEntityTable(snapshot.getClass())
+                .setValue(snapshot);
+
         return IntStream.range(0, entityTable.getColumnCount())
                 .filter(i -> isDirtied(entityTable.getEntityColumn(i), snapshotEntityTable.getEntityColumn(i)))
                 .mapToObj(entityTable::getEntityColumn)

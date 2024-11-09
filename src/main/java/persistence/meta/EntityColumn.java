@@ -12,7 +12,7 @@ public class EntityColumn {
     private final ColumnLength columnLength;
     private final ColumnIdOption columnIdOption;
     private final ColumnOption columnOption;
-    private final ColumnValue columnValue;
+    private ColumnValue columnValue;
 
     public EntityColumn(Field field) {
         this.field = field;
@@ -21,17 +21,6 @@ public class EntityColumn {
         this.columnLength = new ColumnLength(field);
         this.columnIdOption = new ColumnIdOption(field);
         this.columnOption = new ColumnOption(field);
-        this.columnValue = new ColumnValue(field);
-    }
-
-    public EntityColumn(Field field, Object entity) {
-        this.field = field;
-        this.type = field.getType();
-        this.columnName = new ColumnName(field);
-        this.columnLength = new ColumnLength(field);
-        this.columnIdOption = new ColumnIdOption(field);
-        this.columnOption = new ColumnOption(field);
-        this.columnValue = new ColumnValue(field, entity);
     }
 
     public Field getField() {
@@ -64,6 +53,10 @@ public class EntityColumn {
 
     public Object getValue() {
         return columnValue.value();
+    }
+
+    public void setValue(Field field, Object entity) {
+        columnValue = new ColumnValue(field, entity);
     }
 
     @Override

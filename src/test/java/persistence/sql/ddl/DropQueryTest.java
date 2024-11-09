@@ -1,8 +1,8 @@
 package persistence.sql.ddl;
 
+import domain.test.EntityWithId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.fixture.EntityWithId;
 
 import static org.assertj.core.api.Assertions.*;
 

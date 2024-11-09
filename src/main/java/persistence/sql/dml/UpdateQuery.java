@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class UpdateQuery {
-    public String update(Object entity, List<EntityColumn> entityColumns) {
-        final EntityTable entityTable = new EntityTable(entity);
+    public String update(EntityTable entityTable, List<EntityColumn> entityColumns) {
         return new UpdateQueryBuilder()
                 .update(entityTable.getTableName())
                 .set(getSetColumns(entityColumns), getSetValues(entityColumns))

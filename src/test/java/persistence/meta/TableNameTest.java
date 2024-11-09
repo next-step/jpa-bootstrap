@@ -1,9 +1,9 @@
 package persistence.meta;
 
+import domain.test.EntityWithId;
+import domain.test.EntityWithoutTable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.fixture.EntityWithId;
-import persistence.fixture.EntityWithoutTable;
 
 import static org.assertj.core.api.Assertions.*;
 

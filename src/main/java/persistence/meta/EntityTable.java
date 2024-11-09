@@ -23,13 +23,6 @@ public class EntityTable {
         this.entityColumns = new EntityColumns(entityType);
     }
 
-    public EntityTable(Object entity) {
-        validate(entity.getClass());
-        this.type = entity.getClass();
-        this.tableName = new TableName(entity.getClass());
-        this.entityColumns = new EntityColumns(entity);
-    }
-
     public Class<?> getType() {
         return type;
     }
@@ -53,6 +46,11 @@ public class EntityTable {
     @Override
     public int hashCode() {
         return Objects.hash(type, tableName, entityColumns);
+    }
+
+    public EntityTable setValue(Object entity) {
+        entityColumns.setValue(entity);
+        return this;
     }
 
     public EntityColumn getIdEntityColumn() {

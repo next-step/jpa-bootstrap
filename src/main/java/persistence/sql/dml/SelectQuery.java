@@ -9,33 +9,27 @@ import java.util.stream.Stream;
 import static persistence.sql.QueryConst.*;
 
 public class SelectQuery {
-    public String findAll(Class<?> entityType) {
-        final EntityTable entityTable = new EntityTable(entityType);
-
+    public String findAll(EntityTable entityTable) {
         if (entityTable.isOneToMany()) {
             return getAssociationQuery(entityTable)
                     .build();
         }
-        return findAll(entityTable)
-                .build();
+        return find(entityTable).build();
     }
 
-    public String findById(Class<?> entityType, Object id) {
-        final EntityTable entityTable = new EntityTable(entityType);
-
+    public String findById(EntityTable entityTable, Object id) {
         if (entityTable.isOneToMany() && entityTable.isEager()) {
             return getAssociationQuery(entityTable)
                 .where(getColumnWithAliasClause(entityTable, entityTable.getIdColumnName()), id)
                     .build();
         }
-        return findAll(entityTable)
+        return find(entityTable)
                 .where(entityTable.getIdColumnName(), id)
                 .build();
     }
 
-    public String findCollection(Class<?> entityType, String columnName, Object value) {
-        final EntityTable entityTable = new EntityTable(entityType);
-        return findAll(entityTable)
+    public String findCollection(EntityTable entityTable, String columnName, Object value) {
+        return find(entityTable)
                 .where(columnName, value)
                 .build();
     }
@@ -52,7 +46,7 @@ public class SelectQuery {
                 );
     }
 
-    private SelectQueryBuilder findAll(EntityTable entityTable) {
+    private SelectQueryBuilder find(EntityTable entityTable) {
         return new SelectQueryBuilder()
                 .select(getSelectClause(entityTable))
                 .from(entityTable.getTableName());

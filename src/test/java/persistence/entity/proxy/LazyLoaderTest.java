@@ -2,7 +2,6 @@ package persistence.entity.proxy;
 
 import database.H2ConnectionFactory;
 import domain.Order;
-import domain.OrderItem;
 import domain.OrderLazy;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.CollectionLoader;
 import persistence.entity.LazyLoader;
+import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;
 
 import static org.assertj.core.api.Assertions.*;
@@ -29,10 +29,11 @@ class LazyLoaderTest {
     void constructor() {
         // given
         final OrderLazy order = new OrderLazy("OrderNumber1");
-        final CollectionLoader collectionLoader = new CollectionLoader(jdbcTemplate, selectQuery);
+        final EntityTable entityTable = new EntityTable(OrderLazy.class).setValue(order);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery);
 
         // when
-        final LazyLoader<OrderItem> lazyLoader = new LazyLoader<>(OrderItem.class, order, collectionLoader);
+        final LazyLoader lazyLoader = new LazyLoader(entityTable, collectionLoader);
 
         // then
         assertThat(lazyLoader).isNotNull();
@@ -43,10 +44,11 @@ class LazyLoaderTest {
     void constructor_exception() {
         // given
         final Order order = new Order("OrderNumber1");
-        final CollectionLoader collectionLoader = new CollectionLoader(jdbcTemplate, selectQuery);
+        final EntityTable entityTable = new EntityTable(Order.class).setValue(order);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery);
 
         // when & then
-        assertThatThrownBy(() -> new LazyLoader<>(OrderItem.class, order, collectionLoader))
+        assertThatThrownBy(() -> new LazyLoader(entityTable, collectionLoader))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(LazyLoader.NO_ONE_TO_ONE_LAZY_FAILED_MESSAGE);
     }

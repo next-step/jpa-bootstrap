@@ -1,8 +1,8 @@
 package persistence.meta;
 
+import domain.test.EntityWithId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.fixture.EntityWithId;
 import util.ReflectionUtils;
 
 import java.lang.reflect.Field;

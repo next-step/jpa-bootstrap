@@ -9,16 +9,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-public class LazyLoadingHandler<T> implements InvocationHandler {
+public class LazyLoadingHandler implements InvocationHandler {
     private static final String LAZY_LOADING_FAILED_MESSAGE = "Lazy 로딩에 실패하였습니다.";
 
-    private final Object entity;
-    private final LazyLoader<T> lazyLoader;
-    private List<T> collection;
+    private final Object parentEntity;
+    private final LazyLoader lazyLoader;
+    private List<?> collection;
     private boolean isLoaded = false;
 
-    public LazyLoadingHandler(Object entity, LazyLoader<T> lazyLoader) {
-        this.entity = entity;
+    public LazyLoadingHandler(Object parentEntity, LazyLoader lazyLoader) {
+        this.parentEntity = parentEntity;
         this.lazyLoader = lazyLoader;
     }
 
@@ -38,12 +38,14 @@ public class LazyLoadingHandler<T> implements InvocationHandler {
     }
 
     private void setLoadedCollection() {
-        final EntityTable entityTable = new EntityTable(entity);
+        final EntityTable entityTable = new EntityTable(parentEntity.getClass());
+        entityTable.setValue(parentEntity);
+
         final Field associationField = entityTable.getAssociationField();
 
         try {
             associationField.setAccessible(true);
-            associationField.set(entity, collection);
+            associationField.set(parentEntity, collection);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(LAZY_LOADING_FAILED_MESSAGE, e);
         }

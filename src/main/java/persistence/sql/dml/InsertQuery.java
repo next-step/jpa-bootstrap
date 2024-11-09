@@ -7,26 +7,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class InsertQuery {
-    public String insert(Object entity) {
-        final EntityTable entityTable = new EntityTable(entity);
+    public String insert(EntityTable entityTable) {
         return new InsertQueryBuilder()
                 .insertInto(entityTable.getTableName(), getColumns(entityTable))
                 .values(getValues(entityTable))
                 .build();
     }
 
-    public String insert(Object entity, Object parentEntity) {
-        final EntityTable entityTable = new EntityTable(entity);
-        final EntityTable parentEntityTable = new EntityTable(parentEntity);
+    public String insert(EntityTable entityTable, String columnName, Object associationId) {
         return new InsertQueryBuilder()
-                .insertInto(entityTable.getTableName(), getColumns(entityTable, parentEntityTable))
-                .values(getValues(entityTable, parentEntityTable))
+                .insertInto(entityTable.getTableName(), getColumns(entityTable, columnName))
+                .values(getValues(entityTable, associationId))
                 .build();
     }
 
-    private List<String> getColumns(EntityTable entityTable, EntityTable parentEntityTable) {
+    private List<String> getColumns(EntityTable entityTable, String columnName) {
         final List<String> columnClause = getColumns(entityTable);
-        columnClause.add(parentEntityTable.getAssociationColumnName());
+        columnClause.add(columnName);
         return columnClause;
     }
 
@@ -38,9 +35,9 @@ public class InsertQuery {
                 .collect(Collectors.toList());
     }
 
-    private List<Object> getValues(EntityTable entityTable, EntityTable parentEntityTable) {
+    private List<Object> getValues(EntityTable entityTable, Object associationId) {
         final List<Object> valueClause = getValues(entityTable);
-        valueClause.add(parentEntityTable.getIdValue());
+        valueClause.add(associationId);
         return valueClause;
     }
 

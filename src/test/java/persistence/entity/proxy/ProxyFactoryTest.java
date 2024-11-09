@@ -1,48 +1,66 @@
 package persistence.entity.proxy;
 
+import database.H2ConnectionFactory;
+import domain.OrderItem;
+import domain.OrderLazy;
+import jdbc.JdbcTemplate;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import persistence.entity.CollectionLoader;
+import persistence.entity.DefaultEntityManager;
+import persistence.entity.EntityManager;
+import persistence.entity.LazyLoader;
+import persistence.meta.EntityTable;
+import persistence.sql.dml.SelectQuery;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static util.QueryUtils.*;
+
 class ProxyFactoryTest {
-//    private final JdbcTemplate jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-//    private final Order order = new Order("OrderNumber1");
-//    private final OrderItem orderItem1 = new OrderItem("Product1", 10);
-//    private final OrderItem orderItem2 = new OrderItem("Product2", 20);
+    private final JdbcTemplate jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
+    private final OrderLazy order = new OrderLazy("OrderNumber1");
+    private final OrderItem orderItem1 = new OrderItem("Product1", 10);
+    private final OrderItem orderItem2 = new OrderItem("Product2", 20);
 
-//    @BeforeEach
-//    void setUp() {
-//        createTable(OrderLazy.class);
-//        createTable(OrderItem.class, OrderLazy.class);
-//
-//        final EntityPersister entityPersister = new DefaultEntityPersister(
-//                jdbcTemplate, new InsertQuery(), new UpdateQuery(), new DeleteQuery());
-//
-//        entityPersister.insert(order);
-//        order.addOrderItem(orderItem1);
-//        entityPersister.insert(orderItem1, order);
-//        order.addOrderItem(orderItem2);
-//        entityPersister.insert(orderItem2, order);
-//    }
-//
-//    @AfterEach
-//    void tearDown() {
-//        dropTable(OrderLazy.class);
-//        dropTable(OrderItem.class);
-//    }
+    @BeforeEach
+    void setUp() {
+        createTable(OrderLazy.class);
+        createTable(OrderItem.class, OrderLazy.class);
 
-//    @Test
-//    @DisplayName("프록시 생성 후 컬렉션에 접근하면 lazy 로딩 된다.")
-//    void createProxyAndLazyLoading() {
-//        // given
-//        final ProxyFactory proxyFactory = new ProxyFactory();
-//        final CollectionLoader collectionLoader = new CollectionLoader(jdbcTemplate, new SelectQuery());
-//        final OrderLazy managedOrder = collectionLoader.load(OrderLazy.class, order.getId());
-//
-//        // when
-//        final List<OrderItem> proxy = proxyFactory.createProxy(collectionLoader, OrderItem.class, managedOrder);
-//        proxy.size();
-//
-//        // then
-//        assertAll(
-//                () -> assertThat(proxy).hasSize(2),
-//                () -> assertThat(proxy).containsExactly(orderItem1, orderItem2)
-//        );
-//    }
+        final EntityManager entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        order.addOrderItem(orderItem1);
+        order.addOrderItem(orderItem2);
+        entityManager.persist(order);
+    }
+
+    @AfterEach
+    void tearDown() {
+        dropTable(OrderLazy.class);
+        dropTable(OrderItem.class);
+    }
+
+    @Test
+    @DisplayName("프록시 생성 후 컬렉션에 접근하면 lazy 로딩 된다.")
+    void createProxyAndLazyLoading() {
+        // given
+        final ProxyFactory proxyFactory = new ProxyFactory();
+        final EntityTable entityTable = new EntityTable(OrderLazy.class).setValue(order);
+        final EntityTable childEntityTable = new EntityTable(entityTable.getAssociationColumnType());
+        final CollectionLoader collectionLoader = new CollectionLoader(childEntityTable, jdbcTemplate, new SelectQuery());
+        final LazyLoader lazyLoader = new LazyLoader(entityTable, collectionLoader);
+
+        // when
+        final List<OrderItem> proxy = (List<OrderItem>) proxyFactory.createProxy(order, lazyLoader);
+
+        // then
+        assertAll(
+                () -> assertThat(proxy).hasSize(2),
+                () -> assertThat(proxy).containsExactly(orderItem1, orderItem2)
+        );
+    }
 }

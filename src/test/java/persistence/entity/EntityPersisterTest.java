@@ -1,13 +1,13 @@
 package persistence.entity;
 
 import database.H2ConnectionFactory;
+import domain.test.EntityWithId;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.proxy.ProxyFactory;
-import persistence.fixture.EntityWithId;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.DeleteQuery;
 import persistence.sql.dml.InsertQuery;
@@ -20,14 +20,14 @@ import static util.QueryUtils.*;
 
 class EntityPersisterTest {
     private JdbcTemplate jdbcTemplate;
-    private EntityLoader entityLoader;
     private EntityManager entityManager;
+    private SelectQuery selectQuery;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        entityLoader = new EntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory());
-        entityManager = DefaultEntityManager.of(jdbcTemplate);
+        entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        selectQuery = new SelectQuery();
 
         createTable(EntityWithId.class);
     }
@@ -41,9 +41,12 @@ class EntityPersisterTest {
     @DisplayName("엔티티를 저장한다.")
     void insert() {
         // given
-        final EntityPersister entityPersister = new EntityPersister(jdbcTemplate, new InsertQuery(),
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
+        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate, new InsertQuery(),
                 new UpdateQuery(), new DeleteQuery());
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery);
+        final EntityLoader entityLoader = new EntityLoader(entityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), collectionLoader);
 
         // when
         entityPersister.insert(entity);
@@ -64,15 +67,18 @@ class EntityPersisterTest {
     @DisplayName("엔티티를 수정한다.")
     void update() {
         // given
-        final EntityPersister entityPersister = new EntityPersister(jdbcTemplate, new InsertQuery(),
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
+        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate, new InsertQuery(),
                 new UpdateQuery(), new DeleteQuery());
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
         final EntityWithId updatedEntity = new EntityWithId(entity.getId(), "Jackson", 20, "test2@email.com");
-        final EntityTable entityTable = new EntityTable(updatedEntity);
+        final EntityTable updatedEntityTable = new EntityTable(updatedEntity.getClass()).setValue(updatedEntity);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery);
+        final EntityLoader entityLoader = new EntityLoader(entityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), collectionLoader);
 
         // when
-        entityPersister.update(entity, entityTable.getEntityColumns());
+        entityPersister.update(entity, updatedEntityTable.getEntityColumns());
 
         // then
         final EntityWithId managedEntity = entityLoader.load(entity.getClass(), entity.getId());
@@ -90,10 +96,13 @@ class EntityPersisterTest {
     @DisplayName("엔티티를 삭제한다.")
     void delete() {
         // given
-        final EntityPersister entityPersister = new EntityPersister(jdbcTemplate, new InsertQuery(),
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
+        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate, new InsertQuery(),
                 new UpdateQuery(), new DeleteQuery());
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery);
+        final EntityLoader entityLoader = new EntityLoader(entityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), collectionLoader);
 
         // when
         entityPersister.delete(entity);

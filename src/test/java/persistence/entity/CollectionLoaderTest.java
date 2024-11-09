@@ -3,12 +3,12 @@ package persistence.entity;
 import database.H2ConnectionFactory;
 import domain.Order;
 import domain.OrderItem;
+import domain.test.EntityWithId;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.fixture.EntityWithId;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;
 
@@ -25,7 +25,7 @@ class CollectionLoaderTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        entityManager = DefaultEntityManager.of(jdbcTemplate);
+        entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
 
         createTable(EntityWithId.class);
         createTable(Order.class);
@@ -43,7 +43,9 @@ class CollectionLoaderTest {
     @DisplayName("엔티티를 로드한다.")
     void load() {
         // given
-        final CollectionLoader collectionLoader = new CollectionLoader(jdbcTemplate, new SelectQuery());
+        final EntityTable parentEntityTable = new EntityTable(Order.class);
+        final EntityTable entityTable = new EntityTable(OrderItem.class);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, new SelectQuery());
         final Order order = new Order("OrderNumber1");
         final OrderItem orderItem1 = new OrderItem("Product1", 10);
         final OrderItem orderItem2 = new OrderItem("Product2", 20);
@@ -52,8 +54,8 @@ class CollectionLoaderTest {
         insertData(order);
 
         // when
-        final List<OrderItem> orderItems = collectionLoader.load(
-                OrderItem.class, new EntityTable(order).getAssociationColumnName(), order.getId());
+        final List<OrderItem> orderItems = (List<OrderItem>) collectionLoader.load(
+                parentEntityTable.getAssociationColumnName(), order.getId());
 
         // then
         assertAll(

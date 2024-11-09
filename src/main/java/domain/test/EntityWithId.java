@@ -1,15 +1,18 @@
-package persistence.fixture;
+package domain.test;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
 @Table(name = "users")
 @Entity
-public class EntityWithOnlyId {
+public class EntityWithId {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "nick_name", length = 20)
@@ -24,15 +27,21 @@ public class EntityWithOnlyId {
     @Transient
     private Integer index;
 
-    public EntityWithOnlyId() {
+    public EntityWithId() {
     }
 
-    public EntityWithOnlyId(Long id, String name, Integer age, String email, Integer index) {
-        this.id = id;
+    public EntityWithId(String name, Integer age, String email, Integer index) {
         this.name = name;
         this.age = age;
         this.email = email;
         this.index = index;
+    }
+
+    public EntityWithId(Long id, String name, Integer age, String email) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.email = email;
     }
 
     public Long getId() {
@@ -53,5 +62,21 @@ public class EntityWithOnlyId {
 
     public Integer getIndex() {
         return index;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setIndex(Integer index) {
+        this.index = index;
     }
 }

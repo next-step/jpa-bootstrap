@@ -1,9 +1,9 @@
 package persistence.meta;
 
+import domain.test.EntityWithId;
+import domain.test.EntityWithoutId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.fixture.EntityWithId;
-import persistence.fixture.EntityWithoutID;
 import util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -50,7 +50,7 @@ class EntityColumnsTest {
     @DisplayName("@ID 애노테이션이 없는 엔티티로 id 값을 반환면 예외를 발생한다.")
     void getIdEntityColumn_exception() {
         // given
-        final EntityColumns entityColumns = new EntityColumns(EntityWithoutID.class);
+        final EntityColumns entityColumns = new EntityColumns(EntityWithoutId.class);
 
         // when & then
         assertThatThrownBy(entityColumns::getIdEntityColumn)

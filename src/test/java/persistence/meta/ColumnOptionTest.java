@@ -2,10 +2,10 @@ package persistence.meta;
 
 import domain.Order;
 import domain.OrderItem;
+import domain.test.EntityWithId;
 import jakarta.persistence.FetchType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.fixture.EntityWithId;
 import util.ReflectionUtils;
 
 import java.lang.reflect.Field;

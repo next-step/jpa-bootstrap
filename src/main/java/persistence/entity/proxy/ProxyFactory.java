@@ -6,10 +6,10 @@ import java.lang.reflect.Proxy;
 import java.util.List;
 
 public class ProxyFactory {
-    public <T> List<T> createProxy(Object entity, LazyLoader<T> lazyLoader) {
-        return (List<T>) Proxy.newProxyInstance(
+    public List<?> createProxy(Object parentEntity, LazyLoader lazyLoader) {
+        return (List<?>) Proxy.newProxyInstance(
                 List.class.getClassLoader(),
                 new Class[]{List.class},
-                new LazyLoadingHandler<>(entity, lazyLoader));
+                new LazyLoadingHandler(parentEntity, lazyLoader));
     }
 }

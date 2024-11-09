@@ -19,15 +19,24 @@ public class EntityColumns {
                 .collect(Collectors.toList());
     }
 
-    public EntityColumns(Object entity) {
-        this.entityColumns = Arrays.stream(entity.getClass().getDeclaredFields())
-                .filter(this::isPersistent)
-                .map(field -> new EntityColumn(field, entity))
-                .collect(Collectors.toList());
-    }
-
     public List<EntityColumn> getEntityColumns() {
         return entityColumns;
+    }
+
+    public void setValue(Object entity) {
+        Arrays.stream(entity.getClass().getDeclaredFields())
+                .filter(this::isPersistent)
+                .forEach(field -> {
+                    final EntityColumn entityColumn = findEntityColumn(field);
+                    entityColumn.setValue(field, entity);
+                });
+    }
+
+    private EntityColumn findEntityColumn(Field field) {
+        return entityColumns.stream()
+                .filter(entityColumn -> entityColumn.getField().equals(field))
+                .findFirst()
+                .orElseThrow();
     }
 
     public EntityColumn getIdEntityColumn() {

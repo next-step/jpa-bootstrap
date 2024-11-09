@@ -12,33 +12,34 @@ import java.util.List;
 public class EntityLoader {
     private static final String PROXY_CREATION_FAILED_MESSAGE = "프록시 생성에 실패하였습니다.";
 
+    private final EntityTable entityTable;
     private final JdbcTemplate jdbcTemplate;
     private final SelectQuery selectQuery;
     private final ProxyFactory proxyFactory;
+    private final CollectionLoader collectionLoader;
 
-    public EntityLoader(JdbcTemplate jdbcTemplate, SelectQuery selectQuery, ProxyFactory proxyFactory) {
+    public EntityLoader(EntityTable entityTable, JdbcTemplate jdbcTemplate, SelectQuery selectQuery,
+                        ProxyFactory proxyFactory, CollectionLoader collectionLoader) {
+        this.entityTable = entityTable;
         this.jdbcTemplate = jdbcTemplate;
         this.selectQuery = selectQuery;
         this.proxyFactory = proxyFactory;
+        this.collectionLoader = collectionLoader;
     }
 
     public <T> T load(Class<T> entityType, Object id) {
-        final String sql = selectQuery.findById(entityType, id);
+        final String sql = selectQuery.findById(entityTable, id);
         final T entity = jdbcTemplate.queryForObject(sql, new DefaultRowMapper<>(entityType));
+        entityTable.setValue(entity);
 
-        final EntityTable entityTable = new EntityTable(entityType);
         if (entityTable.isOneToMany() && !entityTable.isEager()) {
             setProxy(entityTable, entity);
         }
-
         return entity;
     }
 
     private void setProxy(EntityTable entityTable, Object entity) {
-        final CollectionLoader collectionLoader = new CollectionLoader(jdbcTemplate, selectQuery);
-        final List<?> proxy = proxyFactory.createProxy(
-                entity, new LazyLoader<>(entityTable.getAssociationColumnType(), entity, collectionLoader)
-        );
+        final List<?> proxy = proxyFactory.createProxy(entity, new LazyLoader(entityTable.setValue(entity), collectionLoader));
 
         try {
             final Field associationField = entityTable.getAssociationField();
