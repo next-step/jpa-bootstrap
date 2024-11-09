@@ -2,16 +2,12 @@ package persistence.entity;
 
 import jdbc.DefaultRowMapper;
 import jdbc.JdbcTemplate;
-import org.jetbrains.annotations.Nullable;
 import persistence.entity.proxy.ProxyFactory;
-import persistence.meta.EntityColumn;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class EntityLoader {
     private static final String PROXY_CREATION_FAILED_MESSAGE = "프록시 생성에 실패하였습니다.";
@@ -30,32 +26,22 @@ public class EntityLoader {
         final String sql = selectQuery.findById(entityType, id);
         final T entity = jdbcTemplate.queryForObject(sql, new DefaultRowMapper<>(entityType));
 
-        final Field associationField = getAssociationField(entityType);
-        if (Objects.nonNull(associationField)) {
-            setProxy(associationField, entity);
+        final EntityTable entityTable = new EntityTable(entityType);
+        if (entityTable.isOneToManyAssociation() && !entityTable.isEager()) {
+            setProxy(entityTable, entity);
         }
 
         return entity;
     }
 
-    private <T> @Nullable Field getAssociationField(Class<T> entityType) {
-        return Arrays.stream(entityType.getDeclaredFields())
-                .filter(this::isOneToManyAndLazy)
-                .findFirst()
-                .orElse(null);
-    }
-
-    private boolean isOneToManyAndLazy(Field field) {
-        final EntityColumn entityColumn = new EntityColumn(field);
-        return entityColumn.isOneToManyAndLazy();
-    }
-
-    private void setProxy(Field associationField, Object entity) {
-        final EntityTable entityTable = new EntityTable(entity);
-        final List<Object> proxy = proxyFactory.createProxy(
-                new CollectionLoader(jdbcTemplate, selectQuery), entityTable.getJoinColumnType(), entity);
+    private void setProxy(EntityTable entityTable, Object entity) {
+        final CollectionLoader collectionLoader = new CollectionLoader(jdbcTemplate, selectQuery);
+        final List<?> proxy = proxyFactory.createProxy(
+                entity, new LazyLoader<>(entityTable.getJoinColumnType(), entity, collectionLoader)
+        );
 
         try {
+            final Field associationField = entityTable.getAssociationField();
             associationField.setAccessible(true);
             associationField.set(entity, proxy);
         } catch (IllegalAccessException e) {

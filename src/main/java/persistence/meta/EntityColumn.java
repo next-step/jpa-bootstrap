@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 
 public class EntityColumn {
+    private final Field field;
     private final Class<?> type;
     private final ColumnName columnName;
     private final ColumnLength columnLength;
@@ -14,6 +15,7 @@ public class EntityColumn {
     private final ColumnValue columnValue;
 
     public EntityColumn(Field field) {
+        this.field = field;
         this.type = field.getType();
         this.columnName = new ColumnName(field);
         this.columnLength = new ColumnLength(field);
@@ -23,12 +25,17 @@ public class EntityColumn {
     }
 
     public EntityColumn(Field field, Object entity) {
+        this.field = field;
         this.type = field.getType();
         this.columnName = new ColumnName(field);
         this.columnLength = new ColumnLength(field);
         this.columnIdOption = new ColumnIdOption(field);
         this.columnOption = new ColumnOption(field);
         this.columnValue = new ColumnValue(field, entity);
+    }
+
+    public Field getField() {
+        return field;
     }
 
     public Class<?> getType() {

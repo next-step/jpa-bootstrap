@@ -3,6 +3,7 @@ package persistence.meta;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 
@@ -108,6 +109,15 @@ public class EntityTable {
 
     public String getJoinColumnName() {
         return getJoinEntityColumn().getColumnName();
+    }
+
+    public Object getJoinColumnValue() {
+        return getJoinEntityColumn().getValue();
+    }
+
+    public Field getAssociationField() {
+        final EntityColumn joinEntityColumn = getJoinEntityColumn();
+        return joinEntityColumn.getField();
     }
 
     public boolean isSimpleMapping() {

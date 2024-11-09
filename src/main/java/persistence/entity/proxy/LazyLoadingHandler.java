@@ -1,65 +1,51 @@
 package persistence.entity.proxy;
 
-import persistence.entity.CollectionLoader;
-import persistence.meta.EntityColumn;
+import persistence.entity.LazyLoader;
 import persistence.meta.EntityTable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.List;
 
 public class LazyLoadingHandler<T> implements InvocationHandler {
-    private static final String NO_ONE_TO_ONE_LAZY_FAILED_MESSAGE = "@OneToMany 연관관계이면서 LAZY 타입인 컬럼이 존재하지 않습니다.";
+    private static final String LAZY_LOADING_FAILED_MESSAGE = "Lazy 로딩에 실패하였습니다.";
 
-    private final CollectionLoader collectionLoader;
-    private final Class<T> entityType;
-    private final Object parentEntity;
+    private final Object entity;
+    private final LazyLoader<T> lazyLoader;
+    private List<T> collection;
+    private boolean isLoaded = false;
 
-    public LazyLoadingHandler(CollectionLoader collectionLoader, Class<T> entityType, Object parentEntity) {
-        this.collectionLoader = collectionLoader;
-        this.entityType = entityType;
-        this.parentEntity = parentEntity;
+    public LazyLoadingHandler(Object entity, LazyLoader<T> lazyLoader) {
+        this.entity = entity;
+        this.lazyLoader = lazyLoader;
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        final Field associationField = Arrays.stream(parentEntity.getClass().getDeclaredFields())
-                .filter(this::isOneToManyAndLazy)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(NO_ONE_TO_ONE_LAZY_FAILED_MESSAGE));
-
-        final Object associationFieldValue = getAssociationFieldValue(associationField);
-        if (isNotLoaded(associationFieldValue)) {
-            final List<T> loadedList = lazyLoad(associationField);
-            return method.invoke(loadedList, args);
+    public Object invoke(Object proxy, Method method, Object[] args) {
+        if (!isLoaded) {
+            collection = lazyLoader.load();
+            setLoadedCollection();
+            isLoaded = true;
         }
-        return method.invoke(associationFieldValue, args);
+
+        try {
+            return method.invoke(collection, args);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException(LAZY_LOADING_FAILED_MESSAGE, e);
+        }
     }
 
-    private boolean isOneToManyAndLazy(Field field) {
-        final EntityColumn entityColumn = new EntityColumn(field);
-        return entityColumn.isOneToManyAndLazy();
-    }
+    private void setLoadedCollection() {
+        final EntityTable entityTable = new EntityTable(entity);
+        final Field associationField = entityTable.getAssociationField();
 
-    private Object getAssociationFieldValue(Field associationField) throws IllegalAccessException {
-        associationField.setAccessible(true);
-        return associationField.get(parentEntity);
-    }
-
-    private boolean isNotLoaded(Object associationFieldValue) {
-        return Proxy.isProxyClass(associationFieldValue.getClass());
-    }
-
-    private List<T> lazyLoad(Field associationField) throws IllegalAccessException {
-        final EntityTable parentEntityTable = new EntityTable(parentEntity);
-        final List<T> loadedList = collectionLoader.load(entityType, parentEntityTable.getJoinColumnName(),
-                parentEntityTable.getIdValue());
-
-        associationField.setAccessible(true);
-        associationField.set(parentEntity, loadedList);
-        return loadedList;
+        try {
+            associationField.setAccessible(true);
+            associationField.set(entity, collection);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(LAZY_LOADING_FAILED_MESSAGE, e);
+        }
     }
 }
