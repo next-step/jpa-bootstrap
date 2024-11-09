@@ -9,8 +9,6 @@ import java.sql.SQLException;
 
 public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
-    private static final ThreadLocal<EntityManager> sessionHolder = new ThreadLocal<>();
-
     private final CurrentSessionContext currentSessionContext;
     private final DatabaseServer server;
 
@@ -36,7 +34,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
                 metamodelInitializer.getMetamodel()
         );
 
-        sessionHolder.set(newSession);
+        currentSessionContext.bindSession(newSession);
         return newSession;
     }
 }

@@ -1,4 +1,4 @@
-package persistence.entity;
+package persistence.session;
 
 import database.DatabaseServer;
 import database.H2;
@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.entity.StatefulPersistenceContext;
 import persistence.fixtures.TestEagerOrder;
 import persistence.fixtures.TestEagerOrderItem;
 import persistence.fixtures.TestLazyOrder;
@@ -18,8 +19,6 @@ import persistence.fixtures.TestLazyOrderItem;
 import persistence.meta.Metamodel;
 import persistence.meta.MetamodelInitializer;
 import persistence.proxy.PersistentList;
-import persistence.session.EntityManager;
-import persistence.session.EntityManagerImpl;
 import persistence.sql.H2Dialect;
 import persistence.sql.ddl.query.CreateTableQueryBuilder;
 import persistence.sql.ddl.query.DropQueryBuilder;

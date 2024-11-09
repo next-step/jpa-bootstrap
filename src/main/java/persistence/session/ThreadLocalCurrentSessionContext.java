@@ -8,4 +8,14 @@ public class ThreadLocalCurrentSessionContext implements CurrentSessionContext {
     public EntityManager currentSession() {
         return sessionHolder.get();
     }
+
+    @Override
+    public void bindSession(EntityManager session) {
+        sessionHolder.set(session);
+    }
+
+    @Override
+    public void closeSession() {
+        sessionHolder.remove();
+    }
 }
