@@ -34,7 +34,7 @@ public class DefaultEntityManager implements EntityManager {
 
     public static DefaultEntityManager of(JdbcTemplate jdbcTemplate) {
         return new DefaultEntityManager(
-                new DefaultPersistenceContext(),
+                new PersistenceContext(),
                 new EntityPersister(jdbcTemplate, new InsertQuery(), new UpdateQuery(), new DeleteQuery()),
                 new CollectionPersister(jdbcTemplate, new InsertQuery()),
                 new EntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory())

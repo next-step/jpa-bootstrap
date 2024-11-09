@@ -11,12 +11,12 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class DefaultPersistenceContextTest {
+class PersistenceContextTest {
     @Test
     @DisplayName("엔티티 저장소에 엔티티를 추가한다.")
     void addEntity() throws NoSuchFieldException, IllegalAccessException {
         // given
-        final PersistenceContext persistenceContext = new DefaultPersistenceContext();
+        final PersistenceContext persistenceContext = new PersistenceContext();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
 
         // when
@@ -31,7 +31,7 @@ class DefaultPersistenceContextTest {
     @DisplayName("엔티티 저장소에서 엔티티를 반환한다.")
     void getEntity() {
         // given
-        final PersistenceContext persistenceContext = new DefaultPersistenceContext();
+        final PersistenceContext persistenceContext = new PersistenceContext();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
         persistenceContext.addEntity(entity);
 
@@ -46,7 +46,7 @@ class DefaultPersistenceContextTest {
     @DisplayName("엔티티 저장소에서 엔티티를 제거한다.")
     void removeEntity() throws NoSuchFieldException, IllegalAccessException {
         // given
-        final PersistenceContext persistenceContext = new DefaultPersistenceContext();
+        final PersistenceContext persistenceContext = new PersistenceContext();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
         persistenceContext.addEntity(entity);
 
