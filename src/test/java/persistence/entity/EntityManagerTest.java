@@ -18,6 +18,8 @@ import persistence.fixtures.TestLazyOrderItem;
 import persistence.meta.Metamodel;
 import persistence.meta.MetamodelInitializer;
 import persistence.proxy.PersistentList;
+import persistence.session.EntityManager;
+import persistence.session.EntityManagerImpl;
 import persistence.sql.H2Dialect;
 import persistence.sql.ddl.query.CreateTableQueryBuilder;
 import persistence.sql.ddl.query.DropQueryBuilder;

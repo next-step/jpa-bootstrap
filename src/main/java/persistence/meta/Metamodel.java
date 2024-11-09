@@ -71,4 +71,10 @@ public class Metamodel {
     public CollectionPersister findCollectionPersister(TableAssociationDefinition association) {
         return collectionPersisters.get(association);
     }
+
+    public List<TableAssociationDefinition> resolveEagerAssociation(Class<?> entityClass) {
+        return entityPersisters.get(entityClass).getAssociations()
+                .stream().filter(TableAssociationDefinition::isEager)
+                .collect(Collectors.toList());
+    }
 }

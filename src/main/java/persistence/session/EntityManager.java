@@ -1,4 +1,4 @@
-package persistence.entity;
+package persistence.session;
 
 public interface EntityManager {
 

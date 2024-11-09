@@ -1,6 +1,14 @@
-package persistence.entity;
+package persistence.session;
 
 import jdbc.JdbcTemplate;
+import persistence.entity.CollectionPersister;
+import persistence.entity.EntityEntry;
+import persistence.entity.EntityKey;
+import persistence.entity.EntityLoader;
+import persistence.entity.EntityPersister;
+import persistence.entity.EntitySnapshot;
+import persistence.entity.PersistenceContext;
+import persistence.entity.Status;
 import persistence.meta.Metamodel;
 import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.definition.TableDefinition;

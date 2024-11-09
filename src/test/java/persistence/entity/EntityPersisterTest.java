@@ -14,6 +14,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.meta.Metamodel;
 import persistence.meta.MetamodelInitializer;
+import persistence.session.EntityManager;
+import persistence.session.EntityManagerImpl;
 import persistence.sql.H2Dialect;
 import persistence.sql.ddl.query.CreateTableQueryBuilder;
 import persistence.sql.ddl.query.DropQueryBuilder;
