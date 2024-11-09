@@ -1,5 +1,7 @@
 package builder;
 
+import boot.Metamodel;
+import boot.MetamodelImpl;
 import builder.dml.EntityData;
 import builder.dml.builder.*;
 import database.H2DBConnection;
@@ -36,7 +38,10 @@ class DMLBuilderTest {
 
         PersistenceContext persistenceContext = new PersistenceContextImpl();
 
-        EntityManager entityManager = new EntityManagerImpl(persistenceContext, jdbcTemplate);
+        Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
+        metamodel.init();
+
+        EntityManager entityManager = new EntityManagerImpl(persistenceContext, jdbcTemplate, metamodel);
     }
 
     @DisplayName("Insert 쿼리 문자열 생성하기")

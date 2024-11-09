@@ -1,5 +1,7 @@
 package person;
 
+import boot.Metamodel;
+import boot.MetamodelImpl;
 import builder.ddl.DDLBuilderData;
 import builder.ddl.builder.CreateQueryBuilder;
 import builder.ddl.builder.DropQueryBuilder;
@@ -45,7 +47,10 @@ class PersonServiceTest {
 
         jdbcTemplate.execute(createQuery);
 
-        this.personService = new PersonService(new EntityManagerImpl(jdbcTemplate));
+        Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
+        metamodel.init();
+
+        this.personService = new PersonService(new EntityManagerImpl(jdbcTemplate, metamodel));
 
         this.personService.save(createPersonRequest(1));
         this.personService.save(createPersonRequest(2));

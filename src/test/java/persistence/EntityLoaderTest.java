@@ -1,5 +1,7 @@
 package persistence;
 
+import boot.Metamodel;
+import boot.MetamodelImpl;
 import builder.ddl.DDLBuilderData;
 import builder.ddl.builder.CreateQueryBuilder;
 import builder.ddl.builder.DropQueryBuilder;
@@ -54,7 +56,10 @@ class EntityLoaderTest {
 
         this.persistenceContext = new PersistenceContextImpl();
 
-        this.entityPersister = new EntityPersister(jdbcTemplate);
+        Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
+        metamodel.init();
+
+        this.entityPersister = new EntityPersister(jdbcTemplate, metamodel);
         this.entityLoader = new EntityLoader(jdbcTemplate);
     }
 

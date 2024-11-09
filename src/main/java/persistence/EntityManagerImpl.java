@@ -1,5 +1,6 @@
 package persistence;
 
+import boot.Metamodel;
 import builder.dml.DMLColumnData;
 import builder.dml.EntityData;
 import jdbc.JdbcTemplate;
@@ -9,19 +10,19 @@ import java.util.List;
 public class EntityManagerImpl implements EntityManager {
 
     private final EntityLoader entityLoader;
-    private final EntityPersister entityPersister;
     private final PersistenceContext persistenceContext;
+    private final Metamodel metamodel;
 
-    public EntityManagerImpl(JdbcTemplate jdbcTemplate) {
+    public EntityManagerImpl(JdbcTemplate jdbcTemplate, Metamodel metamodel) {
         this.entityLoader = new EntityLoader(jdbcTemplate);
-        this.entityPersister = new EntityPersister(jdbcTemplate);
         this.persistenceContext = new PersistenceContextImpl();
+        this.metamodel = metamodel;
     }
 
-    public EntityManagerImpl(PersistenceContext persistenceContext, JdbcTemplate jdbcTemplate) {
+    public EntityManagerImpl(PersistenceContext persistenceContext, JdbcTemplate jdbcTemplate, Metamodel metamodel) {
         this.entityLoader = new EntityLoader(jdbcTemplate);
-        this.entityPersister = new EntityPersister(jdbcTemplate);
         this.persistenceContext = persistenceContext;
+        this.metamodel = metamodel;
     }
 
     @Override
@@ -57,7 +58,7 @@ public class EntityManagerImpl implements EntityManager {
 
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.SAVING);
 
-        this.entityPersister.persist(entityData);
+        metamodel.entityPersister(entityInstance.getClass()).persist(entityData);
 
         insertPersistenceContext(entityKey, entityData);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.MANAGED);
@@ -81,7 +82,7 @@ public class EntityManagerImpl implements EntityManager {
             return;
         }
 
-        this.entityPersister.merge(diffBuilderData);
+        metamodel.entityPersister(entityInstance.getClass()).merge(diffBuilderData);
 
         insertPersistenceContext(entityKey, entityData);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.MANAGED);
@@ -99,7 +100,7 @@ public class EntityManagerImpl implements EntityManager {
         }
 
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.DELETED);
-        this.entityPersister.remove(entityData);
+        metamodel.entityPersister(entityInstance.getClass()).remove(entityData);
 
         this.persistenceContext.deleteEntity(entityKey);
         this.persistenceContext.deleteDatabaseSnapshot(entityKey);
