@@ -1,7 +1,7 @@
 package persistence.entity;
 
-import jdbc.DefaultRowMapper;
 import jdbc.JdbcTemplate;
+import jdbc.RowMapper;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;
@@ -16,20 +16,22 @@ public class EntityLoader {
     private final JdbcTemplate jdbcTemplate;
     private final SelectQuery selectQuery;
     private final ProxyFactory proxyFactory;
+    private final RowMapper<?> rowMapper;
     private final CollectionLoader collectionLoader;
 
     public EntityLoader(EntityTable entityTable, JdbcTemplate jdbcTemplate, SelectQuery selectQuery,
-                        ProxyFactory proxyFactory, CollectionLoader collectionLoader) {
+                        ProxyFactory proxyFactory, RowMapper<?> rowMapper, CollectionLoader collectionLoader) {
         this.entityTable = entityTable;
         this.jdbcTemplate = jdbcTemplate;
         this.selectQuery = selectQuery;
         this.proxyFactory = proxyFactory;
+        this.rowMapper = rowMapper;
         this.collectionLoader = collectionLoader;
     }
 
-    public <T> T load(Class<T> entityType, Object id) {
+    public <T> T load(Object id) {
         final String sql = selectQuery.findById(entityTable, id);
-        final T entity = jdbcTemplate.queryForObject(sql, new DefaultRowMapper<>(entityType));
+        final T entity = (T) jdbcTemplate.queryForObject(sql, rowMapper);
         entityTable.setValue(entity);
 
         if (entityTable.isOneToMany() && !entityTable.isEager()) {

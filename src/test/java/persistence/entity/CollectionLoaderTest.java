@@ -4,6 +4,7 @@ import database.H2ConnectionFactory;
 import domain.Order;
 import domain.OrderItem;
 import fixture.EntityWithId;
+import jdbc.DefaultRowMapper;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +46,8 @@ class CollectionLoaderTest {
     void load() {
         // given
         final EntityTable entityTable = new EntityTable(OrderItem.class);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, new SelectQuery());
+        final DefaultRowMapper<OrderItem> rowMapper = new DefaultRowMapper<>(OrderItem.class);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, new SelectQuery(), rowMapper);
         final Order order = new Order("OrderNumber1");
         final OrderItem orderItem1 = new OrderItem("Product1", 10);
         final OrderItem orderItem2 = new OrderItem("Product2", 20);

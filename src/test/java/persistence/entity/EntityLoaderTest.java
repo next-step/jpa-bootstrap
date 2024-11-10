@@ -4,6 +4,7 @@ import database.H2ConnectionFactory;
 import domain.Order;
 import domain.OrderItem;
 import fixture.EntityWithId;
+import jdbc.DefaultRowMapper;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,13 +47,14 @@ class EntityLoaderTest {
     void load() {
         // given
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery);
-        final EntityLoader entityLoader = new EntityLoader(entityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), collectionLoader);
+        final DefaultRowMapper<EntityWithId> rowMapper = new DefaultRowMapper<>(EntityWithId.class);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
+        final EntityLoader entityLoader = new EntityLoader(entityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
 
         // when
-        final EntityWithId managedEntity = entityLoader.load(entity.getClass(), entity.getId());
+        final EntityWithId managedEntity = entityLoader.load(entity.getId());
 
         // then
         assertAll(
@@ -70,8 +72,9 @@ class EntityLoaderTest {
     void load_withAssociation() {
         // given
         final EntityTable entityTable = new EntityTable(Order.class);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery);
-        final EntityLoader entityLoader = new EntityLoader(entityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), collectionLoader);
+        final DefaultRowMapper<Order> rowMapper = new DefaultRowMapper<>(Order.class);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
+        final EntityLoader entityLoader = new EntityLoader(entityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
         final Order order = new Order("OrderNumber1");
         final OrderItem orderItem1 = new OrderItem("Product1", 10);
         final OrderItem orderItem2 = new OrderItem("Product2", 20);
@@ -80,7 +83,7 @@ class EntityLoaderTest {
         insertData(order);
 
         // when
-        final Order managedOrder = entityLoader.load(order.getClass(), order.getId());
+        final Order managedOrder = entityLoader.load(order.getId());
 
         // then
         assertThat(managedOrder).isEqualTo(order);

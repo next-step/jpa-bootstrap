@@ -1,6 +1,7 @@
 package persistence.bootstrap;
 
 import jdbc.JdbcTemplate;
+import jdbc.RowMapper;
 import persistence.entity.CollectionLoader;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.DmlQueries;
@@ -13,13 +14,15 @@ public class CollectionLoaderBinder {
     private final Map<String, CollectionLoader> collectionLoaderRegistry = new HashMap<>();
 
     public CollectionLoaderBinder(List<Class<?>> entityTypes, EntityTableBinder entityTableBinder,
-                                  JdbcTemplate jdbcTemplate, DmlQueries dmlQueries) {
+                                  RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate, DmlQueries dmlQueries) {
         for (Class<?> entityType : entityTypes) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
             if (entityTable.isOneToMany()) {
-                final EntityTable childEntityTable = new EntityTable(entityTable.getAssociationColumnType());
+                final Class<?> associationColumnType = entityTable.getAssociationColumnType();
+                final EntityTable childEntityTable = new EntityTable(associationColumnType);
+                final RowMapper<?> rowMapper = rowMapperBinder.getRowMapper(associationColumnType);
                 final CollectionLoader collectionLoader =
-                        new CollectionLoader(childEntityTable, jdbcTemplate, dmlQueries.getSelectQuery());
+                        new CollectionLoader(childEntityTable, jdbcTemplate, dmlQueries.getSelectQuery(), rowMapper);
 
                 final String collectionKey = getKey(entityType, entityTable.getAssociationColumnName());
                 collectionLoaderRegistry.put(collectionKey, collectionLoader);

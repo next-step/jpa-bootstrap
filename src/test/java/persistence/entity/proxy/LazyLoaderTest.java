@@ -3,6 +3,7 @@ package persistence.entity.proxy;
 import database.H2ConnectionFactory;
 import domain.Order;
 import domain.OrderLazy;
+import jdbc.DefaultRowMapper;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +31,8 @@ class LazyLoaderTest {
         // given
         final OrderLazy order = new OrderLazy("OrderNumber1");
         final EntityTable entityTable = new EntityTable(OrderLazy.class).setValue(order);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery);
+        final DefaultRowMapper<OrderLazy> rowMapper = new DefaultRowMapper<>(OrderLazy.class);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
 
         // when
         final LazyLoader lazyLoader = new LazyLoader(entityTable, collectionLoader);
@@ -45,7 +47,8 @@ class LazyLoaderTest {
         // given
         final Order order = new Order("OrderNumber1");
         final EntityTable entityTable = new EntityTable(Order.class).setValue(order);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery);
+        final DefaultRowMapper<Order> rowMapper = new DefaultRowMapper<>(Order.class);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
 
         // when & then
         assertThatThrownBy(() -> new LazyLoader(entityTable, collectionLoader))

@@ -29,7 +29,6 @@ class MetamodelTest {
                 () -> assertThat(getBinder(metamodel, "entityTableBinder")).isNotNull(),
                 () -> assertThat(getBinder(metamodel, "entityLoaderBinder")).isNotNull(),
                 () -> assertThat(getBinder(metamodel, "entityPersisterBinder")).isNotNull(),
-                () -> assertThat(getBinder(metamodel, "collectionLoaderBinder")).isNotNull(),
                 () -> assertThat(getBinder(metamodel, "collectionPersisterBinder")).isNotNull()
         );
     }

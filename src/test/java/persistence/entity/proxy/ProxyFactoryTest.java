@@ -3,6 +3,7 @@ package persistence.entity.proxy;
 import database.H2ConnectionFactory;
 import domain.OrderItem;
 import domain.OrderLazy;
+import jdbc.DefaultRowMapper;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +52,8 @@ class ProxyFactoryTest {
         final ProxyFactory proxyFactory = new ProxyFactory();
         final EntityTable entityTable = new EntityTable(OrderLazy.class).setValue(order);
         final EntityTable childEntityTable = new EntityTable(entityTable.getAssociationColumnType());
-        final CollectionLoader collectionLoader = new CollectionLoader(childEntityTable, jdbcTemplate, new SelectQuery());
+        final DefaultRowMapper<OrderItem> rowMapper = new DefaultRowMapper<>(OrderItem.class);
+        final CollectionLoader collectionLoader = new CollectionLoader(childEntityTable, jdbcTemplate, new SelectQuery(), rowMapper);
         final LazyLoader lazyLoader = new LazyLoader(entityTable, collectionLoader);
 
         // when

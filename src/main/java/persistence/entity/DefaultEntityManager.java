@@ -30,7 +30,7 @@ public class DefaultEntityManager implements EntityManager {
         }
 
         final EntityLoader entityLoader = metamodel.getEntityLoader(entityType);
-        final T entity = entityLoader.load(entityType, id);
+        final T entity = entityLoader.load(id);
         persistenceContext.addEntity(entity);
         return entity;
     }
