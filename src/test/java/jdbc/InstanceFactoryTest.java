@@ -1,7 +1,7 @@
 package jdbc;
 
-import domain.test.EntityWithId;
-import domain.test.EntityWithoutDefaultConstructor;
+import fixture.EntityWithId;
+import fixture.EntityWithoutDefaultConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

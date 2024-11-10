@@ -32,7 +32,7 @@ class ProxyFactoryTest {
         createTable(OrderLazy.class);
         createTable(OrderItem.class, OrderLazy.class);
 
-        final EntityManager entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        final EntityManager entityManager = DefaultEntityManager.of(jdbcTemplate, "domain");
         order.addOrderItem(orderItem1);
         order.addOrderItem(orderItem2);
         entityManager.persist(order);

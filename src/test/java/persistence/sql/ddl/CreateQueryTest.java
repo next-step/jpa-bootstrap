@@ -2,7 +2,7 @@ package persistence.sql.ddl;
 
 import domain.Order;
 import domain.OrderItem;
-import domain.test.EntityWithId;
+import fixture.EntityWithId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.dialect.Dialect;

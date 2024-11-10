@@ -1,7 +1,7 @@
 package persistence.entity;
 
 import database.H2ConnectionFactory;
-import domain.test.EntityWithId;
+import fixture.EntityWithId;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,7 @@ class EntityPersisterTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
         selectQuery = new SelectQuery();
 
         createTable(EntityWithId.class);

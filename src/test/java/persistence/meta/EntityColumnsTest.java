@@ -1,7 +1,7 @@
 package persistence.meta;
 
-import domain.test.EntityWithId;
-import domain.test.EntityWithoutId;
+import fixture.EntityWithId;
+import fixture.EntityWithoutId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import util.ReflectionUtils;

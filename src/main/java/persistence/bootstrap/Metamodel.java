@@ -12,7 +12,6 @@ import persistence.sql.dml.InsertQuery;
 import persistence.sql.dml.SelectQuery;
 import persistence.sql.dml.UpdateQuery;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,13 +26,9 @@ public class Metamodel {
     private final Map<String, CollectionPersister> collectionPersisterRegistry = new ConcurrentHashMap<>();
     private final Map<String, CollectionLoader> collectionLoaderRegistry = new ConcurrentHashMap<>();
 
-    public Metamodel(String basePackage, JdbcTemplate jdbcTemplate) {
-        final ComponentScanner componentScanner = new ComponentScanner();
-        try {
-            initRegistry(componentScanner.scan(basePackage), jdbcTemplate);
-        } catch (IOException | ClassNotFoundException e) {
-            throw new IllegalArgumentException(INIT_FAILED_MESSAGE, e);
-        }
+    public Metamodel(JdbcTemplate jdbcTemplate, String... basePackages) {
+        final EntityHolder entityHolder = new EntityHolder(basePackages);
+        initRegistry(entityHolder.getEntityTypes(), jdbcTemplate);
     }
 
     private void initRegistry(List<Class<?>> entities, JdbcTemplate jdbcTemplate) {

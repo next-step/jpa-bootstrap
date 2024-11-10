@@ -2,8 +2,8 @@ package persistence.sql.dml;
 
 import domain.Order;
 import domain.OrderItem;
-import domain.test.EntityWithId;
-import domain.test.EntityWithoutId;
+import fixture.EntityWithId;
+import fixture.EntityWithoutId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.meta.EntityColumns;

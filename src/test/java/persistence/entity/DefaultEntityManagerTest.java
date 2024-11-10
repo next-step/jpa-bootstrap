@@ -3,8 +3,8 @@ package persistence.entity;
 import database.H2ConnectionFactory;
 import domain.OrderItem;
 import domain.OrderLazy;
-import domain.test.EntityWithId;
-import domain.test.EntityWithOnlyId;
+import fixture.EntityWithId;
+import fixture.EntityWithOnlyId;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +38,7 @@ class DefaultEntityManagerTest {
     @DisplayName("엔티티를 로드한다.")
     void find() {
         // given
-        final EntityManager entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        final EntityManager entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity, entityManager);
 
@@ -60,7 +60,7 @@ class DefaultEntityManagerTest {
     @DisplayName("Lazy 연관관게를 가진 엔티티를 로드한다.")
     void find_withLazyAssociation() {
         // given
-        final EntityManager entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        final EntityManager entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
         final OrderLazy order = new OrderLazy("OrderNumber1");
         final OrderItem orderItem1 = new OrderItem("Product1", 10);
         final OrderItem orderItem2 = new OrderItem("Product2", 20);
@@ -86,7 +86,7 @@ class DefaultEntityManagerTest {
     @DisplayName("엔티티를 영속화한다.")
     void persist() {
         // given
-        final DefaultEntityManager entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        final DefaultEntityManager entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
 
         // when
@@ -108,7 +108,7 @@ class DefaultEntityManagerTest {
     @DisplayName("엔티티를 영속성 컨텍스트에 등록하고 flush() 한다.")
     void persistAndFlush() {
         // given
-        final EntityManager entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        final EntityManager entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
         final EntityWithOnlyId entity = new EntityWithOnlyId(1L, "Jaden", 30, "test@email.com", 1);
 
         // when
@@ -131,7 +131,7 @@ class DefaultEntityManagerTest {
     @DisplayName("엔티티를 영속성 컨텍스트에 등록하고 flush() 한다.")
     void persistAnRemoveAndFlush() {
         // given
-        final EntityManager entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        final EntityManager entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
         final EntityWithOnlyId entity = new EntityWithOnlyId(1L, "Jaden", 30, "test@email.com", 1);
 
         // when
@@ -149,7 +149,7 @@ class DefaultEntityManagerTest {
     @DisplayName("영속화 불가능한 상태에서 엔티티를 영속화하면 예외를 발생한다.")
     void persist_exception() {
         // given
-        final EntityManager entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        final EntityManager entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity, entityManager);
 
@@ -164,7 +164,7 @@ class DefaultEntityManagerTest {
     @DisplayName("엔티티를 영속성 상태에서 제거한다.")
     void removeAndFlush() {
         // given
-        final EntityManager entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        final EntityManager entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity, entityManager);
 
@@ -182,7 +182,7 @@ class DefaultEntityManagerTest {
     @DisplayName("제거 불가능한 상태에서 엔티티를 제거하면 예외를 발생한다.")
     void remove_exception() {
         // given
-        final EntityManager entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        final EntityManager entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         entityManager.persist(entity);
         entityManager.remove(entity);
@@ -199,7 +199,7 @@ class DefaultEntityManagerTest {
     @DisplayName("엔티티를 업데이트한다.")
     void updateAndFlush() {
         // given
-        final EntityManager entityManager = DefaultEntityManager.of("domain", jdbcTemplate);
+        final EntityManager entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity, entityManager);
         entity.setName("Yang");

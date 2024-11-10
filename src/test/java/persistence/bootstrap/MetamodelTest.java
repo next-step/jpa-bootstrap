@@ -20,7 +20,7 @@ class MetamodelTest {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
 
         // when
-        final Metamodel metamodel = new Metamodel(basePackage, jdbcTemplate);
+        final Metamodel metamodel = new Metamodel(jdbcTemplate, basePackage);
 
         // then
         assertAll(

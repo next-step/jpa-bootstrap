@@ -1,4 +1,4 @@
-package domain.test;
+package fixture;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

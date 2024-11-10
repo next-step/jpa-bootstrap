@@ -23,8 +23,8 @@ public class DefaultEntityManager implements EntityManager {
         this.metamodel = metamodel;
     }
 
-    public static DefaultEntityManager of(String basePackage, JdbcTemplate jdbcTemplate) {
-        return new DefaultEntityManager(new PersistenceContext(), new Metamodel(basePackage, jdbcTemplate));
+    public static DefaultEntityManager of(JdbcTemplate jdbcTemplate, String... basePackages) {
+        return new DefaultEntityManager(new PersistenceContext(), new Metamodel(jdbcTemplate, basePackages));
     }
 
     @Override

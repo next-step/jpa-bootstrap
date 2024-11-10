@@ -1,8 +1,8 @@
 package persistence.meta;
 
-import domain.test.EntityWithId;
-import domain.test.EntityWithOnlyId;
-import domain.test.EntityWithoutId;
+import fixture.EntityWithId;
+import fixture.EntityWithOnlyId;
+import fixture.EntityWithoutId;
 import jakarta.persistence.GenerationType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

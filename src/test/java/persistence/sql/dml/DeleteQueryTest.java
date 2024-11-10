@@ -1,6 +1,6 @@
 package persistence.sql.dml;
 
-import domain.test.EntityWithId;
+import fixture.EntityWithId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.meta.EntityTable;
