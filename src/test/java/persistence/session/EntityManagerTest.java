@@ -69,6 +69,8 @@ public class EntityManagerTest {
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         metadata = new MetadataImpl(server);
         metamodel = new Metamodel(metadata, jdbcTemplate);
+
+        SchemaManagementToolCoordinator.processDropTable(jdbcTemplate, metadata);
         entityManagerFactory = metadata.buildEntityManagerFactory();
     }
 
