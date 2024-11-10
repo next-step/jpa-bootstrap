@@ -1,12 +1,8 @@
 package persistence;
 
-import builder.dml.EntityData;
 import builder.dml.JoinEntityData;
 import builder.dml.builder.InsertQueryBuilder;
-import database.H2DBConnection;
 import jdbc.JdbcTemplate;
-
-import java.sql.SQLException;
 
 public class CollectionPersister {
 
@@ -20,10 +16,6 @@ public class CollectionPersister {
         this.entityClass = entityClass;
     }
 
-    public CollectionPersister(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     public String getSimpleName() {
         return entityClass.getSimpleName();
     }
@@ -33,14 +25,6 @@ public class CollectionPersister {
                 joinEntityData.getTableName(),
                 joinEntityData.getJoinColumnData())
         );
-    }
-
-    private JdbcTemplate initializeJdbcTemplate() {
-        try {
-            return new H2DBConnection().start();
-        } catch (SQLException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
     }
 
 }

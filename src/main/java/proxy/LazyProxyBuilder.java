@@ -14,11 +14,7 @@ public class LazyProxyBuilder<T> {
     private final JdbcTemplate jdbcTemplate;
 
     public LazyProxyBuilder(){
-        try {
-            this.jdbcTemplate = new H2DBConnection().start();
-        } catch (SQLException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
+        this.jdbcTemplate = new H2DBConnection().start();
     }
 
     @SuppressWarnings("unchecked")
