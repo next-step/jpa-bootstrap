@@ -24,16 +24,17 @@ public class AssociationFieldMapping implements FieldMapping {
         final EntityTable entityTable = new EntityTable(entityType);
         final Class<?> associationColumnType = entityTable.getAssociationColumnType();
         final T entity = new InstanceFactory<>(entityType).createInstance();
-        final List<Object> collection = getCollection(entity, entityTable);
+        final List<Object> collection = createCollection(entity, entityTable);
 
         do {
-            collection.add(getChildEntity(resultSet, associationColumnType, entity, entityTable));
+            final Object childEntity = createChildEntity(resultSet, associationColumnType, entity, entityTable);
+            collection.add(childEntity);
         } while (resultSet.next());
 
         return entity;
     }
 
-    private List<Object> getCollection(Object entity, EntityTable entityTable) throws IllegalAccessException {
+    private List<Object> createCollection(Object entity, EntityTable entityTable) throws IllegalAccessException {
         final Field collectionField = entityTable.getAssociationField();
         collectionField.setAccessible(true);
         Object collection = collectionField.get(entity);
@@ -46,7 +47,7 @@ public class AssociationFieldMapping implements FieldMapping {
         throw new ClassCastException();
     }
 
-    private Object getChildEntity(ResultSet resultSet, Class<?> associationColumnType, Object entity, EntityTable entityTable) throws SQLException, IllegalAccessException {
+    private Object createChildEntity(ResultSet resultSet, Class<?> associationColumnType, Object entity, EntityTable entityTable) throws SQLException, IllegalAccessException {
         final Object childEntity = new InstanceFactory<>(associationColumnType).createInstance();
         final AtomicInteger fieldIndex = new AtomicInteger(0);
         final AtomicInteger childFieldIndex = new AtomicInteger(0);
