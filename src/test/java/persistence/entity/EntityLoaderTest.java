@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;
+import util.TestHelper;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,7 +26,7 @@ class EntityLoaderTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
+        entityManager = TestHelper.createEntityManager("domain", "fixture");
         selectQuery = new SelectQuery();
 
         createTable(EntityWithId.class);

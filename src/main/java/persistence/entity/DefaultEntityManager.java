@@ -1,6 +1,5 @@
 package persistence.entity;
 
-import jdbc.JdbcTemplate;
 import persistence.bootstrap.Metamodel;
 import persistence.meta.EntityColumn;
 import persistence.meta.EntityTable;
@@ -18,13 +17,9 @@ public class DefaultEntityManager implements EntityManager {
     private final PersistenceContext persistenceContext;
     private final Metamodel metamodel;
 
-    private DefaultEntityManager(PersistenceContext persistenceContext, Metamodel metamodel) {
+    public DefaultEntityManager(PersistenceContext persistenceContext, Metamodel metamodel) {
         this.persistenceContext = persistenceContext;
         this.metamodel = metamodel;
-    }
-
-    public static DefaultEntityManager of(JdbcTemplate jdbcTemplate, String... basePackages) {
-        return new DefaultEntityManager(new PersistenceContext(), new Metamodel(jdbcTemplate, basePackages));
     }
 
     @Override

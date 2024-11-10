@@ -9,11 +9,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.CollectionLoader;
-import persistence.entity.DefaultEntityManager;
 import persistence.entity.EntityManager;
 import persistence.entity.LazyLoader;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;
+import util.TestHelper;
 
 import java.util.List;
 
@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static util.QueryUtils.*;
 
 class ProxyFactoryTest {
-    private final JdbcTemplate jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
     private final OrderLazy order = new OrderLazy("OrderNumber1");
     private final OrderItem orderItem1 = new OrderItem("Product1", 10);
     private final OrderItem orderItem2 = new OrderItem("Product2", 20);
@@ -32,7 +31,7 @@ class ProxyFactoryTest {
         createTable(OrderLazy.class);
         createTable(OrderItem.class, OrderLazy.class);
 
-        final EntityManager entityManager = DefaultEntityManager.of(jdbcTemplate, "domain");
+        final EntityManager entityManager = TestHelper.createEntityManager("domain", "fixture");
         order.addOrderItem(orderItem1);
         order.addOrderItem(orderItem2);
         entityManager.persist(order);
@@ -48,6 +47,7 @@ class ProxyFactoryTest {
     @DisplayName("프록시 생성 후 컬렉션에 접근하면 lazy 로딩 된다.")
     void createProxyAndLazyLoading() {
         // given
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
         final ProxyFactory proxyFactory = new ProxyFactory();
         final EntityTable entityTable = new EntityTable(OrderLazy.class).setValue(order);
         final EntityTable childEntityTable = new EntityTable(entityTable.getAssociationColumnType());

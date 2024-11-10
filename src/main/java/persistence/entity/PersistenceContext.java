@@ -76,8 +76,7 @@ public class PersistenceContext {
     public void createOrUpdateStatus(Object entity, EntityStatus entityStatus) {
         final EntityEntry entityEntry = entityEntryRegistry.get(entity);
         if (Objects.isNull(entityEntry)) {
-            final EntityEntry entityEntry1 = new EntityEntry(entityStatus);
-            entityEntryRegistry.put(entity, entityEntry1);
+            entityEntryRegistry.put(entity, new EntityEntry(entityStatus));
             return;
         }
         entityEntry.updateStatus(entityStatus);

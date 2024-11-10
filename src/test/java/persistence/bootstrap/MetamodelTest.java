@@ -4,9 +4,10 @@ import database.H2ConnectionFactory;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.entity.proxy.ProxyFactory;
+import persistence.sql.dml.DmlQueries;
 
 import java.lang.reflect.Field;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,27 +17,26 @@ class MetamodelTest {
     @DisplayName("Metamodel을 생성한다.")
     void constructor() {
         // given
-        String basePackage = "domain";
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
+        final DmlQueries dmlQueries = new DmlQueries();
+        final ProxyFactory proxyFactory = new ProxyFactory();
 
         // when
-        final Metamodel metamodel = new Metamodel(jdbcTemplate, basePackage);
+        final Metamodel metamodel = new Metamodel(jdbcTemplate, dmlQueries, proxyFactory, "domain", "fixture");
 
         // then
         assertAll(
-                () -> assertThat(getRegistrySize(metamodel, "entityTableRegistry")).isPositive(),
-                () -> assertThat(getRegistrySize(metamodel, "entityPersisterRegistry")).isPositive(),
-                () -> assertThat(getRegistrySize(metamodel, "entityLoaderRegistry")).isPositive(),
-                () -> assertThat(getRegistrySize(metamodel, "collectionPersisterRegistry")).isPositive(),
-                () -> assertThat(getRegistrySize(metamodel, "collectionLoaderRegistry")).isPositive()
+                () -> assertThat(getBinder(metamodel, "entityTableBinder")).isNotNull(),
+                () -> assertThat(getBinder(metamodel, "entityLoaderBinder")).isNotNull(),
+                () -> assertThat(getBinder(metamodel, "entityPersisterBinder")).isNotNull(),
+                () -> assertThat(getBinder(metamodel, "collectionLoaderBinder")).isNotNull(),
+                () -> assertThat(getBinder(metamodel, "collectionPersisterBinder")).isNotNull()
         );
     }
 
-    private int getRegistrySize(Metamodel metamodel, String fieldName)
-            throws NoSuchFieldException, IllegalAccessException {
+    private Object getBinder(Metamodel metamodel, String fieldName) throws NoSuchFieldException, IllegalAccessException {
         final Field field = metamodel.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
-        final Map<String, ?> registry = (Map<String, ?>) field.get(metamodel);
-        return registry.size();
+        return field.get(metamodel);
     }
 }

@@ -13,6 +13,7 @@ import persistence.sql.dml.DeleteQuery;
 import persistence.sql.dml.InsertQuery;
 import persistence.sql.dml.SelectQuery;
 import persistence.sql.dml.UpdateQuery;
+import util.TestHelper;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,7 +27,7 @@ class EntityPersisterTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        entityManager = DefaultEntityManager.of(jdbcTemplate, "domain", "fixture");
+        entityManager = TestHelper.createEntityManager("domain", "fixture");
         selectQuery = new SelectQuery();
 
         createTable(EntityWithId.class);
