@@ -1,19 +1,16 @@
 package person;
 
-import boot.Metamodel;
-import boot.MetamodelImpl;
 import builder.ddl.DDLBuilderData;
 import builder.ddl.builder.CreateQueryBuilder;
 import builder.ddl.builder.DropQueryBuilder;
 import builder.ddl.dataType.DB;
 import database.H2DBConnection;
 import entity.Person;
+import hibernate.CurrentSessionContext;
+import hibernate.EntityManagerFactory;
+import hibernate.EntityManagerFactoryImpl;
 import jdbc.JdbcTemplate;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import persistence.EntityManagerImpl;
+import org.junit.jupiter.api.*;
 import service.person.PersonService;
 import service.person.request.PersonRequest;
 import service.person.response.PersonResponse;
@@ -30,16 +27,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 */
 class PersonServiceTest {
 
+    private static EntityManagerFactory entityManagerFactory;
+
     private PersonService personService;
-    private H2DBConnection h2DBConnection;
-    private JdbcTemplate jdbcTemplate;
+
+    @BeforeAll
+    static void allSetup() {
+        CurrentSessionContext currentSessionContext = new CurrentSessionContext();
+        entityManagerFactory = new EntityManagerFactoryImpl(currentSessionContext, new H2DBConnection().start());
+    }
 
     //정확한 테스트를 위해 메소드마다 DB실행 후 테이블생성
     @BeforeEach
     void eachSetUp() throws SQLException {
-        this.h2DBConnection = new H2DBConnection();
-
-        this.jdbcTemplate = this.h2DBConnection.start();
+        JdbcTemplate jdbcTemplate = entityManagerFactory.getJdbcTemplate();
 
         //테이블 생성
         CreateQueryBuilder queryBuilder = new CreateQueryBuilder();
@@ -47,10 +48,7 @@ class PersonServiceTest {
 
         jdbcTemplate.execute(createQuery);
 
-        Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
-        metamodel.init();
-
-        this.personService = new PersonService(new EntityManagerImpl(jdbcTemplate, metamodel));
+        this.personService = new PersonService(entityManagerFactory.openSession());
 
         this.personService.save(createPersonRequest(1));
         this.personService.save(createPersonRequest(2));
@@ -61,8 +59,8 @@ class PersonServiceTest {
     void tearDown() {
         DropQueryBuilder queryBuilder = new DropQueryBuilder();
         String dropQuery = queryBuilder.buildQuery(DDLBuilderData.createDDLBuilderData(Person.class, DB.H2));
-        jdbcTemplate.execute(dropQuery);
-        this.h2DBConnection.stop();
+        entityManagerFactory.getJdbcTemplate().execute(dropQuery);
+        entityManagerFactory.closeSession();
     }
 
     @DisplayName("Person 1L 데이터를 가져온다.")
