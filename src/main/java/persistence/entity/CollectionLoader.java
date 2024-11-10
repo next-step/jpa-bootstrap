@@ -2,6 +2,7 @@ package persistence.entity;
 
 import jdbc.DefaultRowMapper;
 import jdbc.JdbcTemplate;
+import persistence.meta.AssociationCondition;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;
 
@@ -18,8 +19,9 @@ public class CollectionLoader {
         this.selectQuery = selectQuery;
     }
 
-    public List<?> load(String columnName, Object value) {
-        final String sql = selectQuery.findCollection(entityTable, columnName, value);
+    public List<?> load(AssociationCondition associationCondition) {
+        final String sql = selectQuery.findCollection(
+                entityTable, associationCondition.getColumnName(), associationCondition.getId());
         return jdbcTemplate.query(sql, new DefaultRowMapper<>(entityTable.getType()));
     }
 }

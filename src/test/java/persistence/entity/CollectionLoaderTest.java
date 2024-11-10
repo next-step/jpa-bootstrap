@@ -43,7 +43,6 @@ class CollectionLoaderTest {
     @DisplayName("엔티티를 로드한다.")
     void load() {
         // given
-        final EntityTable parentEntityTable = new EntityTable(Order.class);
         final EntityTable entityTable = new EntityTable(OrderItem.class);
         final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, new SelectQuery());
         final Order order = new Order("OrderNumber1");
@@ -52,10 +51,11 @@ class CollectionLoaderTest {
         order.addOrderItem(orderItem1);
         order.addOrderItem(orderItem2);
         insertData(order);
+        final EntityTable parentEntityTable = new EntityTable(Order.class).setValue(order);
 
         // when
-        final List<OrderItem> orderItems = (List<OrderItem>) collectionLoader.load(
-                parentEntityTable.getAssociationColumnName(), order.getId());
+        final List<OrderItem> orderItems =
+                (List<OrderItem>) collectionLoader.load(parentEntityTable.getAssociationCondition());
 
         // then
         assertAll(

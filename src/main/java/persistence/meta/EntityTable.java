@@ -127,6 +127,10 @@ public class EntityTable {
         return ALIAS_PREFIX + getTableName();
     }
 
+    public AssociationCondition getAssociationCondition() {
+        return new AssociationCondition(getAssociationColumnName(), getIdValue());
+    }
+
     public List<Field> getFields() {
         return entityColumns.getEntityColumns()
                 .stream()

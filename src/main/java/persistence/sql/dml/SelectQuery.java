@@ -28,9 +28,9 @@ public class SelectQuery {
                 .build();
     }
 
-    public String findCollection(EntityTable entityTable, String columnName, Object value) {
+    public String findCollection(EntityTable entityTable, String columnName, Object id) {
         return find(entityTable)
-                .where(columnName, value)
+                .where(columnName, id)
                 .build();
     }
 
