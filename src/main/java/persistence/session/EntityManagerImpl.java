@@ -11,7 +11,6 @@ import persistence.entity.PersistenceContext;
 import persistence.entity.Status;
 import persistence.meta.Metamodel;
 import persistence.sql.definition.TableAssociationDefinition;
-import persistence.sql.definition.TableDefinition;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -134,7 +133,7 @@ public class EntityManagerImpl implements EntityManager {
         checkManagedEntity(entity, entityEntry);
 
         final EntitySnapshot entitySnapshot = persistenceContext.getDatabaseSnapshot(entityKey);
-        if (entitySnapshot.hasDirtyColumns(entity, metamodel.findTableDefinition(entity.getClass()))) {
+        if (entitySnapshot.hasDirtyColumns(entity, metamodel.findEntityPersister(entity.getClass()))) {
             entityPersister.update(entity);
         }
 
@@ -166,10 +165,10 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     private void storeEntityInContext(EntityKey entityKey, Object entity) {
-        final TableDefinition tableDefinition = metamodel.findTableDefinition(entity.getClass());
+        final EntityPersister persister = metamodel.findEntityPersister(entity.getClass());
 
         persistenceContext.addEntity(entityKey, entity);
-        persistenceContext.addDatabaseSnapshot(entityKey, entity, tableDefinition);
+        persistenceContext.addDatabaseSnapshot(entityKey, entity, persister);
     }
 
     private void updateEntryToManaged(EntityKey entityKey, EntityEntry entityEntry) {
@@ -178,7 +177,7 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         clear();
     }
 }

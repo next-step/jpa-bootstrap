@@ -19,7 +19,7 @@ public class EntityLoader {
 
         metamodel.resolveEagerAssociation(entityClass)
                 .forEach(association ->
-                        queryBuilder.join(metamodel.findTableDefinition(association.getAssociatedEntityClass()))
+                        queryBuilder.join(metamodel.findEntityPersister(association.getAssociatedEntityClass()))
                 );
 
         final String query = queryBuilder.buildById(entityKey.id());

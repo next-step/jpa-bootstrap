@@ -1,17 +1,27 @@
 package persistence.sql.dml.query;
 
+import database.H2;
+import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.Test;
+import persistence.entity.EntityPersister;
 import persistence.fixtures.TestLazyOrder;
 import persistence.fixtures.TestLazyOrderItem;
+import persistence.meta.Metadata;
+import persistence.meta.MetadataImpl;
 import persistence.meta.Metamodel;
-import persistence.meta.MetamodelInitializer;
 import persistence.sql.definition.TableDefinition;
+
+import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SelectQueryBuilderTest {
 
-    private final Metamodel metamodel = new MetamodelInitializer(null).getMetamodel();
+    private final Metadata metadata = new MetadataImpl(new H2());
+    private final Metamodel metamodel = new Metamodel(metadata, new JdbcTemplate(metadata.getDatabase().getConnection()));
+
+    SelectQueryBuilderTest() throws SQLException {
+    }
 
     @Test
     void testSelectSingleTable() {
@@ -28,11 +38,11 @@ class SelectQueryBuilderTest {
     @Test
     void testSelectSingleTableWithJoin() {
         TestLazyOrder order = new TestLazyOrder("order_number");
-        TableDefinition orderTableDefinition = metamodel.findTableDefinition(order.getClass());
+        EntityPersister entityPersister = metamodel.findEntityPersister(order.getClass());
 
         SelectQueryBuilder selectQuery = new SelectQueryBuilder(order.getClass(), metamodel);
-        orderTableDefinition.getAssociations().forEach(association -> {
-            selectQuery.join(metamodel.findTableDefinition(association.getAssociatedEntityClass()));
+        entityPersister.getAssociations().forEach(association -> {
+            selectQuery.join(metamodel.findEntityPersister(association.getAssociatedEntityClass()));
         });
 
         assertThat(selectQuery.buildById(1)).isEqualTo(
@@ -50,9 +60,9 @@ class SelectQueryBuilderTest {
     @Test
     void testFindAll() {
         TestLazyOrder order = new TestLazyOrder(1L, "order_number");
-        TableDefinition orderTableDefinition = metamodel.findTableDefinition(order.getClass());
-        String joinColumnName = orderTableDefinition.getJoinColumnName(TestLazyOrderItem.class);
-        Object joinColumnValue = orderTableDefinition.getValue(order, joinColumnName);
+        EntityPersister entityPersister = metamodel.findEntityPersister(order.getClass());
+        String joinColumnName = entityPersister.getJoinColumnName(TestLazyOrderItem.class);
+        Object joinColumnValue = entityPersister.getValue(order, joinColumnName);
 
         TestLazyOrderItem orderItem = new TestLazyOrderItem("product", 1);
         String selectQuery = new SelectQueryBuilder(orderItem.getClass(), metamodel)

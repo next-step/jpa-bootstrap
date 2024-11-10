@@ -4,15 +4,12 @@ import database.DatabaseServer;
 import database.H2;
 import domain.Department;
 import domain.Employee;
-import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.meta.Metadata;
+import persistence.meta.MetadataImpl;
 import persistence.session.EntityManager;
 import persistence.session.EntityManagerFactory;
-import persistence.session.EntityManagerFactoryImpl;
-import persistence.session.ThreadLocalCurrentSessionContext;
-import persistence.sql.H2Dialect;
-import persistence.sql.ddl.query.CreateTableQueryBuilder;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -28,20 +25,10 @@ public class Application {
 
         try {
             server.start();
-            final JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
+            Metadata metadata = new MetadataImpl(server);
 
-            doInJpa(() -> new EntityManagerFactoryImpl(new ThreadLocalCurrentSessionContext(), server),
+            doInJpa(metadata::buildEntityManagerFactory,
                     em -> {
-                        jdbcTemplate.execute(
-                                new CreateTableQueryBuilder(new H2Dialect(), Department.class, em.getMetamodel())
-                                        .build()
-                        );
-
-                        jdbcTemplate.execute(
-                                new CreateTableQueryBuilder(new H2Dialect(), Employee.class, em.getMetamodel())
-                                        .build()
-                        );
-
                         Department department = new Department("IT");
                         Employee employee = new Employee("John Doe");
                         Employee employee2 = new Employee("Jane Doe");

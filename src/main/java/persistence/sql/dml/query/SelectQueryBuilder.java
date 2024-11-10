@@ -2,8 +2,8 @@ package persistence.sql.dml.query;
 
 import common.AliasRule;
 import common.SqlLogger;
+import persistence.entity.EntityPersister;
 import persistence.meta.Metamodel;
-import persistence.sql.definition.TableDefinition;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,29 +14,28 @@ import java.util.StringJoiner;
 
 public class SelectQueryBuilder implements BaseQueryBuilder {
     private final StringBuilder query = new StringBuilder();
-    private final TableDefinition tableDefinition;
+    private final EntityPersister entityPersister;
     private final List<String> columns = new ArrayList<>();
     private final Map<String, String> conditions = new HashMap<>();
 
-    private TableDefinition joinTableDefinition;
+    private EntityPersister joinEntityPersister;
     private final List<String> joinTableColumns = new ArrayList<>();
 
     public SelectQueryBuilder(Class<?> entityClass, Metamodel metamodel) {
-        final TableDefinition tableDefinition = metamodel.findTableDefinition(entityClass);
-        this.tableDefinition = tableDefinition;
-        tableDefinition.getColumns().forEach(column -> {
+        final EntityPersister entityPersister = metamodel.findEntityPersister(entityClass);
+        this.entityPersister = entityPersister;
+        entityPersister.getColumns().forEach(column -> {
                     columns.add(column.getDatabaseColumnName());
                 }
         );
     }
 
-    public SelectQueryBuilder join(TableDefinition joinTableDefinition) {
-        this.joinTableDefinition = joinTableDefinition;
-        this.joinTableDefinition.getColumns().forEach(column -> {
+    public void join(EntityPersister joinEntityPersister) {
+        this.joinEntityPersister = joinEntityPersister;
+        this.joinEntityPersister.getColumns().forEach(column -> {
                     joinTableColumns.add(column.getDatabaseColumnName());
                 }
         );
-        return this;
     }
 
     public SelectQueryBuilder where(String column, String value) {
@@ -48,37 +47,37 @@ public class SelectQueryBuilder implements BaseQueryBuilder {
         query.append("SELECT ")
                 .append(columnsClause())
                 .append(" FROM ")
-                .append(tableDefinition.getTableName());
+                .append(entityPersister.getTableName());
     }
 
     private String columnsClause() {
         final StringJoiner joiner = new StringJoiner(", ");
 
         columns.forEach(column -> {
-            final String aliased = AliasRule.with(tableDefinition.getTableName(), column);
-            joiner.add(tableDefinition.getTableName() + "." + column + " AS " + aliased);
+            final String aliased = AliasRule.with(entityPersister.getTableName(), column);
+            joiner.add(entityPersister.getTableName() + "." + column + " AS " + aliased);
         });
 
         joinTableColumns.forEach(column -> {
-            final String aliased = AliasRule.with(joinTableDefinition.getTableName(), column);
-            joiner.add(joinTableDefinition.getTableName() + "." + column + " AS " + aliased);
+            final String aliased = AliasRule.with(joinEntityPersister.getTableName(), column);
+            joiner.add(joinEntityPersister.getTableName() + "." + column + " AS " + aliased);
         });
 
         return joiner.toString();
     }
 
     private void joinClause() {
-        if (joinTableDefinition != null) {
+        if (joinEntityPersister != null) {
             query.append(" LEFT JOIN ")
-                    .append(joinTableDefinition.getTableName())
+                    .append(joinEntityPersister.getTableName())
                     .append(" ON ")
-                    .append(joinTableDefinition.getTableName())
+                    .append(joinEntityPersister.getTableName())
                     .append(".")
-                    .append(tableDefinition.getJoinColumnName(joinTableDefinition.getEntityClass()))
+                    .append(entityPersister.getJoinColumnName(joinEntityPersister.getEntityClass()))
                     .append(" = ")
-                    .append(tableDefinition.getTableName())
+                    .append(entityPersister.getTableName())
                     .append(".")
-                    .append(tableDefinition.getIdColumnName());
+                    .append(entityPersister.getIdColumnName());
         }
     }
 
@@ -90,7 +89,7 @@ public class SelectQueryBuilder implements BaseQueryBuilder {
 
         query.append(" WHERE ");
         conditions.forEach((column, value) -> {
-            joiner.add(tableDefinition.getTableName() + "." + column + " = " + getQuoted(value));
+            joiner.add(entityPersister.getTableName() + "." + column + " = " + getQuoted(value));
         });
         query.append(joiner);
     }
@@ -98,9 +97,9 @@ public class SelectQueryBuilder implements BaseQueryBuilder {
     private void whereByIdClause(Serializable id) {
         query
                 .append(" WHERE ")
-                .append(tableDefinition.getTableName())
+                .append(entityPersister.getTableName())
                 .append(".")
-                .append(tableDefinition.getIdColumnName())
+                .append(entityPersister.getIdColumnName())
                 .append(" = ")
                 .append(getQuoted(id)).append(";");
     }

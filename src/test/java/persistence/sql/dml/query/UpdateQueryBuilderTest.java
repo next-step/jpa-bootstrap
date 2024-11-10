@@ -6,16 +6,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.sql.definition.TableDefinition;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UpdateQueryBuilderTest {
     @Entity
-    private static class HasNullableColumnEntity {
+    private static class HasNullableColumnEntity2 {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
@@ -24,15 +22,15 @@ class UpdateQueryBuilderTest {
 
         private Integer age;
 
-        public HasNullableColumnEntity() {
+        public HasNullableColumnEntity2() {
         }
 
-        public HasNullableColumnEntity(Long id, Integer age) {
+        public HasNullableColumnEntity2(Long id, Integer age) {
             this.id = id;
             this.age = age;
         }
 
-        public HasNullableColumnEntity(Long id, String name, Integer age) {
+        public HasNullableColumnEntity2(Long id, String name, Integer age) {
             this.id = id;
             this.name = name;
             this.age = age;

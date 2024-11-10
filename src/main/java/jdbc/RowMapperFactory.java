@@ -1,7 +1,7 @@
 package jdbc;
 
+import persistence.entity.EntityPersister;
 import persistence.meta.Metamodel;
-import persistence.sql.definition.TableDefinition;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,13 +29,13 @@ public class RowMapperFactory {
         if (rowMapper != null) {
             return rowMapper;
         }
-        final TableDefinition tableDefinition = metamodel.findTableDefinition(targetClass);
-        for (var association : tableDefinition.getAssociations()) {
+        final EntityPersister entityPersister = metamodel.findEntityPersister(targetClass);
+        for (var association : entityPersister.getAssociations()) {
             if (association.isEager()) {
                 return (RowMapper<T>) eagerFetchRowMappers.computeIfAbsent(targetClass,
                         k -> new EagerFetchRowMapper<>(targetClass,
-                                metamodel.findTableDefinition(targetClass),
-                                metamodel.findTableDefinition(association.getAssociatedEntityClass())
+                                metamodel.findEntityPersister(targetClass),
+                                metamodel.findEntityPersister(association.getAssociatedEntityClass())
                         ));
             }
         }

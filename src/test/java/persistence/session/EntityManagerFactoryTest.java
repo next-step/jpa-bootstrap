@@ -7,6 +7,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.meta.Metadata;
+import persistence.meta.MetadataImpl;
 import persistence.meta.Metamodel;
 
 import java.sql.SQLException;
@@ -16,13 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class EntityManagerFactoryTest {
 
     private static DatabaseServer server;
-    private static Metamodel metamodel;
-    private static JdbcTemplate jdbcTemplate;
+    private static Metadata metadata;
 
     @BeforeEach
     void setUp() throws SQLException {
         server = new H2();
         server.start();
+        metadata = new MetadataImpl(server);
     }
 
     @AfterEach
@@ -35,7 +37,7 @@ public class EntityManagerFactoryTest {
     void currentSessionExists() throws SQLException {
         EntityManagerFactory entityManagerFactory = new EntityManagerFactoryImpl(
                 new ThreadLocalCurrentSessionContext(),
-                server
+                metadata
         );
 
         EntityManager em1 = entityManagerFactory.openSession();

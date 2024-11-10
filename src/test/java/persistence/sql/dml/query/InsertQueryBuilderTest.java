@@ -23,7 +23,7 @@ class InsertQueryBuilderTest {
     }
 
     @Entity
-    private static class HasNullableColumnEntity {
+    private static class HasNullableColumnEntity1 {
         @Id
         private Long id;
 
@@ -31,14 +31,14 @@ class InsertQueryBuilderTest {
 
         private Integer age;
 
-        public HasNullableColumnEntity() {
+        public HasNullableColumnEntity1() {
         }
 
-        public HasNullableColumnEntity(Long id) {
+        public HasNullableColumnEntity1(Long id) {
             this.id = id;
         }
 
-        public HasNullableColumnEntity(Long id, Integer age) {
+        public HasNullableColumnEntity1(Long id, Integer age) {
             this.id = id;
             this.age = age;
         }
@@ -46,15 +46,15 @@ class InsertQueryBuilderTest {
 
     @Test
     void testIgnoreNullableColumnInInsertQuery() {
-        HasNullableColumnEntity hasNullableColumnEntity1 = new HasNullableColumnEntity(1L);
-        HasNullableColumnEntity hasNullableColumnEntity2 = new HasNullableColumnEntity(2L, 10);
+        HasNullableColumnEntity1 hasNullableColumnEntity1 = new HasNullableColumnEntity1(1L);
+        HasNullableColumnEntity1 hasNullableColumnEntity2 = new HasNullableColumnEntity1(2L, 10);
 
-        String query1 = new InsertQueryBuilder().build(hasNullableColumnEntity1, new TableDefinition(HasNullableColumnEntity.class));
-        String query2 = new InsertQueryBuilder().build(hasNullableColumnEntity2, new TableDefinition(HasNullableColumnEntity.class));
+        String query1 = new InsertQueryBuilder().build(hasNullableColumnEntity1, new TableDefinition(HasNullableColumnEntity1.class));
+        String query2 = new InsertQueryBuilder().build(hasNullableColumnEntity2, new TableDefinition(HasNullableColumnEntity1.class));
 
         assertAll(
-                () -> assertThat(query1).isEqualTo("INSERT INTO HasNullableColumnEntity (id) VALUES (1);"),
-                () -> assertThat(query2).isEqualTo("INSERT INTO HasNullableColumnEntity (id, age) VALUES (2, 10);")
+                () -> assertThat(query1).isEqualTo("INSERT INTO HasNullableColumnEntity1 (id) VALUES (1);"),
+                () -> assertThat(query2).isEqualTo("INSERT INTO HasNullableColumnEntity1 (id, age) VALUES (2, 10);")
         );
     }
 }

@@ -10,11 +10,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.meta.Metadata;
+import persistence.meta.MetadataImpl;
 import persistence.meta.Metamodel;
-import persistence.meta.MetamodelInitializer;
+import persistence.session.SchemaManagementToolCoordinator;
 import persistence.sql.Dialect;
 import persistence.sql.H2Dialect;
-import persistence.sql.ddl.query.CreateTableQueryBuilder;
 import persistence.sql.ddl.query.DropQueryBuilder;
 
 import java.sql.SQLException;
@@ -58,6 +59,7 @@ class EntityLoaderTest {
     }
 
     private static DatabaseServer server;
+    private static Metadata metadata;
     private static Metamodel metamodel;
 
     @BeforeEach
@@ -65,26 +67,17 @@ class EntityLoaderTest {
         server = new H2();
         server.start();
 
-        Dialect dialect = new H2Dialect();
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        metamodel = new MetamodelInitializer(jdbcTemplate).getMetamodel();
 
-        String createTestEntity1TableQuery = new CreateTableQueryBuilder(dialect, EntityLoaderTestEntity1.class, metamodel).build();
-        String createTestEntity2TableQuery = new CreateTableQueryBuilder(dialect, EntityLoaderTestEntity2.class, metamodel).build();
-
-        jdbcTemplate.execute(createTestEntity1TableQuery);
-        jdbcTemplate.execute(createTestEntity2TableQuery);
+        metadata = new MetadataImpl(server);
+        SchemaManagementToolCoordinator.processCreateTable(jdbcTemplate, metadata);
+        metamodel = new Metamodel(metadata, jdbcTemplate);
     }
 
     @AfterEach
     void tearDown() throws SQLException {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-
-        String dropTestEntity1TableQuery = new DropQueryBuilder(EntityLoaderTestEntity1.class, metamodel).build();
-        String dropTestEntity2TableQuery = new DropQueryBuilder(EntityLoaderTestEntity2.class, metamodel).build();
-
-        jdbcTemplate.execute(dropTestEntity1TableQuery);
-        jdbcTemplate.execute(dropTestEntity2TableQuery);
+        SchemaManagementToolCoordinator.processDropTable(jdbcTemplate, metadata);
         server.stop();
     }
 

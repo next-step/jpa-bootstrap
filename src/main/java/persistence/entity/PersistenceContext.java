@@ -1,7 +1,5 @@
 package persistence.entity;
 
-import persistence.sql.definition.TableDefinition;
-
 public interface PersistenceContext {
 
     Object getEntity(EntityKey entityKey);
@@ -12,7 +10,7 @@ public interface PersistenceContext {
 
     void addEntity(EntityKey entityKey, Object entity);
 
-    void addDatabaseSnapshot(EntityKey entityKey, Object entity, TableDefinition tableDefinition);
+    void addDatabaseSnapshot(EntityKey entityKey, Object entity, EntityPersister entityPersister);
 
     void removeEntity(EntityKey entityKey);
 
