@@ -20,11 +20,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
     @Override
     public EntityManager openSession() throws SQLException {
-        final EntityManager currentSession = currentSessionContext.currentSession();
-        if (currentSession != null) {
-            throw new IllegalStateException("Session already opened");
-        }
-
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
         final MetamodelInitializer metamodelInitializer = new MetamodelInitializer(jdbcTemplate);
 

@@ -11,42 +11,74 @@ import persistence.session.EntityManager;
 import persistence.session.EntityManagerFactory;
 import persistence.session.EntityManagerFactoryImpl;
 import persistence.session.ThreadLocalCurrentSessionContext;
+import persistence.sql.H2Dialect;
+import persistence.sql.ddl.query.CreateTableQueryBuilder;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         logger.info("Starting application...");
+        final DatabaseServer server = new H2();
+
         try {
-            final DatabaseServer server = new H2();
             server.start();
-
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-            final EntityManagerFactory emf = new EntityManagerFactoryImpl(new ThreadLocalCurrentSessionContext(), server);
 
+            doInJpa(() -> new EntityManagerFactoryImpl(new ThreadLocalCurrentSessionContext(), server),
+                    em -> {
+                        jdbcTemplate.execute(
+                                new CreateTableQueryBuilder(new H2Dialect(), Department.class, em.getMetamodel())
+                                        .build()
+                        );
 
-            jdbcTemplate.execute("CREATE TABLE department (department_id BIGINT AUTO_INCREMENT, name VARCHAR(255), PRIMARY KEY (department_id));");
-            jdbcTemplate.execute("CREATE TABLE employee (id BIGINT AUTO_INCREMENT, name VARCHAR(255), department_id BIGINT, PRIMARY KEY (id), FOREIGN KEY (department_id) REFERENCES department(department_id));");
+                        jdbcTemplate.execute(
+                                new CreateTableQueryBuilder(new H2Dialect(), Employee.class, em.getMetamodel())
+                                        .build()
+                        );
 
-            final EntityManager em = emf.openSession();
+                        Department department = new Department("IT");
+                        Employee employee = new Employee("John Doe");
+                        Employee employee2 = new Employee("Jane Doe");
 
-            Department department = new Department("IT");
-            Employee employee = new Employee("John Doe");
-            Employee employee2 = new Employee("Jane Doe");
-            department.getEmployees().add(employee);
-            department.getEmployees().add(employee2);
+                        department.getEmployees().addAll(List.of(employee, employee2));
 
-            em.persist(department);
-            em.clear();
+                        em.persist(department);
+                        em.clear();
 
-            Department saved = em.find(Department.class, 1L);
+                        Department saved = em.find(Department.class, 1L);
 
-            saved.getEmployees().forEach(emp -> logger.info(emp.getName()));
-            server.stop();
+                        logger.info("before lazy loading...");
+                        saved.getEmployees().forEach(emp -> logger.info(emp.getName()));
+
+                        return saved;
+                    }
+            );
+
         } catch (Exception e) {
             logger.error("Error occurred", e);
         } finally {
+            server.stop();
             logger.info("Application finished");
+        }
+    }
+
+    private static <T> T doInJpa(Supplier<EntityManagerFactory> factorySupplier,
+                                 Function<EntityManager, T> function) {
+
+        try (EntityManagerFactory emf = factorySupplier.get()) {
+            try (EntityManager em = emf.openSession()) {
+                return function.apply(em);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

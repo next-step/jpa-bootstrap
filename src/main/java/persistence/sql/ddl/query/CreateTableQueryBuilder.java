@@ -16,8 +16,7 @@ public class CreateTableQueryBuilder {
     public CreateTableQueryBuilder(
             Dialect dialect,
             Class<?> entityClass,
-            Metamodel metamodel,
-            List<ColumnDefinitionAware> additionalColumns
+            Metamodel metamodel
     ) {
         TableDefinition tableDefinition = metamodel.findTableDefinition(entityClass);
         this.query = new StringBuilder();
@@ -27,7 +26,9 @@ public class CreateTableQueryBuilder {
         query.append(" (");
 
         columnClause(tableDefinition.getTableId(), tableDefinition.getColumns());
-        additionalColumns.forEach(column -> {
+
+        List<? extends ColumnDefinitionAware> foreignKeys = metamodel.getForeignKeys(entityClass);
+        foreignKeys.forEach(column -> {
             appendColumn(column);
             query.append(", ");
         });

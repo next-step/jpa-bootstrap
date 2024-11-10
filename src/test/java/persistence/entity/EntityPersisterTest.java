@@ -68,11 +68,14 @@ class EntityPersisterTest {
         metamodel = new MetamodelInitializer(jdbcTemplate).getMetamodel();
         entityPersister = new EntityPersister(metamodel.findTableDefinition(QueryTestEntityWithIdentityId.class), jdbcTemplate);
 
-        jdbcTemplate.execute(new CreateTableQueryBuilder(new H2Dialect(), QueryTestEntityWithIdentityId.class, metamodel, List.of()).build());
+        jdbcTemplate.execute(
+                new CreateTableQueryBuilder(new H2Dialect(), QueryTestEntityWithIdentityId.class, metamodel)
+                        .build()
+        );
     }
 
     @AfterEach
-    void tearDown() throws SQLException {
+    void tearDown() {
         String query2 = new DropQueryBuilder(QueryTestEntityWithIdentityId.class, metamodel).build();
 
         jdbcTemplate.execute(query2);

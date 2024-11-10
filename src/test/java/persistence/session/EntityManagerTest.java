@@ -69,7 +69,7 @@ public class EntityManagerTest {
         jdbcTemplate = new JdbcTemplate(server.getConnection());
         metamodel = new MetamodelInitializer(jdbcTemplate).getMetamodel();
 
-        String query = new CreateTableQueryBuilder(new H2Dialect(), EntityManagerTestEntityWithIdentityId.class, metamodel, List.of()).build();
+        String query = new CreateTableQueryBuilder(new H2Dialect(), EntityManagerTestEntityWithIdentityId.class, metamodel).build();
         jdbcTemplate.execute(query);
 
         jdbcTemplate.execute(TestLazyOrder.createTableQuery());

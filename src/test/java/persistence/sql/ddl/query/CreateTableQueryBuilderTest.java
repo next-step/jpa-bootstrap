@@ -11,8 +11,6 @@ import persistence.sql.ddl.fixtures.TestEntityWithIdentityIdStrategy;
 import persistence.sql.ddl.fixtures.TestEntityWithNullableColumns;
 import persistence.sql.ddl.fixtures.TestEntityWithTransientColumn;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CreateTableQueryBuilderTest {
@@ -24,7 +22,7 @@ class CreateTableQueryBuilderTest {
     void createTable_TestEntityWithAutoIdStrategy() {
         String query = new CreateTableQueryBuilder(
                 dialect, TestEntityWithAutoIdStrategy.class,
-                metamodel, List.of()
+                metamodel
         ).build();
 
         assertThat(query).isEqualTo(
@@ -37,7 +35,7 @@ class CreateTableQueryBuilderTest {
     void createTable_TestEntityWithIdentityIdStrategy() {
         String query = new CreateTableQueryBuilder(
                 dialect, TestEntityWithIdentityIdStrategy.class,
-                metamodel, List.of()
+                metamodel
         ).build();
 
         assertThat(query).isEqualTo(
@@ -51,7 +49,7 @@ class CreateTableQueryBuilderTest {
     void createTable_TestEntityWithNullableColumns() {
         String query = new CreateTableQueryBuilder(
                 dialect, TestEntityWithNullableColumns.class,
-                metamodel, List.of()
+                metamodel
         ).build();
 
         assertThat(query).isEqualTo(
@@ -68,7 +66,7 @@ class CreateTableQueryBuilderTest {
     void createTable_TestEntityWithTransientColumn() {
         String query = new CreateTableQueryBuilder(
                 dialect, TestEntityWithTransientColumn.class,
-                metamodel, List.of()
+                metamodel
         ).build();
 
         assertThat(query).isEqualTo(

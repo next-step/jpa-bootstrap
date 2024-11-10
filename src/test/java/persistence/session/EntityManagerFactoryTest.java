@@ -11,7 +11,7 @@ import persistence.meta.Metamodel;
 
 import java.sql.SQLException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class EntityManagerFactoryTest {
 
@@ -31,15 +31,16 @@ public class EntityManagerFactoryTest {
     }
 
     @Test
-    @DisplayName("현재 session이 존재하면 새롭게 session을 open할 수 없다.")
+    @DisplayName("openSession이 호출될 때마다 새로운 세션을 생성한다.")
     void currentSessionExists() throws SQLException {
         EntityManagerFactory entityManagerFactory = new EntityManagerFactoryImpl(
                 new ThreadLocalCurrentSessionContext(),
                 server
         );
 
-        entityManagerFactory.openSession();
-        assertThrows(IllegalStateException.class, entityManagerFactory::openSession);
+        EntityManager em1 = entityManagerFactory.openSession();
+        EntityManager em2 = entityManagerFactory.openSession();
 
+        assertThat(em1).isNotEqualTo(em2);
     }
 }
