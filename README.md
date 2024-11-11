@@ -70,3 +70,7 @@ public class EntityManagerFactoryImpl {
 ```
 ### 요구 사항 2 - EntityManagerFactory 를 적용하여 리팩터링을 해보자
 
+## 3단계 - Event
+
+### 요구 사항 1 - EventType 을 활용해 리팩터링 해보기
+### 요구 사항 2 - Queue 를 활용해 데이터베이스 반영 시 최적화 해보기
