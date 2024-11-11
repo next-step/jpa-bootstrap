@@ -1,17 +1,13 @@
 package persistence.sql.ddl.query;
 
-import persistence.meta.Metamodel;
-import persistence.sql.definition.TableDefinition;
-
 public class DropQueryBuilder {
     private final StringBuilder query;
 
-    public DropQueryBuilder(Class<?> entityClass, Metamodel metamodel) {
+    public DropQueryBuilder(String tableName) {
         query = new StringBuilder();
-        TableDefinition tableDefinition = metamodel.findTableDefinition(entityClass);
 
         query.append("DROP TABLE ");
-        query.append(tableDefinition.getTableName());
+        query.append(tableName);
         query.append(" if exists;");
     }
 

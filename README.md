@@ -51,3 +51,22 @@ private Long id;
   - [x] base scan package를 properties 파일로 관리할 수 있도록 수정...
 - [x] TableDefinition, EntityPersister를 사전에 Metamodel에 만들어 두고, EntityManager에서는 Metamodel을 의존하여 사용한다
 
+## 2단계 - SessionFactory
+
+### 요구 사항 1 - EntityManagerFactory 를 만들어 보기
+```java
+public class EntityManagerFactoryImpl {
+    private final CurrentSessionContext currentSessionContext;
+    // 메서드 및 책임을 자유롭게 추가해도 됩니다.
+
+    public EntityManagerFactoryImpl(적절히) {
+        // 구현해보기
+    }
+
+    public EntityManager openSession(적절히) {
+        // 구현해보기
+    }
+}
+```
+### 요구 사항 2 - EntityManagerFactory 를 적용하여 리팩터링을 해보자
+

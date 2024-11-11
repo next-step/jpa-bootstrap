@@ -101,8 +101,12 @@ public class EntityPersister {
         return tableDefinition.getTableName();
     }
 
-    public Serializable getIdName() {
+    public String getIdName() {
         return tableDefinition.getIdFieldName();
+    }
+
+    public String getIdColumnName() {
+        return tableDefinition.getIdColumnName();
     }
 
     public List<? extends ColumnDefinitionAware> getColumns() {
@@ -115,6 +119,10 @@ public class EntityPersister {
 
     public Object getValue(Object entity, ColumnDefinitionAware column) {
         return tableDefinition.getValue(entity, column);
+    }
+
+    public Object getValue(Object entity, String columnName) {
+        return tableDefinition.getValue(entity, columnName);
     }
 
     private String getQuoted(Object value) {

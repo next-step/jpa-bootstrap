@@ -24,4 +24,8 @@ public class SqlLogger {
     public static void infoSelect(String query) {
         logger.info("Selecting with query: {}", query);
     }
+
+    public static void infoDropTable(String query) {
+        logger.info("Dropping table with query: {}", query);
+    }
 }

@@ -1,6 +1,8 @@
-package persistence.entity;
+package persistence.session;
 
-public interface EntityManager {
+import persistence.meta.Metamodel;
+
+public interface EntityManager extends AutoCloseable {
 
     <T> T find(Class<T> clazz, Object id);
 
@@ -11,4 +13,6 @@ public interface EntityManager {
     <T> T merge(T entity);
 
     void clear();
+
+    Metamodel getMetamodel();
 }

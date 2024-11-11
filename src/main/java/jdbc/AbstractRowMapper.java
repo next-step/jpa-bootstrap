@@ -2,8 +2,8 @@ package jdbc;
 
 import common.AliasRule;
 import common.ReflectionFieldAccessUtils;
+import persistence.entity.EntityPersister;
 import persistence.sql.definition.ColumnDefinitionAware;
-import persistence.sql.definition.TableDefinition;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -11,11 +11,11 @@ import java.sql.SQLException;
 
 public abstract class AbstractRowMapper<T> implements RowMapper<T> {
     private final Class<T> clazz;
-    private final TableDefinition tableDefinition;
+    private final EntityPersister entityPersister;
 
-    protected AbstractRowMapper(Class<T> clazz, TableDefinition tableDefinition) {
+    protected AbstractRowMapper(Class<T> clazz, EntityPersister entityPersister) {
         this.clazz = clazz;
-        this.tableDefinition = tableDefinition;
+        this.entityPersister = entityPersister;
     }
 
     protected abstract void setAssociation(ResultSet resultSet, T instance) throws NoSuchFieldException, SQLException;
@@ -25,7 +25,7 @@ public abstract class AbstractRowMapper<T> implements RowMapper<T> {
     public T mapRow(ResultSet resultSet) throws SQLException {
         try {
             final T instance = (T) newInstance(clazz);
-            setColumns(resultSet, tableDefinition, instance);
+            setColumns(resultSet, entityPersister, instance);
             setAssociation(resultSet, instance);
             return instance;
         } catch (ReflectiveOperationException e) {
@@ -41,16 +41,16 @@ public abstract class AbstractRowMapper<T> implements RowMapper<T> {
         }
     }
 
-    protected void setColumns(ResultSet resultSet, TableDefinition tableDefinition,
+    protected void setColumns(ResultSet resultSet, EntityPersister entityPersister,
                               Object instance) throws NoSuchFieldException, SQLException {
 
-        final Class<?> entityClass = tableDefinition.getEntityClass();
+        final Class<?> entityClass = entityPersister.getEntityClass();
 
-        for (ColumnDefinitionAware column : tableDefinition.getColumns()) {
+        for (ColumnDefinitionAware column : entityPersister.getColumns()) {
             final String databaseColumnName = column.getDatabaseColumnName();
             final Field instanceField = entityClass.getDeclaredField(column.getEntityFieldName());
             final Object result = resultSet.getObject(
-                    AliasRule.with(tableDefinition.getTableName(), databaseColumnName));
+                    AliasRule.with(entityPersister.getTableName(), databaseColumnName));
 
             ReflectionFieldAccessUtils.accessAndSet(instance, instanceField, result);
         }

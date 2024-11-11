@@ -31,8 +31,8 @@ public class StatefulPersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public void addDatabaseSnapshot(EntityKey entityKey, Object entity, TableDefinition tableDefinition) {
-        final EntitySnapshot entitySnapshot = new EntitySnapshot(entity, tableDefinition);
+    public void addDatabaseSnapshot(EntityKey entityKey, Object entity, EntityPersister entityPersister) {
+        final EntitySnapshot entitySnapshot = new EntitySnapshot(entity, entityPersister);
         entitySnapshots.put(entityKey, entitySnapshot);
     }
 

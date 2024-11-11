@@ -1,30 +1,31 @@
 package persistence.sql.ddl.query;
 
+import database.H2;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.meta.Metamodel;
-import persistence.meta.MetamodelInitializer;
-import persistence.sql.Dialect;
-import persistence.sql.H2Dialect;
+import persistence.meta.Metadata;
+import persistence.meta.MetadataImpl;
 import persistence.sql.ddl.fixtures.TestEntityWithAutoIdStrategy;
 import persistence.sql.ddl.fixtures.TestEntityWithIdentityIdStrategy;
 import persistence.sql.ddl.fixtures.TestEntityWithNullableColumns;
 import persistence.sql.ddl.fixtures.TestEntityWithTransientColumn;
 
-import java.util.List;
+import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CreateTableQueryBuilderTest {
-    private final Dialect dialect = new H2Dialect();
-    private final Metamodel metamodel = new MetamodelInitializer(null).getMetamodel();
+    private final Metadata metadata = new MetadataImpl(new H2());
+
+    CreateTableQueryBuilderTest() throws SQLException {
+    }
 
     @Test
     @DisplayName("Should create create table query for TestEntityWithAutoIdStrategy")
     void createTable_TestEntityWithAutoIdStrategy() {
         String query = new CreateTableQueryBuilder(
-                dialect, TestEntityWithAutoIdStrategy.class,
-                metamodel, List.of()
+                TestEntityWithAutoIdStrategy.class,
+                metadata
         ).build();
 
         assertThat(query).isEqualTo(
@@ -36,8 +37,8 @@ class CreateTableQueryBuilderTest {
     @DisplayName("Should create a CREATE TABLE query for TestEntityWithIdentityIdStrategy")
     void createTable_TestEntityWithIdentityIdStrategy() {
         String query = new CreateTableQueryBuilder(
-                dialect, TestEntityWithIdentityIdStrategy.class,
-                metamodel, List.of()
+                TestEntityWithIdentityIdStrategy.class,
+                metadata
         ).build();
 
         assertThat(query).isEqualTo(
@@ -50,8 +51,8 @@ class CreateTableQueryBuilderTest {
     @DisplayName("Should create a CREATE TABLE query for TestEntityWithNullableColumns")
     void createTable_TestEntityWithNullableColumns() {
         String query = new CreateTableQueryBuilder(
-                dialect, TestEntityWithNullableColumns.class,
-                metamodel, List.of()
+                TestEntityWithNullableColumns.class,
+                metadata
         ).build();
 
         assertThat(query).isEqualTo(
@@ -67,8 +68,8 @@ class CreateTableQueryBuilderTest {
     @DisplayName("Should create a CREATE TABLE query for TestEntityWithTransientColumn")
     void createTable_TestEntityWithTransientColumn() {
         String query = new CreateTableQueryBuilder(
-                dialect, TestEntityWithTransientColumn.class,
-                metamodel, List.of()
+                TestEntityWithTransientColumn.class,
+                metadata
         ).build();
 
         assertThat(query).isEqualTo(

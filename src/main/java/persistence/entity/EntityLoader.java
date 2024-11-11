@@ -3,7 +3,6 @@ package persistence.entity;
 import jdbc.JdbcTemplate;
 import jdbc.RowMapperFactory;
 import persistence.meta.Metamodel;
-import persistence.sql.definition.TableAssociationDefinition;
 import persistence.sql.dml.query.SelectQueryBuilder;
 
 public class EntityLoader {
@@ -17,12 +16,10 @@ public class EntityLoader {
 
     public <T> T loadEntity(Class<T> entityClass, EntityKey entityKey) {
         final SelectQueryBuilder queryBuilder = new SelectQueryBuilder(entityKey.entityClass(), metamodel);
-        final EntityPersister persister = metamodel.findEntityPersister(entityClass);
 
-        persister.getAssociations().stream()
-                .filter(TableAssociationDefinition::isEager)
+        metamodel.resolveEagerAssociation(entityClass)
                 .forEach(association ->
-                        queryBuilder.join(metamodel.findTableDefinition(association.getAssociatedEntityClass()))
+                        queryBuilder.join(metamodel.findEntityPersister(association.getAssociatedEntityClass()))
                 );
 
         final String query = queryBuilder.buildById(entityKey.id());

@@ -12,14 +12,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.meta.Metadata;
+import persistence.meta.MetadataImpl;
 import persistence.meta.Metamodel;
-import persistence.meta.MetamodelInitializer;
-import persistence.sql.H2Dialect;
-import persistence.sql.ddl.query.CreateTableQueryBuilder;
-import persistence.sql.ddl.query.DropQueryBuilder;
+import persistence.session.EntityManager;
+import persistence.session.EntityManagerImpl;
+import persistence.session.SchemaManagementToolCoordinator;
 
 import java.sql.SQLException;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -54,6 +54,7 @@ class EntityPersisterTest {
 
     private static DatabaseServer server;
     private static JdbcTemplate jdbcTemplate;
+    private static Metadata metadata;
     private static Metamodel metamodel;
     private static EntityPersister entityPersister;
 
@@ -63,17 +64,15 @@ class EntityPersisterTest {
         server.start();
 
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        metamodel = new MetamodelInitializer(jdbcTemplate).getMetamodel();
-        entityPersister = new EntityPersister(metamodel.findTableDefinition(QueryTestEntityWithIdentityId.class), jdbcTemplate);
-
-        jdbcTemplate.execute(new CreateTableQueryBuilder(new H2Dialect(), QueryTestEntityWithIdentityId.class, metamodel, List.of()).build());
+        metadata = new MetadataImpl(server);
+        SchemaManagementToolCoordinator.processCreateTable(jdbcTemplate, metadata);
+        metamodel = new Metamodel(metadata, jdbcTemplate);
+        entityPersister = metamodel.findEntityPersister(QueryTestEntityWithIdentityId.class);
     }
 
     @AfterEach
-    void tearDown() throws SQLException {
-        String query2 = new DropQueryBuilder(QueryTestEntityWithIdentityId.class, metamodel).build();
-
-        jdbcTemplate.execute(query2);
+    void tearDown() {
+        SchemaManagementToolCoordinator.processDropTable(jdbcTemplate, metadata);
         server.stop();
     }
 

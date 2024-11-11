@@ -2,6 +2,7 @@ package jdbc;
 
 import common.ReflectionFieldAccessUtils;
 import persistence.entity.EntityLazyLoader;
+import persistence.entity.EntityPersister;
 import persistence.meta.Metamodel;
 import persistence.proxy.PersistentList;
 import persistence.sql.definition.TableAssociationDefinition;
@@ -16,15 +17,15 @@ import java.util.List;
 
 public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
     private final Class<T> clazz;
-    private final TableDefinition tableDefinition;
+    private final EntityPersister entityPersister;
     private final JdbcTemplate jdbcTemplate;
     private final Metamodel metamodel;
 
     public LazyFetchRowMapper(Class<T> clazz,
                               JdbcTemplate jdbcTemplate,
                               Metamodel metamodel) {
-        super(clazz, metamodel.findTableDefinition(clazz));
-        this.tableDefinition = metamodel.findTableDefinition(clazz);
+        super(clazz, metamodel.findEntityPersister(clazz));
+        this.entityPersister = metamodel.findEntityPersister(clazz);
         this.clazz = clazz;
         this.jdbcTemplate = jdbcTemplate;
         this.metamodel = metamodel;
@@ -32,7 +33,7 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
 
     @Override
     protected void setAssociation(ResultSet resultSet, T instance) throws NoSuchFieldException, SQLException {
-        List<TableAssociationDefinition> associations = tableDefinition.getAssociations();
+        List<TableAssociationDefinition> associations = entityPersister.getAssociations();
         for (TableAssociationDefinition association : associations) {
             if (association.isEager()) {
                 continue;
@@ -56,8 +57,8 @@ public class LazyFetchRowMapper<T> extends AbstractRowMapper<T> {
 
     private EntityLazyLoader createLazyLoader(Class<?> elementClass) {
         return owner -> {
-            final String joinColumnName = tableDefinition.getJoinColumnName(elementClass);
-            final Object joinColumnValue = tableDefinition.getValue(owner, joinColumnName);
+            final String joinColumnName = entityPersister.getJoinColumnName(elementClass);
+            final Object joinColumnValue = entityPersister.getValue(owner, joinColumnName);
 
             final String query = new SelectQueryBuilder(elementClass, metamodel)
                     .where(joinColumnName, joinColumnValue.toString())

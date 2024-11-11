@@ -1,4 +1,4 @@
-package persistence.entity;
+package persistence.session;
 
 import database.DatabaseServer;
 import database.H2;
@@ -11,20 +11,19 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.entity.StatefulPersistenceContext;
 import persistence.fixtures.TestEagerOrder;
 import persistence.fixtures.TestEagerOrderItem;
 import persistence.fixtures.TestLazyOrder;
 import persistence.fixtures.TestLazyOrderItem;
+import persistence.meta.Metadata;
+import persistence.meta.MetadataImpl;
 import persistence.meta.Metamodel;
-import persistence.meta.MetamodelInitializer;
 import persistence.proxy.PersistentList;
-import persistence.sql.H2Dialect;
-import persistence.sql.ddl.query.CreateTableQueryBuilder;
 import persistence.sql.ddl.query.DropQueryBuilder;
 
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -58,35 +57,26 @@ public class EntityManagerTest {
     }
 
     private static DatabaseServer server;
+    private static Metadata metadata;
     private static Metamodel metamodel;
     private static JdbcTemplate jdbcTemplate;
+    private static EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
     void setUp() throws SQLException {
         server = new H2();
         server.start();
         jdbcTemplate = new JdbcTemplate(server.getConnection());
-        metamodel = new MetamodelInitializer(jdbcTemplate).getMetamodel();
+        metadata = new MetadataImpl(server);
+        metamodel = new Metamodel(metadata, jdbcTemplate);
 
-        String query = new CreateTableQueryBuilder(new H2Dialect(), EntityManagerTestEntityWithIdentityId.class, metamodel, List.of()).build();
-        jdbcTemplate.execute(query);
-
-        jdbcTemplate.execute(TestLazyOrder.createTableQuery());
-        jdbcTemplate.execute(TestEagerOrder.createTableQuery());
-        jdbcTemplate.execute(TestLazyOrderItem.createTableQuery());
-        jdbcTemplate.execute(TestEagerOrderItem.createTableQuery());
+        SchemaManagementToolCoordinator.processDropTable(jdbcTemplate, metadata);
+        entityManagerFactory = metadata.buildEntityManagerFactory();
     }
 
     @AfterEach
     void tearDown() throws SQLException {
-        String query = new DropQueryBuilder(EntityManagerTestEntityWithIdentityId.class, metamodel).build();
-
-        jdbcTemplate = new JdbcTemplate(server.getConnection());
-        jdbcTemplate.execute(query);
-        jdbcTemplate.execute(new DropQueryBuilder(TestLazyOrder.class, metamodel).build());
-        jdbcTemplate.execute(new DropQueryBuilder(TestEagerOrder.class, metamodel).build());
-        jdbcTemplate.execute(new DropQueryBuilder(TestLazyOrderItem.class, metamodel).build());
-        jdbcTemplate.execute(new DropQueryBuilder(TestEagerOrderItem.class, metamodel).build());
+        entityManagerFactory.close();
         server.stop();
     }
 

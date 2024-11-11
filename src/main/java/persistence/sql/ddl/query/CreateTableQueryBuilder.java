@@ -1,7 +1,6 @@
 package persistence.sql.ddl.query;
 
-import common.SqlLogger;
-import persistence.meta.Metamodel;
+import persistence.meta.Metadata;
 import persistence.sql.Dialect;
 import persistence.sql.definition.ColumnDefinitionAware;
 import persistence.sql.definition.TableDefinition;
@@ -13,21 +12,18 @@ public class CreateTableQueryBuilder {
     private final StringBuilder query;
     private final Dialect dialect;
 
-    public CreateTableQueryBuilder(
-            Dialect dialect,
-            Class<?> entityClass,
-            Metamodel metamodel,
-            List<ColumnDefinitionAware> additionalColumns
-    ) {
-        TableDefinition tableDefinition = metamodel.findTableDefinition(entityClass);
+    public CreateTableQueryBuilder(Class<?> entityClass, Metadata metadata) {
+        TableDefinition tableDefinition = metadata.findTableDefinition(entityClass);
         this.query = new StringBuilder();
-        this.dialect = dialect;
+        this.dialect = metadata.getDialect();
 
         query.append("CREATE TABLE ").append(tableDefinition.getTableName());
         query.append(" (");
 
         columnClause(tableDefinition.getTableId(), tableDefinition.getColumns());
-        additionalColumns.forEach(column -> {
+
+        List<? extends ColumnDefinitionAware> foreignKeys = metadata.getForeignKeys(entityClass);
+        foreignKeys.forEach(column -> {
             appendColumn(column);
             query.append(", ");
         });
@@ -60,9 +56,7 @@ public class CreateTableQueryBuilder {
     }
 
     public String build() {
-        final String sql = query.toString();
-        SqlLogger.infoCreateTable(sql);
-        return sql;
+        return query.toString();
     }
 
     private void definePrimaryKey(TableId pk, StringBuilder query) {
