@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TableDefinition {
 
@@ -212,5 +213,11 @@ public class TableDefinition {
         return columns.stream()
                 .map(column -> getValue(entity, column))
                 .toList();
+    }
+
+    public List<TableAssociationDefinition> resolveEagerAssociation() {
+        return getAssociations()
+                .stream().filter(TableAssociationDefinition::isEager)
+                .collect(Collectors.toList());
     }
 }

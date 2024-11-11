@@ -1,7 +1,6 @@
 package persistence.session;
 
 import jdbc.JdbcTemplate;
-import persistence.entity.CollectionPersister;
 import persistence.entity.EntityEntry;
 import persistence.entity.EntityKey;
 import persistence.entity.EntityLoader;
@@ -15,17 +14,14 @@ import persistence.event.EventSource;
 import persistence.event.PersistEvent;
 import persistence.event.PersistEventListener;
 import persistence.meta.Metamodel;
-import persistence.sql.definition.TableAssociationDefinition;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.function.Supplier;
 
 public class SessionImpl implements EventSource {
     private final PersistenceContext persistenceContext;
     private final Metamodel metamodel;
     private final EventListenerGroupHandler eventListenerGroupHandler;
-    private final EntityLoader entityLoader;
 
     public SessionImpl(JdbcTemplate jdbcTemplate,
                        PersistenceContext persistenceContext,
@@ -35,7 +31,6 @@ public class SessionImpl implements EventSource {
         this.persistenceContext = persistenceContext;
         this.metamodel = metamodel;
         this.eventListenerGroupHandler = eventListenerGroupHandler;
-        this.entityLoader = new EntityLoader(jdbcTemplate, metamodel);
     }
 
     @Override
@@ -51,10 +46,16 @@ public class SessionImpl implements EventSource {
             throw new IllegalArgumentException("Entity is not managed: " + clazz.getSimpleName());
         }
 
-        final T loaded = entityLoader.loadEntity(clazz, entityKey);
+        final T loaded = metamodel.findEntityLoader(clazz).loadEntity(clazz, entityKey);
         storeEntityInContext(entityKey, loaded);
         updateEntryToManaged(entityKey, entityEntry);
         return loaded;
+
+//        return eventListenerGroupHandler.LOAD
+//                .fireEventOnEachListener(
+//                        entityEntry,
+//                        () -> entityLoader.loadEntity(clazz, entityKey)
+//                );
     }
 
     private EntityEntry getEntityEntryOrDefault(EntityKey entityKey, Supplier<EntityEntry> defaultEntrySupplier) {
@@ -74,7 +75,6 @@ public class SessionImpl implements EventSource {
             return;
         }
 
-//        doPersist(entity, entityPersister);
         eventListenerGroupHandler.PERSIST
                 .fireEventOnEachListener(
                         PersistEvent.create(this, entity),
@@ -97,34 +97,6 @@ public class SessionImpl implements EventSource {
 
         throw new IllegalArgumentException("Entity already persisted");
     }
-
-//    private void doPersist(Object entity, EntityPersister entityPersister) {
-//        final EntityEntry entityEntry = EntityEntry.inSaving();
-//        entityPersister.insert(entity);
-//        startManageEntity(entity, entityEntry, entityPersister.getEntityId(entity));
-//
-//        for (TableAssociationDefinition association : entityPersister.getCollectionAssociations()) {
-//            final CollectionPersister collectionPersister = metamodel.findCollectionPersister(association);
-//            final Collection<Object> childEntities = collectionPersister.insertCollection(entity, association);
-//            childEntities.forEach(child -> {
-//                startManageEntity(child,
-//                        EntityEntry.inSaving(),
-//                        metamodel.findEntityPersister(child.getClass()).getEntityId(child));
-//            });
-//        }
-//    }
-
-//    private void startManageEntity(Object entity,
-//                                   EntityEntry entityEntry,
-//                                   Serializable id) {
-//
-//        final EntityKey entityKey = new EntityKey(id, entity.getClass());
-//        entityEntry.bindId(id);
-//        entityEntry.updateStatus(Status.MANAGED);
-//
-//        storeEntityInContext(entityKey, entity);
-//        updateEntryToManaged(entityKey, entityEntry);
-//    }
 
     @Override
     public void remove(Object entity) {

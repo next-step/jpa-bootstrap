@@ -14,25 +14,31 @@ import java.util.StringJoiner;
 
 public class SelectQueryBuilder implements BaseQueryBuilder {
     private final StringBuilder query = new StringBuilder();
-    private final EntityPersister entityPersister;
+    private final String tableName;
+    private final String idColumnName;
     private final List<String> columns = new ArrayList<>();
     private final Map<String, String> conditions = new HashMap<>();
 
-    private EntityPersister joinEntityPersister;
+    private String joinTableName;
+    private String joinColumnName;
     private final List<String> joinTableColumns = new ArrayList<>();
 
     public SelectQueryBuilder(Class<?> entityClass, Metamodel metamodel) {
         final EntityPersister entityPersister = metamodel.findEntityPersister(entityClass);
-        this.entityPersister = entityPersister;
+        this.tableName = entityPersister.getTableName();
+        this.idColumnName = entityPersister.getIdColumnName();
         entityPersister.getColumns().forEach(column -> {
                     columns.add(column.getDatabaseColumnName());
                 }
         );
     }
 
-    public void join(EntityPersister joinEntityPersister) {
-        this.joinEntityPersister = joinEntityPersister;
-        this.joinEntityPersister.getColumns().forEach(column -> {
+    public void join(String joinColumnName,
+                     EntityPersister joinEntityPersister) {
+
+        this.joinTableName = joinEntityPersister.getTableName();
+        this.joinColumnName = joinColumnName;
+        joinEntityPersister.getColumns().forEach(column -> {
                     joinTableColumns.add(column.getDatabaseColumnName());
                 }
         );
@@ -47,37 +53,37 @@ public class SelectQueryBuilder implements BaseQueryBuilder {
         query.append("SELECT ")
                 .append(columnsClause())
                 .append(" FROM ")
-                .append(entityPersister.getTableName());
+                .append(tableName);
     }
 
     private String columnsClause() {
         final StringJoiner joiner = new StringJoiner(", ");
 
         columns.forEach(column -> {
-            final String aliased = AliasRule.with(entityPersister.getTableName(), column);
-            joiner.add(entityPersister.getTableName() + "." + column + " AS " + aliased);
+            final String aliased = AliasRule.with(tableName, column);
+            joiner.add(tableName + "." + column + " AS " + aliased);
         });
 
         joinTableColumns.forEach(column -> {
-            final String aliased = AliasRule.with(joinEntityPersister.getTableName(), column);
-            joiner.add(joinEntityPersister.getTableName() + "." + column + " AS " + aliased);
+            final String aliased = AliasRule.with(joinTableName, column);
+            joiner.add(joinTableName + "." + column + " AS " + aliased);
         });
 
         return joiner.toString();
     }
 
     private void joinClause() {
-        if (joinEntityPersister != null) {
+        if (joinTableName != null) {
             query.append(" LEFT JOIN ")
-                    .append(joinEntityPersister.getTableName())
+                    .append(joinTableName)
                     .append(" ON ")
-                    .append(joinEntityPersister.getTableName())
+                    .append(joinTableName)
                     .append(".")
-                    .append(entityPersister.getJoinColumnName(joinEntityPersister.getEntityClass()))
+                    .append(joinColumnName)
                     .append(" = ")
-                    .append(entityPersister.getTableName())
+                    .append(tableName)
                     .append(".")
-                    .append(entityPersister.getIdColumnName());
+                    .append(idColumnName);
         }
     }
 
@@ -89,7 +95,7 @@ public class SelectQueryBuilder implements BaseQueryBuilder {
 
         query.append(" WHERE ");
         conditions.forEach((column, value) -> {
-            joiner.add(entityPersister.getTableName() + "." + column + " = " + getQuoted(value));
+            joiner.add(tableName + "." + column + " = " + getQuoted(value));
         });
         query.append(joiner);
     }
@@ -97,9 +103,9 @@ public class SelectQueryBuilder implements BaseQueryBuilder {
     private void whereByIdClause(Serializable id) {
         query
                 .append(" WHERE ")
-                .append(entityPersister.getTableName())
+                .append(tableName)
                 .append(".")
-                .append(entityPersister.getIdColumnName())
+                .append(idColumnName)
                 .append(" = ")
                 .append(getQuoted(id)).append(";");
     }

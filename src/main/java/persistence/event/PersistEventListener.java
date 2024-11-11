@@ -1,6 +1,6 @@
 package persistence.event;
 
-public interface PersistEventListener extends BaseEventListener {
+public interface PersistEventListener {
 
     void onPersist(PersistEvent event);
 }
