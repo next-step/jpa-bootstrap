@@ -23,7 +23,7 @@ public class UpdateQuery {
 
     private List<Object> getSetValues(List<EntityColumn> entityColumns, Object entity) {
         return entityColumns.stream()
-                .map(entityColumn -> entityColumn.getValue(entity))
+                .map(entityColumn -> entityColumn.extractValue(entity))
                 .collect(Collectors.toList());
     }
 }

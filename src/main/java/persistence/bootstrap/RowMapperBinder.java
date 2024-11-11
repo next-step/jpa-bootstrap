@@ -15,7 +15,7 @@ public class RowMapperBinder {
     public RowMapperBinder(List<Class<?>> entityTypes, EntityTableBinder entityTableBinder) {
         for (Class<?> entityType : entityTypes) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
-            final DefaultRowMapper defaultRowMapper = getDefaultRowMapper(entityTable, entityTableBinder);
+            final RowMapper defaultRowMapper = createRowMapper(entityTable, entityTableBinder);
             rowMapperRegistry.put(entityType.getTypeName(), defaultRowMapper);
         }
     }
@@ -24,7 +24,7 @@ public class RowMapperBinder {
         return rowMapperRegistry.get(entityType.getName());
     }
 
-    private DefaultRowMapper getDefaultRowMapper(EntityTable entityTable, EntityTableBinder entityTableBinder) {
+    private RowMapper createRowMapper(EntityTable entityTable, EntityTableBinder entityTableBinder) {
         if (Objects.isNull(entityTable.getAssociationEntityColumn())) {
             return new DefaultRowMapper(entityTable);
         }

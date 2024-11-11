@@ -59,7 +59,7 @@ public class EntityTable {
     }
 
     public Object getIdValue(Object entity) {
-        return getIdEntityColumn().getValue(entity);
+        return getIdEntityColumn().extractValue(entity);
     }
 
     public boolean isIdGenerationFromDatabase() {
@@ -108,7 +108,7 @@ public class EntityTable {
     }
 
     public List<?> getAssociationColumnValue(Object entity) {
-        return (List<?>) getAssociationEntityColumn().getValue(entity);
+        return (List<?>) getAssociationEntityColumn().extractValue(entity);
     }
 
     public Field getAssociationField() {

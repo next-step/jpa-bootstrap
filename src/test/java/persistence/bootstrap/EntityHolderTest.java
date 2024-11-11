@@ -21,8 +21,6 @@ class EntityHolderTest {
     @Test
     @DisplayName("엔티티를 찾아서 반환한다.")
     void constructor() {
-        // given
-
         // when
         final EntityHolder entityHolder = new EntityHolder("domain", "fixture");
 

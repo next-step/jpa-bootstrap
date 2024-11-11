@@ -7,8 +7,6 @@ import persistence.meta.EntityTable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class DefaultEntityManager implements EntityManager {
     public static final String NOT_PERSISTABLE_STATUS_FAILED_MESSAGE = "엔티티가 영속화 가능한 상태가 아닙니다.";
@@ -33,7 +31,7 @@ public class DefaultEntityManager implements EntityManager {
         final T entity = entityLoader.load(id);
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
 
-        persistenceContext.addEntity(entity, entityTable);
+        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
         return entity;
     }
 
@@ -47,7 +45,7 @@ public class DefaultEntityManager implements EntityManager {
             return;
         }
 
-        persistenceContext.addEntity(entity, entityTable);
+        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
         persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
         persistenceContext.addToPersistQueue(entity);
     }
@@ -60,7 +58,7 @@ public class DefaultEntityManager implements EntityManager {
         }
 
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        persistenceContext.removeEntity(entity, entityTable);
+        persistenceContext.removeEntity(entity, entityTable.getIdValue(entity));
         persistenceContext.addToRemoveQueue(entity);
     }
 
@@ -85,7 +83,7 @@ public class DefaultEntityManager implements EntityManager {
 
     private void persistImmediately(Object entity, EntityTable entityTable) {
         persist(entity, entityTable);
-        persistenceContext.addEntity(entity, entityTable);
+        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
         persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
     }
 
@@ -131,7 +129,7 @@ public class DefaultEntityManager implements EntityManager {
             return;
         }
 
-        final List<EntityColumn> dirtiedEntityColumns = getDirtiedEntityColumns(entity, snapshot);
+        final List<EntityColumn> dirtiedEntityColumns = findDirtiedEntityColumns(entity, snapshot);
         if (dirtiedEntityColumns.isEmpty()) {
             return;
         }
@@ -141,17 +139,15 @@ public class DefaultEntityManager implements EntityManager {
         persistenceContext.addEntity(entity, entityTable);
     }
 
-    private List<EntityColumn> getDirtiedEntityColumns(Object entity, Object snapshot) {
+    private List<EntityColumn> findDirtiedEntityColumns(Object entity, Object snapshot) {
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        final EntityTable snapshotEntityTable = metamodel.getEntityTable(snapshot.getClass());
-
-        return IntStream.range(0, entityTable.getColumnCount())
-                .filter(i -> isDirtied(entityTable.getEntityColumn(i), snapshotEntityTable.getEntityColumn(i), entity, snapshot))
-                .mapToObj(entityTable::getEntityColumn)
-                .collect(Collectors.toList());
+        return entityTable.getEntityColumns()
+                .stream()
+                .filter(entityColumn -> isDirtied(entity, snapshot, entityColumn))
+                .toList();
     }
 
-    private boolean isDirtied(EntityColumn entityColumn, EntityColumn snapshotEntityColumn, Object entity, Object snapshot) {
-        return !Objects.equals(entityColumn.getValue(entity), snapshotEntityColumn.getValue(snapshot));
+    private boolean isDirtied(Object entity, Object snapshot, EntityColumn entityColumn) {
+        return !Objects.equals(entityColumn.extractValue(entity), entityColumn.extractValue(snapshot));
     }
 }

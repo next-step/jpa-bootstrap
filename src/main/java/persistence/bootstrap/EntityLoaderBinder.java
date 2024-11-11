@@ -22,7 +22,7 @@ public class EntityLoaderBinder {
         for (Class<?> entityType : entityTypes) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
             final EntityLoader entityLoader =
-                    getEntityLoader(entityTableBinder, collectionLoaderBinder, rowMapperBinder, jdbcTemplate, dmlQueries, proxyFactory, entityType, entityTable);
+                    createEntityLoader(entityTableBinder, collectionLoaderBinder, rowMapperBinder, jdbcTemplate, dmlQueries, proxyFactory, entityType);
             entityLoaderRegistry.put(entityType.getTypeName(), entityLoader);
         }
     }
@@ -31,9 +31,10 @@ public class EntityLoaderBinder {
         return entityLoaderRegistry.get(entityType.getName());
     }
 
-    private EntityLoader getEntityLoader(EntityTableBinder entityTableBinder, CollectionLoaderBinder collectionLoaderBinder,
-                                         RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate, DmlQueries dmlQueries,
-                                         ProxyFactory proxyFactory, Class<?> entityType, EntityTable entityTable) {
+    private EntityLoader createEntityLoader(EntityTableBinder entityTableBinder, CollectionLoaderBinder collectionLoaderBinder,
+                                            RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate, DmlQueries dmlQueries,
+                                            ProxyFactory proxyFactory, Class<?> entityType) {
+        final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
         final RowMapper rowMapper = rowMapperBinder.getRowMapper(entityType);
         if (Objects.isNull(entityTable.getAssociationEntityColumn())) {
             return new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, dmlQueries.getSelectQuery(), proxyFactory,

@@ -16,7 +16,7 @@ public class EntityScanner {
     private static final String DIRECTORY_DELIMITER = "/";
     private static final String CLASS_FILE_POSTFIX = ".class";
 
-    public EntityScanner() {
+    private EntityScanner() {
         throw new AssertionError();
     }
 

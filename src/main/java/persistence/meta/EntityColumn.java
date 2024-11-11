@@ -51,7 +51,7 @@ public class EntityColumn {
         return columnOption.isNotNull();
     }
 
-    public Object getValue(Object entity) {
+    public Object extractValue(Object entity) {
         try {
             return field.get(entity);
         } catch (IllegalAccessException e) {

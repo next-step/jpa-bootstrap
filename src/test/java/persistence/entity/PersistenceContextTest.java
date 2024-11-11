@@ -22,7 +22,7 @@ class PersistenceContextTest {
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
 
         // when
-        persistenceContext.addEntity(entity, entityTable);
+        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
 
         // then
         final Object managedEntity = getManagedEntity(persistenceContext, entity.getClass(), entity.getId());
@@ -36,7 +36,7 @@ class PersistenceContextTest {
         final PersistenceContext persistenceContext = new PersistenceContext();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
-        persistenceContext.addEntity(entity, entityTable);
+        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
 
         // when
         final EntityWithId managedEntity = persistenceContext.getEntity(entity.getClass(), entity.getId());
@@ -52,10 +52,10 @@ class PersistenceContextTest {
         final PersistenceContext persistenceContext = new PersistenceContext();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
-        persistenceContext.addEntity(entity, entityTable);
+        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
 
         // when
-        persistenceContext.removeEntity(entity, entityTable);
+        persistenceContext.removeEntity(entity, entityTable.getIdValue(entity));
 
         // then
         final Object managedEntity = getManagedEntity(persistenceContext, entity.getClass(), entity.getId());

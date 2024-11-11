@@ -2,7 +2,6 @@ package persistence.entity;
 
 import jdbc.InstanceFactory;
 import persistence.meta.EntityKey;
-import persistence.meta.EntityTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +19,10 @@ public class PersistenceContext {
     private final Queue<Object> persistQueue = new ConcurrentLinkedQueue<>();
     private final Queue<Object> removeQueue = new ConcurrentLinkedQueue<>();
 
-    public void addEntity(Object entity, EntityTable entityTable) {
-        entityRegistry.put(entityTable.toEntityKey(entity), entity);
-        addSnapshot(entity, entityTable);
+    public void addEntity(Object entity, Object id) {
+        final EntityKey entityKey = new EntityKey(entity.getClass(), id);
+        entityRegistry.put(entityKey, entity);
+        addSnapshot(entity, entityKey);
     }
 
     public <T> T getEntity(Class<T> entityType, Object id) {
@@ -30,9 +30,10 @@ public class PersistenceContext {
         return entityType.cast(entityRegistry.get(entityKey));
     }
 
-    public void removeEntity(Object entity, EntityTable entityTable) {
-        entityRegistry.remove(entityTable.toEntityKey(entity));
-        entitySnapshotRegistry.remove(entityTable.toEntityKey(entity));
+    public void removeEntity(Object entity, Object id) {
+        final EntityKey entityKey = new EntityKey(entity.getClass(), id);
+        entityRegistry.remove(entityKey);
+        entitySnapshotRegistry.remove(entityKey);
         createOrUpdateStatus(entity, EntityStatus.GONE);
     }
 
@@ -84,8 +85,8 @@ public class PersistenceContext {
         removeQueue.clear();
     }
 
-    private void addSnapshot(Object entity, EntityTable entityTable) {
+    private void addSnapshot(Object entity, EntityKey entityKey) {
         final Object snapshot = new InstanceFactory<>(entity.getClass()).copy(entity);
-        entitySnapshotRegistry.put(entityTable.toEntityKey(entity), snapshot);
+        entitySnapshotRegistry.put(entityKey, snapshot);
     }
 }
