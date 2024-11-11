@@ -7,13 +7,13 @@ import persistence.meta.Metamodel;
 
 import java.sql.SQLException;
 
-public class EntityManagerFactoryImpl implements EntityManagerFactory {
+public class SessionFactoryImpl implements EntityManagerFactory {
 
     private final CurrentSessionContext currentSessionContext;
     private final Metadata metadata;
 
-    public EntityManagerFactoryImpl(CurrentSessionContext currentSessionContext,
-                                    Metadata metadata) throws SQLException {
+    public SessionFactoryImpl(CurrentSessionContext currentSessionContext,
+                              Metadata metadata) throws SQLException {
         this.currentSessionContext = currentSessionContext;
         this.metadata = metadata;
 
@@ -28,7 +28,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     public EntityManager openSession() throws SQLException {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(metadata.getDatabase().getConnection());
 
-        final EntityManager newSession = new EntityManagerImpl(
+        final EntityManager newSession = new SessionImpl(
                 jdbcTemplate,
                 new StatefulPersistenceContext(),
                 new Metamodel(metadata, jdbcTemplate)

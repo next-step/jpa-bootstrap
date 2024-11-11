@@ -16,14 +16,14 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-public class EntityManagerImpl implements EntityManager {
+public class SessionImpl implements EntityManager {
     private final PersistenceContext persistenceContext;
     private final Metamodel metamodel;
     private final EntityLoader entityLoader;
 
-    public EntityManagerImpl(JdbcTemplate jdbcTemplate,
-                             PersistenceContext persistenceContext,
-                             Metamodel metamodel) {
+    public SessionImpl(JdbcTemplate jdbcTemplate,
+                       PersistenceContext persistenceContext,
+                       Metamodel metamodel) {
 
         this.persistenceContext = persistenceContext;
         this.metamodel = metamodel;
