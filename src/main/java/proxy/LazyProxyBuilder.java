@@ -1,6 +1,7 @@
 package proxy;
 
 import builder.dml.JoinEntityData;
+import builder.dml.builder.DMLQueryBuilder;
 import database.H2DBConnection;
 import jdbc.JdbcTemplate;
 import persistence.EntityLoader;
@@ -21,6 +22,6 @@ public class LazyProxyBuilder<T> {
     public List<T> createProxy(JoinEntityData joinEntityData) {
         return (List<T>) Proxy.newProxyInstance(joinEntityData.getClazz().getClassLoader(),
                 new Class[]{List.class},
-                new ProxyInvocationHandler(joinEntityData, new EntityLoader(jdbcTemplate)));
+                new ProxyInvocationHandler(joinEntityData, new EntityLoader(jdbcTemplate, new DMLQueryBuilder())));
     }
 }

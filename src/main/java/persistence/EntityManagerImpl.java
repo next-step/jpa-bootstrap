@@ -3,24 +3,22 @@ package persistence;
 import boot.Metamodel;
 import builder.dml.DMLColumnData;
 import builder.dml.EntityData;
+import builder.dml.builder.DMLQueryBuilder;
 import jdbc.JdbcTemplate;
 
 import java.util.List;
 
 public class EntityManagerImpl implements EntityManager {
 
-    private final EntityLoader entityLoader;
     private final PersistenceContext persistenceContext;
     private final Metamodel metamodel;
 
-    public EntityManagerImpl(JdbcTemplate jdbcTemplate, Metamodel metamodel) {
-        this.entityLoader = new EntityLoader(jdbcTemplate);
+    public EntityManagerImpl(Metamodel metamodel) {
         this.persistenceContext = new PersistenceContextImpl();
         this.metamodel = metamodel;
     }
 
-    public EntityManagerImpl(PersistenceContext persistenceContext, JdbcTemplate jdbcTemplate, Metamodel metamodel) {
-        this.entityLoader = new EntityLoader(jdbcTemplate);
+    public EntityManagerImpl(PersistenceContext persistenceContext, Metamodel metamodel) {
         this.persistenceContext = persistenceContext;
         this.metamodel = metamodel;
     }
@@ -35,7 +33,7 @@ public class EntityManagerImpl implements EntityManager {
             return clazz.cast(persistEntityData.getEntityInstance());
         }
 
-        T findObject = this.entityLoader.find(clazz, id);
+        T findObject = metamodel.entityLoader(clazz).find(clazz, id);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.LOADING);
         EntityData entityData = EntityData.createEntityData(findObject);
 

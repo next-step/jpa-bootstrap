@@ -41,6 +41,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     }
 
     private EntityManager createEntityManager() {
-        return new EntityManagerImpl(new PersistenceContextImpl(), this.jdbcTemplate, metamodel);
+        return new EntityManagerImpl(new PersistenceContextImpl(), metamodel);
     }
 }
