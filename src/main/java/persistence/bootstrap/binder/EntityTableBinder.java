@@ -1,4 +1,4 @@
-package persistence.bootstrap;
+package persistence.bootstrap.binder;
 
 import persistence.meta.EntityTable;
 

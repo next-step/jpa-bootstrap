@@ -1,5 +1,6 @@
-package persistence.entity;
+package persistence.entity.proxy;
 
+import persistence.entity.loader.CollectionLoader;
 import persistence.meta.EntityTable;
 
 import java.util.List;

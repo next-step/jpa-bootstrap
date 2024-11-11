@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.bootstrap.Metamodel;
+import persistence.entity.manager.CurrentSessionContext;
+import persistence.entity.manager.EntityManager;
+import persistence.entity.manager.factory.EntityManagerFactory;
 import util.TestHelper;
 
 import static org.assertj.core.api.Assertions.*;

@@ -1,6 +1,6 @@
 package jdbc.mapping;
 
-import jdbc.InstanceFactory;
+import persistence.entity.manager.factory.InstanceFactory;
 import persistence.meta.EntityTable;
 
 import java.lang.reflect.Field;

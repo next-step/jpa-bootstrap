@@ -1,7 +1,6 @@
 package persistence.entity.proxy;
 
 import jakarta.persistence.OneToMany;
-import persistence.entity.LazyLoader;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;

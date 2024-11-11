@@ -1,7 +1,7 @@
-package persistence.bootstrap;
+package persistence.bootstrap.binder;
 
-import jdbc.DefaultRowMapper;
-import jdbc.RowMapper;
+import jdbc.mapper.DefaultRowMapper;
+import jdbc.mapper.RowMapper;
 import persistence.meta.EntityTable;
 
 import java.util.HashMap;

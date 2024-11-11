@@ -1,5 +1,7 @@
 package jdbc;
 
+import jdbc.mapper.IdMapper;
+import jdbc.mapper.RowMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

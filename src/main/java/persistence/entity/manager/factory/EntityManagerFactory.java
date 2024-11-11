@@ -1,6 +1,9 @@
-package persistence.entity;
+package persistence.entity.manager.factory;
 
 import persistence.bootstrap.Metamodel;
+import persistence.entity.manager.CurrentSessionContext;
+import persistence.entity.manager.DefaultEntityManager;
+import persistence.entity.manager.EntityManager;
 
 public class EntityManagerFactory {
     private final CurrentSessionContext currentSessionContext;

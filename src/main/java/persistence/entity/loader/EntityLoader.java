@@ -1,7 +1,8 @@
-package persistence.entity;
+package persistence.entity.loader;
 
 import jdbc.JdbcTemplate;
-import jdbc.RowMapper;
+import jdbc.mapper.RowMapper;
+import persistence.entity.proxy.LazyLoader;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;

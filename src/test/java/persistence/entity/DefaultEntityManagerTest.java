@@ -10,6 +10,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.entity.manager.DefaultEntityManager;
+import persistence.entity.manager.EntityManager;
 import util.TestHelper;
 
 import static org.assertj.core.api.Assertions.*;

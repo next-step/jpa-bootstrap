@@ -1,4 +1,4 @@
-package persistence.entity;
+package persistence.entity.manager;
 
 public enum EntityStatus {
     MANAGED,    // 영속 상태

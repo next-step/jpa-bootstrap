@@ -1,9 +1,9 @@
-package persistence.bootstrap;
+package persistence.bootstrap.binder;
 
 import jdbc.JdbcTemplate;
-import jdbc.RowMapper;
-import persistence.entity.CollectionLoader;
-import persistence.entity.EntityLoader;
+import jdbc.mapper.RowMapper;
+import persistence.entity.loader.CollectionLoader;
+import persistence.entity.loader.EntityLoader;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.DmlQueries;

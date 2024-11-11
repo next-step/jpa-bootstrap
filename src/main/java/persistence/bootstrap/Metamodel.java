@@ -1,9 +1,15 @@
 package persistence.bootstrap;
 
 import jdbc.JdbcTemplate;
-import persistence.entity.CollectionPersister;
-import persistence.entity.EntityLoader;
-import persistence.entity.EntityPersister;
+import persistence.bootstrap.binder.CollectionLoaderBinder;
+import persistence.bootstrap.binder.CollectionPersisterBinder;
+import persistence.bootstrap.binder.EntityLoaderBinder;
+import persistence.bootstrap.binder.EntityPersisterBinder;
+import persistence.bootstrap.binder.EntityTableBinder;
+import persistence.bootstrap.binder.RowMapperBinder;
+import persistence.entity.loader.EntityLoader;
+import persistence.entity.persister.CollectionPersister;
+import persistence.entity.persister.EntityPersister;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.DmlQueries;

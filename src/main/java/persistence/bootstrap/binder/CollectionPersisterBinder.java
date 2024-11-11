@@ -1,7 +1,7 @@
-package persistence.bootstrap;
+package persistence.bootstrap.binder;
 
 import jdbc.JdbcTemplate;
-import persistence.entity.CollectionPersister;
+import persistence.entity.persister.CollectionPersister;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.DmlQueries;
 

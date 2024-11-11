@@ -3,7 +3,7 @@ package persistence.sql.ddl;
 import persistence.dialect.Dialect;
 import persistence.meta.EntityColumn;
 import persistence.meta.EntityTable;
-import persistence.meta.JavaTypeConvertor;
+import persistence.sql.JavaTypeConvertor;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -3,8 +3,8 @@ package util;
 import database.H2ConnectionFactory;
 import jdbc.JdbcTemplate;
 import persistence.bootstrap.Metamodel;
-import persistence.entity.DefaultEntityManager;
-import persistence.entity.EntityManager;
+import persistence.entity.manager.DefaultEntityManager;
+import persistence.entity.manager.EntityManager;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.sql.dml.DmlQueries;
 

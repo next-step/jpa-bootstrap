@@ -1,4 +1,4 @@
-package persistence.meta;
+package persistence.sql;
 
 import java.sql.Types;
 import java.util.HashMap;

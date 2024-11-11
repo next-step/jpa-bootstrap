@@ -1,4 +1,4 @@
-package jdbc;
+package jdbc.mapper;
 
 import jakarta.persistence.Id;
 import org.slf4j.Logger;

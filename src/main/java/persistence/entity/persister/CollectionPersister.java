@@ -1,7 +1,7 @@
-package persistence.entity;
+package persistence.entity.persister;
 
-import jdbc.DefaultIdMapper;
 import jdbc.JdbcTemplate;
+import jdbc.mapper.DefaultIdMapper;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.InsertQuery;
 

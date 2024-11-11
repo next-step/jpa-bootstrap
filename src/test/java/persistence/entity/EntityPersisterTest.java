@@ -2,12 +2,16 @@ package persistence.entity;
 
 import database.H2ConnectionFactory;
 import fixture.EntityWithId;
-import jdbc.DefaultRowMapper;
 import jdbc.JdbcTemplate;
+import jdbc.mapper.DefaultRowMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.entity.loader.CollectionLoader;
+import persistence.entity.loader.EntityLoader;
+import persistence.entity.manager.EntityManager;
+import persistence.entity.persister.EntityPersister;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.DeleteQuery;

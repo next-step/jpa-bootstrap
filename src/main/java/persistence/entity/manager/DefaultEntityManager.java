@@ -1,6 +1,10 @@
-package persistence.entity;
+package persistence.entity.manager;
 
 import persistence.bootstrap.Metamodel;
+import persistence.entity.loader.EntityLoader;
+import persistence.entity.manager.factory.PersistenceContext;
+import persistence.entity.persister.CollectionPersister;
+import persistence.entity.persister.EntityPersister;
 import persistence.meta.EntityColumn;
 import persistence.meta.EntityTable;
 

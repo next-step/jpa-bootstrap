@@ -1,4 +1,4 @@
-package jdbc;
+package persistence.entity.manager.factory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

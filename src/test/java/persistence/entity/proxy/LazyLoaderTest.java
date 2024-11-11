@@ -3,13 +3,12 @@ package persistence.entity.proxy;
 import database.H2ConnectionFactory;
 import domain.Order;
 import domain.OrderLazy;
-import jdbc.DefaultRowMapper;
 import jdbc.JdbcTemplate;
+import jdbc.mapper.DefaultRowMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.entity.CollectionLoader;
-import persistence.entity.LazyLoader;
+import persistence.entity.loader.CollectionLoader;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;
 

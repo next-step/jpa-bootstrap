@@ -1,4 +1,4 @@
-package jdbc;
+package jdbc.mapper;
 
 import jdbc.mapping.AssociationFieldMapping;
 import jdbc.mapping.FieldMapping;

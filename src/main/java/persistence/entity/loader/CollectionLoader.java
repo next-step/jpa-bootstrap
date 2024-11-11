@@ -1,7 +1,7 @@
-package persistence.entity;
+package persistence.entity.loader;
 
 import jdbc.JdbcTemplate;
-import jdbc.RowMapper;
+import jdbc.mapper.RowMapper;
 import persistence.meta.AssociationCondition;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;

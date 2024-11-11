@@ -4,6 +4,7 @@ import fixture.EntityWithId;
 import fixture.EntityWithoutDefaultConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.entity.manager.factory.InstanceFactory;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
