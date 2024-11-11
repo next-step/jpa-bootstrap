@@ -12,12 +12,12 @@ public class DefaultEntityManager implements EntityManager {
     public static final String NOT_PERSISTABLE_STATUS_FAILED_MESSAGE = "엔티티가 영속화 가능한 상태가 아닙니다.";
     public static final String NOT_REMOVABLE_STATUS_FAILED_MESSAGE = "엔티티가 제거 가능한 상태가 아닙니다.";
 
-    private final PersistenceContext persistenceContext;
     private final Metamodel metamodel;
+    private final PersistenceContext persistenceContext;
 
-    public DefaultEntityManager(PersistenceContext persistenceContext, Metamodel metamodel) {
-        this.persistenceContext = persistenceContext;
+    public DefaultEntityManager(Metamodel metamodel) {
         this.metamodel = metamodel;
+        this.persistenceContext = new PersistenceContext();
     }
 
     @Override
