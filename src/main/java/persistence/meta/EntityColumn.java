@@ -12,7 +12,6 @@ public class EntityColumn {
     private final ColumnLength columnLength;
     private final ColumnIdOption columnIdOption;
     private final ColumnOption columnOption;
-    private ColumnValue columnValue;
 
     public EntityColumn(Field field) {
         this.field = field;
@@ -21,6 +20,7 @@ public class EntityColumn {
         this.columnLength = new ColumnLength(field);
         this.columnIdOption = new ColumnIdOption(field);
         this.columnOption = new ColumnOption(field);
+        field.setAccessible(true);
     }
 
     public Field getField() {
@@ -51,12 +51,12 @@ public class EntityColumn {
         return columnOption.isNotNull();
     }
 
-    public Object getValue() {
-        return columnValue.value();
-    }
-
-    public void setValue(Field field, Object entity) {
-        columnValue = new ColumnValue(field, entity);
+    public Object getValue(Object entity) {
+        try {
+            return field.get(entity);
+        } catch (IllegalAccessException e) {
+            return null;
+        }
     }
 
     @Override
@@ -64,14 +64,14 @@ public class EntityColumn {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         EntityColumn that = (EntityColumn) o;
-        return Objects.equals(type, that.type) && Objects.equals(columnName, that.columnName)
-                && Objects.equals(columnLength, that.columnLength) && Objects.equals(columnIdOption, that.columnIdOption)
-                && Objects.equals(columnOption, that.columnOption) && Objects.equals(columnValue, that.columnValue);
+        return Objects.equals(field, that.field) && Objects.equals(type, that.type)
+                && Objects.equals(columnName, that.columnName) && Objects.equals(columnLength, that.columnLength)
+                && Objects.equals(columnIdOption, that.columnIdOption) && Objects.equals(columnOption, that.columnOption);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, columnName, columnLength, columnIdOption, columnOption, columnValue);
+        return Objects.hash(field, type, columnName, columnLength, columnIdOption, columnOption);
     }
 
     public boolean isIdGenerationFromDatabase() {

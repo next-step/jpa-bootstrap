@@ -27,7 +27,7 @@ public class LazyLoadingHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
         if (!isLoaded) {
-            collection = lazyLoader.load();
+            collection = lazyLoader.load(parentEntity);
             setLoadedCollection();
             isLoaded = true;
         }

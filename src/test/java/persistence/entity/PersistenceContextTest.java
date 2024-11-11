@@ -19,7 +19,7 @@ class PersistenceContextTest {
         // given
         final PersistenceContext persistenceContext = new PersistenceContext();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
-        final EntityTable entityTable = new EntityTable(EntityWithId.class).setValue(entity);
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
 
         // when
         persistenceContext.addEntity(entity, entityTable);
@@ -35,7 +35,7 @@ class PersistenceContextTest {
         // given
         final PersistenceContext persistenceContext = new PersistenceContext();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
-        final EntityTable entityTable = new EntityTable(EntityWithId.class).setValue(entity);
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
         persistenceContext.addEntity(entity, entityTable);
 
         // when
@@ -51,7 +51,7 @@ class PersistenceContextTest {
         // given
         final PersistenceContext persistenceContext = new PersistenceContext();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
-        final EntityTable entityTable = new EntityTable(EntityWithId.class).setValue(entity);
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
         persistenceContext.addEntity(entity, entityTable);
 
         // when

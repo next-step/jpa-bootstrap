@@ -31,8 +31,7 @@ public class DefaultEntityManager implements EntityManager {
 
         final EntityLoader entityLoader = metamodel.getEntityLoader(entityType);
         final T entity = entityLoader.load(id);
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
-                .setValue(entity);
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
 
         persistenceContext.addEntity(entity, entityTable);
         return entity;
@@ -42,9 +41,7 @@ public class DefaultEntityManager implements EntityManager {
     public void persist(Object entity) {
         validatePersist(entity);
 
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
-                .setValue(entity);
-
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
         if (entityTable.isIdGenerationFromDatabase()) {
             persistImmediately(entity, entityTable);
             return;
@@ -62,8 +59,7 @@ public class DefaultEntityManager implements EntityManager {
             throw new IllegalStateException(NOT_REMOVABLE_STATUS_FAILED_MESSAGE);
         }
 
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
-                .setValue(entity);
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
         persistenceContext.removeEntity(entity, entityTable);
         persistenceContext.addToRemoveQueue(entity);
     }
@@ -97,8 +93,7 @@ public class DefaultEntityManager implements EntityManager {
         final Queue<Object> persistQueue = persistenceContext.getPersistQueue();
         while (!persistQueue.isEmpty()) {
             final Object entity = persistQueue.poll();
-            final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
-                    .setValue(entity);
+            final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
 
             persist(entity, entityTable);
             persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
@@ -111,7 +106,7 @@ public class DefaultEntityManager implements EntityManager {
         if (entityTable.isOneToMany()) {
             final CollectionPersister collectionPersister = metamodel.getCollectionPersister(
                     entity.getClass(), entityTable.getAssociationColumnName());
-            collectionPersister.insert(entityTable.getAssociationColumnValue(), entity);
+            collectionPersister.insert(entityTable.getAssociationColumnValue(entity), entity);
         }
     }
 
@@ -130,10 +125,8 @@ public class DefaultEntityManager implements EntityManager {
     }
 
     private void update(Object entity) {
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
-                .setValue(entity);
-
-        final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue());
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue(entity));
         if (Objects.isNull(snapshot)) {
             return;
         }
@@ -149,18 +142,16 @@ public class DefaultEntityManager implements EntityManager {
     }
 
     private List<EntityColumn> getDirtiedEntityColumns(Object entity, Object snapshot) {
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
-                .setValue(entity);
-        final EntityTable snapshotEntityTable = metamodel.getEntityTable(snapshot.getClass())
-                .setValue(snapshot);
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        final EntityTable snapshotEntityTable = metamodel.getEntityTable(snapshot.getClass());
 
         return IntStream.range(0, entityTable.getColumnCount())
-                .filter(i -> isDirtied(entityTable.getEntityColumn(i), snapshotEntityTable.getEntityColumn(i)))
+                .filter(i -> isDirtied(entityTable.getEntityColumn(i), snapshotEntityTable.getEntityColumn(i), entity, snapshot))
                 .mapToObj(entityTable::getEntityColumn)
                 .collect(Collectors.toList());
     }
 
-    private boolean isDirtied(EntityColumn entityColumn, EntityColumn snapshotEntityColumn) {
-        return !Objects.equals(entityColumn.getValue(), snapshotEntityColumn.getValue());
+    private boolean isDirtied(EntityColumn entityColumn, EntityColumn snapshotEntityColumn, Object entity, Object snapshot) {
+        return !Objects.equals(entityColumn.getValue(entity), snapshotEntityColumn.getValue(snapshot));
     }
 }

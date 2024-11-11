@@ -77,14 +77,14 @@ class EntityPersisterTest {
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
         final EntityWithId updatedEntity = new EntityWithId(entity.getId(), "Jackson", 20, "test2@email.com");
-        final EntityTable updatedEntityTable = new EntityTable(updatedEntity.getClass()).setValue(updatedEntity);
+        final EntityTable updatedEntityTable = new EntityTable(updatedEntity.getClass());
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
         final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
         final EntityLoader entityLoader =
                 new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
 
         // when
-        entityPersister.update(entity, updatedEntityTable.getEntityColumns());
+        entityPersister.update(updatedEntity, updatedEntityTable.getEntityColumns());
 
         // then
         final EntityWithId managedEntity = entityLoader.load(entity.getId());

@@ -27,18 +27,17 @@ public class EntityPersister {
     }
 
     public void insert(Object entity) {
-        entityTable.setValue(entity);
-        final String sql = insertQuery.insert(entityTable);
+        final String sql = insertQuery.insert(entityTable, entity);
         jdbcTemplate.executeAndReturnGeneratedKeys(sql, new DefaultIdMapper(entity));
     }
 
-    public void update(Object entity, List<EntityColumn> entityColumns) {
-        entityTable.setValue(entity);
-        jdbcTemplate.execute(updateQuery.update(entityTable, entityColumns));
+    public void update(Object updatedEntity, List<EntityColumn> entityColumns) {
+        final String sql = updateQuery.update(entityTable, entityColumns, updatedEntity);
+        jdbcTemplate.execute(sql);
     }
 
     public void delete(Object entity) {
-        entityTable.setValue(entity);
-        jdbcTemplate.execute(deleteQuery.delete(entityTable));
+        final String sql = deleteQuery.delete(entityTable, entity);
+        jdbcTemplate.execute(sql);
     }
 }

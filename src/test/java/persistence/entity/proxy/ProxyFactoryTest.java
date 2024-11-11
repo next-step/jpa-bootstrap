@@ -50,7 +50,7 @@ class ProxyFactoryTest {
         // given
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
         final ProxyFactory proxyFactory = new ProxyFactory();
-        final EntityTable entityTable = new EntityTable(OrderLazy.class).setValue(order);
+        final EntityTable entityTable = new EntityTable(OrderLazy.class);
         final EntityTable childEntityTable = new EntityTable(entityTable.getAssociationColumnType());
         final DefaultRowMapper rowMapper = new DefaultRowMapper(childEntityTable);
         final CollectionLoader collectionLoader = new CollectionLoader(childEntityTable, jdbcTemplate, new SelectQuery(), rowMapper);

@@ -29,8 +29,7 @@ class LazyLoaderTest {
     @DisplayName("FetchType이 LAZY인 클래스로 인스턴스를 생성한다.")
     void constructor() {
         // given
-        final OrderLazy order = new OrderLazy("OrderNumber1");
-        final EntityTable entityTable = new EntityTable(OrderLazy.class).setValue(order);
+        final EntityTable entityTable = new EntityTable(OrderLazy.class);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
         final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
 
@@ -45,8 +44,7 @@ class LazyLoaderTest {
     @DisplayName("FetchType이 LAZY가 아닌 클래스로 인스턴스를 생성하면 예외를 발생한다.")
     void constructor_exception() {
         // given
-        final Order order = new Order("OrderNumber1");
-        final EntityTable entityTable = new EntityTable(Order.class).setValue(order);
+        final EntityTable entityTable = new EntityTable(Order.class);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
         final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
 

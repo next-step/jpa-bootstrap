@@ -35,7 +35,6 @@ public class EntityLoader {
     public <T> T load(Object id) {
         final String sql = getSql(id);
         final T entity = jdbcTemplate.queryForObject(sql, rowMapper);
-        entityTable.setValue(entity);
 
         if (entityTable.isOneToMany() && !entityTable.isEager()) {
             setProxy(entityTable, entity);
@@ -51,7 +50,7 @@ public class EntityLoader {
     }
 
     private void setProxy(EntityTable entityTable, Object entity) {
-        final List<?> proxy = proxyFactory.createProxy(entity, new LazyLoader(entityTable.setValue(entity), collectionLoader));
+        final List<?> proxy = proxyFactory.createProxy(entity, new LazyLoader(entityTable, collectionLoader));
 
         try {
             final Field associationField = entityTable.getAssociationField();

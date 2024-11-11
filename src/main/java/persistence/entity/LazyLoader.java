@@ -16,8 +16,8 @@ public class LazyLoader {
         validate();
     }
 
-    public List<?> load() {
-        return collectionLoader.load(parentEntityTable.getAssociationCondition());
+    public List<?> load(Object parentEntity) {
+        return collectionLoader.load(parentEntityTable.getAssociationCondition(parentEntity));
     }
 
     private void validate() {

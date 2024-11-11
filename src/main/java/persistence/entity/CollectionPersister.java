@@ -22,11 +22,9 @@ public class CollectionPersister {
     }
 
     public void insert(List<?> collection, Object parentEntity) {
-        parentEntityTable.setValue(parentEntity);
-
         for (Object entity : collection) {
             final String sql = insertQuery.insert(
-                    entityTable.setValue(entity), parentEntityTable.getAssociationColumnName(), parentEntityTable.getIdValue());
+                    entityTable, parentEntityTable.getAssociationColumnName(), parentEntityTable.getIdValue(parentEntity), entity);
             jdbcTemplate.executeAndReturnGeneratedKeys(sql, new DefaultIdMapper(entity));
         }
     }

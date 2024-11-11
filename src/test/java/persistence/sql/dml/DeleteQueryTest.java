@@ -14,10 +14,10 @@ class DeleteQueryTest {
         // given
         final DeleteQuery deleteQuery = new DeleteQuery();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
-        final EntityTable entityTable = new EntityTable(EntityWithId.class).setValue(entity);
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
 
         // when
-        final String sql = deleteQuery.delete(entityTable);
+        final String sql = deleteQuery.delete(entityTable, entity);
 
         // then
         assertThat(sql).isEqualTo("DELETE FROM users WHERE id = 1");

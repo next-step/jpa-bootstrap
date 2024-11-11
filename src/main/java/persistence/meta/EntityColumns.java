@@ -23,22 +23,6 @@ public class EntityColumns {
         return entityColumns;
     }
 
-    public void setValue(Object entity) {
-        Arrays.stream(entity.getClass().getDeclaredFields())
-                .filter(this::isPersistent)
-                .forEach(field -> {
-                    final EntityColumn entityColumn = findEntityColumn(field);
-                    entityColumn.setValue(field, entity);
-                });
-    }
-
-    private EntityColumn findEntityColumn(Field field) {
-        return entityColumns.stream()
-                .filter(entityColumn -> entityColumn.getField().equals(field))
-                .findFirst()
-                .orElseThrow();
-    }
-
     public EntityColumn getIdEntityColumn() {
         return entityColumns.stream()
                 .filter(EntityColumn::isId)

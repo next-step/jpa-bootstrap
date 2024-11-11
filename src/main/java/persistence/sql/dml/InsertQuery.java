@@ -7,17 +7,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class InsertQuery {
-    public String insert(EntityTable entityTable) {
+    public String insert(EntityTable entityTable, Object entity) {
         return new InsertQueryBuilder()
                 .insertInto(entityTable.getTableName(), getColumns(entityTable))
-                .values(getValues(entityTable))
+                .values(getValues(entityTable, entity))
                 .build();
     }
 
-    public String insert(EntityTable entityTable, String columnName, Object associationId) {
+    public String insert(EntityTable entityTable, String columnName, Object associationId, Object entity) {
         return new InsertQueryBuilder()
                 .insertInto(entityTable.getTableName(), getColumns(entityTable, columnName))
-                .values(getValues(entityTable, associationId))
+                .values(getValues(entityTable, associationId, entity))
                 .build();
     }
 
@@ -35,17 +35,17 @@ public class InsertQuery {
                 .collect(Collectors.toList());
     }
 
-    private List<Object> getValues(EntityTable entityTable, Object associationId) {
-        final List<Object> valueClause = getValues(entityTable);
+    private List<Object> getValues(EntityTable entityTable, Object associationId, Object entity) {
+        final List<Object> valueClause = getValues(entityTable, entity);
         valueClause.add(associationId);
         return valueClause;
     }
 
-    private List<Object> getValues(EntityTable entityTable) {
+    private List<Object> getValues(EntityTable entityTable, Object entity) {
         return entityTable.getEntityColumns()
                 .stream()
                 .filter(this::isAvailable)
-                .map(EntityColumn::getValue)
+                .map(entityColumn -> entityColumn.getValue(entity))
                 .collect(Collectors.toList());
     }
 

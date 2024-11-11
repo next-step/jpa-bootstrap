@@ -16,10 +16,10 @@ class InsertQueryTest {
         // given
         final InsertQuery insertQuery = new InsertQuery();
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
-        final EntityTable entityTable = new EntityTable(EntityWithId.class).setValue(entity);
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
 
         // when
-        final String sql = insertQuery.insert(entityTable);
+        final String sql = insertQuery.insert(entityTable, entity);
 
         // then
         assertThat(sql).isEqualTo("INSERT INTO users (nick_name, old, email) VALUES ('Jaden', 30, 'test@email.com')");
@@ -31,10 +31,10 @@ class InsertQueryTest {
         // given
         final InsertQuery insertQuery = new InsertQuery();
         final Order order = new Order("OrderNumber1");
-        final EntityTable entityTable = new EntityTable(Order.class).setValue(order);
+        final EntityTable entityTable = new EntityTable(Order.class);
 
         // when
-        final String sql = insertQuery.insert(entityTable);
+        final String sql = insertQuery.insert(entityTable, order);
 
         // then
         assertThat(sql).isEqualTo("INSERT INTO orders (orderNumber) VALUES ('OrderNumber1')");
@@ -49,12 +49,12 @@ class InsertQueryTest {
         final OrderItem orderItem = new OrderItem("Product1", 10);
         order.addOrderItem(orderItem);
 
-        final EntityTable parentEntityTable = new EntityTable(Order.class).setValue(order);
-        final EntityTable entityTable = new EntityTable(OrderItem.class).setValue(orderItem);
+        final EntityTable parentEntityTable = new EntityTable(Order.class);
+        final EntityTable entityTable = new EntityTable(OrderItem.class);
 
         // when
         final String sql = insertQuery.insert(
-                entityTable, parentEntityTable.getAssociationColumnName(), parentEntityTable.getIdValue());
+                entityTable, parentEntityTable.getAssociationColumnName(), parentEntityTable.getIdValue(order), orderItem);
 
         // then
         assertThat(sql).isEqualTo("INSERT INTO order_items (product, quantity, order_id) VALUES ('Product1', 10, 1)");

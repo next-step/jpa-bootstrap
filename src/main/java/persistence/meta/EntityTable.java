@@ -50,11 +50,6 @@ public class EntityTable {
         return Objects.hash(type, tableName, entityColumns);
     }
 
-    public EntityTable setValue(Object entity) {
-        entityColumns.setValue(entity);
-        return this;
-    }
-
     public EntityColumn getIdEntityColumn() {
         return entityColumns.getIdEntityColumn();
     }
@@ -63,16 +58,16 @@ public class EntityTable {
         return getIdEntityColumn().getColumnName();
     }
 
-    public Object getIdValue() {
-        return getIdEntityColumn().getValue();
+    public Object getIdValue(Object entity) {
+        return getIdEntityColumn().getValue(entity);
     }
 
     public boolean isIdGenerationFromDatabase() {
         return getIdEntityColumn().isIdGenerationFromDatabase();
     }
 
-    public EntityKey toEntityKey() {
-        return new EntityKey(type, getIdValue());
+    public EntityKey toEntityKey(Object entity) {
+        return new EntityKey(type, getIdValue(entity));
     }
 
     public int getColumnCount() {
@@ -112,8 +107,8 @@ public class EntityTable {
         return getAssociationEntityColumn().getColumnName();
     }
 
-    public List<?> getAssociationColumnValue() {
-        return (List<?>) getAssociationEntityColumn().getValue();
+    public List<?> getAssociationColumnValue(Object entity) {
+        return (List<?>) getAssociationEntityColumn().getValue(entity);
     }
 
     public Field getAssociationField() {
@@ -129,8 +124,8 @@ public class EntityTable {
         return ALIAS_PREFIX + getTableName();
     }
 
-    public AssociationCondition getAssociationCondition() {
-        return new AssociationCondition(getAssociationColumnName(), getIdValue());
+    public AssociationCondition getAssociationCondition(Object entity) {
+        return new AssociationCondition(getAssociationColumnName(), getIdValue(entity));
     }
 
     public List<Field> getFields() {
@@ -151,5 +146,4 @@ public class EntityTable {
         @Id
         private Long id;
     }
-
 }

@@ -54,11 +54,11 @@ class CollectionLoaderTest {
         order.addOrderItem(orderItem1);
         order.addOrderItem(orderItem2);
         insertData(order);
-        final EntityTable parentEntityTable = new EntityTable(Order.class).setValue(order);
+        final EntityTable parentEntityTable = new EntityTable(Order.class);
 
         // when
         final List<OrderItem> orderItems =
-                (List<OrderItem>) collectionLoader.load(parentEntityTable.getAssociationCondition());
+                (List<OrderItem>) collectionLoader.load(parentEntityTable.getAssociationCondition(order));
 
         // then
         assertAll(
