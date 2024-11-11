@@ -32,7 +32,7 @@ public class MetamodelImpl implements Metamodel {
 
         for (Class<?> entityClass : entityClasses) {
             entityPersisterMap.put(entityClass.getSimpleName(), new EntityPersister(entityClass, jdbcTemplate, new DMLQueryBuilder()));
-            confirmOneToMany(entityClass);
+            putCollectionPersisterMapOneToMany(entityClass);
         }
     }
 
@@ -54,7 +54,7 @@ public class MetamodelImpl implements Metamodel {
         return allKeys;
     }
 
-    private void confirmOneToMany(Class<?> entityClass) {
+    private void putCollectionPersisterMapOneToMany(Class<?> entityClass) {
         Arrays.stream(entityClass.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(OneToMany.class))
                 .forEach(field -> {
