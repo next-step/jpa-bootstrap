@@ -48,7 +48,7 @@ class EntityManagerTest {
         Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
         metamodel.init();
 
-        this.entityManager = new EntityManagerImpl(persistenceContext, jdbcTemplate, metamodel);
+        this.entityManager = new EntityManagerImpl(persistenceContext, metamodel);
     }
 
     //정확한 테스트를 위해 메소드마다 테이블 DROP 후 DB종료

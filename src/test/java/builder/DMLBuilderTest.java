@@ -1,22 +1,11 @@
 package builder;
 
-import boot.Metamodel;
-import boot.MetamodelImpl;
 import builder.dml.EntityData;
 import builder.dml.builder.*;
-import database.H2DBConnection;
 import entity.Order;
 import entity.Person;
-import jdbc.JdbcTemplate;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.EntityManager;
-import persistence.EntityManagerImpl;
-import persistence.PersistenceContext;
-import persistence.PersistenceContextImpl;
-
-import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,19 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 - Object를 받아 deleteById 쿼리 문자열 생성한다.
 */
 class DMLBuilderTest {
-
-    @BeforeEach
-    void setUp() throws SQLException {
-        H2DBConnection h2DBConnection = new H2DBConnection();
-        JdbcTemplate jdbcTemplate = h2DBConnection.start();
-
-        PersistenceContext persistenceContext = new PersistenceContextImpl();
-
-        Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
-        metamodel.init();
-
-        EntityManager entityManager = new EntityManagerImpl(persistenceContext, jdbcTemplate, metamodel);
-    }
 
     @DisplayName("Insert 쿼리 문자열 생성하기")
     @Test

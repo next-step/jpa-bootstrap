@@ -61,7 +61,7 @@ class EntityLoaderTest {
         metamodel.init();
 
         this.entityPersister = new EntityPersister(jdbcTemplate, metamodel, new DMLQueryBuilder());
-        this.entityLoader = new EntityLoader(jdbcTemplate);
+        this.entityLoader = new EntityLoader(jdbcTemplate, new DMLQueryBuilder());
     }
 
     //정확한 테스트를 위해 메소드마다 테이블 DROP 후 DB종료

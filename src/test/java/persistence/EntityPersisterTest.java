@@ -49,7 +49,7 @@ public class EntityPersisterTest {
         Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
         metamodel.init();
 
-        this.entityLoader = new EntityLoader(jdbcTemplate);
+        this.entityLoader = new EntityLoader(jdbcTemplate, new DMLQueryBuilder());
         this.entityPersister = new EntityPersister(jdbcTemplate, metamodel, new DMLQueryBuilder());
     }
 
