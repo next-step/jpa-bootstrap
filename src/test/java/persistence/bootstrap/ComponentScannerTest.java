@@ -17,17 +17,17 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class EntityHolderTest {
+class ComponentScannerTest {
     @Test
-    @DisplayName("엔티티를 찾아서 반환한다.")
+    @DisplayName("엔티티를 찾는다.")
     void constructor() {
         // when
-        final EntityHolder entityHolder = new EntityHolder("domain", "fixture");
+        final ComponentScanner componentScanner = new ComponentScanner("domain", "fixture");
 
         // then
         assertAll(
-                () -> assertThat(entityHolder.getEntityTypes()).hasSize(11),
-                () -> assertThat(entityHolder.getEntityTypes()).contains(
+                () -> assertThat(componentScanner.getEntityTypes()).hasSize(11),
+                () -> assertThat(componentScanner.getEntityTypes()).contains(
                         Person.class, Order.class, OrderItem.class, OrderLazy.class, EntityWithId.class,
                         EntityWithOnlyId.class, EntityWithoutDefaultConstructor.class, EntityWithoutId.class,
                         EntityWithoutTable.class, Department.class, Employee.class

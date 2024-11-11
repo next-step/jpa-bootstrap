@@ -23,7 +23,7 @@ public class Metamodel {
     private final CollectionPersisterBinder collectionPersisterBinder;
 
     public Metamodel(JdbcTemplate jdbcTemplate, DmlQueries dmlQueries, ProxyFactory proxyFactory, String... basePackages) {
-        final List<Class<?>> entityTypes = new EntityHolder(basePackages).getEntityTypes();
+        final List<Class<?>> entityTypes = new ComponentScanner(basePackages).getEntityTypes();
 
         this.entityTableBinder = new EntityTableBinder(entityTypes);
 
