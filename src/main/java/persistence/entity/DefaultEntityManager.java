@@ -31,7 +31,10 @@ public class DefaultEntityManager implements EntityManager {
 
         final EntityLoader entityLoader = metamodel.getEntityLoader(entityType);
         final T entity = entityLoader.load(id);
-        persistenceContext.addEntity(entity);
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
+                .setValue(entity);
+
+        persistenceContext.addEntity(entity, entityTable);
         return entity;
     }
 
@@ -47,7 +50,7 @@ public class DefaultEntityManager implements EntityManager {
             return;
         }
 
-        persistenceContext.addEntity(entity);
+        persistenceContext.addEntity(entity, entityTable);
         persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
         persistenceContext.addToPersistQueue(entity);
     }
@@ -59,7 +62,9 @@ public class DefaultEntityManager implements EntityManager {
             throw new IllegalStateException(NOT_REMOVABLE_STATUS_FAILED_MESSAGE);
         }
 
-        persistenceContext.removeEntity(entity);
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass())
+                .setValue(entity);
+        persistenceContext.removeEntity(entity, entityTable);
         persistenceContext.addToRemoveQueue(entity);
     }
 
@@ -84,7 +89,7 @@ public class DefaultEntityManager implements EntityManager {
 
     private void persistImmediately(Object entity, EntityTable entityTable) {
         persist(entity, entityTable);
-        persistenceContext.addEntity(entity);
+        persistenceContext.addEntity(entity, entityTable);
         persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
     }
 
@@ -140,7 +145,7 @@ public class DefaultEntityManager implements EntityManager {
 
         final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
         entityPersister.update(entity, dirtiedEntityColumns);
-        persistenceContext.addEntity(entity);
+        persistenceContext.addEntity(entity, entityTable);
     }
 
     private List<EntityColumn> getDirtiedEntityColumns(Object entity, Object snapshot) {

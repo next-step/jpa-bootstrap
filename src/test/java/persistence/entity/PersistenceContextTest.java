@@ -4,6 +4,7 @@ import fixture.EntityWithId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.meta.EntityKey;
+import persistence.meta.EntityTable;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -18,9 +19,10 @@ class PersistenceContextTest {
         // given
         final PersistenceContext persistenceContext = new PersistenceContext();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
+        final EntityTable entityTable = new EntityTable(EntityWithId.class).setValue(entity);
 
         // when
-        persistenceContext.addEntity(entity);
+        persistenceContext.addEntity(entity, entityTable);
 
         // then
         final Object managedEntity = getManagedEntity(persistenceContext, entity.getClass(), entity.getId());
@@ -33,7 +35,8 @@ class PersistenceContextTest {
         // given
         final PersistenceContext persistenceContext = new PersistenceContext();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
-        persistenceContext.addEntity(entity);
+        final EntityTable entityTable = new EntityTable(EntityWithId.class).setValue(entity);
+        persistenceContext.addEntity(entity, entityTable);
 
         // when
         final EntityWithId managedEntity = persistenceContext.getEntity(entity.getClass(), entity.getId());
@@ -48,10 +51,11 @@ class PersistenceContextTest {
         // given
         final PersistenceContext persistenceContext = new PersistenceContext();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
-        persistenceContext.addEntity(entity);
+        final EntityTable entityTable = new EntityTable(EntityWithId.class).setValue(entity);
+        persistenceContext.addEntity(entity, entityTable);
 
         // when
-        persistenceContext.removeEntity(entity);
+        persistenceContext.removeEntity(entity, entityTable);
 
         // then
         final Object managedEntity = getManagedEntity(persistenceContext, entity.getClass(), entity.getId());

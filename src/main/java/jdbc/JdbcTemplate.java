@@ -43,7 +43,7 @@ public class JdbcTemplate {
         }
     }
 
-    public <T> T queryForObject(final String sql, final RowMapper<T> rowMapper) {
+    public <T> T queryForObject(final String sql, final RowMapper rowMapper) {
         final List<T> results = query(sql, rowMapper);
         if (results.size() != 1) {
             throw new IllegalStateException("Expected 1 result, got " + results.size());
@@ -51,12 +51,12 @@ public class JdbcTemplate {
         return results.get(0);
     }
 
-    public <T> List<T> query(final String sql, final RowMapper<T> rowMapper) {
+    public <T> List<T> query(final String sql, final RowMapper rowMapper) {
         logger.debug(sql);
         try (final ResultSet resultSet = connection.prepareStatement(sql).executeQuery()) {
             final List<T> result = new ArrayList<>();
             while (resultSet.next()) {
-                result.add(rowMapper.mapRow(resultSet));
+                result.add((T) rowMapper.mapRow(resultSet));
             }
             return result;
         } catch (Exception e) {

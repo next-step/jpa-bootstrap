@@ -46,7 +46,7 @@ class CollectionLoaderTest {
     void load() {
         // given
         final EntityTable entityTable = new EntityTable(OrderItem.class);
-        final DefaultRowMapper<OrderItem> rowMapper = new DefaultRowMapper<>(OrderItem.class);
+        final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
         final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, new SelectQuery(), rowMapper);
         final Order order = new Order("OrderNumber1");
         final OrderItem orderItem1 = new OrderItem("Product1", 10);

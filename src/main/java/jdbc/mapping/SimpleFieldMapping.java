@@ -13,15 +13,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SimpleFieldMapping implements FieldMapping {
     @Override
-    public <T> boolean supports(Class<T> entityType) {
-        final EntityTable entityTable = new EntityTable(entityType);
+    public boolean supports(EntityTable entityTable) {
         return entityTable.isSimpleMapping();
     }
 
     @Override
-    public <T> T getRow(ResultSet resultSet, Class<T> entityType) throws SQLException, IllegalAccessException {
-        final EntityTable entityTable = new EntityTable(entityType);
-        final T entity = new InstanceFactory<>(entityType).createInstance();
+    public Object getRow(ResultSet resultSet, EntityTable entityTable) throws SQLException, IllegalAccessException {
+        final Object entity = new InstanceFactory<>(entityTable.getType()).createInstance();
         final AtomicInteger fieldIndex = new AtomicInteger(0);
 
         for (int i = 0; i < getColumnCount(resultSet); i++) {

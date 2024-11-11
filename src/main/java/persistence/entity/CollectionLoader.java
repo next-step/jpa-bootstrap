@@ -12,9 +12,9 @@ public class CollectionLoader {
     private final EntityTable entityTable;
     private final JdbcTemplate jdbcTemplate;
     private final SelectQuery selectQuery;
-    private final RowMapper<?> rowMapper;
+    private final RowMapper rowMapper;
 
-    public CollectionLoader(EntityTable entityTable, JdbcTemplate jdbcTemplate, SelectQuery selectQuery, RowMapper<?> rowMapper) {
+    public CollectionLoader(EntityTable entityTable, JdbcTemplate jdbcTemplate, SelectQuery selectQuery, RowMapper rowMapper) {
         this.entityTable = entityTable;
         this.jdbcTemplate = jdbcTemplate;
         this.selectQuery = selectQuery;

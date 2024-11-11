@@ -19,8 +19,8 @@ public class CollectionLoaderBinder {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
             if (entityTable.isOneToMany()) {
                 final Class<?> associationColumnType = entityTable.getAssociationColumnType();
-                final EntityTable childEntityTable = new EntityTable(associationColumnType);
-                final RowMapper<?> rowMapper = rowMapperBinder.getRowMapper(associationColumnType);
+                final EntityTable childEntityTable = entityTableBinder.getEntityTable(associationColumnType);
+                final RowMapper rowMapper = rowMapperBinder.getRowMapper(associationColumnType);
                 final CollectionLoader collectionLoader =
                         new CollectionLoader(childEntityTable, jdbcTemplate, dmlQueries.getSelectQuery(), rowMapper);
 

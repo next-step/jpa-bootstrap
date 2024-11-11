@@ -52,7 +52,7 @@ class ProxyFactoryTest {
         final ProxyFactory proxyFactory = new ProxyFactory();
         final EntityTable entityTable = new EntityTable(OrderLazy.class).setValue(order);
         final EntityTable childEntityTable = new EntityTable(entityTable.getAssociationColumnType());
-        final DefaultRowMapper<OrderItem> rowMapper = new DefaultRowMapper<>(OrderItem.class);
+        final DefaultRowMapper rowMapper = new DefaultRowMapper(childEntityTable);
         final CollectionLoader collectionLoader = new CollectionLoader(childEntityTable, jdbcTemplate, new SelectQuery(), rowMapper);
         final LazyLoader lazyLoader = new LazyLoader(entityTable, collectionLoader);
 

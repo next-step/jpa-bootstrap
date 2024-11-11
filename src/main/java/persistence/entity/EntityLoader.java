@@ -13,15 +13,18 @@ public class EntityLoader {
     private static final String PROXY_CREATION_FAILED_MESSAGE = "프록시 생성에 실패하였습니다.";
 
     private final EntityTable entityTable;
+    private final EntityTable childEntityTable;
     private final JdbcTemplate jdbcTemplate;
     private final SelectQuery selectQuery;
     private final ProxyFactory proxyFactory;
-    private final RowMapper<?> rowMapper;
+    private final RowMapper rowMapper;
     private final CollectionLoader collectionLoader;
 
-    public EntityLoader(EntityTable entityTable, JdbcTemplate jdbcTemplate, SelectQuery selectQuery,
-                        ProxyFactory proxyFactory, RowMapper<?> rowMapper, CollectionLoader collectionLoader) {
+    public EntityLoader(EntityTable entityTable, EntityTable childEntityTable, JdbcTemplate jdbcTemplate, SelectQuery selectQuery,
+                        ProxyFactory proxyFactory, RowMapper rowMapper,
+                        CollectionLoader collectionLoader) {
         this.entityTable = entityTable;
+        this.childEntityTable = childEntityTable;
         this.jdbcTemplate = jdbcTemplate;
         this.selectQuery = selectQuery;
         this.proxyFactory = proxyFactory;
@@ -30,14 +33,21 @@ public class EntityLoader {
     }
 
     public <T> T load(Object id) {
-        final String sql = selectQuery.findById(entityTable, id);
-        final T entity = (T) jdbcTemplate.queryForObject(sql, rowMapper);
+        final String sql = getSql(id);
+        final T entity = jdbcTemplate.queryForObject(sql, rowMapper);
         entityTable.setValue(entity);
 
         if (entityTable.isOneToMany() && !entityTable.isEager()) {
             setProxy(entityTable, entity);
         }
         return entity;
+    }
+
+    private String getSql(Object id) {
+        if (entityTable.isOneToMany() && entityTable.isEager()) {
+            return selectQuery.findById(entityTable, childEntityTable, id);
+        }
+        return selectQuery.findById(entityTable, id);
     }
 
     private void setProxy(EntityTable entityTable, Object entity) {

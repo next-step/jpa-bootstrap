@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.dialect.Dialect;
 import persistence.dialect.H2Dialect;
+import persistence.meta.EntityTable;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -16,7 +17,8 @@ class CreateQueryTest {
     void create() {
         // given
         final Dialect dialect = new H2Dialect();
-        final CreateQuery createQuery = new CreateQuery(EntityWithId.class, dialect);
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
+        final CreateQuery createQuery = new CreateQuery(entityTable, dialect);
 
         // when
         final String sql = createQuery.create();
@@ -31,10 +33,12 @@ class CreateQueryTest {
     void create_withAssociation() {
         // given
         final Dialect dialect = new H2Dialect();
-        final CreateQuery createQuery = new CreateQuery(OrderItem.class, dialect);
+        final EntityTable parentEntityTable = new EntityTable(Order.class);
+        final EntityTable entityTable = new EntityTable(OrderItem.class);
+        final CreateQuery createQuery = new CreateQuery(entityTable, dialect);
 
         // when
-        final String sql = createQuery.create(Order.class);
+        final String sql = createQuery.create(parentEntityTable);
 
         // then
         assertThat(sql).isEqualTo(

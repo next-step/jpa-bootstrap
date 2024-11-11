@@ -10,21 +10,23 @@ import static persistence.sql.QueryConst.*;
 
 public class SelectQuery {
     public String findAll(EntityTable entityTable) {
-        if (entityTable.isOneToMany()) {
-            return getAssociationQuery(entityTable)
-                    .build();
-        }
         return find(entityTable).build();
     }
 
+    public String findAll(EntityTable entityTable, EntityTable childEntityTable) {
+        return getAssociationQuery(entityTable, childEntityTable)
+                .build();
+    }
+
     public String findById(EntityTable entityTable, Object id) {
-        if (entityTable.isOneToMany() && entityTable.isEager()) {
-            return getAssociationQuery(entityTable)
-                .where(getColumnWithAliasClause(entityTable, entityTable.getIdColumnName()), id)
-                    .build();
-        }
         return find(entityTable)
                 .where(entityTable.getIdColumnName(), id)
+                .build();
+    }
+
+    public String findById(EntityTable entityTable, EntityTable childEntityTable, Object id) {
+        return getAssociationQuery(entityTable, childEntityTable)
+                .where(getColumnWithAliasClause(entityTable, entityTable.getIdColumnName()), id)
                 .build();
     }
 
@@ -34,8 +36,7 @@ public class SelectQuery {
                 .build();
     }
 
-    private SelectQueryBuilder getAssociationQuery(EntityTable entityTable) {
-        final EntityTable childEntityTable = new EntityTable(entityTable.getAssociationColumnType());
+    private SelectQueryBuilder getAssociationQuery(EntityTable entityTable, EntityTable childEntityTable) {
         return new SelectQueryBuilder()
                 .select(getSelectClause(entityTable, childEntityTable))
                 .from(getTableWithAliasClause(entityTable))

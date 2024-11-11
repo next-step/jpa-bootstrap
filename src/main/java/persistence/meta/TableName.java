@@ -8,14 +8,14 @@ public class TableName {
     private final String name;
 
     public TableName(Class<?> entityType) {
-        this.name = value(entityType);
+        this.name = getName(entityType);
     }
 
     public String value() {
         return name;
     }
 
-    private String value(Class<?> entityType) {
+    private String getName(Class<?> entityType) {
         final Table table = entityType.getAnnotation(Table.class);
         if (Objects.nonNull(table) && Objects.nonNull(table.name()) && !table.name().isBlank()) {
             return table.name();

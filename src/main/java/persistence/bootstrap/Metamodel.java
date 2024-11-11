@@ -21,7 +21,7 @@ public class Metamodel {
 
         this.entityTableBinder = new EntityTableBinder(entityTypes);
 
-        RowMapperBinder rowMapperBinder = new RowMapperBinder(entityTypes);
+        RowMapperBinder rowMapperBinder = new RowMapperBinder(entityTypes, entityTableBinder);
         CollectionLoaderBinder collectionLoaderBinder = new CollectionLoaderBinder(entityTypes, entityTableBinder, rowMapperBinder, jdbcTemplate, dmlQueries);
 
         this.collectionPersisterBinder =

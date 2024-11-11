@@ -13,17 +13,21 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AssociationFieldMapping implements FieldMapping {
+    private final EntityTable childEntityTable;
+
+    public AssociationFieldMapping(EntityTable childEntityTable) {
+        this.childEntityTable = childEntityTable;
+    }
+
     @Override
-    public <T> boolean supports(Class<T> entityType) {
-        final EntityTable entityTable = new EntityTable(entityType);
+    public boolean supports(EntityTable entityTable) {
         return !entityTable.isSimpleMapping();
     }
 
     @Override
-    public <T> T getRow(ResultSet resultSet, Class<T> entityType) throws IllegalAccessException, SQLException {
-        final EntityTable entityTable = new EntityTable(entityType);
+    public Object getRow(ResultSet resultSet, EntityTable entityTable) throws IllegalAccessException, SQLException {
         final Class<?> associationColumnType = entityTable.getAssociationColumnType();
-        final T entity = new InstanceFactory<>(entityType).createInstance();
+        final Object entity = new InstanceFactory<>(entityTable.getType()).createInstance();
         final List<Object> collection = createCollection(entity, entityTable);
 
         do {
@@ -59,8 +63,7 @@ public class AssociationFieldMapping implements FieldMapping {
                 continue;
             }
 
-            final EntityTable associationEntityTable = new EntityTable(associationColumnType);
-            Field childField = getField(associationEntityTable.getFields(), childFieldIndex);
+            Field childField = getField(childEntityTable.getFields(), childFieldIndex);
             if (Objects.nonNull(childField)) {
                 mapField(resultSet, childEntity, childField, i + 1);
             }

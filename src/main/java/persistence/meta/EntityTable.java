@@ -2,6 +2,7 @@ package persistence.meta;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class EntityTable {
+    public static final EntityTable EMPTY = new EntityTable(EmptyEntity.class);
     public static final String NOT_ENTITY_FAILED_MESSAGE = "클래스에 @Entity 애노테이션이 없습니다.";
     private static final String ALIAS_PREFIX = "_";
 
@@ -143,4 +145,11 @@ public class EntityTable {
             throw new IllegalArgumentException(NOT_ENTITY_FAILED_MESSAGE);
         }
     }
+
+    @Entity
+    private static class EmptyEntity {
+        @Id
+        private Long id;
+    }
+
 }

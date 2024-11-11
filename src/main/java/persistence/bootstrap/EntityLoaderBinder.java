@@ -22,7 +22,7 @@ public class EntityLoaderBinder {
         for (Class<?> entityType : entityTypes) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
             final EntityLoader entityLoader =
-                    getEntityLoader(collectionLoaderBinder, rowMapperBinder, jdbcTemplate, dmlQueries, proxyFactory, entityType, entityTable);
+                    getEntityLoader(entityTableBinder, collectionLoaderBinder, rowMapperBinder, jdbcTemplate, dmlQueries, proxyFactory, entityType, entityTable);
             entityLoaderRegistry.put(entityType.getTypeName(), entityLoader);
         }
     }
@@ -31,16 +31,19 @@ public class EntityLoaderBinder {
         return entityLoaderRegistry.get(entityType.getName());
     }
 
-    private EntityLoader getEntityLoader(CollectionLoaderBinder collectionLoaderBinder, RowMapperBinder rowMapperBinder,
-                                         JdbcTemplate jdbcTemplate, DmlQueries dmlQueries, ProxyFactory proxyFactory,
-                                         Class<?> entityType, EntityTable entityTable) {
-        final RowMapper<?> rowMapper = rowMapperBinder.getRowMapper(entityType);
+    private EntityLoader getEntityLoader(EntityTableBinder entityTableBinder, CollectionLoaderBinder collectionLoaderBinder,
+                                         RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate, DmlQueries dmlQueries,
+                                         ProxyFactory proxyFactory, Class<?> entityType, EntityTable entityTable) {
+        final RowMapper rowMapper = rowMapperBinder.getRowMapper(entityType);
         if (Objects.isNull(entityTable.getAssociationEntityColumn())) {
-            return new EntityLoader(entityTable, jdbcTemplate, dmlQueries.getSelectQuery(), proxyFactory, rowMapper, null);
+            return new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, dmlQueries.getSelectQuery(), proxyFactory,
+                    rowMapper, null);
         }
 
+        final EntityTable childEntityTable = entityTableBinder.getEntityTable(entityTable.getAssociationColumnType());
         final CollectionLoader collectionLoader =
                 collectionLoaderBinder.getCollectionLoader(entityType, entityTable.getAssociationColumnName());
-        return new EntityLoader(entityTable, jdbcTemplate, dmlQueries.getSelectQuery(), proxyFactory, rowMapper, collectionLoader);
+        return new EntityLoader(entityTable, childEntityTable, jdbcTemplate, dmlQueries.getSelectQuery(), proxyFactory,
+                rowMapper, collectionLoader);
     }
 }

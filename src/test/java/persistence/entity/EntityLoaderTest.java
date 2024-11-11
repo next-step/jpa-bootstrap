@@ -47,9 +47,9 @@ class EntityLoaderTest {
     void load() {
         // given
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
-        final DefaultRowMapper<EntityWithId> rowMapper = new DefaultRowMapper<>(EntityWithId.class);
+        final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
         final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
-        final EntityLoader entityLoader = new EntityLoader(entityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
+        final EntityLoader entityLoader = new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
 
@@ -72,9 +72,10 @@ class EntityLoaderTest {
     void load_withAssociation() {
         // given
         final EntityTable entityTable = new EntityTable(Order.class);
-        final DefaultRowMapper<Order> rowMapper = new DefaultRowMapper<>(Order.class);
+        final EntityTable childEntityTable = new EntityTable(OrderItem.class);
+        final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable, childEntityTable);
         final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
-        final EntityLoader entityLoader = new EntityLoader(entityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
+        final EntityLoader entityLoader = new EntityLoader(entityTable, childEntityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
         final Order order = new Order("OrderNumber1");
         final OrderItem orderItem1 = new OrderItem("Product1", 10);
         final OrderItem orderItem2 = new OrderItem("Product2", 20);

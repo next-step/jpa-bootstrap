@@ -32,9 +32,10 @@ class SelectQueryTest {
         // given
         final SelectQuery selectQuery = new SelectQuery();
         final EntityTable entityTable = new EntityTable(Order.class);
+        final EntityTable childEntityTable = new EntityTable(OrderItem.class);
 
         // when
-        final String sql = selectQuery.findAll(entityTable);
+        final String sql = selectQuery.findAll(entityTable, childEntityTable);
 
         // then
         assertThat(sql).isEqualTo("SELECT _orders.id, _orders.orderNumber, _order_items.id, "
@@ -62,9 +63,10 @@ class SelectQueryTest {
         // given
         final SelectQuery selectQuery = new SelectQuery();
         final EntityTable entityTable = new EntityTable(Order.class);
+        final EntityTable childEntityTable = new EntityTable(OrderItem.class);
 
         // when
-        final String sql = selectQuery.findById(entityTable, 1);
+        final String sql = selectQuery.findById(entityTable, childEntityTable, 1);
 
         // then
         assertThat(sql).isEqualTo("SELECT _orders.id, _orders.orderNumber, _order_items.id, "

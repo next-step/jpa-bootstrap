@@ -31,7 +31,7 @@ class LazyLoaderTest {
         // given
         final OrderLazy order = new OrderLazy("OrderNumber1");
         final EntityTable entityTable = new EntityTable(OrderLazy.class).setValue(order);
-        final DefaultRowMapper<OrderLazy> rowMapper = new DefaultRowMapper<>(OrderLazy.class);
+        final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
         final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
 
         // when
@@ -47,7 +47,7 @@ class LazyLoaderTest {
         // given
         final Order order = new Order("OrderNumber1");
         final EntityTable entityTable = new EntityTable(Order.class).setValue(order);
-        final DefaultRowMapper<Order> rowMapper = new DefaultRowMapper<>(Order.class);
+        final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
         final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
 
         // when & then

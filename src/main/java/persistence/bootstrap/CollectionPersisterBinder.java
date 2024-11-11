@@ -17,7 +17,7 @@ public class CollectionPersisterBinder {
         for (Class<?> entityType : entityTypes) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
             if (entityTable.isOneToMany()) {
-                final EntityTable childEntityTable = new EntityTable(entityTable.getAssociationColumnType());
+                final EntityTable childEntityTable = entityTableBinder.getEntityTable(entityTable.getAssociationColumnType());
                 final CollectionPersister collectionPersister =
                         new CollectionPersister(childEntityTable, entityTable, jdbcTemplate, dmlQueries.getInsertQuery());
 
