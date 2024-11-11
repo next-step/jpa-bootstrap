@@ -11,10 +11,14 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
     private final CurrentSessionContext currentSessionContext;
     private final JdbcTemplate jdbcTemplate;
+    private final Metamodel metamodel;
 
     public EntityManagerFactoryImpl(CurrentSessionContext currentSessionContext, JdbcTemplate jdbcTemplate) {
         this.currentSessionContext = currentSessionContext;
         this.jdbcTemplate = jdbcTemplate;
+
+        this.metamodel = new MetamodelImpl(this.jdbcTemplate);
+        this.metamodel.init();
     }
 
     @Override
@@ -37,9 +41,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     }
 
     private EntityManager createEntityManager() {
-        Metamodel metamodel = new MetamodelImpl(this.jdbcTemplate);
-        metamodel.init();
-
         return new EntityManagerImpl(new PersistenceContextImpl(), this.jdbcTemplate, metamodel);
     }
 }

@@ -1,5 +1,6 @@
 package boot;
 
+import builder.dml.builder.DMLQueryBuilder;
 import hibernate.AnnotationBinder;
 import jakarta.persistence.OneToMany;
 import jdbc.JdbcTemplate;
@@ -30,7 +31,7 @@ public class MetamodelImpl implements Metamodel {
         List<Class<?>> entityClasses = annotationBinder.getEntityClasses();
 
         for (Class<?> entityClass : entityClasses) {
-            entityPersisterMap.put(entityClass.getSimpleName(), new EntityPersister(entityClass, jdbcTemplate));
+            entityPersisterMap.put(entityClass.getSimpleName(), new EntityPersister(entityClass, jdbcTemplate, new DMLQueryBuilder()));
             confirmOneToMany(entityClass);
         }
     }
