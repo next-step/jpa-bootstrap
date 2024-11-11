@@ -37,11 +37,12 @@ public class MetaModel {
         return entityPersisterMap.get(entityClass);
     }
 
-    public EntityLoader<?> entityLoader(Class<?> entityClass) {
+    @SuppressWarnings("unchecked")
+    public <T> EntityLoader<T> entityLoader(Class<T> entityClass) {
         if (entityClass == null || !entityLoaderMap.containsKey(entityClass)) {
             throw new IllegalArgumentException("Not Found EntityLoader");
         }
 
-        return entityLoaderMap.get(entityClass);
+        return (EntityLoader<T>) entityLoaderMap.get(entityClass);
     }
 }

@@ -5,7 +5,6 @@ import database.ConnectionHolder;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.OneToMany;
-import persistence.sql.EntityLoaderFactory;
 import persistence.sql.clause.Clause;
 import persistence.sql.context.EntityPersister;
 import persistence.sql.context.PersistenceContext;
@@ -25,7 +24,6 @@ import java.util.List;
 
 public class DefaultEntityManager implements EntityManager {
     private final PersistenceContext persistenceContext;
-    private final EntityLoaderFactory entityLoaderFactory;
     private final MetaModel metaModel;
     private final Transaction transaction;
 
@@ -33,7 +31,6 @@ public class DefaultEntityManager implements EntityManager {
     public DefaultEntityManager(PersistenceContext persistenceContext, MetaModel metaModel) {
         this.persistenceContext = persistenceContext;
         this.metaModel = metaModel;
-        this.entityLoaderFactory = EntityLoaderFactory.getInstance();
         this.transaction = new EntityTransaction(this);
     }
 
@@ -69,7 +66,7 @@ public class DefaultEntityManager implements EntityManager {
     }
 
     private <T> void persistChildEntity(T entity) {
-        MetadataLoader<?> loader = entityLoaderFactory.getLoader(entity.getClass()).getMetadataLoader();
+        MetadataLoader<?> loader = metaModel.entityLoader(entity.getClass()).getMetadataLoader();
         List<Field> fields = loader.getFieldAllByPredicate(this::isCascadePersist);
 
         for (Field field : fields) {
@@ -107,7 +104,7 @@ public class DefaultEntityManager implements EntityManager {
     }
 
     private <T> boolean existsPersistChildEntity(T entity) {
-        EntityLoader<?> entityLoader = entityLoaderFactory.getLoader(entity.getClass());
+        EntityLoader<?> entityLoader = metaModel.entityLoader(entity.getClass());
         MetadataLoader<?> loader = entityLoader.getMetadataLoader();
         List<Field> fields = loader.getFieldAllByPredicate(this::isCascadePersist);
 
@@ -135,7 +132,7 @@ public class DefaultEntityManager implements EntityManager {
     }
 
     private boolean isNew(Object entity) {
-        EntityLoader<?> entityLoader = entityLoaderFactory.getLoader(entity.getClass());
+        EntityLoader<?> entityLoader = metaModel.entityLoader(entity.getClass());
         MetadataLoader<?> loader = entityLoader.getMetadataLoader();
 
         Field primaryKeyField = loader.getPrimaryKeyField();
@@ -152,7 +149,7 @@ public class DefaultEntityManager implements EntityManager {
         if (entity == null) {
             throw new IllegalArgumentException("Entity must not be null");
         }
-        EntityLoader<?> entityLoader = entityLoaderFactory.getLoader(entity.getClass());
+        EntityLoader<?> entityLoader = metaModel.entityLoader(entity.getClass());
         MetadataLoader<?> loader = entityLoader.getMetadataLoader();
 
         if (isNew(entity)) {
@@ -183,7 +180,7 @@ public class DefaultEntityManager implements EntityManager {
         if (entity == null) {
             throw new IllegalArgumentException("Entity must not be null");
         }
-        EntityLoader<?> entityLoader = entityLoaderFactory.getLoader(entity.getClass());
+        EntityLoader<?> entityLoader = metaModel.entityLoader(entity.getClass());
         MetadataLoader<?> loader = entityLoader.getMetadataLoader();
 
         Object id = Clause.extractValue(loader.getPrimaryKeyField(), entity);
@@ -213,8 +210,8 @@ public class DefaultEntityManager implements EntityManager {
             return returnType.cast(entry.getEntity());
         }
 
-        entry = persistenceContext.addLoadingEntry(primaryKey, returnType);
-        EntityLoader<T> entityLoader = entityLoaderFactory.getLoader(returnType);
+        EntityLoader<T> entityLoader = metaModel.entityLoader(returnType);
+        entry = persistenceContext.addLoadingEntry(primaryKey, entityLoader.getMetadataLoader());
 
         T loadedEntity = entityLoader.load(primaryKey);
         if (loadedEntity != null) {
@@ -223,7 +220,7 @@ public class DefaultEntityManager implements EntityManager {
         }
 
         if (entityLoader.existLazyLoading()) {
-            entityLoader.updateLazyLoadingField(loadedEntity, persistenceContext, (collectionKeyHolder, collectionEntry) -> {
+            entityLoader.updateLazyLoadingField(loadedEntity, persistenceContext, metaModel, (collectionKeyHolder, collectionEntry) -> {
                 if (transaction.isActive()) {
                     persistenceContext.addCollectionEntry(collectionKeyHolder, collectionEntry);
                 }
@@ -235,7 +232,7 @@ public class DefaultEntityManager implements EntityManager {
 
     @Override
     public <T> List<T> findAll(Class<T> entityClass) {
-        EntityLoader<T> entityLoader = entityLoaderFactory.getLoader(entityClass);
+        EntityLoader<T> entityLoader = metaModel.entityLoader(entityClass);
         EntityPersister entityPersister = metaModel.entityPersister(entityClass);
 
         List<T> loadedEntities = entityLoader.loadAll();

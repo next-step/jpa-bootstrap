@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DisplayName("EntityEntry 테스트")
 class EntityEntryTest extends TestEntityInitialize {
+    private MetadataLoader<?> metadataLoader = new SimpleMetadataLoader<>(TestPerson.class);
 
     public static Stream<Arguments> provideNullEntityOrSnapshotEntry() {
         EntityEntry entityNullEntry = createDummyEntry();
@@ -66,7 +67,7 @@ class EntityEntryTest extends TestEntityInitialize {
         // given
         TestPerson person = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
 
-        EntityEntry actual = EntityEntry.newEntry(person, Status.MANAGED);
+        EntityEntry actual = EntityEntry.newEntry(person, Status.MANAGED, metadataLoader);
 
         assertAll(
                 () -> assertThat(actual).isNotNull(),
@@ -80,9 +81,10 @@ class EntityEntryTest extends TestEntityInitialize {
     void testNewEntryWithInvalidGeneratedValue() {
         // given
         TestPersonNoGenerateValue person = new TestPersonNoGenerateValue("catsbi", 55, "casbi@naver.com", 123);
+        SimpleMetadataLoader<TestPersonNoGenerateValue> loader = new SimpleMetadataLoader<>(TestPersonNoGenerateValue.class);
 
         // when, then
-        assertThatThrownBy(() -> EntityEntry.newEntry(person, Status.MANAGED))
+        assertThatThrownBy(() -> EntityEntry.newEntry(person, Status.MANAGED, loader))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Primary key must not be null");
     }
@@ -93,7 +95,7 @@ class EntityEntryTest extends TestEntityInitialize {
         // given
         Long primaryKey = 1L;
 
-        EntityEntry actual = EntityEntry.newLoadingEntry(primaryKey, TestPerson.class);
+        EntityEntry actual = EntityEntry.newLoadingEntry(primaryKey,metadataLoader);
 
         assertAll(
                 () -> assertThat(actual).isNotNull(),
@@ -109,7 +111,7 @@ class EntityEntryTest extends TestEntityInitialize {
         // given
         String expectedName = "newCatsbi";
         TestPerson person = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
-        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED);
+        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED, metadataLoader);
 
         // when
         person.setName(expectedName);
@@ -127,7 +129,7 @@ class EntityEntryTest extends TestEntityInitialize {
     void testSynchronizingSnapshotIdAndTransient() {
         // given
         TestPerson person = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
-        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED);
+        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED, metadataLoader);
 
         // when
         person.setId(2L);
@@ -149,7 +151,7 @@ class EntityEntryTest extends TestEntityInitialize {
     void testUpdateEntityAndSnapshotIsNull() {
         // given
         TestPerson person = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
-        EntityEntry entry = EntityEntry.newLoadingEntry(1L, TestPerson.class);
+        EntityEntry entry = EntityEntry.newLoadingEntry(1L, metadataLoader);
 
         //when
         entry.updateEntity(person);
@@ -166,7 +168,7 @@ class EntityEntryTest extends TestEntityInitialize {
     void testIsDirtyWithDirtyEntity() {
         // given
         TestPerson person = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
-        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED);
+        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED, metadataLoader);
 
         // when
         person.setName("newCatsbi");
@@ -180,7 +182,7 @@ class EntityEntryTest extends TestEntityInitialize {
     void testIsDirtyWithNotDirtyEntity() {
         // given
         TestPerson person = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
-        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED);
+        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED, metadataLoader);
 
         // when
         person.setIndex(456);
@@ -194,7 +196,7 @@ class EntityEntryTest extends TestEntityInitialize {
     void testIsDirtyWithNotManagedStatus() {
         // given
         TestPerson person = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
-        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED);
+        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED, metadataLoader);
 
         // when
         person.setName("newCatsbi");
@@ -221,7 +223,7 @@ class EntityEntryTest extends TestEntityInitialize {
     void testIsDirtyEqualsEntityAndSnapshot() {
         // given
         TestPerson person = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
-        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED);
+        EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED, metadataLoader);
 
         // when
         boolean actual = entry.isDirty();

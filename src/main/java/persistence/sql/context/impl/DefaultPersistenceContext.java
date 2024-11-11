@@ -5,6 +5,7 @@ import persistence.sql.context.CollectionKeyHolder;
 import persistence.sql.context.EntityPersister;
 import persistence.sql.context.KeyHolder;
 import persistence.sql.context.PersistenceContext;
+import persistence.sql.dml.MetadataLoader;
 import persistence.sql.entity.CollectionEntry;
 import persistence.sql.entity.EntityEntry;
 import persistence.sql.entity.data.Status;
@@ -18,15 +19,15 @@ public class DefaultPersistenceContext implements PersistenceContext {
 
     @Override
     public <T> EntityEntry addEntry(T entity, Status status, EntityPersister entityPersister) {
-        EntityEntry entityEntry = EntityEntry.newEntry(entity, status);
+        EntityEntry entityEntry = EntityEntry.newEntry(entity, status, entityPersister.getMetadataLoader());
         context.put(entityEntry.getKey(), entityEntry);
 
         return entityEntry;
     }
 
     @Override
-    public <T> EntityEntry addLoadingEntry(Object primaryKey, Class<T> returnType) {
-        EntityEntry entityEntry = EntityEntry.newLoadingEntry(primaryKey, returnType);
+    public <T> EntityEntry addLoadingEntry(Object primaryKey, MetadataLoader<T> metadataLoader) {
+        EntityEntry entityEntry = EntityEntry.newLoadingEntry(primaryKey, metadataLoader);
         context.put(entityEntry.getKey(), entityEntry);
 
         return entityEntry;

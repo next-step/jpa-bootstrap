@@ -127,4 +127,9 @@ public class DefaultEntityPersister implements EntityPersister {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public MetadataLoader<?> getMetadataLoader() {
+        return metadataLoader;
+    }
 }

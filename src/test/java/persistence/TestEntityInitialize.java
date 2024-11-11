@@ -7,8 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.config.TestPersistenceConfig;
-import persistence.proxy.ProxyFactory;
-import persistence.sql.EntityLoaderFactory;
 import persistence.sql.QueryBuilderFactory;
 import persistence.sql.config.PersistenceConfig;
 import persistence.sql.data.QueryType;

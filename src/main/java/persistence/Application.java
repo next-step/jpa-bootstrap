@@ -1,19 +1,15 @@
 package persistence;
 
-import boot.Metadata;
 import database.ConnectionHolder;
 import database.DatabaseServer;
 import database.H2;
 import jdbc.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import persistence.proxy.ProxyFactory;
-import persistence.sql.EntityLoaderFactory;
 import persistence.sql.QueryBuilderFactory;
 import persistence.sql.config.PersistenceConfig;
 import persistence.sql.data.QueryType;
 import persistence.sql.ddl.TableScanner;
-import persistence.sql.dml.Database;
 import persistence.sql.dml.impl.SimpleMetadataLoader;
 import persistence.sql.node.EntityNode;
 

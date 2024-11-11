@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.TestEntityInitialize;
-import persistence.sql.EntityLoaderFactory;
 import persistence.sql.config.PersistenceConfig;
 import persistence.sql.context.EntityPersister;
 import persistence.sql.context.KeyHolder;
@@ -44,7 +43,8 @@ class DefaultPersistenceContextTest extends TestEntityInitialize {
         entityPersister.insert(catsbiEntity);
         context.addEntry(catsbiEntity, Status.SAVING, entityPersister);
 
-        TestPerson actual = EntityLoaderFactory.getInstance().getLoader(TestPerson.class).load(catsbiEntity.getId());
+        EntityLoader<TestPerson> testPersonEntityLoader = metaModel.entityLoader(TestPerson.class);
+        TestPerson actual = testPersonEntityLoader.load(catsbiEntity.getId());
 
         assertThat(context.getEntry(TestPerson.class, catsbiEntity.getId())).isNotNull();
         assertThat(actual.getName()).isEqualTo("catsbi");
@@ -96,7 +96,7 @@ class DefaultPersistenceContextTest extends TestEntityInitialize {
     @DisplayName("dirtyCheck 함수는 저장이 필요한 엔티티를 동기화한다.")
     void testDirtyCheckWithValidEntries() {
         // given
-        EntityLoader<TestPerson> loader = EntityLoaderFactory.getInstance().getLoader(TestPerson.class);
+        EntityLoader<TestPerson> loader = metaModel.entityLoader(TestPerson.class);
         TestPerson catsbiEntity = new TestPerson(1L, "catsbi", 33, "catsbi@naver.com", 123);
         EntityEntry entityEntry = new EntityEntry(loader.getMetadataLoader(),
                 Status.SAVING,
@@ -108,7 +108,7 @@ class DefaultPersistenceContextTest extends TestEntityInitialize {
 
         //when
         context.dirtyCheck(metaModel);
-        TestPerson actual = EntityLoaderFactory.getInstance().getLoader(TestPerson.class).load(catsbiEntity.getId());
+        TestPerson actual = metaModel.entityLoader(TestPerson.class).load(catsbiEntity.getId());
 
         assertThat(context.getEntry(TestPerson.class, catsbiEntity.getId())).isNotNull();
         assertThat(actual.getName()).isEqualTo("catsbi");
@@ -118,7 +118,7 @@ class DefaultPersistenceContextTest extends TestEntityInitialize {
     @DisplayName("dirtyCheck 함수는 변경이 필요한 엔티티를 동기화한다.")
     void testDirtyCheckWithDirtyEntity() {
         // given
-        EntityLoader<TestPerson> loader = EntityLoaderFactory.getInstance().getLoader(TestPerson.class);
+        EntityLoader<TestPerson> loader = metaModel.entityLoader(TestPerson.class);
         TestPerson catsbiEntity = new TestPerson(1L, "catsbi", 33, "catsbi@naver.com", 123);
         context.addEntry(catsbiEntity, Status.SAVING, entityPersister);
 
@@ -135,7 +135,7 @@ class DefaultPersistenceContextTest extends TestEntityInitialize {
     @DisplayName("deleteEntry 함수는 저장된 엔티티를 삭제한다.")
     void testDeleteEntry() {
         // given
-        EntityLoader<TestPerson> loader = EntityLoaderFactory.getInstance().getLoader(TestPerson.class);
+        EntityLoader<TestPerson> loader = metaModel.entityLoader(TestPerson.class);
         TestPerson catsbiEntity = new TestPerson("catsbi", 33, "catsbi@naver.com", 123);
         entityPersister.insert(catsbiEntity);
         EntityEntry entityEntry = context.addEntry(catsbiEntity, Status.MANAGED, entityPersister);
