@@ -7,6 +7,7 @@ import builder.ddl.builder.CreateQueryBuilder;
 import builder.ddl.builder.DropQueryBuilder;
 import builder.ddl.dataType.DB;
 import builder.dml.EntityData;
+import builder.dml.builder.DMLQueryBuilder;
 import database.H2DBConnection;
 import entity.Order;
 import entity.OrderItem;
@@ -59,7 +60,7 @@ class EntityLoaderTest {
         Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
         metamodel.init();
 
-        this.entityPersister = new EntityPersister(jdbcTemplate, metamodel);
+        this.entityPersister = new EntityPersister(jdbcTemplate, metamodel, new DMLQueryBuilder());
         this.entityLoader = new EntityLoader(jdbcTemplate);
     }
 

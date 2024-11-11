@@ -7,6 +7,7 @@ import builder.ddl.builder.CreateQueryBuilder;
 import builder.ddl.builder.DropQueryBuilder;
 import builder.ddl.dataType.DB;
 import builder.dml.EntityData;
+import builder.dml.builder.DMLQueryBuilder;
 import database.H2DBConnection;
 import entity.Order;
 import entity.OrderItem;
@@ -49,7 +50,7 @@ public class EntityPersisterTest {
         metamodel.init();
 
         this.entityLoader = new EntityLoader(jdbcTemplate);
-        this.entityPersister = new EntityPersister(jdbcTemplate, metamodel);
+        this.entityPersister = new EntityPersister(jdbcTemplate, metamodel, new DMLQueryBuilder());
     }
 
     //정확한 테스트를 위해 메소드마다 테이블 DROP 후 DB종료
