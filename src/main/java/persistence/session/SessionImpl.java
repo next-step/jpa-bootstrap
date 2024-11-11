@@ -9,6 +9,11 @@ import persistence.entity.EntityPersister;
 import persistence.entity.EntitySnapshot;
 import persistence.entity.PersistenceContext;
 import persistence.entity.Status;
+import persistence.event.ActionQueue;
+import persistence.event.EventListenerGroupHandler;
+import persistence.event.EventSource;
+import persistence.event.PersistEvent;
+import persistence.event.PersistEventListener;
 import persistence.meta.Metamodel;
 import persistence.sql.definition.TableAssociationDefinition;
 
@@ -16,17 +21,20 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-public class SessionImpl implements EntityManager {
+public class SessionImpl implements EventSource {
     private final PersistenceContext persistenceContext;
     private final Metamodel metamodel;
+    private final EventListenerGroupHandler eventListenerGroupHandler;
     private final EntityLoader entityLoader;
 
     public SessionImpl(JdbcTemplate jdbcTemplate,
                        PersistenceContext persistenceContext,
+                       EventListenerGroupHandler eventListenerGroupHandler,
                        Metamodel metamodel) {
 
         this.persistenceContext = persistenceContext;
         this.metamodel = metamodel;
+        this.eventListenerGroupHandler = eventListenerGroupHandler;
         this.entityLoader = new EntityLoader(jdbcTemplate, metamodel);
     }
 
@@ -66,7 +74,12 @@ public class SessionImpl implements EntityManager {
             return;
         }
 
-        doPersist(entity, entityPersister);
+//        doPersist(entity, entityPersister);
+        eventListenerGroupHandler.PERSIST
+                .fireEventOnEachListener(
+                        PersistEvent.create(this, entity),
+                        PersistEventListener::onPersist);
+
     }
 
     private void throwIfNotManaged(Object entity, EntityPersister entityPersister) {
@@ -85,33 +98,33 @@ public class SessionImpl implements EntityManager {
         throw new IllegalArgumentException("Entity already persisted");
     }
 
-    private void doPersist(Object entity, EntityPersister entityPersister) {
-        final EntityEntry entityEntry = EntityEntry.inSaving();
-        entityPersister.insert(entity);
-        startManageEntity(entity, entityEntry, entityPersister.getEntityId(entity));
+//    private void doPersist(Object entity, EntityPersister entityPersister) {
+//        final EntityEntry entityEntry = EntityEntry.inSaving();
+//        entityPersister.insert(entity);
+//        startManageEntity(entity, entityEntry, entityPersister.getEntityId(entity));
+//
+//        for (TableAssociationDefinition association : entityPersister.getCollectionAssociations()) {
+//            final CollectionPersister collectionPersister = metamodel.findCollectionPersister(association);
+//            final Collection<Object> childEntities = collectionPersister.insertCollection(entity, association);
+//            childEntities.forEach(child -> {
+//                startManageEntity(child,
+//                        EntityEntry.inSaving(),
+//                        metamodel.findEntityPersister(child.getClass()).getEntityId(child));
+//            });
+//        }
+//    }
 
-        for (TableAssociationDefinition association : entityPersister.getCollectionAssociations()) {
-            final CollectionPersister collectionPersister = metamodel.findCollectionPersister(association);
-            final Collection<Object> childEntities = collectionPersister.insertCollection(entity, association);
-            childEntities.forEach(child -> {
-                startManageEntity(child,
-                        EntityEntry.inSaving(),
-                        metamodel.findEntityPersister(child.getClass()).getEntityId(child));
-            });
-        }
-    }
-
-    private void startManageEntity(Object entity,
-                                   EntityEntry entityEntry,
-                                   Serializable id) {
-
-        final EntityKey entityKey = new EntityKey(id, entity.getClass());
-        entityEntry.bindId(id);
-        entityEntry.updateStatus(Status.MANAGED);
-
-        storeEntityInContext(entityKey, entity);
-        updateEntryToManaged(entityKey, entityEntry);
-    }
+//    private void startManageEntity(Object entity,
+//                                   EntityEntry entityEntry,
+//                                   Serializable id) {
+//
+//        final EntityKey entityKey = new EntityKey(id, entity.getClass());
+//        entityEntry.bindId(id);
+//        entityEntry.updateStatus(Status.MANAGED);
+//
+//        storeEntityInContext(entityKey, entity);
+//        updateEntryToManaged(entityKey, entityEntry);
+//    }
 
     @Override
     public void remove(Object entity) {
@@ -179,5 +192,20 @@ public class SessionImpl implements EntityManager {
     @Override
     public void close() {
         clear();
+    }
+
+    @Override
+    public ActionQueue getActionQueue() {
+        return null;
+    }
+
+    @Override
+    public PersistenceContext getPersistenceContext() {
+        return persistenceContext;
+    }
+
+    @Override
+    public EntityPersister getEntityPersister(Class<?> clazz) {
+        return metamodel.findEntityPersister(clazz);
     }
 }

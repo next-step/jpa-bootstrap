@@ -16,7 +16,7 @@ import persistence.meta.Metadata;
 import persistence.meta.MetadataImpl;
 import persistence.meta.Metamodel;
 import persistence.session.EntityManager;
-import persistence.session.EntityManagerImpl;
+import persistence.session.SessionImpl;
 import persistence.session.SchemaManagementToolCoordinator;
 
 import java.sql.SQLException;
@@ -94,7 +94,7 @@ class EntityPersisterTest {
 
         entityPersister.insert(entity);
 
-        EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
+        EntityManager em = new SessionImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
         QueryTestEntityWithIdentityId saved = em.find(QueryTestEntityWithIdentityId.class, 1L);
         assertAll(
                 () -> assertThat(saved.id).isEqualTo(1L),
@@ -109,7 +109,7 @@ class EntityPersisterTest {
 
         entityPersister.insert(entity);
 
-        EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
+        EntityManager em = new SessionImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
         QueryTestEntityWithIdentityId saved = em.find(QueryTestEntityWithIdentityId.class, 1L);
         assertAll(
                 () -> assertThat(saved.id).isEqualTo(1L),
@@ -127,7 +127,7 @@ class EntityPersisterTest {
 
         entityPersister.update(updatedEntity);
 
-        EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
+        EntityManager em = new SessionImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
         QueryTestEntityWithIdentityId updated = em.find(QueryTestEntityWithIdentityId.class, 1L);
 
         assertAll(
@@ -144,7 +144,7 @@ class EntityPersisterTest {
         entityPersister.insert(entity);
         entityPersister.delete(entity);
 
-        EntityManager em = new EntityManagerImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
+        EntityManager em = new SessionImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
         assertThrows(RuntimeException.class, () -> em.find(QueryTestEntityWithIdentityId.class, 1L));
     }
 }
