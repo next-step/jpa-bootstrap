@@ -1,14 +1,14 @@
 package persistence.sql.config;
 
+import boot.MetaModel;
+import boot.Metadata;
 import database.DatabaseServer;
 import database.H2;
 import persistence.proxy.ProxyFactory;
 import persistence.proxy.impl.JdkProxyFactory;
 import persistence.sql.common.util.CamelToSnakeConverter;
 import persistence.sql.common.util.NameConverter;
-import persistence.sql.context.EntityPersister;
 import persistence.sql.context.PersistenceContext;
-import persistence.sql.context.impl.DefaultEntityPersister;
 import persistence.sql.context.impl.DefaultPersistenceContext;
 import persistence.sql.ddl.QueryColumnSupplier;
 import persistence.sql.ddl.QueryConstraintSupplier;
@@ -21,11 +21,11 @@ import persistence.sql.ddl.impl.ConstraintPrimaryKeySupplier;
 import persistence.sql.ddl.impl.H2ColumnTypeSupplier;
 import persistence.sql.ddl.impl.H2Dialect;
 import persistence.sql.dml.Database;
-import persistence.sql.dml.EntityManager;
 import persistence.sql.dml.impl.DefaultDatabase;
-import persistence.sql.dml.impl.DefaultEntityManager;
+import persistence.sql.node.EntityNode;
 
 import java.sql.SQLException;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -34,6 +34,8 @@ public class PersistenceConfig {
 
     private DatabaseServer databaseServer;
     private PersistenceContext persistenceContext;
+    private MetaModel metaModel;
+    private Metadata metadata;
 
     private PersistenceConfig() {
     }
@@ -69,12 +71,23 @@ public class PersistenceConfig {
         return suppliers;
     }
 
-    public EntityManager entityManager() throws SQLException {
-        return new DefaultEntityManager(persistenceContext(), entityPersister());
+    public MetaModel metalModel() throws SQLException {
+        if (metaModel != null) {
+            return metaModel;
+        }
+        metaModel = new MetaModel();
+        metaModel.init(metadata(), proxyFactory());
+
+        return metaModel;
     }
 
-    public EntityPersister entityPersister() throws SQLException {
-        return new DefaultEntityPersister(database(), nameConverter());
+    public Metadata metadata() throws SQLException {
+        if (metadata != null) {
+            return metadata;
+        }
+        Set<EntityNode<?>> nodes = tableScanner().scan("persistence.sql.fixture");
+        metadata = Metadata.create(nodes, database());
+        return metadata;
     }
 
     public PersistenceContext persistenceContext() throws SQLException {

@@ -1,16 +1,16 @@
 package persistence.sql.context;
 
-import java.sql.Connection;
+import persistence.sql.dml.MetadataLoader;
 
 public interface EntityPersister {
 
-    <T> Object insert(T entity);
+    Object insert(Object entity);
 
-    <T> Object insert(T entity, T parentEntity);
+    Object insert(Object entity, Object parentEntity);
 
-    <T> void update(T entity, T snapshotEntity);
+    void update(Object entity, Object snapshotEntity);
 
-    <T> void delete(T entity);
+    void delete(Object entity);
 
-    Connection getConnection();
+    MetadataLoader<?> getMetadataLoader();
 }

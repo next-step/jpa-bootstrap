@@ -1,12 +1,10 @@
 package persistence.sql.entity;
 
 import jakarta.persistence.Id;
-import persistence.sql.EntityLoaderFactory;
 import persistence.sql.clause.Clause;
 import persistence.sql.context.KeyHolder;
 import persistence.sql.dml.MetadataLoader;
 import persistence.sql.entity.data.Status;
-import persistence.sql.loader.EntityLoader;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -26,20 +24,18 @@ public class EntityEntry {
         this.key = key;
     }
 
-    public static EntityEntry newLoadingEntry(Object primaryKey, Class<?> returnType) {
-        EntityLoader<?> entityLoader = EntityLoaderFactory.getInstance().getLoader(returnType);
+    public static EntityEntry newLoadingEntry(Object primaryKey, MetadataLoader<?> metadataLoader) {
+        Class<?> returnType = metadataLoader.getEntityType();
         KeyHolder key = new KeyHolder(returnType, primaryKey);
 
-        return new EntityEntry(entityLoader.getMetadataLoader(),
+        return new EntityEntry(metadataLoader,
                 Status.LOADING,
                 null,
                 null,
                 key);
     }
 
-    public static EntityEntry newEntry(Object entity, Status status) {
-        EntityLoader<?> entityLoader = EntityLoaderFactory.getInstance().getLoader(entity.getClass());
-        MetadataLoader<?> loader = entityLoader.getMetadataLoader();
+    public static EntityEntry newEntry(Object entity, Status status, MetadataLoader<?> loader) {
 
         Object id = Clause.extractValue(loader.getPrimaryKeyField(), entity);
         if (id == null && status != Status.SAVING) {

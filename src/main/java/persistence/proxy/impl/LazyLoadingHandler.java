@@ -1,7 +1,6 @@
 package persistence.proxy.impl;
 
 import org.jetbrains.annotations.NotNull;
-import persistence.sql.EntityLoaderFactory;
 import persistence.sql.context.CollectionKeyHolder;
 import persistence.sql.context.KeyHolder;
 import persistence.sql.context.PersistenceContext;
@@ -25,24 +24,26 @@ public class LazyLoadingHandler<T> extends AbstractCollection<T> implements Invo
 
     private final PersistenceContext persistenceContext;
     private final KeyHolder parentKeyHolder;
+    private final EntityLoader<?> targetLoader;
     private final EntityLoader<T> entityLoader;
     private List<T> target;
     private volatile boolean loaded = false;
 
-    public LazyLoadingHandler(KeyHolder parentKeyHolder, EntityLoader<T> entityLoader, PersistenceContext persistenceContext) {
+    public LazyLoadingHandler(KeyHolder parentKeyHolder, EntityLoader<?> targetLoader, EntityLoader<T> entityLoader, PersistenceContext persistenceContext) {
         this.persistenceContext = persistenceContext;
         this.parentKeyHolder = parentKeyHolder;
         this.entityLoader = entityLoader;
         this.target = Collections.emptyList();
+        this.targetLoader = targetLoader;
     }
 
     public static <T> LazyLoadingHandler<T> newInstance(Object foreignKey,
                                                         Class<?> foreignType,
-                                                        Class<T> targetClass,
-                                                        PersistenceContext persistenceContext) {
-        EntityLoader<T> entityLoader = EntityLoaderFactory.getInstance().getLoader(targetClass);
+                                                        PersistenceContext persistenceContext,
+                                                        EntityLoader<T> entityLoader,
+                                                        EntityLoader<?> targetLoader) {
 
-        return new LazyLoadingHandler<>(new KeyHolder(foreignType, foreignKey), entityLoader, persistenceContext);
+        return new LazyLoadingHandler<>(new KeyHolder(foreignType, foreignKey), targetLoader, entityLoader, persistenceContext);
     }
 
     @Override
@@ -67,7 +68,6 @@ public class LazyLoadingHandler<T> extends AbstractCollection<T> implements Invo
             return;
         }
 
-        EntityLoader<?> targetLoader = EntityLoaderFactory.getInstance().getLoader(parentKeyHolder.entityType());
         target = entityLoader.loadAllByForeignKey(parentKeyHolder.key(), targetLoader.getMetadataLoader());
         entry.updateEntries((List<Object>) target);
         loaded = true;
@@ -98,7 +98,11 @@ public class LazyLoadingHandler<T> extends AbstractCollection<T> implements Invo
         if (!(o instanceof LazyLoadingHandler<?> that)) {
             return false;
         }
-        return loaded == that.loaded && Objects.equals(persistenceContext, that.persistenceContext) && Objects.equals(parentKeyHolder, that.parentKeyHolder) && Objects.equals(entityLoader, that.entityLoader) && Objects.equals(target, that.target);
+        return loaded == that.loaded
+                && Objects.equals(persistenceContext, that.persistenceContext)
+                && Objects.equals(parentKeyHolder, that.parentKeyHolder)
+                && Objects.equals(entityLoader, that.entityLoader)
+                && Objects.equals(target, that.target);
     }
 
     @Override

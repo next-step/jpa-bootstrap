@@ -1,5 +1,7 @@
 package persistence.sql.context;
 
+import boot.MetaModel;
+import persistence.sql.dml.MetadataLoader;
 import persistence.sql.entity.CollectionEntry;
 import persistence.sql.entity.EntityEntry;
 import persistence.sql.entity.data.Status;
@@ -8,7 +10,7 @@ public interface PersistenceContext {
 
     <T> EntityEntry addEntry(T entity, Status status, EntityPersister entityPersister);
 
-    <T> EntityEntry addLoadingEntry(Object primaryKey, Class<T> returnType);
+    <T> EntityEntry addLoadingEntry(Object primaryKey, MetadataLoader<T> metadataLoader);
 
     <T, ID> EntityEntry getEntry(Class<T> entityType, ID id);
 
@@ -20,5 +22,5 @@ public interface PersistenceContext {
 
     void cleanup();
 
-    void dirtyCheck(EntityPersister persister);
+    void dirtyCheck(MetaModel metaModel);
 }

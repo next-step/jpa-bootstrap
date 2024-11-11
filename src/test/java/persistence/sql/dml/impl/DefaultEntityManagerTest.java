@@ -5,10 +5,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.TestEntityInitialize;
 import persistence.config.TestPersistenceConfig;
 import persistence.sql.context.PersistenceContext;
 import persistence.sql.dml.EntityManager;
-import persistence.sql.dml.TestEntityInitialize;
 import persistence.sql.fixture.LazyTestOrder;
 import persistence.sql.fixture.LazyTestOrderItem;
 import persistence.sql.fixture.TestOrder;
@@ -52,7 +52,7 @@ class DefaultEntityManagerTest extends TestEntityInitialize {
                 () -> assertThat(actual.getName()).isEqualTo("catsbi"),
                 () -> assertThat(actual.getAge()).isEqualTo(55),
                 () -> assertThat(actual.getEmail()).isEqualTo("catsbi@naver.com"),
-                () -> assertThat(actual.getIndex()).isEqualTo(123)
+                () -> assertThat(actual.getIndex()).isNull()
         );
     }
 
@@ -297,5 +297,4 @@ class DefaultEntityManagerTest extends TestEntityInitialize {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("failed to lazily initialize a collection");
     }
-
 }
