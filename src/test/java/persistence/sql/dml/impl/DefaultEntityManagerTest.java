@@ -297,5 +297,4 @@ class DefaultEntityManagerTest extends TestEntityInitialize {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("failed to lazily initialize a collection");
     }
-
 }
