@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import persistence.TestEntityInitialize;
 import persistence.sql.context.KeyHolder;
 import persistence.sql.dml.MetadataLoader;
-import persistence.sql.dml.TestEntityInitialize;
 import persistence.sql.dml.impl.SimpleMetadataLoader;
 import persistence.sql.entity.data.Status;
 import persistence.sql.fixture.TestPerson;
@@ -23,6 +23,42 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DisplayName("EntityEntry 테스트")
 class EntityEntryTest extends TestEntityInitialize {
+
+    public static Stream<Arguments> provideNullEntityOrSnapshotEntry() {
+        EntityEntry entityNullEntry = createDummyEntry();
+        entityNullEntry.updateEntity(null);
+        EntityEntry snapshotNullEntry = createDummyEntry();
+        TestReflectionUtils.setFieldValue(snapshotNullEntry, "snapshot", null);
+
+        return Stream.of(
+                Arguments.of(entityNullEntry),
+                Arguments.of(snapshotNullEntry)
+        );
+    }
+
+    private static EntityEntry createDummyEntry() {
+        TestPerson catsbi = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
+        SimpleMetadataLoader<TestPerson> loader = new SimpleMetadataLoader<>(TestPerson.class);
+        Object snapshot = createSnapshot(catsbi, loader);
+
+        return new EntityEntry(loader, Status.MANAGED, catsbi, snapshot, new KeyHolder(TestPerson.class, catsbi.getId()));
+    }
+
+    private static <T> T createSnapshot(Object source, MetadataLoader<?> loader) {
+        try {
+
+            Object snapshotEntity = loader.getNoArgConstructor().newInstance();
+            for (int i = 0; i < loader.getColumnCount(); i++) {
+                Field field = loader.getField(i);
+                field.setAccessible(true);
+                field.set(snapshotEntity, field.get(source));
+            }
+
+            return (T) snapshotEntity;
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Failed to create snapshot entity");
+        }
+    }
 
     @Test
     @DisplayName("newEntry 함수는 EntityEntry를 생성한다.")
@@ -67,7 +103,6 @@ class EntityEntryTest extends TestEntityInitialize {
         );
     }
 
-
     @Test
     @DisplayName("synchrnoizingSnapshot 함수는 Entity의 스냅샷을 업데이트한다.")
     void testSynchronizingSnapshot() {
@@ -89,7 +124,7 @@ class EntityEntryTest extends TestEntityInitialize {
 
     @Test
     @DisplayName("synchrnoizingSnapshot 함수는 식별자나 Transient 애노테이션 필드의 변경사항은 반영하지 않는다.")
-    void testSynchronizingSnapshotIdAndTransient () {
+    void testSynchronizingSnapshotIdAndTransient() {
         // given
         TestPerson person = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
         EntityEntry entry = EntityEntry.newEntry(person, Status.MANAGED);
@@ -125,7 +160,6 @@ class EntityEntryTest extends TestEntityInitialize {
                 () -> assertThat(entry.getSnapshot()).isNotNull()
         );
     }
-
 
     @Test
     @DisplayName("isDirty 함수는 변경이 필요한 엔티티가 있을 경우 true를 반환한다.")
@@ -195,42 +229,5 @@ class EntityEntryTest extends TestEntityInitialize {
         // then
         assertThat(actual).isFalse();
 
-    }
-
-
-    public static Stream<Arguments> provideNullEntityOrSnapshotEntry() {
-        EntityEntry entityNullEntry = createDummyEntry();
-        entityNullEntry.updateEntity(null);
-        EntityEntry snapshotNullEntry = createDummyEntry();
-        TestReflectionUtils.setFieldValue(snapshotNullEntry, "snapshot", null);
-
-        return Stream.of(
-                Arguments.of(entityNullEntry),
-                Arguments.of(snapshotNullEntry)
-        );
-    }
-
-    private static EntityEntry createDummyEntry() {
-        TestPerson catsbi = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
-        SimpleMetadataLoader<TestPerson> loader = new SimpleMetadataLoader<>(TestPerson.class);
-        Object snapshot = createSnapshot(catsbi, loader);
-
-        return new EntityEntry(loader, Status.MANAGED, catsbi, snapshot, new KeyHolder(TestPerson.class, catsbi.getId()));
-    }
-
-    private static <T> T createSnapshot(Object source, MetadataLoader<?> loader) {
-        try {
-
-            Object snapshotEntity = loader.getNoArgConstructor().newInstance();
-            for (int i = 0; i < loader.getColumnCount(); i++) {
-                Field field = loader.getField(i);
-                field.setAccessible(true);
-                field.set(snapshotEntity, field.get(source));
-            }
-
-            return (T) snapshotEntity;
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("Failed to create snapshot entity");
-        }
     }
 }

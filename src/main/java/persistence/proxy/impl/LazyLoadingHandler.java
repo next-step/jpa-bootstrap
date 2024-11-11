@@ -98,7 +98,11 @@ public class LazyLoadingHandler<T> extends AbstractCollection<T> implements Invo
         if (!(o instanceof LazyLoadingHandler<?> that)) {
             return false;
         }
-        return loaded == that.loaded && Objects.equals(persistenceContext, that.persistenceContext) && Objects.equals(parentKeyHolder, that.parentKeyHolder) && Objects.equals(entityLoader, that.entityLoader) && Objects.equals(target, that.target);
+        return loaded == that.loaded
+                && Objects.equals(persistenceContext, that.persistenceContext)
+                && Objects.equals(parentKeyHolder, that.parentKeyHolder)
+                && Objects.equals(entityLoader, that.entityLoader)
+                && Objects.equals(target, that.target);
     }
 
     @Override

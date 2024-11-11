@@ -1,5 +1,7 @@
 package persistence;
 
+import boot.Metadata;
+import database.ConnectionHolder;
 import database.DatabaseServer;
 import database.H2;
 import jdbc.JdbcTemplate;
@@ -29,10 +31,10 @@ public class Application {
 
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
             PersistenceConfig persistenceConfig = PersistenceConfig.getInstance();
+            ConnectionHolder.updateDatabase(persistenceConfig.database());
 
             TableScanner tableScanner = persistenceConfig.tableScanner();
             Set<EntityNode<?>> nodes = tableScanner.scan(BASE_PACKAGE);
-            initEntityLoaderFactory(nodes, persistenceConfig.database(), persistenceConfig.proxyFactory());
 
             QueryBuilderFactory factory = QueryBuilderFactory.getInstance();
             for (EntityNode<?> node : nodes) {
@@ -53,14 +55,6 @@ public class Application {
             logger.error("Error occurred", e);
         } finally {
             logger.info("Application finished");
-        }
-    }
-
-    private static void initEntityLoaderFactory(Set<EntityNode<?>> nodes, Database database, ProxyFactory proxyFactory) {
-        EntityLoaderFactory factory = EntityLoaderFactory.getInstance();
-
-        for (EntityNode<?> node : nodes) {
-            factory.addLoader(node.entityClass(), database, proxyFactory);
         }
     }
 }

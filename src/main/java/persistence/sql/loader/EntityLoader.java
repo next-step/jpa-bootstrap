@@ -46,7 +46,8 @@ public class EntityLoader<T> implements Loader<T> {
 
     public EntityLoader(Database database,
                         MetadataLoader<T> metadataLoader,
-                        NameConverter nameConverter, ProxyFactory proxyFactory) {
+                        NameConverter nameConverter,
+                        ProxyFactory proxyFactory) {
         this.database = database;
         this.metadataLoader = metadataLoader;
         this.nameConverter = nameConverter;

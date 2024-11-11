@@ -1,5 +1,6 @@
 package persistence.sql.context.impl;
 
+import boot.MetaModel;
 import persistence.sql.context.CollectionKeyHolder;
 import persistence.sql.context.EntityPersister;
 import persistence.sql.context.KeyHolder;
@@ -65,8 +66,9 @@ public class DefaultPersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public void dirtyCheck(EntityPersister persister) {
+    public void dirtyCheck(MetaModel metaModel) {
         for (EntityEntry entry : context.values()) {
+            EntityPersister persister = metaModel.entityPersister(entry.getEntity().getClass());
             handleEntry(persister, entry);
         }
     }

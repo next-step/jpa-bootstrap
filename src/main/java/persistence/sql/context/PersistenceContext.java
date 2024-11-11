@@ -1,5 +1,6 @@
 package persistence.sql.context;
 
+import boot.MetaModel;
 import persistence.sql.entity.CollectionEntry;
 import persistence.sql.entity.EntityEntry;
 import persistence.sql.entity.data.Status;
@@ -20,5 +21,5 @@ public interface PersistenceContext {
 
     void cleanup();
 
-    void dirtyCheck(EntityPersister persister);
+    void dirtyCheck(MetaModel metaModel);
 }

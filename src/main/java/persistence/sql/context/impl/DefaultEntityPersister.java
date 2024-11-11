@@ -6,7 +6,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import persistence.annoation.DynamicUpdate;
-import persistence.sql.EntityLoaderFactory;
 import persistence.sql.QueryBuilderFactory;
 import persistence.sql.clause.Clause;
 import persistence.sql.clause.DeleteQueryClauses;
@@ -17,10 +16,8 @@ import persistence.sql.context.EntityPersister;
 import persistence.sql.data.QueryType;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.MetadataLoader;
-import persistence.sql.loader.EntityLoader;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -29,71 +26,61 @@ public class DefaultEntityPersister implements EntityPersister {
     private static final Logger logger = Logger.getLogger(DefaultEntityPersister.class.getName());
     private final Database database;
     private final NameConverter nameConverter;
+    private final MetadataLoader<?> metadataLoader;
 
-    public DefaultEntityPersister(Database database, NameConverter nameConverter) {
+    public DefaultEntityPersister(Database database, NameConverter nameConverter, MetadataLoader<?> metadataLoader) {
         this.database = database;
         this.nameConverter = nameConverter;
-    }
-
-    private static <T> MetadataLoader<?> getMetadataLoader(T entity) {
-        EntityLoader<?> entityLoader = EntityLoaderFactory.getInstance().getLoader(entity.getClass());
-        return entityLoader.getMetadataLoader();
+        this.metadataLoader = metadataLoader;
     }
 
     @Override
-    public <T> Object insert(T entity) {
-        MetadataLoader<?> loader = getMetadataLoader(entity);
-
+    public Object insert(Object entity) {
         InsertColumnValueClause clause = InsertColumnValueClause.newInstance(entity, nameConverter);
 
-        String insertQuery = QueryBuilderFactory.getInstance().buildQuery(QueryType.INSERT, loader, clause);
+        String insertQuery = QueryBuilderFactory.getInstance().buildQuery(QueryType.INSERT, metadataLoader, clause);
         Object id = database.executeUpdate(insertQuery);
-        updatePrimaryKeyValue(entity, id, loader);
+        updatePrimaryKeyValue(entity, id);
 
         return entity;
     }
 
     @Override
-    public <T> Object insert(T entity, T parentEntity) {
-        MetadataLoader<?> loader = getMetadataLoader(entity);
-
+    public Object insert(Object entity, Object parentEntity) {
         InsertColumnValueClause clause = InsertColumnValueClause.newInstance(entity, parentEntity, nameConverter);
 
-        String insertQuery = QueryBuilderFactory.getInstance().buildQuery(QueryType.INSERT, loader, clause);
+        String insertQuery = QueryBuilderFactory.getInstance().buildQuery(QueryType.INSERT, metadataLoader, clause);
         logger.info("Entity: %s, Parent Entity: %s | insertQuery: %s".formatted(entity, parentEntity, insertQuery));
 
         Object id = database.executeUpdate(insertQuery);
-        updatePrimaryKeyValue(entity, id, loader);
+        updatePrimaryKeyValue(entity, id);
 
         return entity;
     }
 
     @Override
-    public <T> void update(T entity, T snapshotEntity) {
-        EntityLoader<?> entityLoader = EntityLoaderFactory.getInstance().getLoader(entity.getClass());
-        MetadataLoader<?> loader = entityLoader.getMetadataLoader();
-
-        List<Field> updateTargetFields = getUpdateTargetFields(entity, snapshotEntity, loader);
+    public void update(Object entity, Object snapshotEntity) {
+        List<Field> updateTargetFields = getUpdateTargetFields(entity, snapshotEntity);
         UpdateQueryClauses updateQueryClauses = UpdateQueryClauses.builder(nameConverter)
-                .where(entity, loader)
-                .setColumnValues(entity, updateTargetFields, loader)
+                .where(entity, metadataLoader)
+                .setColumnValues(entity, updateTargetFields, metadataLoader)
                 .build();
 
         String mergeQuery = QueryBuilderFactory.getInstance()
-                .buildQuery(QueryType.UPDATE, loader, updateQueryClauses.clauseArrays());
+                .buildQuery(QueryType.UPDATE, metadataLoader, updateQueryClauses.clauseArrays());
         database.executeUpdate(mergeQuery);
     }
 
-    private <T> List<Field> getUpdateTargetFields(T entity, T snapshotEntity, MetadataLoader<?> loader) {
-        if (loader.isClassAnnotationPresent(DynamicUpdate.class) && snapshotEntity != null) {
-            return extractDiffFields(entity, snapshotEntity, loader);
+    private List<Field> getUpdateTargetFields(Object entity, Object snapshotEntity) {
+        if (metadataLoader.isClassAnnotationPresent(DynamicUpdate.class) && snapshotEntity != null) {
+            return extractDiffFields(entity, snapshotEntity);
         }
 
-        return loader.getFieldAllByPredicate(field -> !field.isAnnotationPresent(Id.class) && !isAssociationField(field));
+        return metadataLoader.getFieldAllByPredicate(field -> !field.isAnnotationPresent(Id.class) && !isAssociationField(field));
     }
 
-    List<Field> extractDiffFields(Object entity, Object snapshotEntity, MetadataLoader<?> loader) {
-        return loader.getFieldAllByPredicate(field -> {
+    List<Field> extractDiffFields(Object entity, Object snapshotEntity) {
+        return metadataLoader.getFieldAllByPredicate(field -> {
             Object entityValue = Clause.extractValue(field, entity);
             Object snapshotValue = Clause.extractValue(field, snapshotEntity);
 
@@ -117,27 +104,20 @@ public class DefaultEntityPersister implements EntityPersister {
     }
 
     @Override
-    public <T> void delete(T entity) {
-        EntityLoader<?> entityLoader = EntityLoaderFactory.getInstance().getLoader(entity.getClass());
-        MetadataLoader<?> loader = entityLoader.getMetadataLoader();
-
+    public void delete(Object entity) {
         DeleteQueryClauses deleteQueryClauses = DeleteQueryClauses.builder(nameConverter)
-                .where(entity, loader)
+                .where(entity, metadataLoader)
                 .build();
 
-        String removeQuery = QueryBuilderFactory.getInstance().buildQuery(QueryType.DELETE, loader,
+        String removeQuery = QueryBuilderFactory.getInstance().buildQuery(QueryType.DELETE, metadataLoader,
                 deleteQueryClauses.clauseArrays());
 
         database.executeUpdate(removeQuery);
     }
 
-    @Override
-    public Connection getConnection() {
-        return database.getConnection();
-    }
 
-    private void updatePrimaryKeyValue(Object entity, Object id, MetadataLoader<?> loader) {
-        Field primaryKeyField = loader.getPrimaryKeyField();
+    private void updatePrimaryKeyValue(Object entity, Object id) {
+        Field primaryKeyField = metadataLoader.getPrimaryKeyField();
         primaryKeyField.setAccessible(true);
 
         try {

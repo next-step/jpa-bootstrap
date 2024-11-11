@@ -1,5 +1,6 @@
-package persistence.sql.dml;
+package persistence;
 
+import database.ConnectionHolder;
 import database.DatabaseServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import persistence.sql.data.QueryType;
 import persistence.sql.ddl.JoinTargetScanner;
 import persistence.sql.ddl.TableScanner;
 import persistence.sql.ddl.impl.JoinTargetDefinition;
+import persistence.sql.dml.Database;
 import persistence.sql.dml.impl.SimpleMetadataLoader;
 import persistence.sql.holder.JoinTargetHolder;
 import persistence.sql.node.EntityNode;
@@ -24,14 +26,6 @@ public class TestEntityInitialize {
     private static final Logger logger = LoggerFactory.getLogger(TestEntityInitialize.class);
     DatabaseServer server;
     Set<EntityNode<?>> nodes;
-
-    private static void initEntityLoaderFactory(Set<EntityNode<?>> nodes, Database database, ProxyFactory proxyFactory) {
-        EntityLoaderFactory factory = EntityLoaderFactory.getInstance();
-
-        for (EntityNode<?> node : nodes) {
-            factory.addLoader(node.entityClass(), database, proxyFactory);
-        }
-    }
 
     private void initJoinTargetHolder(Set<JoinTargetDefinition> joinTargets) {
         JoinTargetHolder holder = JoinTargetHolder.getInstance();
@@ -45,13 +39,12 @@ public class TestEntityInitialize {
         try {
             TestPersistenceConfig config = TestPersistenceConfig.getInstance();
             Database database = config.database();
-            ProxyFactory proxyFactory = config.proxyFactory();
             server = config.databaseServer();
             server.start();
 
+            ConnectionHolder.updateDatabase(database);
             TableScanner tableScanner = config.tableScanner();
             nodes = tableScanner.scan("persistence.sql.fixture");
-            initEntityLoaderFactory(nodes, database, proxyFactory);
 
             JoinTargetScanner joinTargetScanner = config.joinTargetScanner();
             Set<JoinTargetDefinition> joinTargets = joinTargetScanner.scan("persistence.sql.fixture");
