@@ -22,4 +22,5 @@ public class EventListenerGroupImpl<T> implements EventListenerGroup<T> {
     public <U> void fireEventOnEachListener(U event, BiConsumer<T, U> actionOnEvent) {
         listeners.forEach(listener -> actionOnEvent.accept(listener, event));
     }
+
 }

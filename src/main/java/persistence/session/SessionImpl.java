@@ -1,9 +1,7 @@
 package persistence.session;
 
-import jdbc.JdbcTemplate;
 import persistence.entity.EntityEntry;
 import persistence.entity.EntityKey;
-import persistence.entity.EntityLoader;
 import persistence.entity.EntityPersister;
 import persistence.entity.EntitySnapshot;
 import persistence.entity.PersistenceContext;
@@ -11,6 +9,8 @@ import persistence.entity.Status;
 import persistence.event.ActionQueue;
 import persistence.event.EventListenerGroupHandler;
 import persistence.event.EventSource;
+import persistence.event.LoadEvent;
+import persistence.event.LoadEventListener;
 import persistence.event.PersistEvent;
 import persistence.event.PersistEventListener;
 import persistence.meta.Metamodel;
@@ -23,8 +23,7 @@ public class SessionImpl implements EventSource {
     private final Metamodel metamodel;
     private final EventListenerGroupHandler eventListenerGroupHandler;
 
-    public SessionImpl(JdbcTemplate jdbcTemplate,
-                       PersistenceContext persistenceContext,
+    public SessionImpl(PersistenceContext persistenceContext,
                        EventListenerGroupHandler eventListenerGroupHandler,
                        Metamodel metamodel) {
 
@@ -42,21 +41,18 @@ public class SessionImpl implements EventSource {
             return clazz.cast(persistenceContext.getEntity(entityKey));
         }
 
-        if (entityEntry.isNotReadable()) {
-            throw new IllegalArgumentException("Entity is not managed: " + clazz.getSimpleName());
-        }
+        check(entityEntry.isNotReadable(), "Entity is not managed: " + clazz.getSimpleName());
 
-        final T loaded = metamodel.findEntityLoader(clazz).loadEntity(clazz, entityKey);
-        storeEntityInContext(entityKey, loaded);
-        updateEntryToManaged(entityKey, entityEntry);
-        return loaded;
+        final T entity = metamodel.findEntityLoader(clazz).loadEntity(clazz, entityKey);
+        eventListenerGroupHandler.LOAD
+                .fireEventOnEachListener(
+                        LoadEvent.create(this, (Serializable) id, entity, entityEntry),
+                        LoadEventListener::onLoad
+                );
 
-//        return eventListenerGroupHandler.LOAD
-//                .fireEventOnEachListener(
-//                        entityEntry,
-//                        () -> entityLoader.loadEntity(clazz, entityKey)
-//                );
+        return entity;
     }
+
 
     private EntityEntry getEntityEntryOrDefault(EntityKey entityKey, Supplier<EntityEntry> defaultEntrySupplier) {
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entityKey);
@@ -87,9 +83,7 @@ public class SessionImpl implements EventSource {
                 new EntityKey(entityPersister.getEntityId(entity), entity.getClass())
         );
 
-        if (entityEntry == null) {
-            throw new IllegalArgumentException("No Entity Entry with id: " + entityPersister.getEntityId(entity));
-        }
+        check(entityEntry == null, "No Entity Entry with id: " + entityPersister.getEntityId(entity));
 
         if (entityEntry.isManaged()) {
             return;
@@ -138,15 +132,11 @@ public class SessionImpl implements EventSource {
     }
 
     private void checkManagedEntity(Object entity, EntityEntry entityEntry) {
-        if (entityEntry == null) {
-            throw new IllegalStateException("Can not find entity in persistence context: "
-                    + entity.getClass().getSimpleName());
-        }
+        check(entityEntry == null,
+                "Can not find entry in persistence context: " + entity.getClass().getSimpleName());
 
-        if (!entityEntry.isManaged()) {
-            throw new IllegalArgumentException("Detached entity can not be merged: "
-                    + entity.getClass().getSimpleName());
-        }
+        check(!entityEntry.isManaged(),
+                "Detached entity can not be merged: " + entity.getClass().getSimpleName());
     }
 
     private void storeEntityInContext(EntityKey entityKey, Object entity) {
@@ -159,6 +149,12 @@ public class SessionImpl implements EventSource {
     private void updateEntryToManaged(EntityKey entityKey, EntityEntry entityEntry) {
         entityEntry.updateStatus(Status.MANAGED);
         persistenceContext.addEntry(entityKey, entityEntry);
+    }
+
+    private void check(boolean condition, String reason) {
+        if (condition) {
+            throw new IllegalArgumentException(reason);
+        }
     }
 
     @Override

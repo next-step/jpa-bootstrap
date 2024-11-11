@@ -30,7 +30,6 @@ public class SessionFactoryImpl implements EntityManagerFactory {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(metadata.getDatabase().getConnection());
 
         final EntityManager newSession = new SessionImpl(
-                jdbcTemplate,
                 new StatefulPersistenceContext(),
                 new EventListenerGroupHandler(),
                 new Metamodel(metadata, jdbcTemplate)
