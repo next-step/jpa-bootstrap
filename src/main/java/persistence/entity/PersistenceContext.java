@@ -1,30 +1,91 @@
 package persistence.entity;
 
+import jdbc.InstanceFactory;
+import persistence.meta.EntityKey;
+import persistence.meta.EntityTable;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-public interface PersistenceContext {
-    void addEntity(Object entry);
+public class PersistenceContext {
+    private final Map<EntityKey, Object> entityRegistry = new ConcurrentHashMap<>();
+    private final Map<EntityKey, Object> entitySnapshotRegistry = new ConcurrentHashMap<>();
+    private final Map<Object, EntityEntry> entityEntryRegistry = new ConcurrentHashMap<>();
 
-    <T> T getEntity(Class<T> entityType, Object id);
+    private final Queue<Object> persistQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Object> removeQueue = new ConcurrentLinkedQueue<>();
 
-    void removeEntity(Object entity);
+    public void addEntity(Object entity, EntityTable entityTable) {
+        entityRegistry.put(entityTable.toEntityKey(entity), entity);
+        addSnapshot(entity, entityTable);
+    }
 
-    <T> T getSnapshot(Class<T> entityType, Object id);
+    public <T> T getEntity(Class<T> entityType, Object id) {
+        final EntityKey entityKey = new EntityKey(entityType, id);
+        return entityType.cast(entityRegistry.get(entityKey));
+    }
 
-    void addToPersistQueue(Object entity);
+    public void removeEntity(Object entity, EntityTable entityTable) {
+        entityRegistry.remove(entityTable.toEntityKey(entity));
+        entitySnapshotRegistry.remove(entityTable.toEntityKey(entity));
+        createOrUpdateStatus(entity, EntityStatus.GONE);
+    }
 
-    void addToRemoveQueue(Object entity);
+    public <T> T getSnapshot(Class<T> entityType, Object id) {
+        final EntityKey entityKey = new EntityKey(entityType, id);
+        return entityType.cast(entitySnapshotRegistry.get(entityKey));
+    }
 
-    Queue<Object> getPersistQueue();
+    public void addToPersistQueue(Object entity) {
+        persistQueue.offer(entity);
+        createOrUpdateStatus(entity, EntityStatus.MANAGED);
+    }
 
-    Queue<Object> getRemoveQueue();
+    public void addToRemoveQueue(Object entity) {
+        removeQueue.offer(entity);
+        createOrUpdateStatus(entity, EntityStatus.DELETED);
+    }
 
-    List<Object> getAllEntity();
+    public Queue<Object> getPersistQueue() {
+        return persistQueue;
+    }
 
-    EntityEntry getEntityEntry(Object entity);
+    public Queue<Object> getRemoveQueue() {
+        return removeQueue;
+    }
 
-    void createOrUpdateStatus(Object entity, EntityStatus entityStatus);
+    public List<Object> getAllEntity() {
+        return new ArrayList<>(entityRegistry.values());
+    }
 
-    void clear();
+    public EntityEntry getEntityEntry(Object entity) {
+        return entityEntryRegistry.get(entity);
+    }
+
+    public void createOrUpdateStatus(Object entity, EntityStatus entityStatus) {
+        final EntityEntry entityEntry = entityEntryRegistry.get(entity);
+        if (Objects.isNull(entityEntry)) {
+            entityEntryRegistry.put(entity, new EntityEntry(entityStatus));
+            return;
+        }
+        entityEntry.updateStatus(entityStatus);
+    }
+
+    public void clear() {
+        entityRegistry.clear();
+        entitySnapshotRegistry.clear();
+        entityEntryRegistry.clear();
+        persistQueue.clear();
+        removeQueue.clear();
+    }
+
+    private void addSnapshot(Object entity, EntityTable entityTable) {
+        final Object snapshot = new InstanceFactory<>(entity.getClass()).copy(entity);
+        entitySnapshotRegistry.put(entityTable.toEntityKey(entity), snapshot);
+    }
 }

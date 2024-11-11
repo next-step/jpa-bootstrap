@@ -2,11 +2,15 @@ package persistence.meta;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class EntityTable {
+    public static final EntityTable EMPTY = new EntityTable(EmptyEntity.class);
     public static final String NOT_ENTITY_FAILED_MESSAGE = "클래스에 @Entity 애노테이션이 없습니다.";
     private static final String ALIAS_PREFIX = "_";
 
@@ -19,13 +23,6 @@ public class EntityTable {
         this.type = entityType;
         this.tableName = new TableName(entityType);
         this.entityColumns = new EntityColumns(entityType);
-    }
-
-    public EntityTable(Object entity) {
-        validate(entity.getClass());
-        this.type = entity.getClass();
-        this.tableName = new TableName(entity.getClass());
-        this.entityColumns = new EntityColumns(entity);
     }
 
     public Class<?> getType() {
@@ -61,16 +58,16 @@ public class EntityTable {
         return getIdEntityColumn().getColumnName();
     }
 
-    public Object getIdValue() {
-        return getIdEntityColumn().getValue();
+    public Object getIdValue(Object entity) {
+        return getIdEntityColumn().getValue(entity);
     }
 
     public boolean isIdGenerationFromDatabase() {
         return getIdEntityColumn().isIdGenerationFromDatabase();
     }
 
-    public EntityKey toEntityKey() {
-        return new EntityKey(type, getIdValue());
+    public EntityKey toEntityKey(Object entity) {
+        return new EntityKey(type, getIdValue(entity));
     }
 
     public int getColumnCount() {
@@ -81,46 +78,72 @@ public class EntityTable {
         return getEntityColumns().get(index);
     }
 
-    public boolean isOneToManyAssociation() {
-        final EntityColumn joinEntityColumn = getJoinEntityColumn();
-        if (Objects.isNull(joinEntityColumn)) {
+    public boolean isOneToMany() {
+        final EntityColumn associationEntityColumn = getAssociationEntityColumn();
+        if (Objects.isNull(associationEntityColumn)) {
             return false;
         }
-        return joinEntityColumn.isOneToManyAssociation();
+        return associationEntityColumn.isOneToMany();
     }
 
     public boolean isEager() {
-        final EntityColumn joinEntityColumn = getJoinEntityColumn();
-        return joinEntityColumn.getFetchType() == FetchType.EAGER;
+        final EntityColumn associationEntityColumn = getAssociationEntityColumn();
+        return associationEntityColumn.getFetchType() == FetchType.EAGER;
     }
 
-    public EntityColumn getJoinEntityColumn() {
-        return entityColumns.getJoinEntityColumn();
+    public EntityColumn getAssociationEntityColumn() {
+        return entityColumns.getAssociationEntityColumn();
     }
 
-    public Class<?> getJoinColumnType() {
-        final EntityColumn joinEntityColumn = getJoinEntityColumn();
-        if (Objects.isNull(joinEntityColumn)) {
+    public Class<?> getAssociationColumnType() {
+        final EntityColumn associationEntityColumn = getAssociationEntityColumn();
+        if (Objects.isNull(associationEntityColumn)) {
             return Object.class;
         }
-        return joinEntityColumn.getJoinColumnType();
+        return associationEntityColumn.getAssociationColumnType();
     }
 
-    public String getJoinColumnName() {
-        return getJoinEntityColumn().getColumnName();
+    public String getAssociationColumnName() {
+        return getAssociationEntityColumn().getColumnName();
+    }
+
+    public List<?> getAssociationColumnValue(Object entity) {
+        return (List<?>) getAssociationEntityColumn().getValue(entity);
+    }
+
+    public Field getAssociationField() {
+        final EntityColumn associationEntityColumn = getAssociationEntityColumn();
+        return associationEntityColumn.getField();
     }
 
     public boolean isSimpleMapping() {
-        return Objects.isNull(getJoinEntityColumn()) || getJoinEntityColumn().isOneToManyAndLazy();
+        return Objects.isNull(getAssociationEntityColumn()) || getAssociationEntityColumn().isOneToManyAndLazy();
     }
 
     public String getAlias() {
         return ALIAS_PREFIX + getTableName();
     }
 
+    public AssociationCondition getAssociationCondition(Object entity) {
+        return new AssociationCondition(getAssociationColumnName(), getIdValue(entity));
+    }
+
+    public List<Field> getFields() {
+        return entityColumns.getEntityColumns()
+                .stream()
+                .map(EntityColumn::getField)
+                .collect(Collectors.toList());
+    }
+
     private void validate(Class<?> entityType) {
         if (!entityType.isAnnotationPresent(Entity.class)) {
             throw new IllegalArgumentException(NOT_ENTITY_FAILED_MESSAGE);
         }
+    }
+
+    @Entity
+    private static class EmptyEntity {
+        @Id
+        private Long id;
     }
 }

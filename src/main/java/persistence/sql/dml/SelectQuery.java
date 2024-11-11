@@ -9,50 +9,45 @@ import java.util.stream.Stream;
 import static persistence.sql.QueryConst.*;
 
 public class SelectQuery {
-    public String findAll(Class<?> entityType) {
-        final EntityTable entityTable = new EntityTable(entityType);
+    public String findAll(EntityTable entityTable) {
+        return find(entityTable).build();
+    }
 
-        if (entityTable.isOneToManyAssociation()) {
-            return getAssociationQuery(entityTable)
-                    .build();
-        }
-        return findAll(entityTable)
+    public String findAll(EntityTable entityTable, EntityTable childEntityTable) {
+        return getAssociationQuery(entityTable, childEntityTable)
                 .build();
     }
 
-    public String findById(Class<?> entityType, Object id) {
-        final EntityTable entityTable = new EntityTable(entityType);
-
-        if (entityTable.isOneToManyAssociation() && entityTable.isEager()) {
-            return getAssociationQuery(entityTable)
-                .where(getColumnWithAliasClause(entityTable, entityTable.getIdColumnName()), id)
-                    .build();
-        }
-        return findAll(entityTable)
+    public String findById(EntityTable entityTable, Object id) {
+        return find(entityTable)
                 .where(entityTable.getIdColumnName(), id)
                 .build();
     }
 
-    public String findCollection(Class<?> entityType, String columnName, Object value) {
-        final EntityTable entityTable = new EntityTable(entityType);
-        return findAll(entityTable)
-                .where(columnName, value)
+    public String findById(EntityTable entityTable, EntityTable childEntityTable, Object id) {
+        return getAssociationQuery(entityTable, childEntityTable)
+                .where(getColumnWithAliasClause(entityTable, entityTable.getIdColumnName()), id)
                 .build();
     }
 
-    private SelectQueryBuilder getAssociationQuery(EntityTable entityTable) {
-        final EntityTable childEntityTable = new EntityTable(entityTable.getJoinColumnType());
+    public String findCollection(EntityTable entityTable, String columnName, Object id) {
+        return find(entityTable)
+                .where(columnName, id)
+                .build();
+    }
+
+    private SelectQueryBuilder getAssociationQuery(EntityTable entityTable, EntityTable childEntityTable) {
         return new SelectQueryBuilder()
                 .select(getSelectClause(entityTable, childEntityTable))
                 .from(getTableWithAliasClause(entityTable))
                 .innerJoin(getTableWithAliasClause(childEntityTable))
                 .on(
                         getColumnWithAliasClause(entityTable, entityTable.getIdColumnName()),
-                        getColumnWithAliasClause(childEntityTable, entityTable.getJoinColumnName())
+                        getColumnWithAliasClause(childEntityTable, entityTable.getAssociationColumnName())
                 );
     }
 
-    private SelectQueryBuilder findAll(EntityTable entityTable) {
+    private SelectQueryBuilder find(EntityTable entityTable) {
         return new SelectQueryBuilder()
                 .select(getSelectClause(entityTable))
                 .from(entityTable.getTableName());
@@ -82,7 +77,7 @@ public class SelectQuery {
     }
 
     private boolean isNotNeeded(EntityColumn entityColumn) {
-        return !entityColumn.isOneToManyAssociation();
+        return !entityColumn.isOneToMany();
     }
 
     private String getJoinColumnName(EntityTable entityTable, EntityColumn entityColumn) {

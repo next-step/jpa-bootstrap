@@ -12,37 +12,37 @@ import java.util.Objects;
 
 public class ColumnOption {
     private final boolean isNotNull;
-    private final boolean isOneToManyAssociation;
+    private final boolean isOneToMany;
     private final FetchType fetchType;
-    private final String joinColumnName;
-    private final Class<?> joinColumnType;
+    private final String associationColumnName;
+    private final Class<?> associationColumnType;
 
     public ColumnOption(Field field) {
         this.isNotNull = isNotNull(field);
-        this.isOneToManyAssociation = isOneToManyAssociation(field);
+        this.isOneToMany = isOneToMany(field);
         this.fetchType = getFetchType(field);
-        this.joinColumnName = getJoinColumnName(field);
-        this.joinColumnType = getJoinColumnType(field);
+        this.associationColumnName = getAssociationColumnName(field);
+        this.associationColumnType = getAssociationColumnType(field);
     }
 
     public boolean isNotNull() {
         return isNotNull;
     }
 
-    public boolean isOneToManyAssociation() {
-        return isOneToManyAssociation;
+    public boolean isOneToMany() {
+        return isOneToMany;
     }
 
     public FetchType getFetchType() {
         return fetchType;
     }
 
-    public String getJoinColumnName() {
-        return joinColumnName;
+    public String getAssociationColumnName() {
+        return associationColumnName;
     }
 
-    public Class<?> getJoinColumnType() {
-        return joinColumnType;
+    public Class<?> getAssociationColumnType() {
+        return associationColumnType;
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ColumnOption {
         return !column.nullable();
     }
 
-    private boolean isOneToManyAssociation(Field field) {
+    private boolean isOneToMany(Field field) {
         final OneToMany oneToMany = field.getAnnotation(OneToMany.class);
         return Objects.nonNull(oneToMany);
     }
@@ -79,7 +79,7 @@ public class ColumnOption {
         return oneToMany.fetch();
     }
 
-    private String getJoinColumnName(Field field) {
+    private String getAssociationColumnName(Field field) {
         final JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
         if (Objects.isNull(joinColumn) || Objects.isNull(joinColumn.name()) || joinColumn.name().isBlank()) {
             return null;
@@ -87,7 +87,7 @@ public class ColumnOption {
         return joinColumn.name();
     }
 
-    private Class<?> getJoinColumnType(Field field) {
+    private Class<?> getAssociationColumnType(Field field) {
         final JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
         if (Objects.isNull(joinColumn)) {
             return null;

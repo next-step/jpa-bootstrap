@@ -7,36 +7,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class InsertQuery {
-    public String insert(Object entity) {
-        final EntityTable entityTable = new EntityTable(entity);
+    public String insert(EntityTable entityTable, Object entity) {
         return new InsertQueryBuilder()
                 .insertInto(entityTable.getTableName(), getColumns(entityTable))
-                .values(getValues(entityTable))
+                .values(getValues(entityTable, entity))
                 .build();
     }
 
-    @SuppressWarnings("rawtypes")
-    public String insert(Object entity, Object parentEntity) {
-        final EntityTable entityTable = new EntityTable(entity);
-        final EntityTable parentEntityTable = new EntityTable(parentEntity);
-        final EntityColumn joinEntityColumn = parentEntityTable.getJoinEntityColumn();
-        final List joinEntities = (List) joinEntityColumn.getValue();
-
-        if (joinEntities.contains(entity)) {
-            return new InsertQueryBuilder()
-                    .insertInto(entityTable.getTableName(), getColumns(entityTable, parentEntityTable))
-                    .values(getValues(entityTable, parentEntityTable))
-                    .build();
-        }
+    public String insert(EntityTable entityTable, String columnName, Object associationId, Object entity) {
         return new InsertQueryBuilder()
-                .insertInto(entityTable.getTableName(), getColumns(entityTable))
-                .values(getValues(entityTable))
+                .insertInto(entityTable.getTableName(), getColumns(entityTable, columnName))
+                .values(getValues(entityTable, associationId, entity))
                 .build();
     }
 
-    private List<String> getColumns(EntityTable entityTable, EntityTable parentEntityTable) {
+    private List<String> getColumns(EntityTable entityTable, String columnName) {
         final List<String> columnClause = getColumns(entityTable);
-        columnClause.add(parentEntityTable.getJoinColumnName());
+        columnClause.add(columnName);
         return columnClause;
     }
 
@@ -48,21 +35,21 @@ public class InsertQuery {
                 .collect(Collectors.toList());
     }
 
-    private List<Object> getValues(EntityTable entityTable, EntityTable parentEntityTable) {
-        final List<Object> valueClause = getValues(entityTable);
-        valueClause.add(parentEntityTable.getIdValue());
+    private List<Object> getValues(EntityTable entityTable, Object associationId, Object entity) {
+        final List<Object> valueClause = getValues(entityTable, entity);
+        valueClause.add(associationId);
         return valueClause;
     }
 
-    private List<Object> getValues(EntityTable entityTable) {
+    private List<Object> getValues(EntityTable entityTable, Object entity) {
         return entityTable.getEntityColumns()
                 .stream()
                 .filter(this::isAvailable)
-                .map(EntityColumn::getValue)
+                .map(entityColumn -> entityColumn.getValue(entity))
                 .collect(Collectors.toList());
     }
 
     private boolean isAvailable(EntityColumn entityColumn) {
-        return !entityColumn.isGenerationValue() && !entityColumn.isOneToManyAssociation();
+        return !entityColumn.isGenerationValue() && !entityColumn.isOneToMany();
     }
 }

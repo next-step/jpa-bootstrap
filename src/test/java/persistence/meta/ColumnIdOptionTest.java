@@ -1,11 +1,11 @@
 package persistence.meta;
 
+import fixture.EntityWithId;
+import fixture.EntityWithOnlyId;
+import fixture.EntityWithoutId;
 import jakarta.persistence.GenerationType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.fixture.EntityWithId;
-import persistence.fixture.EntityWithOnlyId;
-import persistence.fixture.EntityWithoutID;
 import util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -52,7 +52,7 @@ class ColumnIdOptionTest {
     @DisplayName("@GeneratedValue 애노테이션만 존재하는 필드로 인스턴스를 생성한다.")
     void constructor_withGeneratedValue() {
         // given
-        final Field field = ReflectionUtils.getField(EntityWithoutID.class, "id");
+        final Field field = ReflectionUtils.getField(EntityWithoutId.class, "id");
 
         // when
         final ColumnIdOption columnIdOption = new ColumnIdOption(field);

@@ -6,29 +6,25 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 
 public class EntityColumn {
+    private final Field field;
     private final Class<?> type;
     private final ColumnName columnName;
     private final ColumnLength columnLength;
     private final ColumnIdOption columnIdOption;
     private final ColumnOption columnOption;
-    private final ColumnValue columnValue;
 
     public EntityColumn(Field field) {
+        this.field = field;
         this.type = field.getType();
         this.columnName = new ColumnName(field);
         this.columnLength = new ColumnLength(field);
         this.columnIdOption = new ColumnIdOption(field);
         this.columnOption = new ColumnOption(field);
-        this.columnValue = new ColumnValue(field);
+        field.setAccessible(true);
     }
 
-    public EntityColumn(Field field, Object entity) {
-        this.type = field.getType();
-        this.columnName = new ColumnName(field);
-        this.columnLength = new ColumnLength(field);
-        this.columnIdOption = new ColumnIdOption(field);
-        this.columnOption = new ColumnOption(field);
-        this.columnValue = new ColumnValue(field, entity);
+    public Field getField() {
+        return field;
     }
 
     public Class<?> getType() {
@@ -55,8 +51,12 @@ public class EntityColumn {
         return columnOption.isNotNull();
     }
 
-    public Object getValue() {
-        return columnValue.value();
+    public Object getValue(Object entity) {
+        try {
+            return field.get(entity);
+        } catch (IllegalAccessException e) {
+            return null;
+        }
     }
 
     @Override
@@ -64,33 +64,33 @@ public class EntityColumn {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         EntityColumn that = (EntityColumn) o;
-        return Objects.equals(type, that.type) && Objects.equals(columnName, that.columnName)
-                && Objects.equals(columnLength, that.columnLength) && Objects.equals(columnIdOption, that.columnIdOption)
-                && Objects.equals(columnOption, that.columnOption) && Objects.equals(columnValue, that.columnValue);
+        return Objects.equals(field, that.field) && Objects.equals(type, that.type)
+                && Objects.equals(columnName, that.columnName) && Objects.equals(columnLength, that.columnLength)
+                && Objects.equals(columnIdOption, that.columnIdOption) && Objects.equals(columnOption, that.columnOption);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, columnName, columnLength, columnIdOption, columnOption, columnValue);
+        return Objects.hash(field, type, columnName, columnLength, columnIdOption, columnOption);
     }
 
     public boolean isIdGenerationFromDatabase() {
         return columnIdOption.isIdGenerationFromDatabase();
     }
 
-    public boolean isOneToManyAssociation() {
-        return columnOption.isOneToManyAssociation();
+    public boolean isOneToMany() {
+        return columnOption.isOneToMany();
     }
 
     public FetchType getFetchType() {
         return columnOption.getFetchType();
     }
 
-    public Class<?> getJoinColumnType() {
-        return columnOption.getJoinColumnType();
+    public Class<?> getAssociationColumnType() {
+        return columnOption.getAssociationColumnType();
     }
 
     public boolean isOneToManyAndLazy() {
-        return columnOption.isOneToManyAssociation() && columnOption.getFetchType() == FetchType.LAZY;
+        return columnOption.isOneToMany() && columnOption.getFetchType() == FetchType.LAZY;
     }
 }

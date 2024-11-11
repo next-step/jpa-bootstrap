@@ -27,6 +27,24 @@ public class OrderItem {
         this.quantity = quantity;
     }
 
+    public OrderItem(Long id, String product, Integer quantity) {
+        this.id = id;
+        this.product = product;
+        this.quantity = quantity;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getProduct() {
+        return product;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

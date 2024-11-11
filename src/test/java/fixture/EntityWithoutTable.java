@@ -1,4 +1,4 @@
-package persistence.fixture;
+package fixture;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -13,53 +13,57 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AssociationFieldMapping implements FieldMapping {
+    private final EntityTable childEntityTable;
+
+    public AssociationFieldMapping(EntityTable childEntityTable) {
+        this.childEntityTable = childEntityTable;
+    }
+
     @Override
-    public <T> boolean supports(Class<T> entityType) {
-        final EntityTable entityTable = new EntityTable(entityType);
+    public boolean supports(EntityTable entityTable) {
         return !entityTable.isSimpleMapping();
     }
 
     @Override
-    public <T> T getRow(ResultSet resultSet, Class<T> entityType) throws IllegalAccessException, SQLException {
-        final List<Field> fields = getPersistentFields(entityType);
-        final Class<?> joinColumnType = getJoinColumnType(entityType);
-
-        final T entity = new InstanceFactory<>(entityType).createInstance();
-        final List<Object> list = getList(fields, entity);
+    public Object getRow(ResultSet resultSet, EntityTable entityTable) throws IllegalAccessException, SQLException {
+        final Class<?> associationColumnType = entityTable.getAssociationColumnType();
+        final Object entity = new InstanceFactory<>(entityTable.getType()).createInstance();
+        final List<Object> collection = createCollection(entity, entityTable);
 
         do {
-            list.add(getChildEntity(resultSet, joinColumnType, fields, entity));
+            final Object childEntity = createChildEntity(resultSet, associationColumnType, entity, entityTable);
+            collection.add(childEntity);
         } while (resultSet.next());
 
         return entity;
     }
 
-    private List<Object> getList(List<Field> fields, Object entity) throws IllegalAccessException {
-        final Field listField = findListField(fields);
-        listField.setAccessible(true);
+    private List<Object> createCollection(Object entity, EntityTable entityTable) throws IllegalAccessException {
+        final Field collectionField = entityTable.getAssociationField();
+        collectionField.setAccessible(true);
+        Object collection = collectionField.get(entity);
 
-        Object list = listField.get(entity);
-        if (list instanceof List<?>) {
-            final List<Object> newList = new ArrayList<>((List<?>) list);
-            listField.set(entity, newList);
-            return newList;
+        if (collection instanceof List<?>) {
+            final List<Object> newCollection = new ArrayList<>((List<?>) collection);
+            collectionField.set(entity, newCollection);
+            return newCollection;
         }
         throw new ClassCastException();
     }
 
-    private Object getChildEntity(ResultSet resultSet, Class<?> joinColumnType, List<Field> fields, Object entity) throws SQLException, IllegalAccessException {
-        final Object childEntity = new InstanceFactory<>(joinColumnType).createInstance();
+    private Object createChildEntity(ResultSet resultSet, Class<?> associationColumnType, Object entity, EntityTable entityTable) throws SQLException, IllegalAccessException {
+        final Object childEntity = new InstanceFactory<>(associationColumnType).createInstance();
         final AtomicInteger fieldIndex = new AtomicInteger(0);
         final AtomicInteger childFieldIndex = new AtomicInteger(0);
 
         for (int i = 0; i < getColumnCount(resultSet); i++) {
-            Field field = getField(fields, fieldIndex);
+            Field field = getField(entityTable.getFields(), fieldIndex);
             if (Objects.nonNull(field)) {
                 mapField(resultSet, entity, field, i + 1);
                 continue;
             }
 
-            Field childField = getField(getPersistentFields(joinColumnType), childFieldIndex);
+            Field childField = getField(childEntityTable.getFields(), childFieldIndex);
             if (Objects.nonNull(childField)) {
                 mapField(resultSet, childEntity, childField, i + 1);
             }
@@ -70,13 +74,6 @@ public class AssociationFieldMapping implements FieldMapping {
     private int getColumnCount(ResultSet resultSet) throws SQLException {
         final ResultSetMetaData metaData = resultSet.getMetaData();
         return metaData.getColumnCount();
-    }
-
-    private Field findListField(List<Field> fields) {
-        return fields.stream()
-                .filter(field -> field.getType() == List.class)
-                .findFirst()
-                .orElseThrow();
     }
 
     private Field getField(List<Field> fields, AtomicInteger fieldIndex) {

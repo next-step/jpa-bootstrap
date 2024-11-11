@@ -1,8 +1,8 @@
 package persistence.sql.dml;
 
+import fixture.EntityWithId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.fixture.EntityWithId;
 import persistence.meta.EntityTable;
 
 import static org.assertj.core.api.Assertions.*;
@@ -14,10 +14,10 @@ class UpdateQueryTest {
         // given
         final UpdateQuery updateQuery = new UpdateQuery();
         final EntityWithId entity = new EntityWithId(1L, "Jackson", 20, "test@email.com");
-        final EntityTable entityTable = new EntityTable(entity);
+        final EntityTable entityTable = new EntityTable(entity.getClass());
 
         // when
-        final String sql = updateQuery.update(entity, entityTable.getEntityColumns());
+        final String sql = updateQuery.update(entityTable, entityTable.getEntityColumns(), entity);
 
         // then
         assertThat(sql).isEqualTo("UPDATE users SET id = 1, nick_name = 'Jackson', old = 20, email = 'test@email.com' WHERE id = 1");

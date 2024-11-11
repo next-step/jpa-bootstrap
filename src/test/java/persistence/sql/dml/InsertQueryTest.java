@@ -2,9 +2,10 @@ package persistence.sql.dml;
 
 import domain.Order;
 import domain.OrderItem;
+import fixture.EntityWithId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.fixture.EntityWithId;
+import persistence.meta.EntityTable;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -15,9 +16,10 @@ class InsertQueryTest {
         // given
         final InsertQuery insertQuery = new InsertQuery();
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
 
         // when
-        final String sql = insertQuery.insert(entity);
+        final String sql = insertQuery.insert(entityTable, entity);
 
         // then
         assertThat(sql).isEqualTo("INSERT INTO users (nick_name, old, email) VALUES ('Jaden', 30, 'test@email.com')");
@@ -29,9 +31,10 @@ class InsertQueryTest {
         // given
         final InsertQuery insertQuery = new InsertQuery();
         final Order order = new Order("OrderNumber1");
+        final EntityTable entityTable = new EntityTable(Order.class);
 
         // when
-        final String sql = insertQuery.insert(order);
+        final String sql = insertQuery.insert(entityTable, order);
 
         // then
         assertThat(sql).isEqualTo("INSERT INTO orders (orderNumber) VALUES ('OrderNumber1')");
@@ -46,8 +49,12 @@ class InsertQueryTest {
         final OrderItem orderItem = new OrderItem("Product1", 10);
         order.addOrderItem(orderItem);
 
+        final EntityTable parentEntityTable = new EntityTable(Order.class);
+        final EntityTable entityTable = new EntityTable(OrderItem.class);
+
         // when
-        final String sql = insertQuery.insert(orderItem, order);
+        final String sql = insertQuery.insert(
+                entityTable, parentEntityTable.getAssociationColumnName(), parentEntityTable.getIdValue(order), orderItem);
 
         // then
         assertThat(sql).isEqualTo("INSERT INTO order_items (product, quantity, order_id) VALUES ('Product1', 10, 1)");

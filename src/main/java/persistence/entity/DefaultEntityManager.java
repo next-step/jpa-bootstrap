@@ -1,13 +1,8 @@
 package persistence.entity;
 
-import jdbc.JdbcTemplate;
-import persistence.entity.proxy.ProxyFactory;
+import persistence.bootstrap.Metamodel;
 import persistence.meta.EntityColumn;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.DeleteQuery;
-import persistence.sql.dml.InsertQuery;
-import persistence.sql.dml.SelectQuery;
-import persistence.sql.dml.UpdateQuery;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,22 +15,11 @@ public class DefaultEntityManager implements EntityManager {
     public static final String NOT_REMOVABLE_STATUS_FAILED_MESSAGE = "엔티티가 제거 가능한 상태가 아닙니다.";
 
     private final PersistenceContext persistenceContext;
-    private final EntityPersister entityPersister;
-    private final EntityLoader entityLoader;
+    private final Metamodel metamodel;
 
-    private DefaultEntityManager(PersistenceContext persistenceContext, EntityPersister entityPersister,
-                                 EntityLoader entityLoader) {
+    public DefaultEntityManager(PersistenceContext persistenceContext, Metamodel metamodel) {
         this.persistenceContext = persistenceContext;
-        this.entityPersister = entityPersister;
-        this.entityLoader = entityLoader;
-    }
-
-    public static DefaultEntityManager of(JdbcTemplate jdbcTemplate) {
-        return new DefaultEntityManager(
-                new DefaultPersistenceContext(),
-                new DefaultEntityPersister(jdbcTemplate, new InsertQuery(), new UpdateQuery(), new DeleteQuery()),
-                new DefaultEntityLoader(jdbcTemplate, new SelectQuery(), new ProxyFactory())
-        );
+        this.metamodel = metamodel;
     }
 
     @Override
@@ -45,31 +29,25 @@ public class DefaultEntityManager implements EntityManager {
             return managedEntity;
         }
 
-        final T entity = entityLoader.load(entityType, id);
-        persistenceContext.addEntity(entity);
+        final EntityLoader entityLoader = metamodel.getEntityLoader(entityType);
+        final T entity = entityLoader.load(id);
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+
+        persistenceContext.addEntity(entity, entityTable);
         return entity;
     }
 
     @Override
     public void persist(Object entity) {
         validatePersist(entity);
-        if (persistImmediately(entity)) {
+
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        if (entityTable.isIdGenerationFromDatabase()) {
+            persistImmediately(entity, entityTable);
             return;
         }
 
-        persistenceContext.addEntity(entity);
-        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
-        persistenceContext.addToPersistQueue(entity);
-    }
-
-    @Override
-    public void persist(Object entity, Object parentEntity) {
-        validatePersist(entity);
-        if (persistImmediately(entity, parentEntity)) {
-            return;
-        }
-
-        persistenceContext.addEntity(entity);
+        persistenceContext.addEntity(entity, entityTable);
         persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
         persistenceContext.addToPersistQueue(entity);
     }
@@ -81,7 +59,8 @@ public class DefaultEntityManager implements EntityManager {
             throw new IllegalStateException(NOT_REMOVABLE_STATUS_FAILED_MESSAGE);
         }
 
-        persistenceContext.removeEntity(entity);
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        persistenceContext.removeEntity(entity, entityTable);
         persistenceContext.addToRemoveQueue(entity);
     }
 
@@ -104,34 +83,30 @@ public class DefaultEntityManager implements EntityManager {
         }
     }
 
-    private boolean persistImmediately(Object entity) {
-        final EntityTable entityTable = new EntityTable(entity);
-        if (entityTable.isIdGenerationFromDatabase()) {
-            entityPersister.insert(entity);
-            persistenceContext.addEntity(entity);
-            persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean persistImmediately(Object entity, Object parentEntity) {
-        final EntityTable entityTable = new EntityTable(entity);
-        if (entityTable.isIdGenerationFromDatabase()) {
-            entityPersister.insert(entity, parentEntity);
-            persistenceContext.addEntity(entity);
-            persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
-            return true;
-        }
-        return false;
+    private void persistImmediately(Object entity, EntityTable entityTable) {
+        persist(entity, entityTable);
+        persistenceContext.addEntity(entity, entityTable);
+        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
     }
 
     private void persistAll() {
         final Queue<Object> persistQueue = persistenceContext.getPersistQueue();
         while (!persistQueue.isEmpty()) {
             final Object entity = persistQueue.poll();
-            entityPersister.insert(entity);
+            final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+
+            persist(entity, entityTable);
             persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
+        }
+    }
+
+    private void persist(Object entity, EntityTable entityTable) {
+        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
+        entityPersister.insert(entity);
+        if (entityTable.isOneToMany()) {
+            final CollectionPersister collectionPersister = metamodel.getCollectionPersister(
+                    entity.getClass(), entityTable.getAssociationColumnName());
+            collectionPersister.insert(entityTable.getAssociationColumnValue(entity), entity);
         }
     }
 
@@ -139,6 +114,7 @@ public class DefaultEntityManager implements EntityManager {
         final Queue<Object> removeQueue = persistenceContext.getRemoveQueue();
         while (!removeQueue.isEmpty()) {
             final Object entity = removeQueue.poll();
+            final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
             entityPersister.delete(entity);
         }
     }
@@ -149,8 +125,8 @@ public class DefaultEntityManager implements EntityManager {
     }
 
     private void update(Object entity) {
-        final EntityTable entityTable = new EntityTable(entity);
-        final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue());
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue(entity));
         if (Objects.isNull(snapshot)) {
             return;
         }
@@ -160,20 +136,22 @@ public class DefaultEntityManager implements EntityManager {
             return;
         }
 
+        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
         entityPersister.update(entity, dirtiedEntityColumns);
-        persistenceContext.addEntity(entity);
+        persistenceContext.addEntity(entity, entityTable);
     }
 
     private List<EntityColumn> getDirtiedEntityColumns(Object entity, Object snapshot) {
-        final EntityTable entityTable = new EntityTable(entity);
-        final EntityTable snapshotEntityTable = new EntityTable(snapshot);
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        final EntityTable snapshotEntityTable = metamodel.getEntityTable(snapshot.getClass());
+
         return IntStream.range(0, entityTable.getColumnCount())
-                .filter(i -> isDirtied(entityTable.getEntityColumn(i), snapshotEntityTable.getEntityColumn(i)))
+                .filter(i -> isDirtied(entityTable.getEntityColumn(i), snapshotEntityTable.getEntityColumn(i), entity, snapshot))
                 .mapToObj(entityTable::getEntityColumn)
                 .collect(Collectors.toList());
     }
 
-    private boolean isDirtied(EntityColumn entityColumn, EntityColumn snapshotEntityColumn) {
-        return !Objects.equals(entityColumn.getValue(), snapshotEntityColumn.getValue());
+    private boolean isDirtied(EntityColumn entityColumn, EntityColumn snapshotEntityColumn, Object entity, Object snapshot) {
+        return !Objects.equals(entityColumn.getValue(entity), snapshotEntityColumn.getValue(snapshot));
     }
 }

@@ -19,8 +19,8 @@ public class CreateQuery {
     private final EntityTable entityTable;
     private final Dialect dialect;
 
-    public CreateQuery(Class<?> entityType, Dialect dialect) {
-        this.entityTable = new EntityTable(entityType);
+    public CreateQuery(EntityTable entityTable, Dialect dialect) {
+        this.entityTable = entityTable;
         this.dialect = dialect;
     }
 
@@ -28,8 +28,8 @@ public class CreateQuery {
         return QUERY_TEMPLATE.formatted(entityTable.getTableName(), getColumnClause());
     }
 
-    public String create(Class<?> parentEntityType) {
-        return QUERY_TEMPLATE.formatted(entityTable.getTableName(), getColumnClause(parentEntityType));
+    public String create(EntityTable parentEntityTable) {
+        return QUERY_TEMPLATE.formatted(entityTable.getTableName(), getColumnClause(parentEntityTable));
     }
 
     private String getColumnClause() {
@@ -42,26 +42,25 @@ public class CreateQuery {
         return String.join(COLUMN_DELIMITER, columnDefinitions);
     }
 
-    private Object getColumnClause(Class<?> parentEntityType) {
+    private Object getColumnClause(EntityTable parentEntityTable) {
         final List<String> columnDefinitions = entityTable.getEntityColumns()
                 .stream()
                 .filter(this::isAvailable)
                 .map(this::getColumnDefinition)
                 .collect(Collectors.toList());
 
-        final EntityTable parentEntityTable = new EntityTable(parentEntityType);
-        if (parentEntityTable.getJoinColumnType() != entityTable.getType()) {
+        if (parentEntityTable.getAssociationColumnType() != entityTable.getType()) {
             throw new IllegalArgumentException();
         }
 
         columnDefinitions.add(
-                getForeignColumnDefinition(parentEntityTable.getJoinEntityColumn(), parentEntityTable.getIdEntityColumn()));
+                getForeignColumnDefinition(parentEntityTable.getAssociationEntityColumn(), parentEntityTable.getIdEntityColumn()));
 
         return String.join(COLUMN_DELIMITER, columnDefinitions);
     }
 
     private boolean isAvailable(EntityColumn entityColumn) {
-        return !entityColumn.isOneToManyAssociation();
+        return !entityColumn.isOneToMany();
     }
 
     private String getColumnDefinition(EntityColumn entityColumn) {

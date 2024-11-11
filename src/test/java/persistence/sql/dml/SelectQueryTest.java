@@ -2,11 +2,12 @@ package persistence.sql.dml;
 
 import domain.Order;
 import domain.OrderItem;
+import fixture.EntityWithId;
+import fixture.EntityWithoutId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.fixture.EntityWithId;
-import persistence.fixture.EntityWithoutID;
 import persistence.meta.EntityColumns;
+import persistence.meta.EntityTable;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -16,9 +17,10 @@ class SelectQueryTest {
     void findAll() {
         // given
         final SelectQuery selectQuery = new SelectQuery();
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
 
         // when
-        final String sql = selectQuery.findAll(EntityWithId.class);
+        final String sql = selectQuery.findAll(entityTable);
 
         // then
         assertThat(sql).isEqualTo("SELECT id, nick_name, old, email FROM users");
@@ -29,9 +31,11 @@ class SelectQueryTest {
     void findAll_withAssociation() {
         // given
         final SelectQuery selectQuery = new SelectQuery();
+        final EntityTable entityTable = new EntityTable(Order.class);
+        final EntityTable childEntityTable = new EntityTable(OrderItem.class);
 
         // when
-        final String sql = selectQuery.findAll(Order.class);
+        final String sql = selectQuery.findAll(entityTable, childEntityTable);
 
         // then
         assertThat(sql).isEqualTo("SELECT _orders.id, _orders.orderNumber, _order_items.id, "
@@ -44,9 +48,10 @@ class SelectQueryTest {
     void findById() {
         // given
         final SelectQuery selectQuery = new SelectQuery();
+        final EntityTable entityTable = new EntityTable(EntityWithId.class);
 
         // when
-        final String sql = selectQuery.findById(EntityWithId.class, 1);
+        final String sql = selectQuery.findById(entityTable, 1);
 
         // then
         assertThat(sql).isEqualTo("SELECT id, nick_name, old, email FROM users WHERE id = 1");
@@ -57,9 +62,11 @@ class SelectQueryTest {
     void findById_withAssociation() {
         // given
         final SelectQuery selectQuery = new SelectQuery();
+        final EntityTable entityTable = new EntityTable(Order.class);
+        final EntityTable childEntityTable = new EntityTable(OrderItem.class);
 
         // when
-        final String sql = selectQuery.findById(Order.class, 1);
+        final String sql = selectQuery.findById(entityTable, childEntityTable, 1);
 
         // then
         assertThat(sql).isEqualTo("SELECT _orders.id, _orders.orderNumber, _order_items.id, "
@@ -73,9 +80,10 @@ class SelectQueryTest {
     void findCollection() {
         // given
         final SelectQuery selectQuery = new SelectQuery();
+        final EntityTable entityTable = new EntityTable(OrderItem.class);
 
         // when
-        final String sql = selectQuery.findCollection(OrderItem.class, "order_id", 1);
+        final String sql = selectQuery.findCollection(entityTable, "order_id", 1);
 
         // then
         assertThat(sql).isEqualTo("SELECT id, product, quantity FROM order_items WHERE order_id = 1");
@@ -86,9 +94,10 @@ class SelectQueryTest {
     void findById_exception() {
         // given
         final SelectQuery selectQuery = new SelectQuery();
+        final EntityTable entityTable = new EntityTable(EntityWithoutId.class);
 
         // when & then
-        assertThatThrownBy(() -> selectQuery.findById(EntityWithoutID.class, 1))
+        assertThatThrownBy(() -> selectQuery.findById(entityTable, 1))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage(EntityColumns.NOT_ID_FAILED_MESSAGE);
     }

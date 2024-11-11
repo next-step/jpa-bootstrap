@@ -4,6 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @FunctionalInterface
-public interface RowMapper<T> {
-    T mapRow(final ResultSet resultSet) throws SQLException, IllegalAccessException;
+public interface RowMapper {
+    Object mapRow(final ResultSet resultSet) throws SQLException, IllegalAccessException;
 }

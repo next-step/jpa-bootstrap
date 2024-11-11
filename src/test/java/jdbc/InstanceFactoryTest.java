@@ -1,9 +1,9 @@
 package jdbc;
 
+import fixture.EntityWithId;
+import fixture.EntityWithoutDefaultConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.fixture.EntityWithId;
-import persistence.fixture.EntityWithoutDefaultConstructor;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;

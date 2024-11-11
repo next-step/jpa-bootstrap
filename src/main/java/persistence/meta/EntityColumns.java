@@ -19,13 +19,6 @@ public class EntityColumns {
                 .collect(Collectors.toList());
     }
 
-    public EntityColumns(Object entity) {
-        this.entityColumns = Arrays.stream(entity.getClass().getDeclaredFields())
-                .filter(this::isPersistent)
-                .map(field -> new EntityColumn(field, entity))
-                .collect(Collectors.toList());
-    }
-
     public List<EntityColumn> getEntityColumns() {
         return entityColumns;
     }
@@ -41,9 +34,9 @@ public class EntityColumns {
         return !field.isAnnotationPresent(Transient.class);
     }
 
-    public EntityColumn getJoinEntityColumn() {
+    public EntityColumn getAssociationEntityColumn() {
         return entityColumns.stream()
-                .filter(EntityColumn::isOneToManyAssociation)
+                .filter(EntityColumn::isOneToMany)
                 .findFirst()
                 .orElse(null);
     }
