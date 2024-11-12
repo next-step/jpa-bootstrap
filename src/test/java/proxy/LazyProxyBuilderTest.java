@@ -1,6 +1,8 @@
 package proxy;
 
 import builder.dml.EntityData;
+import builder.dml.EntityMetaData;
+import builder.dml.EntityObjectData;
 import entity.OrderItem;
 import entity.OrderLazy;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +19,11 @@ class LazyProxyBuilderTest {
     @Test
     void createProxyTest() {
         OrderLazy order = new OrderLazy(1L, "1234", List.of(createOrderItem(1, 1L)));
-        EntityData entityData = EntityData.createEntityData(order);
+
+        EntityMetaData entityMetaData = new EntityMetaData(order.getClass());
+        EntityObjectData entityObjectData = new EntityObjectData(order);
+
+        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
 
         List<?> list = new LazyProxyBuilder<>().createProxy(entityData.getJoinEntity().getJoinEntityData().getFirst());
 
