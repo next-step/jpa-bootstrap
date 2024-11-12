@@ -1,6 +1,8 @@
-package persistence.event;
+package persistence.event.merge;
 
 import persistence.entity.EntityEntry;
+import persistence.event.AbstractEvent;
+import persistence.event.EventSource;
 
 public class MergeEvent extends AbstractEvent {
 

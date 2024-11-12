@@ -1,6 +1,7 @@
 package persistence.session;
 
 import jdbc.JdbcTemplate;
+import persistence.action.ActionQueue;
 import persistence.entity.StatefulPersistenceContext;
 import persistence.event.EventListenerGroupHandler;
 import persistence.meta.Metadata;
@@ -31,8 +32,9 @@ public class SessionFactoryImpl implements EntityManagerFactory {
 
         final EntityManager newSession = new SessionImpl(
                 new StatefulPersistenceContext(),
+                new Metamodel(metadata, jdbcTemplate),
                 new EventListenerGroupHandler(),
-                new Metamodel(metadata, jdbcTemplate)
+                new ActionQueue()
         );
 
         currentSessionContext.bindSession(newSession);

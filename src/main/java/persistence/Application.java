@@ -48,7 +48,8 @@ public class Application {
                         em.merge(saved);
 
                         // remove test
-                        em.remove(saved);  
+                        em.remove(saved);
+                        em.flush();
 
                         return saved;
                     }

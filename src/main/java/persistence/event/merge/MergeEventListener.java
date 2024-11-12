@@ -1,4 +1,4 @@
-package persistence.event;
+package persistence.event.merge;
 
 public interface MergeEventListener {
 

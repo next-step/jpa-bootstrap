@@ -1,7 +1,5 @@
 package persistence.entity;
 
-import persistence.sql.definition.TableDefinition;
-
 import java.util.HashMap;
 import java.util.Map;
 

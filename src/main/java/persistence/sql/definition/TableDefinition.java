@@ -220,4 +220,8 @@ public class TableDefinition {
                 .stream().filter(TableAssociationDefinition::isEager)
                 .collect(Collectors.toList());
     }
+
+    public boolean isIdentityIdentifier() {
+        return tableId.isIdentity();
+    }
 }

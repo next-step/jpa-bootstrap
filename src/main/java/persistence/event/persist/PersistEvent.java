@@ -1,4 +1,7 @@
-package persistence.event;
+package persistence.event.persist;
+
+import persistence.event.AbstractEvent;
+import persistence.event.EventSource;
 
 public class PersistEvent extends AbstractEvent {
 

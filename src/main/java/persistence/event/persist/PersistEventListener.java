@@ -1,4 +1,4 @@
-package persistence.event;
+package persistence.event.persist;
 
 public interface PersistEventListener {
 

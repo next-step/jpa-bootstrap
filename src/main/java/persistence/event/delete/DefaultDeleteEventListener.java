@@ -1,6 +1,6 @@
-package persistence.event;
+package persistence.event.delete;
 
-import persistence.entity.EntityKey;
+import persistence.action.EntityDeleteAction;
 import persistence.entity.EntityPersister;
 import persistence.entity.Status;
 
@@ -11,9 +11,8 @@ public class DefaultDeleteEventListener implements DeleteEventListener {
         final EntityPersister persister = event.getSession().findEntityPersister(event.getEntity().getClass());
 
         event.getEntry().updateStatus(Status.DELETED);
-        persister.delete(event.getEntity());
-        event.getSession().getPersistenceContext().removeEntity(
-                new EntityKey(persister.getEntityId(event.getEntity()), event.getEntity().getClass())
+        event.getSession().getActionQueue().addAction(
+                new EntityDeleteAction(event.getSession(), event.getEntity(), persister)
         );
     }
 }

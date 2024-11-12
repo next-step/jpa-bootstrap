@@ -1,10 +1,21 @@
 package persistence.session;
 
+import persistence.action.ActionQueue;
 import persistence.entity.EntityEntry;
 import persistence.entity.EntityKey;
 import persistence.entity.EntityPersister;
 import persistence.entity.PersistenceContext;
 import persistence.event.*;
+import persistence.event.delete.DeleteEvent;
+import persistence.event.delete.DeleteEventListener;
+import persistence.event.flush.FlushEvent;
+import persistence.event.flush.FlushEventListener;
+import persistence.event.load.LoadEvent;
+import persistence.event.load.LoadEventListener;
+import persistence.event.merge.MergeEvent;
+import persistence.event.merge.MergeEventListener;
+import persistence.event.persist.PersistEvent;
+import persistence.event.persist.PersistEventListener;
 import persistence.meta.Metamodel;
 
 import java.io.Serializable;
@@ -14,14 +25,17 @@ public class SessionImpl implements EventSource {
     private final PersistenceContext persistenceContext;
     private final Metamodel metamodel;
     private final EventListenerGroupHandler eventListenerGroupHandler;
+    private final ActionQueue actionQueue;
 
     public SessionImpl(PersistenceContext persistenceContext,
+                       Metamodel metamodel,
                        EventListenerGroupHandler eventListenerGroupHandler,
-                       Metamodel metamodel) {
+                       ActionQueue actionQueue) {
 
         this.persistenceContext = persistenceContext;
         this.metamodel = metamodel;
         this.eventListenerGroupHandler = eventListenerGroupHandler;
+        this.actionQueue = actionQueue;
     }
 
     @Override
@@ -104,8 +118,18 @@ public class SessionImpl implements EventSource {
     }
 
     @Override
+    public void flush() {
+        eventListenerGroupHandler.FLUSH
+                .fireEventOnEachListener(
+                        new FlushEvent(this),
+                        FlushEventListener::onFlush
+                );
+    }
+
+    @Override
     public void clear() {
         persistenceContext.clear();
+        actionQueue.clear();
     }
 
     @Override
@@ -134,7 +158,7 @@ public class SessionImpl implements EventSource {
 
     @Override
     public ActionQueue getActionQueue() {
-        return null;
+        return actionQueue;
     }
 
     @Override

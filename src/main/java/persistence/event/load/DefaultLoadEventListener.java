@@ -1,8 +1,9 @@
-package persistence.event;
+package persistence.event.load;
 
 import persistence.entity.EntityEntry;
 import persistence.entity.EntityKey;
 import persistence.entity.Status;
+import persistence.event.EventSource;
 
 import java.io.Serializable;
 

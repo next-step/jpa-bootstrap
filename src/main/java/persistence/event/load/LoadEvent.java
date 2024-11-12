@@ -1,6 +1,8 @@
-package persistence.event;
+package persistence.event.load;
 
 import persistence.entity.EntityEntry;
+import persistence.event.AbstractEvent;
+import persistence.event.EventSource;
 
 import java.io.Serializable;
 

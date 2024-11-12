@@ -1,4 +1,4 @@
-package persistence.event;
+package persistence.event.delete;
 
 public interface DeleteEventListener {
 

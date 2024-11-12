@@ -1,5 +1,6 @@
-package persistence.event;
+package persistence.event.merge;
 
+import persistence.action.EntityUpdateAction;
 import persistence.entity.EntityKey;
 import persistence.entity.EntityPersister;
 import persistence.entity.EntitySnapshot;
@@ -15,7 +16,9 @@ public class DefaultMergeEventListener implements MergeEventListener {
 
         final EntitySnapshot snapshot = event.getSession().getPersistenceContext().getDatabaseSnapshot(entityKey);
         if (snapshot.hasDirtyColumns(entity, persister)) {
-            persister.update(event.getEntity());
+            event.getSession().getActionQueue().addAction(
+                    new EntityUpdateAction(entity, persister)
+            );
         }
 
         event.getEntry().updateStatus(Status.MANAGED);

@@ -1,6 +1,8 @@
-package persistence.event;
+package persistence.event.delete;
 
 import persistence.entity.EntityEntry;
+import persistence.event.AbstractEvent;
+import persistence.event.EventSource;
 
 public class DeleteEvent extends AbstractEvent {
     private final Object entity;

@@ -1,5 +1,11 @@
 package persistence.event;
 
+import persistence.event.delete.DeleteEventListener;
+import persistence.event.flush.FlushEventListener;
+import persistence.event.load.LoadEventListener;
+import persistence.event.merge.MergeEventListener;
+import persistence.event.persist.PersistEventListener;
+
 public final class EventType<T> {
 
     public static final EventType<PersistEventListener> PERSIST =
@@ -10,6 +16,8 @@ public final class EventType<T> {
             create("merge", MergeEventListener.class);
     public static final EventType<DeleteEventListener> DELETE =
             create("delete", DeleteEventListener.class);
+    public static final EventType<FlushEventListener> FLUSH =
+            create("flush", FlushEventListener.class);
 
     private final String eventName;
     private final Class<T> listener;

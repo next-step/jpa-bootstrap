@@ -1,5 +1,6 @@
 package persistence.event;
 
+import persistence.action.ActionQueue;
 import persistence.entity.EntityPersister;
 import persistence.entity.PersistenceContext;
 import persistence.session.EntityManager;

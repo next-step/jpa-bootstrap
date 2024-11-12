@@ -12,6 +12,8 @@ public interface EntityManager extends AutoCloseable {
 
     <T> T merge(T entity);
 
+    void flush();
+
     void clear();
 
     Metamodel getMetamodel();
