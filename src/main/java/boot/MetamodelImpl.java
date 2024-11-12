@@ -1,5 +1,6 @@
 package boot;
 
+import builder.dml.EntityMetaData;
 import builder.dml.builder.DMLQueryBuilder;
 import hibernate.AnnotationBinder;
 import jakarta.persistence.OneToMany;
@@ -17,6 +18,7 @@ public class MetamodelImpl implements Metamodel {
     private static final String DOT = ".";
 
     private final DMLQueryBuilder dmlQueryBuilder = new DMLQueryBuilder();
+    private final Map<String, EntityMetaData> entityMetaDataMap = new HashMap<>();
     private final Map<String, EntityPersister> entityPersisterMap = new HashMap<>();
     private final Map<String, CollectionPersister> collectionPersisterMap = new HashMap<>();
 
@@ -32,9 +34,15 @@ public class MetamodelImpl implements Metamodel {
         List<Class<?>> entityClasses = annotationBinder.getEntityClasses();
 
         for (Class<?> entityClass : entityClasses) {
+            entityMetaDataMap.put(entityClass.getSimpleName(), new EntityMetaData(entityClass));
             entityPersisterMap.put(entityClass.getSimpleName(), new EntityPersister(entityClass, jdbcTemplate, dmlQueryBuilder));
             putCollectionPersisterMapOneToMany(entityClass);
         }
+    }
+
+    @Override
+    public EntityMetaData entityMetaData(Class<?> entityClass) {
+        return entityMetaDataMap.get(entityClass.getSimpleName());
     }
 
     @Override
