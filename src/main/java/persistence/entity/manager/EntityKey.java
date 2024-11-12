@@ -1,4 +1,4 @@
-package persistence.meta;
+package persistence.entity.manager;
 
 import java.util.Objects;
 

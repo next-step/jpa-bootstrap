@@ -1,8 +1,8 @@
 package persistence.entity.manager.factory;
 
 import persistence.entity.manager.EntityEntry;
+import persistence.entity.manager.EntityKey;
 import persistence.entity.manager.EntityStatus;
-import persistence.meta.EntityKey;
 
 import java.util.ArrayList;
 import java.util.List;

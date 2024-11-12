@@ -3,6 +3,7 @@ package persistence.meta;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import persistence.entity.manager.EntityKey;
 
 import java.lang.reflect.Field;
 import java.util.List;

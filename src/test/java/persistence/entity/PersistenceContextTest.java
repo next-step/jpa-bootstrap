@@ -4,9 +4,9 @@ import fixture.EntityWithId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.manager.EntityEntry;
+import persistence.entity.manager.EntityKey;
 import persistence.entity.manager.EntityStatus;
 import persistence.entity.manager.factory.PersistenceContext;
-import persistence.meta.EntityKey;
 import persistence.meta.EntityTable;
 
 import java.lang.reflect.Field;
