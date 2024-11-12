@@ -2,13 +2,8 @@ package persistence;
 
 import boot.Metamodel;
 import builder.dml.EntityData;
-import builder.dml.JoinEntityData;
 import builder.dml.builder.*;
-import database.H2DBConnection;
 import jdbc.JdbcTemplate;
-import org.h2.command.dml.Insert;
-
-import java.sql.SQLException;
 
 public class EntityPersister {
 
@@ -17,7 +12,6 @@ public class EntityPersister {
     private final DMLQueryBuilder dmlQueryBuilder;
     private Metamodel metamodel;
     private Class<?> entityClass;
-
 
     public EntityPersister(JdbcTemplate jdbcTemplate, Metamodel metamodel, DMLQueryBuilder dmlQueryBuilder) {
         this.jdbcTemplate = jdbcTemplate;

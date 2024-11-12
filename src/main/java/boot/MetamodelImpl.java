@@ -5,7 +5,6 @@ import hibernate.AnnotationBinder;
 import jakarta.persistence.OneToMany;
 import jdbc.JdbcTemplate;
 import persistence.CollectionPersister;
-import persistence.EntityLoader;
 import persistence.EntityPersister;
 
 import java.lang.reflect.Field;
@@ -18,7 +17,6 @@ public class MetamodelImpl implements Metamodel {
     private static final String DOT = ".";
 
     private final DMLQueryBuilder dmlQueryBuilder = new DMLQueryBuilder();
-    private final Map<String, EntityLoader> entityLoaderrMap = new HashMap<>();
     private final Map<String, EntityPersister> entityPersisterMap = new HashMap<>();
     private final Map<String, CollectionPersister> collectionPersisterMap = new HashMap<>();
 
@@ -34,15 +32,9 @@ public class MetamodelImpl implements Metamodel {
         List<Class<?>> entityClasses = annotationBinder.getEntityClasses();
 
         for (Class<?> entityClass : entityClasses) {
-            entityLoaderrMap.put(entityClass.getSimpleName(), new EntityLoader(entityClass, jdbcTemplate, dmlQueryBuilder));
             entityPersisterMap.put(entityClass.getSimpleName(), new EntityPersister(entityClass, jdbcTemplate, dmlQueryBuilder));
             putCollectionPersisterMapOneToMany(entityClass);
         }
-    }
-
-    @Override
-    public EntityLoader entityLoader(Class<?> entityClass) {
-        return entityLoaderrMap.get(entityClass.getSimpleName());
     }
 
     @Override

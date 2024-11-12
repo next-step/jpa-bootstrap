@@ -12,13 +12,10 @@ public class EntityManagerImpl implements EntityManager {
 
     private final PersistenceContext persistenceContext;
     private final Metamodel metamodel;
+    private final EntityLoader entityLoader;
 
-    public EntityManagerImpl(Metamodel metamodel) {
-        this.persistenceContext = new PersistenceContextImpl();
-        this.metamodel = metamodel;
-    }
-
-    public EntityManagerImpl(PersistenceContext persistenceContext, Metamodel metamodel) {
+    public EntityManagerImpl(JdbcTemplate jdbcTemplate, PersistenceContext persistenceContext, Metamodel metamodel, DMLQueryBuilder dmlQueryBuilder) {
+        this.entityLoader = new EntityLoader(jdbcTemplate, dmlQueryBuilder);
         this.persistenceContext = persistenceContext;
         this.metamodel = metamodel;
     }
@@ -33,7 +30,7 @@ public class EntityManagerImpl implements EntityManager {
             return clazz.cast(persistEntityData.getEntityInstance());
         }
 
-        T findObject = metamodel.entityLoader(clazz).find(clazz, id);
+        T findObject = this.entityLoader.find(clazz, id);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.LOADING);
         EntityData entityData = EntityData.createEntityData(findObject);
 
@@ -56,7 +53,7 @@ public class EntityManagerImpl implements EntityManager {
 
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.SAVING);
 
-        metamodel.entityPersister(entityInstance.getClass()).persist(entityData);
+        this.metamodel.entityPersister(entityInstance.getClass()).persist(entityData);
 
         insertPersistenceContext(entityKey, entityData);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.MANAGED);

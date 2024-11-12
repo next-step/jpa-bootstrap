@@ -2,6 +2,7 @@ package hibernate;
 
 import boot.Metamodel;
 import boot.MetamodelImpl;
+import builder.dml.builder.DMLQueryBuilder;
 import jdbc.JdbcTemplate;
 import persistence.EntityManager;
 import persistence.EntityManagerImpl;
@@ -12,10 +13,12 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     private final CurrentSessionContext currentSessionContext;
     private final JdbcTemplate jdbcTemplate;
     private final Metamodel metamodel;
+    private final DMLQueryBuilder dmlQueryBuilder;
 
-    public EntityManagerFactoryImpl(CurrentSessionContext currentSessionContext, JdbcTemplate jdbcTemplate) {
+    public EntityManagerFactoryImpl(CurrentSessionContext currentSessionContext, JdbcTemplate jdbcTemplate, DMLQueryBuilder dmlQueryBuilder) {
         this.currentSessionContext = currentSessionContext;
         this.jdbcTemplate = jdbcTemplate;
+        this.dmlQueryBuilder = dmlQueryBuilder;
 
         this.metamodel = new MetamodelImpl(this.jdbcTemplate);
         this.metamodel.init();
@@ -41,6 +44,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     }
 
     private EntityManager createEntityManager() {
-        return new EntityManagerImpl(new PersistenceContextImpl(), metamodel);
+        return new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), metamodel, dmlQueryBuilder);
     }
 }
