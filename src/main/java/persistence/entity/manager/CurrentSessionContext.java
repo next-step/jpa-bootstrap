@@ -19,6 +19,10 @@ public class CurrentSessionContext {
     }
 
     public void closeSession() {
+        final EntityManager entityManager = sessionRegistry.get();
+        if (Objects.nonNull(entityManager)) {
+            entityManager.clear();
+        }
         sessionRegistry.remove();
     }
 
