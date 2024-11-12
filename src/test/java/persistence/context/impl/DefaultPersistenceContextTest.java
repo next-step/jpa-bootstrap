@@ -116,10 +116,11 @@ class DefaultPersistenceContextTest extends TestEntityInitialize {
 
     @Test
     @DisplayName("dirtyCheck 함수는 변경이 필요한 엔티티를 동기화한다.")
-    void testDirtyCheckWithDirtyEntity() {
+    void testDirtyCheckWithDirtyEntity() throws SQLException {
         // given
         EntityLoader<TestPerson> loader = metaModel.entityLoader(TestPerson.class);
         TestPerson catsbiEntity = new TestPerson(1L, "catsbi", 33, "catsbi@naver.com", 123);
+        entityPersister.insert(catsbiEntity);
         context.addEntry(catsbiEntity, Status.SAVING, entityPersister);
 
         // when

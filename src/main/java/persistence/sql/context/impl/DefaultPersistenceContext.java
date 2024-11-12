@@ -18,15 +18,16 @@ public class DefaultPersistenceContext implements PersistenceContext {
     private final Map<CollectionKeyHolder, CollectionEntry> collectionContext = new HashMap<>();
 
     @Override
-    public <T> EntityEntry addEntry(T entity, Status status, EntityPersister entityPersister) {
+    public EntityEntry addEntry(Object entity, Status status, EntityPersister<?> entityPersister) {
         EntityEntry entityEntry = EntityEntry.newEntry(entity, status, entityPersister.getMetadataLoader());
         context.put(entityEntry.getKey(), entityEntry);
 
+        entityEntry.updateStatus(Status.MANAGED);
         return entityEntry;
     }
 
     @Override
-    public <T> EntityEntry addLoadingEntry(Object primaryKey, MetadataLoader<T> metadataLoader) {
+    public EntityEntry addLoadingEntry(Object primaryKey, MetadataLoader<?> metadataLoader) {
         EntityEntry entityEntry = EntityEntry.newLoadingEntry(primaryKey, metadataLoader);
         context.put(entityEntry.getKey(), entityEntry);
 
@@ -34,11 +35,13 @@ public class DefaultPersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public <T, ID> EntityEntry getEntry(Class<T> entityType, ID id) {
+    @SuppressWarnings("unchecked")
+    public <ID> EntityEntry getEntry(Class<?> entityType, ID id) {
         KeyHolder key = new KeyHolder(entityType, id);
 
-        if (context.containsKey(key)) {
-            return context.get(key);
+        EntityEntry entityEntry = context.get(key);
+        if (entityEntry != null && entityType.isAssignableFrom(entityEntry.getEntityType())) {
+            return entityEntry;
         }
 
         return null;
@@ -61,7 +64,7 @@ public class DefaultPersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public <T, ID> void deleteEntry(T entity, ID id) {
+    public <ID> void deleteEntry(Object entity, ID id) {
         KeyHolder key = new KeyHolder(entity.getClass(), id);
         context.remove(key);
     }
@@ -69,12 +72,12 @@ public class DefaultPersistenceContext implements PersistenceContext {
     @Override
     public void dirtyCheck(MetaModel metaModel) {
         for (EntityEntry entry : context.values()) {
-            EntityPersister persister = metaModel.entityPersister(entry.getEntity().getClass());
+            EntityPersister<?> persister = metaModel.entityPersister(entry.getEntity().getClass());
             handleEntry(persister, entry);
         }
     }
 
-    private void handleEntry(EntityPersister persister, EntityEntry entry) {
+    private void handleEntry(EntityPersister<?> persister, EntityEntry entry) {
         switch (entry.getStatus()) {
             case SAVING:
                 handleSavingEntry(persister, entry);
@@ -88,13 +91,13 @@ public class DefaultPersistenceContext implements PersistenceContext {
         }
     }
 
-    private void handleSavingEntry(EntityPersister persister, EntityEntry entry) {
+    private void handleSavingEntry(EntityPersister<?> persister, EntityEntry entry) {
         persister.insert(entry.getEntity());
         entry.updateStatus(Status.MANAGED);
         entry.synchronizingSnapshot();
     }
 
-    private void handleUpdateEntry(EntityPersister persister, EntityEntry entry) {
+    private void handleUpdateEntry(EntityPersister<?> persister, EntityEntry entry) {
         if (!entry.isDirty()) {
             return;
         }
@@ -102,7 +105,7 @@ public class DefaultPersistenceContext implements PersistenceContext {
         entry.synchronizingSnapshot();
     }
 
-    private void handleDeleteEntry(EntityPersister persister, EntityEntry entry) {
+    private void handleDeleteEntry(EntityPersister<?> persister, EntityEntry entry) {
         persister.delete(entry.getEntity());
         entry.updateStatus(Status.GONE);
         context.remove(entry.getKey());

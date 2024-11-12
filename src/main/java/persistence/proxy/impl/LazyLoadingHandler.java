@@ -75,7 +75,7 @@ public class LazyLoadingHandler<T> extends AbstractCollection<T> implements Invo
     }
 
     private CollectionKeyHolder getCollectionKeyHolder() {
-        MetadataLoader<T> metadataLoader = entityLoader.getMetadataLoader();
+        MetadataLoader<?> metadataLoader = entityLoader.getMetadataLoader();
         return new CollectionKeyHolder(parentKeyHolder.entityType(), parentKeyHolder.key(), metadataLoader.getEntityType());
     }
 
