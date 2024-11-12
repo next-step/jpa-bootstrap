@@ -1,6 +1,8 @@
 package persistence;
 
 import builder.dml.EntityData;
+import builder.dml.EntityMetaData;
+import builder.dml.EntityObjectData;
 import builder.dml.JoinEntityData;
 import builder.dml.builder.BuilderName;
 import builder.dml.builder.DMLQueryBuilder;
@@ -30,7 +32,12 @@ public class EntityLoader {
     //데이터를 조회한다.
     public <T> T find(Class<T> clazz, Object id) {
         SelectByIdQueryBuilder selectByIdQueryBuilder = (SelectByIdQueryBuilder) dmlQueryBuilder.query(BuilderName.SELECT_BY_ID);
-        EntityData entityData = EntityData.createEntityData(clazz, id);
+
+        EntityMetaData entityMetaData = new EntityMetaData(clazz);
+        EntityObjectData entityObjectData = new EntityObjectData(clazz, id);
+
+        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
+
         return jdbcTemplate.queryForObject(selectByIdQueryBuilder.buildQuery(entityData), resultSet -> EntityMapper.mapRow(resultSet, entityData));
     }
 
