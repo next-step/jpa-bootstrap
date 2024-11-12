@@ -12,7 +12,7 @@ public class CollectionPersistEventListener extends AbstractPersistEventListener
     public void onPersist(PersistEvent event) {
         final EventSource source = event.getSession();
         final Object entity = event.getEntity();
-        final EntityPersister persister = source.getEntityPersister(entity.getClass());
+        final EntityPersister persister = source.findEntityPersister(entity.getClass());
 
         persister.getCollectionAssociations().forEach(association -> {
             final CollectionPersister collectionPersister = source.getMetamodel().findCollectionPersister(association);

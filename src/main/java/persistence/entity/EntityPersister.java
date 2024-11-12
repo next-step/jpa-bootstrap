@@ -59,7 +59,7 @@ public class EntityPersister {
     public void update(Object entity) {
         final String query = updateQueryBuilder.build(
                 getTableName(),
-                getIdName(),
+                getIdColumnName(),
                 getEntityId(entity),
                 getUpdateColumnMaps(entity)
         );
@@ -81,7 +81,11 @@ public class EntityPersister {
     }
 
     public void delete(Object entity) {
-        String query = deleteQueryBuilder.build(entity, tableDefinition);
+        String query = deleteQueryBuilder.build(
+                getTableName(),
+                getIdColumnName(),
+                getEntityId(entity)
+        );
         jdbcTemplate.execute(query);
     }
 

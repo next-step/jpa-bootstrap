@@ -36,5 +36,9 @@ public class Department {
     public List<Employee> getEmployees() {
         return employees;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
 

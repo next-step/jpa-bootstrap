@@ -3,16 +3,8 @@ package persistence.session;
 import persistence.entity.EntityEntry;
 import persistence.entity.EntityKey;
 import persistence.entity.EntityPersister;
-import persistence.entity.EntitySnapshot;
 import persistence.entity.PersistenceContext;
-import persistence.entity.Status;
-import persistence.event.ActionQueue;
-import persistence.event.EventListenerGroupHandler;
-import persistence.event.EventSource;
-import persistence.event.LoadEvent;
-import persistence.event.LoadEventListener;
-import persistence.event.PersistEvent;
-import persistence.event.PersistEventListener;
+import persistence.event.*;
 import persistence.meta.Metamodel;
 
 import java.io.Serializable;
@@ -67,7 +59,11 @@ public class SessionImpl implements EventSource {
     public void persist(Object entity) {
         final EntityPersister entityPersister = metamodel.findEntityPersister(entity.getClass());
         if (entityPersister.hasId(entity)) {
-            throwIfNotManaged(entity, entityPersister);
+            final EntityEntry entityEntry = persistenceContext.getEntityEntry(
+                    new EntityKey(entityPersister.getEntityId(entity), entity.getClass())
+            );
+
+            checkManagedEntity(entity, entityEntry);
             return;
         }
 
@@ -78,20 +74,6 @@ public class SessionImpl implements EventSource {
 
     }
 
-    private void throwIfNotManaged(Object entity, EntityPersister entityPersister) {
-        final EntityEntry entityEntry = persistenceContext.getEntityEntry(
-                new EntityKey(entityPersister.getEntityId(entity), entity.getClass())
-        );
-
-        check(entityEntry == null, "No Entity Entry with id: " + entityPersister.getEntityId(entity));
-
-        if (entityEntry.isManaged()) {
-            return;
-        }
-
-        throw new IllegalArgumentException("Entity already persisted");
-    }
-
     @Override
     public void remove(Object entity) {
         final EntityPersister entityPersister = metamodel.findEntityPersister(entity.getClass());
@@ -99,9 +81,11 @@ public class SessionImpl implements EventSource {
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entityKey);
         checkManagedEntity(entity, entityEntry);
 
-        entityEntry.updateStatus(Status.DELETED);
-        entityPersister.delete(entity);
-        persistenceContext.removeEntity(entityKey);
+        eventListenerGroupHandler.DELETE
+                .fireEventOnEachListener(
+                        DeleteEvent.create(this, entity, entityEntry),
+                        DeleteEventListener::onDelete
+                );
     }
 
     @Override
@@ -111,13 +95,11 @@ public class SessionImpl implements EventSource {
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entityKey);
         checkManagedEntity(entity, entityEntry);
 
-        final EntitySnapshot entitySnapshot = persistenceContext.getDatabaseSnapshot(entityKey);
-        if (entitySnapshot.hasDirtyColumns(entity, metamodel.findEntityPersister(entity.getClass()))) {
-            entityPersister.update(entity);
-        }
+        eventListenerGroupHandler.MERGE
+                .fireEventOnEachListener(
+                        MergeEvent.create(this, entity, entityEntry),
+                        MergeEventListener::onMerge);
 
-        storeEntityInContext(entityKey, entity);
-        updateEntryToManaged(entityKey, entityEntry);
         return entity;
     }
 
@@ -137,18 +119,6 @@ public class SessionImpl implements EventSource {
 
         check(!entityEntry.isManaged(),
                 "Detached entity can not be merged: " + entity.getClass().getSimpleName());
-    }
-
-    private void storeEntityInContext(EntityKey entityKey, Object entity) {
-        final EntityPersister persister = metamodel.findEntityPersister(entity.getClass());
-
-        persistenceContext.addEntity(entityKey, entity);
-        persistenceContext.addDatabaseSnapshot(entityKey, entity, persister);
-    }
-
-    private void updateEntryToManaged(EntityKey entityKey, EntityEntry entityEntry) {
-        entityEntry.updateStatus(Status.MANAGED);
-        persistenceContext.addEntry(entityKey, entityEntry);
     }
 
     private void check(boolean condition, String reason) {
@@ -173,7 +143,7 @@ public class SessionImpl implements EventSource {
     }
 
     @Override
-    public EntityPersister getEntityPersister(Class<?> clazz) {
+    public EntityPersister findEntityPersister(Class<?> clazz) {
         return metamodel.findEntityPersister(clazz);
     }
 }

@@ -21,7 +21,7 @@ public class DefaultLoadEventListener implements LoadEventListener {
         entry.updateStatus(Status.MANAGED);
 
         source.getPersistenceContext().addEntity(entityKey, entity);
-        source.getPersistenceContext().addDatabaseSnapshot(entityKey, entity, source.getEntityPersister(entityClass));
+        source.getPersistenceContext().addDatabaseSnapshot(entityKey, entity, source.findEntityPersister(entityClass));
         source.getPersistenceContext().addEntry(entityKey, entry);
     }
 }

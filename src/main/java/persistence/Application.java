@@ -43,6 +43,13 @@ public class Application {
                         logger.info("before lazy loading...");
                         saved.getEmployees().forEach(emp -> logger.info(emp.getName()));
 
+                        // merge test
+                        saved.setName("Updated");
+                        em.merge(saved);
+
+                        // remove test
+                        em.remove(saved);  
+
                         return saved;
                     }
             );

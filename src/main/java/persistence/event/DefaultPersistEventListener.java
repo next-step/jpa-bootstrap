@@ -15,7 +15,7 @@ public class DefaultPersistEventListener extends AbstractPersistEventListener {
     }
 
     private void doPersist(EventSource source, Object entity, EntityEntry entry) {
-        final EntityPersister persister = source.getEntityPersister(entity.getClass());
+        final EntityPersister persister = source.findEntityPersister(entity.getClass());
         persister.insert(entity);
         managePersistedEntity(source, persister, entity, entry);
     }

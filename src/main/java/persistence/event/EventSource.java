@@ -10,6 +10,6 @@ public interface EventSource extends EntityManager {
 
     PersistenceContext getPersistenceContext();
 
-    EntityPersister getEntityPersister(Class<?> clazz);
+    EntityPersister findEntityPersister(Class<?> clazz);
 
 }

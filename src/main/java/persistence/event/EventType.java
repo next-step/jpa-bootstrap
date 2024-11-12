@@ -6,6 +6,10 @@ public final class EventType<T> {
             create("persist", PersistEventListener.class);
     public static final EventType<LoadEventListener> LOAD =
             create("load", LoadEventListener.class);
+    public static final EventType<MergeEventListener> MERGE =
+            create("merge", MergeEventListener.class);
+    public static final EventType<DeleteEventListener> DELETE =
+            create("delete", DeleteEventListener.class);
 
     private final String eventName;
     private final Class<T> listener;
