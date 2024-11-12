@@ -42,7 +42,10 @@ class SelectQueryBuilderTest {
 
         SelectQueryBuilder selectQuery = new SelectQueryBuilder(order.getClass(), metamodel);
         entityPersister.getAssociations().forEach(association -> {
-            selectQuery.join(metamodel.findEntityPersister(association.getAssociatedEntityClass()));
+            selectQuery.join(
+                    entityPersister.getJoinColumnName(association.getAssociatedEntityClass()),
+                    metamodel.findEntityPersister(association.getAssociatedEntityClass())
+            );
         });
 
         assertThat(selectQuery.buildById(1)).isEqualTo(

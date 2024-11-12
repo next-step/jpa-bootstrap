@@ -12,12 +12,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.action.ActionQueue;
+import persistence.event.SessionService;
 import persistence.meta.Metadata;
 import persistence.meta.MetadataImpl;
 import persistence.meta.Metamodel;
 import persistence.session.EntityManager;
-import persistence.session.SessionImpl;
 import persistence.session.SchemaManagementToolCoordinator;
+import persistence.session.SessionImpl;
 
 import java.sql.SQLException;
 
@@ -94,7 +96,12 @@ class EntityPersisterTest {
 
         entityPersister.insert(entity);
 
-        EntityManager em = new SessionImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
+        EntityManager em = new SessionImpl(
+                new StatefulPersistenceContext(),
+                metamodel,
+                new SessionService(),
+                new ActionQueue()
+        );
         QueryTestEntityWithIdentityId saved = em.find(QueryTestEntityWithIdentityId.class, 1L);
         assertAll(
                 () -> assertThat(saved.id).isEqualTo(1L),
@@ -109,7 +116,12 @@ class EntityPersisterTest {
 
         entityPersister.insert(entity);
 
-        EntityManager em = new SessionImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
+        EntityManager em = new SessionImpl(
+                new StatefulPersistenceContext(),
+                metamodel,
+                new SessionService(),
+                new ActionQueue()
+        );
         QueryTestEntityWithIdentityId saved = em.find(QueryTestEntityWithIdentityId.class, 1L);
         assertAll(
                 () -> assertThat(saved.id).isEqualTo(1L),
@@ -127,7 +139,12 @@ class EntityPersisterTest {
 
         entityPersister.update(updatedEntity);
 
-        EntityManager em = new SessionImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
+        EntityManager em = new SessionImpl(
+                new StatefulPersistenceContext(),
+                metamodel,
+                new SessionService(),
+                new ActionQueue()
+        );
         QueryTestEntityWithIdentityId updated = em.find(QueryTestEntityWithIdentityId.class, 1L);
 
         assertAll(
@@ -144,7 +161,12 @@ class EntityPersisterTest {
         entityPersister.insert(entity);
         entityPersister.delete(entity);
 
-        EntityManager em = new SessionImpl(jdbcTemplate, new StatefulPersistenceContext(), metamodel);
+        EntityManager em = new SessionImpl(
+                new StatefulPersistenceContext(),
+                metamodel,
+                new SessionService(),
+                new ActionQueue()
+        );
         assertThrows(RuntimeException.class, () -> em.find(QueryTestEntityWithIdentityId.class, 1L));
     }
 }
