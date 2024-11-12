@@ -17,11 +17,11 @@ class CreateQueryTest {
     void create() {
         // given
         final Dialect dialect = new H2Dialect();
+        final CreateQuery createQuery = new CreateQuery(dialect);
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
-        final CreateQuery createQuery = new CreateQuery(entityTable, dialect);
 
         // when
-        final String sql = createQuery.create();
+        final String sql = createQuery.create(entityTable);
 
         // then
         assertThat(sql).isEqualTo(
@@ -33,12 +33,12 @@ class CreateQueryTest {
     void create_withAssociation() {
         // given
         final Dialect dialect = new H2Dialect();
+        final CreateQuery createQuery = new CreateQuery(dialect);
         final EntityTable parentEntityTable = new EntityTable(Order.class);
         final EntityTable entityTable = new EntityTable(OrderItem.class);
-        final CreateQuery createQuery = new CreateQuery(entityTable, dialect);
 
         // when
-        final String sql = createQuery.create(parentEntityTable);
+        final String sql = createQuery.create(entityTable, parentEntityTable);
 
         // then
         assertThat(sql).isEqualTo(

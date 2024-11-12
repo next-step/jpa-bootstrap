@@ -12,11 +12,11 @@ class DropQueryTest {
     @DisplayName("drop 쿼리를 생성한다.")
     void drop() {
         // given
+        final DropQuery dropQuery = new DropQuery();
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
-        final DropQuery dropQuery = new DropQuery(entityTable.getTableName());
 
         // when
-        final String sql = dropQuery.drop();
+        final String sql = dropQuery.drop(entityTable);
 
         // then
         assertThat(sql).isEqualTo("DROP TABLE IF EXISTS users");
