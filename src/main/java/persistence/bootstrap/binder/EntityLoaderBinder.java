@@ -47,4 +47,8 @@ public class EntityLoaderBinder {
         return new EntityLoader(entityTable, childEntityTable, jdbcTemplate, dmlQueries.getSelectQuery(), proxyFactory,
                 rowMapper, collectionLoader);
     }
+
+    public void clear() {
+        entityLoaderRegistry.clear();
+    }
 }

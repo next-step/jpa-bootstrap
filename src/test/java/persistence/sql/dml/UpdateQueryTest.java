@@ -20,6 +20,6 @@ class UpdateQueryTest {
         final String sql = updateQuery.update(entityTable, entityTable.getEntityColumns(), entity);
 
         // then
-        assertThat(sql).isEqualTo("UPDATE users SET id = 1, nick_name = 'Jackson', old = 20, email = 'test@email.com' WHERE id = 1");
+        assertThat(sql).isEqualTo("UPDATE entity SET id = 1, nick_name = 'Jackson', old = 20, email = 'test@email.com' WHERE id = 1");
     }
 }

@@ -27,4 +27,8 @@ public class EntityPersisterBinder {
     public EntityPersister getEntityPersister(Class<?> entityType) {
         return entityPersisterRegistry.get(entityType.getName());
     }
+
+    public void clear() {
+        entityPersisterRegistry.clear();
+    }
 }

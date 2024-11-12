@@ -31,6 +31,10 @@ public class CollectionPersisterBinder {
         return entityPersisterRegistry.get(getKey(entityType, columnName));
     }
 
+    public void clear() {
+        entityPersisterRegistry.clear();
+    }
+
     private String getKey(Class<?> entityType, String columnName) {
         return "%s.%s".formatted(entityType.getName(), columnName);
     }

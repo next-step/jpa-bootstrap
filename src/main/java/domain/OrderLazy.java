@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "orders")
+@Table
 public class OrderLazy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

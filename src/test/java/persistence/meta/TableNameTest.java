@@ -15,7 +15,7 @@ class TableNameTest {
         final TableName tableName = new TableName(EntityWithId.class);
 
         // then
-        assertThat(tableName.value()).isEqualTo("users");
+        assertThat(tableName.value()).isEqualTo("entity");
     }
 
     @Test

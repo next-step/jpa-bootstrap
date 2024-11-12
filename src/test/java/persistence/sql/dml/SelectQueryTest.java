@@ -23,7 +23,7 @@ class SelectQueryTest {
         final String sql = selectQuery.findAll(entityTable);
 
         // then
-        assertThat(sql).isEqualTo("SELECT id, nick_name, old, email FROM users");
+        assertThat(sql).isEqualTo("SELECT id, nick_name, old, email FROM entity");
     }
 
     @Test
@@ -54,7 +54,7 @@ class SelectQueryTest {
         final String sql = selectQuery.findById(entityTable, 1);
 
         // then
-        assertThat(sql).isEqualTo("SELECT id, nick_name, old, email FROM users WHERE id = 1");
+        assertThat(sql).isEqualTo("SELECT id, nick_name, old, email FROM entity WHERE id = 1");
     }
 
     @Test

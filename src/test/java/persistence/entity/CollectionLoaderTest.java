@@ -3,14 +3,15 @@ package persistence.entity;
 import database.H2ConnectionFactory;
 import domain.Order;
 import domain.OrderItem;
-import fixture.EntityWithId;
 import jdbc.JdbcTemplate;
 import jdbc.mapper.DefaultRowMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.bootstrap.Metamodel;
 import persistence.entity.loader.CollectionLoader;
+import persistence.entity.manager.DefaultEntityManager;
 import persistence.entity.manager.EntityManager;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;
@@ -20,27 +21,22 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static util.QueryUtils.*;
 
 class CollectionLoaderTest {
     private JdbcTemplate jdbcTemplate;
+    private Metamodel metamodel;
     private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        entityManager = TestHelper.createEntityManager("domain", "fixture");
-
-        createTable(EntityWithId.class);
-        createTable(Order.class);
-        createTable(OrderItem.class, Order.class);
+        metamodel = TestHelper.createMetamodel("domain", "fixture");
+        entityManager = new DefaultEntityManager(metamodel);
     }
 
     @AfterEach
     void tearDown() {
-        dropTable(EntityWithId.class);
-        dropTable(Order.class);
-        dropTable(OrderItem.class);
+        metamodel.close();
     }
 
     @Test

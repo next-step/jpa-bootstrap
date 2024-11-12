@@ -2,6 +2,7 @@ package persistence.bootstrap.binder;
 
 import persistence.meta.EntityTable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,5 +19,13 @@ public class EntityTableBinder {
 
     public EntityTable getEntityTable(Class<?> entityType) {
         return entityTableRegistry.get(entityType.getName());
+    }
+
+    public List<EntityTable> getAllEntityTables() {
+        return new ArrayList<>(entityTableRegistry.values());
+    }
+
+    public void clear() {
+        entityTableRegistry.clear();
     }
 }

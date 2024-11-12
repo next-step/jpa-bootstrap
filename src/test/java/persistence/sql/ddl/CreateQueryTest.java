@@ -25,7 +25,7 @@ class CreateQueryTest {
 
         // then
         assertThat(sql).isEqualTo(
-                "CREATE TABLE users (id BIGINT AUTO_INCREMENT PRIMARY KEY, nick_name VARCHAR(20), old INTEGER, email VARCHAR(255) NOT NULL)");
+                "CREATE TABLE entity (id BIGINT AUTO_INCREMENT PRIMARY KEY, nick_name VARCHAR(20), old INTEGER, email VARCHAR(255) NOT NULL)");
     }
 
     @Test
