@@ -14,14 +14,14 @@ import persistence.event.persist.PersistEventListener;
 
 import java.util.List;
 
-public final class EventListenerGroupHandler {
+public final class SessionService {
     public final EventListenerGroup<PersistEventListener> PERSIST;
     public final EventListenerGroup<LoadEventListener> LOAD;
     public final EventListenerGroup<MergeEventListener> MERGE;
     public final EventListenerGroup<DeleteEventListener> DELETE;
     public final EventListenerGroup<FlushEventListener> FLUSH;
 
-    public EventListenerGroupHandler() {
+    public SessionService() {
         PERSIST = new EventListenerGroupImpl<>(
                 EventType.PERSIST,
                 List.of(

@@ -5,7 +5,8 @@ import persistence.entity.EntityEntry;
 import persistence.entity.EntityKey;
 import persistence.entity.EntityPersister;
 import persistence.entity.PersistenceContext;
-import persistence.event.*;
+import persistence.event.EventSource;
+import persistence.event.SessionService;
 import persistence.event.delete.DeleteEvent;
 import persistence.event.delete.DeleteEventListener;
 import persistence.event.flush.FlushEvent;
@@ -24,17 +25,17 @@ import java.util.function.Supplier;
 public class SessionImpl implements EventSource {
     private final PersistenceContext persistenceContext;
     private final Metamodel metamodel;
-    private final EventListenerGroupHandler eventListenerGroupHandler;
+    private final SessionService sessionService;
     private final ActionQueue actionQueue;
 
     public SessionImpl(PersistenceContext persistenceContext,
                        Metamodel metamodel,
-                       EventListenerGroupHandler eventListenerGroupHandler,
+                       SessionService sessionService,
                        ActionQueue actionQueue) {
 
         this.persistenceContext = persistenceContext;
         this.metamodel = metamodel;
-        this.eventListenerGroupHandler = eventListenerGroupHandler;
+        this.sessionService = sessionService;
         this.actionQueue = actionQueue;
     }
 
@@ -50,11 +51,10 @@ public class SessionImpl implements EventSource {
         check(entityEntry.isNotReadable(), "Entity is not managed: " + clazz.getSimpleName());
 
         final T entity = metamodel.findEntityLoader(clazz).loadEntity(clazz, entityKey);
-        eventListenerGroupHandler.LOAD
-                .fireEventOnEachListener(
-                        LoadEvent.create(this, (Serializable) id, entity, entityEntry),
-                        LoadEventListener::onLoad
-                );
+        sessionService.LOAD.fireEventOnEachListener(
+                LoadEvent.create(this, (Serializable) id, entity, entityEntry),
+                LoadEventListener::onLoad
+        );
 
         return entity;
     }
@@ -81,10 +81,10 @@ public class SessionImpl implements EventSource {
             return;
         }
 
-        eventListenerGroupHandler.PERSIST
-                .fireEventOnEachListener(
-                        PersistEvent.create(this, entity),
-                        PersistEventListener::onPersist);
+        sessionService.PERSIST.fireEventOnEachListener(
+                PersistEvent.create(this, entity),
+                PersistEventListener::onPersist
+        );
 
     }
 
@@ -95,11 +95,10 @@ public class SessionImpl implements EventSource {
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entityKey);
         checkManagedEntity(entity, entityEntry);
 
-        eventListenerGroupHandler.DELETE
-                .fireEventOnEachListener(
-                        DeleteEvent.create(this, entity, entityEntry),
-                        DeleteEventListener::onDelete
-                );
+        sessionService.DELETE.fireEventOnEachListener(
+                DeleteEvent.create(this, entity, entityEntry),
+                DeleteEventListener::onDelete
+        );
     }
 
     @Override
@@ -109,21 +108,20 @@ public class SessionImpl implements EventSource {
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entityKey);
         checkManagedEntity(entity, entityEntry);
 
-        eventListenerGroupHandler.MERGE
-                .fireEventOnEachListener(
-                        MergeEvent.create(this, entity, entityEntry),
-                        MergeEventListener::onMerge);
+        sessionService.MERGE.fireEventOnEachListener(
+                MergeEvent.create(this, entity, entityEntry),
+                MergeEventListener::onMerge
+        );
 
         return entity;
     }
 
     @Override
     public void flush() {
-        eventListenerGroupHandler.FLUSH
-                .fireEventOnEachListener(
-                        new FlushEvent(this),
-                        FlushEventListener::onFlush
-                );
+        sessionService.FLUSH.fireEventOnEachListener(
+                new FlushEvent(this),
+                FlushEventListener::onFlush
+        );
     }
 
     @Override

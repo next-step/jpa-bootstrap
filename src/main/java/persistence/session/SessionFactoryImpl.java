@@ -3,7 +3,7 @@ package persistence.session;
 import jdbc.JdbcTemplate;
 import persistence.action.ActionQueue;
 import persistence.entity.StatefulPersistenceContext;
-import persistence.event.EventListenerGroupHandler;
+import persistence.event.SessionService;
 import persistence.meta.Metadata;
 import persistence.meta.Metamodel;
 
@@ -33,7 +33,7 @@ public class SessionFactoryImpl implements EntityManagerFactory {
         final EntityManager newSession = new SessionImpl(
                 new StatefulPersistenceContext(),
                 new Metamodel(metadata, jdbcTemplate),
-                new EventListenerGroupHandler(),
+                new SessionService(),
                 new ActionQueue()
         );
 
