@@ -6,6 +6,8 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 
 public class EntityColumn {
+    private static final String VALUE_EXTRACT_FAILED_MESSAGE = "엔티티에서 값 추출을 실패하였습니다.";
+
     private final Field field;
     private final Class<?> type;
     private final ColumnName columnName;
@@ -55,7 +57,7 @@ public class EntityColumn {
         try {
             return field.get(entity);
         } catch (IllegalAccessException e) {
-            return null;
+            throw new IllegalArgumentException(VALUE_EXTRACT_FAILED_MESSAGE);
         }
     }
 

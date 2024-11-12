@@ -45,7 +45,7 @@ class EntityManagerFactoryTest {
         final EntityManager newEntityManager = entityManagerFactory.openSession();
 
         // then
-        assertThat(newEntityManager).isEqualTo(entityManager);
+        assertThat(newEntityManager).isSameAs(entityManager);
     }
 
     @Test
@@ -60,6 +60,6 @@ class EntityManagerFactoryTest {
 
         // then
         final EntityManager newEntityManager = entityManagerFactory.openSession();
-        assertThat(newEntityManager).isNotEqualTo(entityManager);
+        assertThat(newEntityManager).isNotSameAs(entityManager);
     }
 }
