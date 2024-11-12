@@ -15,9 +15,17 @@ public class MetaModel {
     private final Map<Class<?>, EntityPersister> entityPersisterMap = new HashMap<>();
     private final Map<Class<?>, EntityLoader<?>> entityLoaderMap = new HashMap<>();
 
-    public void init(Metadata metadata, ProxyFactory proxyFactory) {
+    public MetaModel(Map<Class<?>, EntityPersister> entityPersisterMap, Map<Class<?>, EntityLoader<?>> entityLoaderMap) {
+        this.entityPersisterMap.putAll(entityPersisterMap);
+        this.entityLoaderMap.putAll(entityLoaderMap);
+    }
+
+    public static MetaModel newInstance(Metadata metadata, ProxyFactory proxyFactory) {
         Map<Class<?>, MetadataLoader<?>> entityBindingMap = metadata.getEntityBinding();
         Database database = metadata.database();
+
+        Map<Class<?>, EntityPersister> entityPersisterMap = new HashMap<>();
+        Map<Class<?>, EntityLoader<?>> entityLoaderMap = new HashMap<>();
 
         for (Map.Entry<Class<?>, MetadataLoader<?>> entry : entityBindingMap.entrySet()) {
             Class<?> clazz = entry.getKey();
@@ -27,14 +35,16 @@ public class MetaModel {
             entityLoaderMap.put(clazz,
                     new EntityLoader<>(database, metadataLoader, CamelToSnakeConverter.getInstance(), proxyFactory));
         }
+
+        return new MetaModel(entityPersisterMap, entityLoaderMap);
     }
 
     public EntityPersister entityPersister(Class<?> entityClass) {
-        if (entityClass == null || !entityPersisterMap.containsKey(entityClass)) {
+        EntityPersister entityPersister = entityPersisterMap.get(entityClass);
+        if (entityPersister == null) {
             throw new IllegalArgumentException("Not Found EntityPersister");
         }
-
-        return entityPersisterMap.get(entityClass);
+        return entityPersister;
     }
 
     @SuppressWarnings("unchecked")

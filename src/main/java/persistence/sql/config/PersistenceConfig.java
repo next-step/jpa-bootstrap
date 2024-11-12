@@ -75,8 +75,7 @@ public class PersistenceConfig {
         if (metaModel != null) {
             return metaModel;
         }
-        metaModel = new MetaModel();
-        metaModel.init(metadata(), proxyFactory());
+        metaModel = MetaModel.newInstance(metadata(), proxyFactory());
 
         return metaModel;
     }

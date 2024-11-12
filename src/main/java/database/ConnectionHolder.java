@@ -9,8 +9,7 @@ public final class ConnectionHolder {
 
     private static Database database;
 
-    public ConnectionHolder(Database database) {
-        ConnectionHolder.database = database;
+    public ConnectionHolder() {
     }
 
     public static void updateDatabase(Database database) {
