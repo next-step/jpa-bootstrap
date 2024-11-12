@@ -19,12 +19,12 @@ public class TestProxyFactory implements ProxyFactory {
                                                                      Class<C> collectionType,
                                                                      PersistenceContext persistenceContext,
                                                                      EntityLoader<?> entityLoader,
-                                                                     EntityLoader<?> targetLoader) {
+                                                                     EntityLoader<?> foreignLoader) {
 
         return (C) Proxy.newProxyInstance(
                 collectionType.getClassLoader(),
                 new Class[]{collectionType},
-                new LazyLoadingHandler<>(new KeyHolder(foreignType, foreignKey), targetLoader, entityLoader, persistenceContext)
+                new LazyLoadingHandler<>(new KeyHolder(foreignType, foreignKey), foreignLoader, entityLoader, persistenceContext)
         );
     }
 }

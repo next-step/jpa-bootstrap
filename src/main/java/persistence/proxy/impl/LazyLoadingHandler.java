@@ -57,7 +57,8 @@ public class LazyLoadingHandler<T> extends AbstractCollection<T> implements Invo
     }
 
     private void realize() {
-        CollectionEntry entry = persistenceContext.getCollectionEntry(getCollectionKeyHolder());
+        CollectionKeyHolder collectionKeyHolder = getCollectionKeyHolder();
+        CollectionEntry entry = persistenceContext.getCollectionEntry(collectionKeyHolder);
         if (entry == null) {
             throw new IllegalStateException("failed to lazily initialize a collection");
         }

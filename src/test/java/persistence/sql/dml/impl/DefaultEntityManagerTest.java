@@ -9,6 +9,7 @@ import persistence.TestEntityInitialize;
 import persistence.config.TestPersistenceConfig;
 import persistence.sql.context.PersistenceContext;
 import persistence.sql.dml.EntityManager;
+import persistence.sql.dml.EntityManagerFactory;
 import persistence.sql.fixture.LazyTestOrder;
 import persistence.sql.fixture.LazyTestOrderItem;
 import persistence.sql.fixture.TestOrder;
@@ -33,8 +34,9 @@ class DefaultEntityManagerTest extends TestEntityInitialize {
     @BeforeEach
     void setUp() throws SQLException {
         TestPersistenceConfig config = TestPersistenceConfig.getInstance();
-        entityManager = config.entityManager();
-        persistenceContext = config.persistenceContext();
+        EntityManagerFactory factory = config.entityManagerFactory();
+        entityManager = factory.entityManager();
+        persistenceContext = TestReflectionUtils.getFieldValue(entityManager, "persistenceContext");
     }
 
     @Test

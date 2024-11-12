@@ -35,7 +35,6 @@ public class DefaultPersistenceContext implements PersistenceContext {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <ID> EntityEntry getEntry(Class<?> entityType, ID id) {
         KeyHolder key = new KeyHolder(entityType, id);
 

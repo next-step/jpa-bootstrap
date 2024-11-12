@@ -39,11 +39,11 @@ class LazyLoadingHandlerTest extends TestEntityInitialize {
         TestPersistenceConfig config = TestPersistenceConfig.getInstance();
         Database database = config.database();
         persistenceContext = config.persistenceContext();
-        metaModel = config.metalModel();
+        metaModel = config.metaModel();
 
-        database.executeUpdate("INSERT INTO orders (order_number) VALUES ('1')");
-        database.executeUpdate("INSERT INTO order_items (product, quantity, order_id) VALUES ('apple', 10, 1)");
-        database.executeUpdate("INSERT INTO order_items (product, quantity, order_id) VALUES ('cherry', 20, 1)");
+        database.executeUpdate("INSERT INTO lazy_orders (order_number) VALUES ('1')");
+        database.executeUpdate("INSERT INTO lazy_order_items (product, quantity, order_id) VALUES ('apple', 10, 1)");
+        database.executeUpdate("INSERT INTO lazy_order_items (product, quantity, order_id) VALUES ('cherry', 20, 1)");
     }
 
     @Test
@@ -74,7 +74,7 @@ class LazyLoadingHandlerTest extends TestEntityInitialize {
         CollectionKeyHolder collectionKeyHolder = new CollectionKeyHolder(LazyTestOrder.class, 1L, LazyTestOrderItem.class);
         persistenceContext.addCollectionEntry(collectionKeyHolder, collectionEntry);
 
-        Collection<LazyTestOrderItem> proxy = proxyFactory.createProxyCollection(1L, LazyTestOrder.class, LazyTestOrderItem.class, List.class, persistenceContext, loader, targetLoader);
+        Collection<LazyTestOrderItem> proxy = proxyFactory.createProxyCollection(1L, LazyTestOrder.class, LazyTestOrderItem.class, List.class, persistenceContext, targetLoader, loader);
         proxy.iterator();
 
         assertAll(
