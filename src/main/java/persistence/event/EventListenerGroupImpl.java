@@ -1,5 +1,6 @@
 package persistence.event;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -16,6 +17,11 @@ public class EventListenerGroupImpl<T> implements EventListenerGroup<T> {
     @Override
     public EventType<T> getEventType() {
         return eventType;
+    }
+
+    @Override
+    public Collection<T> getListeners() {
+        return listeners;
     }
 
     @Override

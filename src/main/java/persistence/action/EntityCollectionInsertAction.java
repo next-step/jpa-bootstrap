@@ -28,7 +28,7 @@ public class EntityCollectionInsertAction extends BaseInsertAction {
         final Collection<Object> childEntities = collectionPersister.insertCollection(parentEntity, association);
 
         childEntities.forEach(child -> {
-            final EntityPersister childPersister = source.getMetamodel().findEntityPersister(child.getClass());
+            final EntityPersister childPersister = source.findEntityPersister(child.getClass());
             final EntityEntry childEntry = EntityEntry.inSaving();
             managePersistedEntity(source, childPersister, child, childEntry);
         });

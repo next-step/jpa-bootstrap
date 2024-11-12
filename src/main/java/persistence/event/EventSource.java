@@ -1,9 +1,11 @@
 package persistence.event;
 
 import persistence.action.ActionQueue;
+import persistence.entity.CollectionPersister;
 import persistence.entity.EntityPersister;
 import persistence.entity.PersistenceContext;
 import persistence.session.EntityManager;
+import persistence.sql.definition.TableAssociationDefinition;
 
 public interface EventSource extends EntityManager {
 
@@ -13,4 +15,5 @@ public interface EventSource extends EntityManager {
 
     EntityPersister findEntityPersister(Class<?> clazz);
 
+    CollectionPersister findCollectionPersister(TableAssociationDefinition association);
 }

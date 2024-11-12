@@ -14,7 +14,7 @@ public class CollectionPersistEventListener implements PersistEventListener {
         final EntityPersister persister = source.findEntityPersister(entity.getClass());
 
         persister.getCollectionAssociations().forEach(association -> {
-            final CollectionPersister collectionPersister = source.getMetamodel().findCollectionPersister(association);
+            final CollectionPersister collectionPersister = source.findCollectionPersister(association);
 
             source.getActionQueue().addAction(
                     new EntityCollectionInsertAction(event.getSession(), entity, collectionPersister, association)

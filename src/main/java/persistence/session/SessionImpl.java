@@ -1,6 +1,7 @@
 package persistence.session;
 
 import persistence.action.ActionQueue;
+import persistence.entity.CollectionPersister;
 import persistence.entity.EntityEntry;
 import persistence.entity.EntityKey;
 import persistence.entity.EntityPersister;
@@ -18,6 +19,7 @@ import persistence.event.merge.MergeEventListener;
 import persistence.event.persist.PersistEvent;
 import persistence.event.persist.PersistEventListener;
 import persistence.meta.Metamodel;
+import persistence.sql.definition.TableAssociationDefinition;
 
 import java.io.Serializable;
 import java.util.function.Supplier;
@@ -130,11 +132,6 @@ public class SessionImpl implements EventSource {
         actionQueue.clear();
     }
 
-    @Override
-    public Metamodel getMetamodel() {
-        return metamodel;
-    }
-
     private void checkManagedEntity(Object entity, EntityEntry entityEntry) {
         check(entityEntry == null,
                 "Can not find entry in persistence context: " + entity.getClass().getSimpleName());
@@ -167,5 +164,10 @@ public class SessionImpl implements EventSource {
     @Override
     public EntityPersister findEntityPersister(Class<?> clazz) {
         return metamodel.findEntityPersister(clazz);
+    }
+
+    @Override
+    public CollectionPersister findCollectionPersister(TableAssociationDefinition association) {
+        return metamodel.findCollectionPersister(association);
     }
 }
