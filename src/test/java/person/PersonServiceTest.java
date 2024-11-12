@@ -4,6 +4,7 @@ import builder.ddl.DDLBuilderData;
 import builder.ddl.builder.CreateQueryBuilder;
 import builder.ddl.builder.DropQueryBuilder;
 import builder.ddl.dataType.DB;
+import builder.dml.builder.DMLQueryBuilder;
 import database.H2DBConnection;
 import entity.Person;
 import hibernate.CurrentSessionContext;
@@ -34,7 +35,7 @@ class PersonServiceTest {
     @BeforeAll
     static void allSetup() {
         CurrentSessionContext currentSessionContext = new CurrentSessionContext();
-        entityManagerFactory = new EntityManagerFactoryImpl(currentSessionContext, new H2DBConnection().start());
+        entityManagerFactory = new EntityManagerFactoryImpl(currentSessionContext, new H2DBConnection().start(), new DMLQueryBuilder());
     }
 
     //정확한 테스트를 위해 메소드마다 DB실행 후 테이블생성
