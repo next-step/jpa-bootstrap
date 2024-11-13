@@ -34,7 +34,7 @@ class EntityLoaderTest {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
         metamodel = TestHelper.createMetamodel("domain", "fixture");
         entityManager = new DefaultEntityManager(metamodel);
-        selectQuery = new SelectQuery();
+        selectQuery = SelectQuery.getInstance();
     }
 
     @AfterEach
@@ -48,8 +48,9 @@ class EntityLoaderTest {
         // given
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
-        final EntityLoader entityLoader = new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, rowMapper);
+        final EntityLoader entityLoader =
+                new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, ProxyFactory.getInstance(), rowMapper, collectionLoader);
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
 
@@ -74,8 +75,9 @@ class EntityLoaderTest {
         final EntityTable entityTable = new EntityTable(Order.class);
         final EntityTable childEntityTable = new EntityTable(OrderItem.class);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable, childEntityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
-        final EntityLoader entityLoader = new EntityLoader(entityTable, childEntityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, rowMapper);
+        final EntityLoader entityLoader =
+                new EntityLoader(entityTable, childEntityTable, jdbcTemplate, ProxyFactory.getInstance(), rowMapper, collectionLoader);
         final Order order = new Order("OrderNumber1");
         final OrderItem orderItem1 = new OrderItem("Product1", 10);
         final OrderItem orderItem2 = new OrderItem("Product2", 20);

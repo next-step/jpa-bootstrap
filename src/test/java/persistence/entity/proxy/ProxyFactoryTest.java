@@ -14,7 +14,6 @@ import persistence.entity.loader.CollectionLoader;
 import persistence.entity.manager.DefaultEntityManager;
 import persistence.entity.manager.EntityManager;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.SelectQuery;
 import util.TestHelper;
 
 import java.util.List;
@@ -47,11 +46,11 @@ class ProxyFactoryTest {
     void createProxyAndLazyLoading() {
         // given
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        final ProxyFactory proxyFactory = new ProxyFactory();
+        final ProxyFactory proxyFactory = ProxyFactory.getInstance();
         final EntityTable entityTable = new EntityTable(OrderLazy.class);
         final EntityTable childEntityTable = new EntityTable(entityTable.getAssociationColumnType());
         final DefaultRowMapper rowMapper = new DefaultRowMapper(childEntityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(childEntityTable, jdbcTemplate, new SelectQuery(), rowMapper);
+        final CollectionLoader collectionLoader = new CollectionLoader(childEntityTable, jdbcTemplate, rowMapper);
         final LazyLoader lazyLoader = new LazyLoader(entityTable, collectionLoader);
 
         // when

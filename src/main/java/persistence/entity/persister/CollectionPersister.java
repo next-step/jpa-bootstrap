@@ -11,17 +11,16 @@ public class CollectionPersister {
     private final EntityTable entityTable;
     private final EntityTable parentEntityTable;
     private final JdbcTemplate jdbcTemplate;
-    private final InsertQuery insertQuery;
 
     public CollectionPersister(
-            EntityTable entityTable, EntityTable parentEntityTable, JdbcTemplate jdbcTemplate, InsertQuery insertQuery) {
+            EntityTable entityTable, EntityTable parentEntityTable, JdbcTemplate jdbcTemplate) {
         this.entityTable = entityTable;
         this.parentEntityTable = parentEntityTable;
         this.jdbcTemplate = jdbcTemplate;
-        this.insertQuery = insertQuery;
     }
 
     public void insert(List<?> collection, Object parentEntity) {
+        final InsertQuery insertQuery = InsertQuery.getInstance();
         for (Object entity : collection) {
             final String sql = insertQuery.insert(
                     entityTable, parentEntityTable.getAssociationColumnName(), parentEntityTable.getIdValue(parentEntity), entity);

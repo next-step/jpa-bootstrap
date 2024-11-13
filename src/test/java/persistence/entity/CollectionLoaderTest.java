@@ -14,7 +14,6 @@ import persistence.entity.loader.CollectionLoader;
 import persistence.entity.manager.DefaultEntityManager;
 import persistence.entity.manager.EntityManager;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.SelectQuery;
 import util.TestHelper;
 
 import java.util.List;
@@ -45,7 +44,7 @@ class CollectionLoaderTest {
         // given
         final EntityTable entityTable = new EntityTable(OrderItem.class);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, new SelectQuery(), rowMapper);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, rowMapper);
         final Order order = new Order("OrderNumber1");
         final OrderItem orderItem1 = new OrderItem("Product1", 10);
         final OrderItem orderItem2 = new OrderItem("Product2", 20);

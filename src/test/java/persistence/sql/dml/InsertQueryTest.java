@@ -14,7 +14,7 @@ class InsertQueryTest {
     @DisplayName("insert 쿼리를 생성한다.")
     void insert() {
         // given
-        final InsertQuery insertQuery = new InsertQuery();
+        final InsertQuery insertQuery = InsertQuery.getInstance();
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
 
@@ -29,7 +29,7 @@ class InsertQueryTest {
     @DisplayName("연관관계가 존재하는 부모 엔티티로 insert 쿼리를 생성한다.")
     void insert_withAssociationParent() {
         // given
-        final InsertQuery insertQuery = new InsertQuery();
+        final InsertQuery insertQuery = InsertQuery.getInstance();
         final Order order = new Order("OrderNumber1");
         final EntityTable entityTable = new EntityTable(Order.class);
 
@@ -44,7 +44,7 @@ class InsertQueryTest {
     @DisplayName("연관관계가 존재하는 자식 엔티티로 insert 쿼리를 생성한다.")
     void insert_withAssociationChild() {
         // given
-        final InsertQuery insertQuery = new InsertQuery();
+        final InsertQuery insertQuery = InsertQuery.getInstance();
         final Order order = new Order(1L, "OrderNumber1");
         final OrderItem orderItem = new OrderItem("Product1", 10);
         order.addOrderItem(orderItem);

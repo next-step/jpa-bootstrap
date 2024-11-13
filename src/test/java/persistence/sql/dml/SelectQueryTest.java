@@ -16,7 +16,7 @@ class SelectQueryTest {
     @DisplayName("findAll 쿼리를 생성한다.")
     void findAll() {
         // given
-        final SelectQuery selectQuery = new SelectQuery();
+        final SelectQuery selectQuery = SelectQuery.getInstance();
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
 
         // when
@@ -30,7 +30,7 @@ class SelectQueryTest {
     @DisplayName("연관관계가 존재하는 엔티티의 findAll 쿼리를 생성한다.")
     void findAll_withAssociation() {
         // given
-        final SelectQuery selectQuery = new SelectQuery();
+        final SelectQuery selectQuery = SelectQuery.getInstance();
         final EntityTable entityTable = new EntityTable(Order.class);
         final EntityTable childEntityTable = new EntityTable(OrderItem.class);
 
@@ -47,7 +47,7 @@ class SelectQueryTest {
     @DisplayName("findById 쿼리를 생성한다.")
     void findById() {
         // given
-        final SelectQuery selectQuery = new SelectQuery();
+        final SelectQuery selectQuery = SelectQuery.getInstance();
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
 
         // when
@@ -61,7 +61,7 @@ class SelectQueryTest {
     @DisplayName("연관관계가 존재하는 엔티티의 findById 쿼리를 생성한다.")
     void findById_withAssociation() {
         // given
-        final SelectQuery selectQuery = new SelectQuery();
+        final SelectQuery selectQuery = SelectQuery.getInstance();
         final EntityTable entityTable = new EntityTable(Order.class);
         final EntityTable childEntityTable = new EntityTable(OrderItem.class);
 
@@ -79,7 +79,7 @@ class SelectQueryTest {
     @DisplayName("findCollection 쿼리를 생성한다.")
     void findCollection() {
         // given
-        final SelectQuery selectQuery = new SelectQuery();
+        final SelectQuery selectQuery = SelectQuery.getInstance();
         final EntityTable entityTable = new EntityTable(OrderItem.class);
 
         // when
@@ -93,7 +93,7 @@ class SelectQueryTest {
     @DisplayName("@Id가 없는 엔티티로 findById 쿼리를 생성하면 예외를 발생한다.")
     void findById_exception() {
         // given
-        final SelectQuery selectQuery = new SelectQuery();
+        final SelectQuery selectQuery = SelectQuery.getInstance();
         final EntityTable entityTable = new EntityTable(EntityWithoutId.class);
 
         // when & then

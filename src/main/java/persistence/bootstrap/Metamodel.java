@@ -15,7 +15,6 @@ import persistence.entity.persister.CollectionPersister;
 import persistence.entity.persister.EntityPersister;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.DmlQueries;
 
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class Metamodel {
     private final EntityPersisterBinder entityPersisterBinder;
     private final CollectionPersisterBinder collectionPersisterBinder;
 
-    public Metamodel(JdbcTemplate jdbcTemplate, Dialect dialect, DmlQueries dmlQueries, ProxyFactory proxyFactory, String... basePackages) {
+    public Metamodel(JdbcTemplate jdbcTemplate, Dialect dialect, ProxyFactory proxyFactory, String... basePackages) {
         this.jdbcTemplate = jdbcTemplate;
 
         final List<Class<?>> entityTypes = new EntityBinder(basePackages).getEntityTypes();
@@ -36,16 +35,16 @@ public class Metamodel {
         this.entityAssociationBinder = new EntityAssociationBinder(entityTableBinder);
 
         RowMapperBinder rowMapperBinder = new RowMapperBinder(entityTypes, entityTableBinder);
-        CollectionLoaderBinder collectionLoaderBinder = new CollectionLoaderBinder(entityTypes, entityTableBinder, rowMapperBinder, jdbcTemplate, dmlQueries);
+        CollectionLoaderBinder collectionLoaderBinder =
+                new CollectionLoaderBinder(entityTypes, entityTableBinder, rowMapperBinder, jdbcTemplate);
 
         this.collectionPersisterBinder =
-                new CollectionPersisterBinder(entityTypes, entityTableBinder, jdbcTemplate, dmlQueries);
+                new CollectionPersisterBinder(entityTypes, entityTableBinder, jdbcTemplate);
         this.entityLoaderBinder =
                 new EntityLoaderBinder(entityTypes, entityTableBinder, collectionLoaderBinder, rowMapperBinder,
-                        jdbcTemplate, dmlQueries, proxyFactory);
+                        jdbcTemplate, proxyFactory);
         this.entityPersisterBinder =
-                new EntityPersisterBinder(entityTypes, entityTableBinder, collectionLoaderBinder,
-                        jdbcTemplate, dmlQueries);
+                new EntityPersisterBinder(entityTypes, entityTableBinder, jdbcTemplate);
 
         DatabaseSyncManager.sync(entityTableBinder, entityAssociationBinder, jdbcTemplate, dialect);
     }

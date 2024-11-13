@@ -7,6 +7,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class InsertQuery {
+    private static class InsertQueryHolder {
+        private static final InsertQuery INSTANCE = new InsertQuery();
+    }
+
+    public static InsertQuery getInstance() {
+        return InsertQueryHolder.INSTANCE;
+    }
+
+    private InsertQuery() {
+    }
+
     public String insert(EntityTable entityTable, Object entity) {
         return new InsertQueryBuilder()
                 .insertInto(entityTable.getTableName(), getColumns(entityTable))

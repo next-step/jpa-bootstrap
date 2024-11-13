@@ -16,10 +16,6 @@ import persistence.entity.manager.EntityManager;
 import persistence.entity.persister.EntityPersister;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.DeleteQuery;
-import persistence.sql.dml.InsertQuery;
-import persistence.sql.dml.SelectQuery;
-import persistence.sql.dml.UpdateQuery;
 import util.TestHelper;
 
 import static org.assertj.core.api.Assertions.*;
@@ -29,14 +25,12 @@ class EntityPersisterTest {
     private JdbcTemplate jdbcTemplate;
     private Metamodel metamodel;
     private EntityManager entityManager;
-    private SelectQuery selectQuery;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
         metamodel = TestHelper.createMetamodel("domain", "fixture");
         entityManager = new DefaultEntityManager(metamodel);
-        selectQuery = new SelectQuery();
     }
 
     @AfterEach
@@ -49,13 +43,12 @@ class EntityPersisterTest {
     void insert() {
         // given
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
-        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate, new InsertQuery(),
-                new UpdateQuery(), new DeleteQuery());
+        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate);
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, rowMapper);
         final EntityLoader entityLoader =
-                new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
+                new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, ProxyFactory.getInstance(), rowMapper, collectionLoader);
 
         // when
         entityPersister.insert(entity);
@@ -77,16 +70,15 @@ class EntityPersisterTest {
     void update() {
         // given
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
-        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate, new InsertQuery(),
-                new UpdateQuery(), new DeleteQuery());
+        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate        );
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
         final EntityWithId updatedEntity = new EntityWithId(entity.getId(), "Jackson", 20, "test2@email.com");
         final EntityTable updatedEntityTable = new EntityTable(updatedEntity.getClass());
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, rowMapper);
         final EntityLoader entityLoader =
-                new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
+                new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, ProxyFactory.getInstance(), rowMapper, collectionLoader);
 
         // when
         entityPersister.update(updatedEntity, updatedEntityTable.getEntityColumns());
@@ -108,14 +100,13 @@ class EntityPersisterTest {
     void delete() {
         // given
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
-        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate, new InsertQuery(),
-                new UpdateQuery(), new DeleteQuery());
+        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate        );
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, rowMapper);
         final EntityLoader entityLoader =
-                new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
+                new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, ProxyFactory.getInstance(), rowMapper, collectionLoader);
 
         // when
         entityPersister.delete(entity);

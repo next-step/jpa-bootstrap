@@ -12,7 +12,7 @@ class UpdateQueryTest {
     @DisplayName("update 쿼리를 생성한다.")
     void update() {
         // given
-        final UpdateQuery updateQuery = new UpdateQuery();
+        final UpdateQuery updateQuery = UpdateQuery.getInstance();
         final EntityWithId entity = new EntityWithId(1L, "Jackson", 20, "test@email.com");
         final EntityTable entityTable = new EntityTable(entity.getClass());
 

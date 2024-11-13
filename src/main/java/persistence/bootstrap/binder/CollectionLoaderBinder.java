@@ -4,7 +4,6 @@ import jdbc.JdbcTemplate;
 import jdbc.mapper.RowMapper;
 import persistence.entity.loader.CollectionLoader;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.DmlQueries;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +13,7 @@ public class CollectionLoaderBinder {
     private final Map<String, CollectionLoader> collectionLoaderRegistry = new HashMap<>();
 
     public CollectionLoaderBinder(List<Class<?>> entityTypes, EntityTableBinder entityTableBinder,
-                                  RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate, DmlQueries dmlQueries) {
+                                  RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate) {
         for (Class<?> entityType : entityTypes) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
             if (entityTable.isOneToMany()) {
@@ -22,7 +21,7 @@ public class CollectionLoaderBinder {
                 final EntityTable childEntityTable = entityTableBinder.getEntityTable(associationColumnType);
                 final RowMapper rowMapper = rowMapperBinder.getRowMapper(associationColumnType);
                 final CollectionLoader collectionLoader =
-                        new CollectionLoader(childEntityTable, jdbcTemplate, dmlQueries.getSelectQuery(), rowMapper);
+                        new CollectionLoader(childEntityTable, jdbcTemplate, rowMapper);
 
                 final String collectionKey = getKey(entityType, entityTable.getAssociationColumnName());
                 collectionLoaderRegistry.put(collectionKey, collectionLoader);

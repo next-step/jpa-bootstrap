@@ -16,18 +16,16 @@ public class EntityLoader {
     private final EntityTable entityTable;
     private final EntityTable childEntityTable;
     private final JdbcTemplate jdbcTemplate;
-    private final SelectQuery selectQuery;
     private final ProxyFactory proxyFactory;
     private final RowMapper rowMapper;
     private final CollectionLoader collectionLoader;
 
-    public EntityLoader(EntityTable entityTable, EntityTable childEntityTable, JdbcTemplate jdbcTemplate, SelectQuery selectQuery,
+    public EntityLoader(EntityTable entityTable, EntityTable childEntityTable, JdbcTemplate jdbcTemplate,
                         ProxyFactory proxyFactory, RowMapper rowMapper,
                         CollectionLoader collectionLoader) {
         this.entityTable = entityTable;
         this.childEntityTable = childEntityTable;
         this.jdbcTemplate = jdbcTemplate;
-        this.selectQuery = selectQuery;
         this.proxyFactory = proxyFactory;
         this.rowMapper = rowMapper;
         this.collectionLoader = collectionLoader;
@@ -44,6 +42,7 @@ public class EntityLoader {
     }
 
     private String getSql(Object id) {
+        final SelectQuery selectQuery = SelectQuery.getInstance();
         if (entityTable.isOneToMany() && entityTable.isEager()) {
             return selectQuery.findById(entityTable, childEntityTable, id);
         }

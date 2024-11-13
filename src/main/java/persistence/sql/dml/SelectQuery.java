@@ -9,6 +9,17 @@ import java.util.stream.Stream;
 import static persistence.sql.QueryConst.*;
 
 public class SelectQuery {
+    private static class SelectQueryHolder {
+        private static final SelectQuery INSTANCE = new SelectQuery();
+    }
+
+    public static SelectQuery getInstance() {
+        return SelectQueryHolder.INSTANCE;
+    }
+
+    private SelectQuery() {
+    }
+
     public String findAll(EntityTable entityTable) {
         return find(entityTable).build();
     }

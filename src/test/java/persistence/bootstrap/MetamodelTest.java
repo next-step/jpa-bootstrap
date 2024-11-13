@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import persistence.dialect.Dialect;
 import persistence.dialect.H2Dialect;
 import persistence.entity.proxy.ProxyFactory;
-import persistence.sql.dml.DmlQueries;
 
 import java.lang.reflect.Field;
 
@@ -29,12 +28,11 @@ class MetamodelTest {
         // given
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
         final Dialect dialect = new H2Dialect();
-        final DmlQueries dmlQueries = new DmlQueries();
-        final ProxyFactory proxyFactory = new ProxyFactory();
+        final ProxyFactory proxyFactory = ProxyFactory.getInstance();
 
         // when
         metamodel = new Metamodel(
-                jdbcTemplate, dialect, dmlQueries, proxyFactory, "domain", "fixture");
+                jdbcTemplate, dialect, proxyFactory, "domain", "fixture");
 
         // then
         assertAll(

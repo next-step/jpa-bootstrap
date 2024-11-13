@@ -3,7 +3,6 @@ package persistence.bootstrap.binder;
 import jdbc.JdbcTemplate;
 import persistence.entity.persister.EntityPersister;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.DmlQueries;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,13 +12,10 @@ public class EntityPersisterBinder {
     private final Map<String, EntityPersister> entityPersisterRegistry = new HashMap<>();
 
     public EntityPersisterBinder(List<Class<?>> entityTypes, EntityTableBinder entityTableBinder,
-                                 CollectionLoaderBinder collectionLoaderBinder, JdbcTemplate jdbcTemplate,
-                                 DmlQueries dmlQueries) {
+                                 JdbcTemplate jdbcTemplate) {
         for (Class<?> entityType : entityTypes) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
-            final EntityPersister entityPersister =
-                    new EntityPersister(entityTable, jdbcTemplate, dmlQueries.getInsertQuery(),
-                            dmlQueries.getUpdateQuery(), dmlQueries.getDeleteQuery());
+            final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate);
             entityPersisterRegistry.put(entityType.getTypeName(), entityPersister);
         }
     }
