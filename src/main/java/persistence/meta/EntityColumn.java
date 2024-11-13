@@ -22,7 +22,6 @@ public class EntityColumn {
         this.columnLength = new ColumnLength(field);
         this.columnIdOption = new ColumnIdOption(field);
         this.columnOption = new ColumnOption(field);
-        field.setAccessible(true);
     }
 
     public Field getField() {
@@ -55,6 +54,7 @@ public class EntityColumn {
 
     public Object extractValue(Object entity) {
         try {
+            field.setAccessible(true);
             return field.get(entity);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException(VALUE_EXTRACT_FAILED_MESSAGE);
