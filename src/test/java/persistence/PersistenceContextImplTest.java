@@ -1,6 +1,8 @@
 package persistence;
 
 import builder.dml.EntityData;
+import builder.dml.EntityMetaData;
+import builder.dml.EntityObjectData;
 import entity.Person;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +27,9 @@ class PersistenceContextImplTest {
         Person person = createPerson(1);
         EntityKey EntityKey = new EntityKey(1, Person.class);
 
-        EntityData entityData = EntityData.createEntityData(person);
+        EntityMetaData entityMetaData = new EntityMetaData(person.getClass());
+        EntityObjectData entityObjectData = new EntityObjectData(person);
+        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
 
         persistenceContext.insertEntity(EntityKey, entityData);
 
@@ -39,8 +43,10 @@ class PersistenceContextImplTest {
     void removeTest() {
         PersistenceContextImpl persistenceContext = new PersistenceContextImpl();
         Person person = createPerson(1);
-        EntityData entityData = EntityData.createEntityData(person);
-        IntStream.range(1,3).forEach(i -> persistenceContext.insertEntity(new EntityKey(i, Person.class), entityData));
+        EntityMetaData entityMetaData = new EntityMetaData(person.getClass());
+        EntityObjectData entityObjectData = new EntityObjectData(person);
+        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
+        IntStream.range(1, 3).forEach(i -> persistenceContext.insertEntity(new EntityKey(i, Person.class), entityData));
 
         persistenceContext.deleteEntity(new EntityKey(2, Person.class));
 
@@ -52,8 +58,12 @@ class PersistenceContextImplTest {
     void addDatabaseSnapshotTest() {
         PersistenceContextImpl persistenceContext = new PersistenceContextImpl();
         Person person = createPerson(1);
-        EntityData entityData = EntityData.createEntityData(person);
-        IntStream.range(1,3).forEach(i -> persistenceContext.insertDatabaseSnapshot(new EntityKey(i, Person.class), entityData));
+
+        EntityMetaData entityMetaData = new EntityMetaData(person.getClass());
+        EntityObjectData entityObjectData = new EntityObjectData(person);
+        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
+
+        IntStream.range(1, 3).forEach(i -> persistenceContext.insertDatabaseSnapshot(new EntityKey(i, Person.class), entityData));
 
         assertThat(persistenceContext.findEntity(new EntityKey(2, Person.class))).isNull();
     }
@@ -63,7 +73,11 @@ class PersistenceContextImplTest {
     void getDatabaseSnapshotTest() {
         PersistenceContextImpl persistenceContext = new PersistenceContextImpl();
         Person person = createPerson(1);
-        EntityData entityData = EntityData.createEntityData(person);
+
+        EntityMetaData entityMetaData = new EntityMetaData(person.getClass());
+        EntityObjectData entityObjectData = new EntityObjectData(person);
+        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
+
         persistenceContext.insertDatabaseSnapshot(new EntityKey(person.getId(), Person.class), entityData);
         assertThat(persistenceContext.getDatabaseSnapshot(new EntityKey(person.getId(), Person.class)).getEntityInstance())
                 .extracting("id", "name", "age", "email")

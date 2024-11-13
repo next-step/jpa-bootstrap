@@ -1,22 +1,13 @@
 package builder;
 
-import boot.Metamodel;
-import boot.MetamodelImpl;
 import builder.dml.EntityData;
+import builder.dml.EntityMetaData;
+import builder.dml.EntityObjectData;
 import builder.dml.builder.*;
-import database.H2DBConnection;
 import entity.Order;
 import entity.Person;
-import jdbc.JdbcTemplate;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.EntityManager;
-import persistence.EntityManagerImpl;
-import persistence.PersistenceContext;
-import persistence.PersistenceContextImpl;
-
-import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,19 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 */
 class DMLBuilderTest {
 
-    @BeforeEach
-    void setUp() throws SQLException {
-        H2DBConnection h2DBConnection = new H2DBConnection();
-        JdbcTemplate jdbcTemplate = h2DBConnection.start();
-
-        PersistenceContext persistenceContext = new PersistenceContextImpl();
-
-        Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
-        metamodel.init();
-
-        EntityManager entityManager = new EntityManagerImpl(persistenceContext, jdbcTemplate, metamodel);
-    }
-
     @DisplayName("Insert 쿼리 문자열 생성하기")
     @Test
     void buildInsertTest() {
@@ -52,7 +30,7 @@ class DMLBuilderTest {
 
         InsertQueryBuilder queryBuilder = new InsertQueryBuilder();
 
-        EntityData entityData = EntityData.createEntityData(person);
+        EntityData entityData = new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person));
 
         //when, then
         assertThat(queryBuilder.buildQuery(entityData.getTableName(), entityData.getEntityColumn()))
@@ -68,7 +46,7 @@ class DMLBuilderTest {
         SelectAllQueryBuilder queryBuilder = new SelectAllQueryBuilder();
 
         //when, then
-        assertThat(queryBuilder.buildQuery(EntityData.createEntityData(person)))
+        assertThat(queryBuilder.buildQuery(new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person))))
                 .isEqualTo("SELECT id, nick_name, old, email FROM users;");
     }
 
@@ -78,7 +56,7 @@ class DMLBuilderTest {
         //given
         SelectByIdQueryBuilder queryBuilder = new SelectByIdQueryBuilder();
         //when, then
-        assertThat(queryBuilder.buildQuery(EntityData.createEntityData(Person.class, 1)))
+        assertThat(queryBuilder.buildQuery(new EntityData(new EntityMetaData(Person.class), new EntityObjectData(Person.class, 1L))))
                 .isEqualTo("SELECT id, nick_name, old, email FROM users WHERE id = 1;");
     }
 
@@ -88,7 +66,7 @@ class DMLBuilderTest {
         //given
         SelectByIdQueryBuilder queryBuilder = new SelectByIdQueryBuilder();
         //when, then
-        assertThat(queryBuilder.buildQuery(EntityData.createEntityData(Person.class, "sangki")))
+        assertThat(queryBuilder.buildQuery(new EntityData(new EntityMetaData(Person.class), new EntityObjectData(Person.class, "sangki"))))
                 .isEqualTo("SELECT id, nick_name, old, email FROM users WHERE id = 'sangki';");
     }
 
@@ -101,7 +79,7 @@ class DMLBuilderTest {
         SelectByIdQueryBuilder queryBuilder = new SelectByIdQueryBuilder();
 
         //when, then
-        assertThat(queryBuilder.buildQuery(EntityData.createEntityData(person)))
+        assertThat(queryBuilder.buildQuery(new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person))))
                 .isEqualTo("SELECT id, nick_name, old, email FROM users WHERE id = 1;");
     }
 
@@ -113,7 +91,7 @@ class DMLBuilderTest {
 
         UpdateQueryBuilder queryBuilder = new UpdateQueryBuilder();
         //when, then
-        assertThat(queryBuilder.buildQuery(EntityData.createEntityData(person)))
+        assertThat(queryBuilder.buildQuery(new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person))))
                 .isEqualTo("UPDATE users SET nick_name='sangki', old=29, email='test@test.com' WHERE id = 1;");
     }
 
@@ -123,7 +101,7 @@ class DMLBuilderTest {
         //given
         DeleteQueryBuilder queryBuilder = new DeleteQueryBuilder();
         //when, then
-        assertThat(queryBuilder.buildQuery(EntityData.createEntityData(Person.class, "sangki")))
+        assertThat(queryBuilder.buildQuery(new EntityData(new EntityMetaData(Person.class), new EntityObjectData(Person.class, "sangki"))))
                 .isEqualTo("DELETE FROM users WHERE id = 'sangki';");
     }
 
@@ -135,7 +113,7 @@ class DMLBuilderTest {
 
         DeleteQueryBuilder queryBuilder = new DeleteQueryBuilder();
         //when, then
-        assertThat(queryBuilder.buildQuery(EntityData.createEntityData(person)))
+        assertThat(queryBuilder.buildQuery(new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person))))
                 .isEqualTo("DELETE FROM users WHERE id = 1;");
     }
 
@@ -143,7 +121,7 @@ class DMLBuilderTest {
     @Test
     void buildDMLBuilderJoinFindAllTest() {
         //given
-        EntityData entityData = EntityData.createEntityData(Order.class);
+        EntityData entityData = new EntityData(new EntityMetaData(Order.class));
 
         SelectAllQueryBuilder queryBuilder = new SelectAllQueryBuilder();
 
@@ -162,7 +140,7 @@ class DMLBuilderTest {
     @Test
     void buildDMLBuilderJoinFindByIdTest() {
         //given
-        EntityData entityData = EntityData.createEntityData(Order.class, 1L);
+        EntityData entityData = new EntityData(new EntityMetaData(Order.class), new EntityObjectData(Order.class, 1L ));
 
         SelectByIdQueryBuilder queryBuilder = new SelectByIdQueryBuilder();
 

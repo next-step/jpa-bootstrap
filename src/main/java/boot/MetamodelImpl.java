@@ -1,5 +1,7 @@
 package boot;
 
+import builder.dml.EntityMetaData;
+import builder.dml.builder.DMLQueryBuilder;
 import hibernate.AnnotationBinder;
 import jakarta.persistence.OneToMany;
 import jdbc.JdbcTemplate;
@@ -15,6 +17,8 @@ public class MetamodelImpl implements Metamodel {
 
     private static final String DOT = ".";
 
+    private final DMLQueryBuilder dmlQueryBuilder = new DMLQueryBuilder();
+    private final Map<String, EntityMetaData> entityMetaDataMap = new HashMap<>();
     private final Map<String, EntityPersister> entityPersisterMap = new HashMap<>();
     private final Map<String, CollectionPersister> collectionPersisterMap = new HashMap<>();
 
@@ -30,9 +34,15 @@ public class MetamodelImpl implements Metamodel {
         List<Class<?>> entityClasses = annotationBinder.getEntityClasses();
 
         for (Class<?> entityClass : entityClasses) {
-            entityPersisterMap.put(entityClass.getSimpleName(), new EntityPersister(entityClass, jdbcTemplate));
-            confirmOneToMany(entityClass);
+            entityMetaDataMap.put(entityClass.getSimpleName(), new EntityMetaData(entityClass));
+            entityPersisterMap.put(entityClass.getSimpleName(), new EntityPersister(entityClass, jdbcTemplate, dmlQueryBuilder));
+            putCollectionPersisterMapOneToMany(entityClass);
         }
+    }
+
+    @Override
+    public EntityMetaData entityMetaData(Class<?> entityClass) {
+        return entityMetaDataMap.get(entityClass.getSimpleName());
     }
 
     @Override
@@ -53,11 +63,11 @@ public class MetamodelImpl implements Metamodel {
         return allKeys;
     }
 
-    private void confirmOneToMany(Class<?> entityClass) {
+    private void putCollectionPersisterMapOneToMany(Class<?> entityClass) {
         Arrays.stream(entityClass.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(OneToMany.class))
                 .forEach(field -> {
-                    CollectionPersister collectionPersister = new CollectionPersister(getRelatedEntityClass(field), jdbcTemplate);
+                    CollectionPersister collectionPersister = new CollectionPersister(getRelatedEntityClass(field), jdbcTemplate, dmlQueryBuilder);
                     collectionPersisterMap.put(entityClass.getSimpleName() + DOT + collectionPersister.getSimpleName(), collectionPersister);
                 });
     }

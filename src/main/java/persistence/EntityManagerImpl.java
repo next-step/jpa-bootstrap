@@ -3,24 +3,21 @@ package persistence;
 import boot.Metamodel;
 import builder.dml.DMLColumnData;
 import builder.dml.EntityData;
+import builder.dml.EntityMetaData;
+import builder.dml.EntityObjectData;
+import builder.dml.builder.DMLQueryBuilder;
 import jdbc.JdbcTemplate;
 
 import java.util.List;
 
 public class EntityManagerImpl implements EntityManager {
 
-    private final EntityLoader entityLoader;
     private final PersistenceContext persistenceContext;
     private final Metamodel metamodel;
+    private final EntityLoader entityLoader;
 
-    public EntityManagerImpl(JdbcTemplate jdbcTemplate, Metamodel metamodel) {
-        this.entityLoader = new EntityLoader(jdbcTemplate);
-        this.persistenceContext = new PersistenceContextImpl();
-        this.metamodel = metamodel;
-    }
-
-    public EntityManagerImpl(PersistenceContext persistenceContext, JdbcTemplate jdbcTemplate, Metamodel metamodel) {
-        this.entityLoader = new EntityLoader(jdbcTemplate);
+    public EntityManagerImpl(JdbcTemplate jdbcTemplate, PersistenceContext persistenceContext, Metamodel metamodel, DMLQueryBuilder dmlQueryBuilder) {
+        this.entityLoader = new EntityLoader(jdbcTemplate, dmlQueryBuilder);
         this.persistenceContext = persistenceContext;
         this.metamodel = metamodel;
     }
@@ -37,7 +34,11 @@ public class EntityManagerImpl implements EntityManager {
 
         T findObject = this.entityLoader.find(clazz, id);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.LOADING);
-        EntityData entityData = EntityData.createEntityData(findObject);
+
+        EntityMetaData entityMetaData = this.metamodel.entityMetaData(clazz);
+        EntityObjectData entityObjectData = new EntityObjectData(clazz, id);
+
+        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
 
         insertPersistenceContext(entityKey, entityData);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.MANAGED);
@@ -47,7 +48,10 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void persist(Object entityInstance) {
-        EntityData entityData = EntityData.createEntityData(entityInstance);
+        EntityMetaData entityMetaData = this.metamodel.entityMetaData(entityInstance.getClass());
+        EntityObjectData entityObjectData = new EntityObjectData(entityInstance);
+
+        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
         EntityKey entityKey = new EntityKey(entityData);
 
         EntityEntry entityEntry = this.persistenceContext.getEntityEntryMap(entityKey);
@@ -58,7 +62,7 @@ public class EntityManagerImpl implements EntityManager {
 
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.SAVING);
 
-        metamodel.entityPersister(entityInstance.getClass()).persist(entityData);
+        this.metamodel.entityPersister(entityInstance.getClass()).persist(entityData);
 
         insertPersistenceContext(entityKey, entityData);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.MANAGED);
@@ -66,7 +70,10 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void merge(Object entityInstance) {
-        EntityData entityData = EntityData.createEntityData(entityInstance);
+        EntityMetaData entityMetaData = this.metamodel.entityMetaData(entityInstance.getClass());
+        EntityObjectData entityObjectData = new EntityObjectData(entityInstance);
+
+        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
         EntityKey entityKey = new EntityKey(entityData);
 
         EntityEntry entityEntry = this.persistenceContext.getEntityEntryMap(entityKey);
@@ -90,7 +97,10 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void remove(Object entityInstance) {
-        EntityData entityData = EntityData.createEntityData(entityInstance);
+        EntityMetaData entityMetaData = new EntityMetaData(entityInstance.getClass());
+        EntityObjectData entityObjectData = new EntityObjectData(entityInstance);
+
+        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
         EntityKey entityKey = new EntityKey(entityData);
 
         EntityEntry entityEntry = this.persistenceContext.getEntityEntryMap(entityKey);

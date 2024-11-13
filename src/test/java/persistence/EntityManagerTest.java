@@ -7,6 +7,7 @@ import builder.ddl.builder.CreateQueryBuilder;
 import builder.ddl.builder.DropQueryBuilder;
 import builder.ddl.dataType.DB;
 import builder.dml.EntityData;
+import builder.dml.builder.DMLQueryBuilder;
 import database.H2DBConnection;
 import entity.Person;
 import jdbc.JdbcTemplate;
@@ -14,8 +15,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +32,7 @@ class EntityManagerTest {
     private PersistenceContext persistenceContext;
 
     @BeforeEach
-    void setUp() throws SQLException {
+    void setUp() {
         this.h2DBConnection = new H2DBConnection();
         this.jdbcTemplate = this.h2DBConnection.start();
 
@@ -48,7 +47,7 @@ class EntityManagerTest {
         Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
         metamodel.init();
 
-        this.entityManager = new EntityManagerImpl(persistenceContext, jdbcTemplate, metamodel);
+        this.entityManager = new EntityManagerImpl(jdbcTemplate, persistenceContext, metamodel, new DMLQueryBuilder());
     }
 
     //정확한 테스트를 위해 메소드마다 테이블 DROP 후 DB종료

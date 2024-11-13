@@ -1,27 +1,22 @@
 package persistence;
 
-import builder.dml.EntityData;
 import builder.dml.JoinEntityData;
+import builder.dml.builder.BuilderName;
+import builder.dml.builder.DMLQueryBuilder;
 import builder.dml.builder.InsertQueryBuilder;
-import database.H2DBConnection;
 import jdbc.JdbcTemplate;
-
-import java.sql.SQLException;
 
 public class CollectionPersister {
 
-    private final InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
     private final JdbcTemplate jdbcTemplate;
+    private final DMLQueryBuilder dmlQueryBuilder;
 
     private Class<?> entityClass;
 
-    public CollectionPersister(Class<?> entityClass, JdbcTemplate jdbcTemplate) {
+    public CollectionPersister(Class<?> entityClass, JdbcTemplate jdbcTemplate, DMLQueryBuilder dmlQueryBuilder) {
         this.jdbcTemplate = jdbcTemplate;
         this.entityClass = entityClass;
-    }
-
-    public CollectionPersister(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.dmlQueryBuilder = dmlQueryBuilder;
     }
 
     public String getSimpleName() {
@@ -29,18 +24,11 @@ public class CollectionPersister {
     }
 
     public void persist(JoinEntityData joinEntityData) {
+        InsertQueryBuilder insertQueryBuilder = (InsertQueryBuilder) dmlQueryBuilder.query(BuilderName.INSERT);
         jdbcTemplate.execute(insertQueryBuilder.buildQuery(
                 joinEntityData.getTableName(),
                 joinEntityData.getJoinColumnData())
         );
-    }
-
-    private JdbcTemplate initializeJdbcTemplate() {
-        try {
-            return new H2DBConnection().start();
-        } catch (SQLException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
     }
 
 }

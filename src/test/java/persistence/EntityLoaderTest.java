@@ -7,6 +7,9 @@ import builder.ddl.builder.CreateQueryBuilder;
 import builder.ddl.builder.DropQueryBuilder;
 import builder.ddl.dataType.DB;
 import builder.dml.EntityData;
+import builder.dml.EntityMetaData;
+import builder.dml.EntityObjectData;
+import builder.dml.builder.DMLQueryBuilder;
 import database.H2DBConnection;
 import entity.Order;
 import entity.OrderItem;
@@ -59,8 +62,8 @@ class EntityLoaderTest {
         Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
         metamodel.init();
 
-        this.entityPersister = new EntityPersister(jdbcTemplate, metamodel);
-        this.entityLoader = new EntityLoader(jdbcTemplate);
+        this.entityPersister = new EntityPersister(jdbcTemplate, metamodel, new DMLQueryBuilder());
+        this.entityLoader = new EntityLoader(jdbcTemplate, new DMLQueryBuilder());
     }
 
     //정확한 테스트를 위해 메소드마다 테이블 DROP 후 DB종료
@@ -80,7 +83,7 @@ class EntityLoaderTest {
     @Test
     void findTest() {
         Person person = createPerson(1);
-        this.entityPersister.persist(EntityData.createEntityData(person));
+        this.entityPersister.persist(new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person)));
 
         assertThat(this.entityLoader.find(Person.class, 1L))
                 .extracting("id", "name", "age", "email")
@@ -91,7 +94,7 @@ class EntityLoaderTest {
     @Test
     void findOrderTest() {
         Order order = new Order(1L, "1234", List.of(createOrderItem(1, 1L)));
-        this.entityPersister.persist(EntityData.createEntityData(order));
+        this.entityPersister.persist(new EntityData(new EntityMetaData(order.getClass()), new EntityObjectData(order)));
 
         Order findOrder = this.entityLoader.find(Order.class, 1L);
 
@@ -110,7 +113,7 @@ class EntityLoaderTest {
     void findOrderItemTest() {
         Order order = new Order(1L, "1234", List.of(createOrderItem(1, 1L)));
 
-        EntityData entityData = EntityData.createEntityData(order);
+        EntityData entityData = new EntityData(new EntityMetaData(order.getClass()), new EntityObjectData(order));
         this.entityPersister.persist(entityData);
 
         List<?> findOrderItems = this.entityLoader.findByIdLazy(entityData.getJoinEntity().getJoinEntityData().getFirst());
@@ -124,7 +127,7 @@ class EntityLoaderTest {
     @Test
     void findOrderLazyTest() {
         OrderLazy order = new OrderLazy(1L, "1234", List.of(createOrderItem(1, 1L)));
-        this.entityPersister.persist(EntityData.createEntityData(order));
+        this.entityPersister.persist(new EntityData(new EntityMetaData(order.getClass()), new EntityObjectData(order)));
 
         OrderLazy findOrder = this.entityLoader.find(OrderLazy.class, 1L);
 

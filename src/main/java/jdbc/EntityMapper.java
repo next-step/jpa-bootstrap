@@ -1,6 +1,8 @@
 package jdbc;
 
 import builder.dml.EntityData;
+import builder.dml.EntityMetaData;
+import builder.dml.EntityObjectData;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
 import proxy.LazyProxyBuilder;
@@ -33,7 +35,11 @@ public class EntityMapper {
     }
 
     public static <T> T mapRow(ResultSet rs, Class<T> entityClass) {
-        entityData = EntityData.createEntityData(entityClass);
+        EntityMetaData entityMetaData = new EntityMetaData(entityClass);
+        EntityObjectData entityObjectData = new EntityObjectData(entityClass);
+
+        entityData = new EntityData(entityMetaData, entityObjectData);
+
         if (entityData.getJoinEntity().checkJoin()) {
             return confirmAnnotationSetColumnContainJoinEntity(rs, entityClass);
         }
