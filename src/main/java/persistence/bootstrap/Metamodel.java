@@ -9,6 +9,7 @@ import persistence.bootstrap.binder.EntityLoaderBinder;
 import persistence.bootstrap.binder.EntityPersisterBinder;
 import persistence.bootstrap.binder.EntityTableBinder;
 import persistence.bootstrap.binder.RowMapperBinder;
+import persistence.dialect.Dialect;
 import persistence.entity.loader.EntityLoader;
 import persistence.entity.persister.CollectionPersister;
 import persistence.entity.persister.EntityPersister;
@@ -26,7 +27,7 @@ public class Metamodel {
     private final EntityPersisterBinder entityPersisterBinder;
     private final CollectionPersisterBinder collectionPersisterBinder;
 
-    public Metamodel(JdbcTemplate jdbcTemplate, DmlQueries dmlQueries, ProxyFactory proxyFactory, String... basePackages) {
+    public Metamodel(JdbcTemplate jdbcTemplate, Dialect dialect, DmlQueries dmlQueries, ProxyFactory proxyFactory, String... basePackages) {
         this.jdbcTemplate = jdbcTemplate;
 
         final List<Class<?>> entityTypes = new EntityBinder(basePackages).getEntityTypes();
@@ -46,7 +47,7 @@ public class Metamodel {
                 new EntityPersisterBinder(entityTypes, entityTableBinder, collectionLoaderBinder,
                         jdbcTemplate, dmlQueries);
 
-        DatabaseSyncManager.sync(entityTableBinder, entityAssociationBinder, jdbcTemplate);
+        DatabaseSyncManager.sync(entityTableBinder, entityAssociationBinder, jdbcTemplate, dialect);
     }
 
     public EntityTable getEntityTable(Class<?> entityType) {

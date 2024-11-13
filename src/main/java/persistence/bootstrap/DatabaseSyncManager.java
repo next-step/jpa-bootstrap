@@ -3,7 +3,7 @@ package persistence.bootstrap;
 import jdbc.JdbcTemplate;
 import persistence.bootstrap.binder.EntityAssociationBinder;
 import persistence.bootstrap.binder.EntityTableBinder;
-import persistence.dialect.H2Dialect;
+import persistence.dialect.Dialect;
 import persistence.meta.EntityAssociation;
 import persistence.meta.EntityTable;
 import persistence.sql.ddl.CreateQuery;
@@ -18,8 +18,8 @@ public class DatabaseSyncManager {
     }
 
     public static void sync(EntityTableBinder entityTableBinder, EntityAssociationBinder entityAssociationBinder,
-                            JdbcTemplate jdbcTemplate) {
-        final CreateQuery createQuery = new CreateQuery(new H2Dialect());
+                            JdbcTemplate jdbcTemplate, Dialect dialect) {
+        final CreateQuery createQuery = new CreateQuery(dialect);
 
         final List<EntityTable> entityTables = entityTableBinder.getAllEntityTables();
         for (EntityTable entityTable : entityTables) {
