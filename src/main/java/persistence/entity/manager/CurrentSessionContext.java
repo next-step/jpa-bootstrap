@@ -1,6 +1,5 @@
 package persistence.entity.manager;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public class CurrentSessionContext {
@@ -20,13 +19,13 @@ public class CurrentSessionContext {
 
     public void closeSession() {
         final EntityManager entityManager = sessionRegistry.get();
-        if (Objects.nonNull(entityManager)) {
+        if (entityManager != null) {
             entityManager.clear();
         }
         sessionRegistry.remove();
     }
 
     private boolean isOpened() {
-        return Objects.nonNull(sessionRegistry.get());
+        return sessionRegistry.get() != null;
     }
 }

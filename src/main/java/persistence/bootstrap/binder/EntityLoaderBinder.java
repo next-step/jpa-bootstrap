@@ -11,7 +11,6 @@ import persistence.sql.dml.DmlQueries;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class EntityLoaderBinder {
     private final Map<String, EntityLoader> entityLoaderRegistry = new HashMap<>();
@@ -36,7 +35,7 @@ public class EntityLoaderBinder {
                                             ProxyFactory proxyFactory, Class<?> entityType) {
         final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
         final RowMapper rowMapper = rowMapperBinder.getRowMapper(entityType);
-        if (Objects.isNull(entityTable.getAssociationEntityColumn())) {
+        if (entityTable.getAssociationEntityColumn() == null) {
             return new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, dmlQueries.getSelectQuery(), proxyFactory,
                     rowMapper, null);
         }

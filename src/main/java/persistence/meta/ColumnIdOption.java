@@ -41,7 +41,7 @@ public class ColumnIdOption {
     }
 
     public boolean isGenerationValue() {
-        return Objects.nonNull(generationType);
+        return generationType != null;
     }
 
     private boolean isId(Field field) {
@@ -54,7 +54,7 @@ public class ColumnIdOption {
         }
 
         final GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
-        if (Objects.isNull(generatedValue)) {
+        if (generatedValue == null) {
             return null;
         }
         return generatedValue.strategy();

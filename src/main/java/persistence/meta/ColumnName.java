@@ -32,12 +32,12 @@ public class ColumnName {
 
     private String getName(Field field) {
         final JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
-        if (Objects.nonNull(joinColumn) && Objects.nonNull(joinColumn.name()) && !joinColumn.name().isBlank()) {
+        if (joinColumn != null && joinColumn.name() != null && !joinColumn.name().isBlank()) {
             return joinColumn.name();
         }
 
         final Column column = field.getAnnotation(Column.class);
-        if (Objects.nonNull(column) && Objects.nonNull(column.name()) && !column.name().isBlank()) {
+        if (column != null && column.name() != null && !column.name().isBlank()) {
             return column.name();
         }
         return field.getName();

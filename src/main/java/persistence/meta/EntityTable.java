@@ -68,7 +68,7 @@ public class EntityTable {
 
     public boolean isOneToMany() {
         final EntityColumn associationEntityColumn = getAssociationEntityColumn();
-        if (Objects.isNull(associationEntityColumn)) {
+        if (associationEntityColumn == null) {
             return false;
         }
         return associationEntityColumn.isOneToMany();
@@ -85,7 +85,7 @@ public class EntityTable {
 
     public Class<?> getAssociationColumnType() {
         final EntityColumn associationEntityColumn = getAssociationEntityColumn();
-        if (Objects.isNull(associationEntityColumn)) {
+        if (associationEntityColumn == null) {
             return Object.class;
         }
         return associationEntityColumn.getAssociationColumnType();
@@ -105,7 +105,7 @@ public class EntityTable {
     }
 
     public boolean isSimpleMapping() {
-        return Objects.isNull(getAssociationEntityColumn()) || getAssociationEntityColumn().isOneToManyAndLazy();
+        return getAssociationEntityColumn() == null || getAssociationEntityColumn().isOneToManyAndLazy();
     }
 
     public String getAlias() {

@@ -36,7 +36,7 @@ public class ComponentScanner {
                 .getContextClassLoader()
                 .getResource(path);
 
-        if (Objects.isNull(resource)) {
+        if (resource == null) {
             throw new IllegalArgumentException(NOT_EXISTS_PACKAGE_FAILED_MESSAGE);
         }
 

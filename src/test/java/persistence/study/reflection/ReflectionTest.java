@@ -9,7 +9,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Objects;
 
 public class ReflectionTest {
     private static final Logger logger = LoggerFactory.getLogger(ReflectionTest.class);
@@ -110,7 +109,7 @@ public class ReflectionTest {
     private void invokeMethod(Car car, Method method) {
         try {
             Object result = method.invoke(car);
-            if (Objects.nonNull(result)) {
+            if (result != null) {
                 logger.debug(String.valueOf(result));
             }
         } catch (Exception e) {

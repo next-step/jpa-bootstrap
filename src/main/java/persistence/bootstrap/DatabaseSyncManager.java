@@ -10,7 +10,6 @@ import persistence.sql.ddl.CreateQuery;
 import persistence.sql.ddl.DropQuery;
 
 import java.util.List;
-import java.util.Objects;
 
 public class DatabaseSyncManager {
     private DatabaseSyncManager() {
@@ -40,7 +39,7 @@ public class DatabaseSyncManager {
 
     private static String getSql(EntityAssociationBinder entityAssociationBinder, EntityTable entityTable, CreateQuery createQuery) {
         final EntityAssociation entityAssociation = entityAssociationBinder.getEntityAssociation(entityTable.getType());
-        if (Objects.nonNull(entityAssociation)) {
+        if (entityAssociation != null) {
             return  createQuery.create(entityTable,entityAssociation.getParentEntityTable());
         }
         return createQuery.create(entityTable);

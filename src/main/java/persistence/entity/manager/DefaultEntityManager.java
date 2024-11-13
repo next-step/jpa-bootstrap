@@ -27,7 +27,7 @@ public class DefaultEntityManager implements EntityManager {
     @Override
     public <T> T find(Class<T> entityType, Object id) {
         final T managedEntity = persistenceContext.getEntity(entityType, id);
-        if (Objects.nonNull(managedEntity)) {
+        if (managedEntity != null) {
             return managedEntity;
         }
 
@@ -80,7 +80,7 @@ public class DefaultEntityManager implements EntityManager {
 
     private void validatePersist(Object entity) {
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entity);
-        if (Objects.nonNull(entityEntry) && !entityEntry.isPersistable()) {
+        if (entityEntry != null && !entityEntry.isPersistable()) {
             throw new IllegalStateException(NOT_PERSISTABLE_STATUS_FAILED_MESSAGE);
         }
     }
@@ -129,7 +129,7 @@ public class DefaultEntityManager implements EntityManager {
     private void update(Object entity) {
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
         final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue(entity));
-        if (Objects.isNull(snapshot)) {
+        if (snapshot == null) {
             return;
         }
 

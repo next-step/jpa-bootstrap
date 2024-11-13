@@ -7,7 +7,6 @@ import persistence.meta.EntityTable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class EntityAssociationBinder {
     private final Map<String, EntityAssociation> entityAssociationRegistry = new HashMap<>();
@@ -17,7 +16,7 @@ public class EntityAssociationBinder {
 
         for (EntityTable entityTable : entityTables) {
             final EntityColumn associationEntityColumn = entityTable.getAssociationEntityColumn();
-            if (Objects.isNull(associationEntityColumn)) {
+            if (associationEntityColumn == null) {
                 continue;
             }
 

@@ -7,7 +7,6 @@ import persistence.entity.manager.EntityStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -71,7 +70,7 @@ public class PersistenceContext {
 
     public void createOrUpdateStatus(Object entity, EntityStatus entityStatus) {
         final EntityEntry entityEntry = entityEntryRegistry.get(entity);
-        if (Objects.isNull(entityEntry)) {
+        if (entityEntry == null) {
             entityEntryRegistry.put(entity, new EntityEntry(entityStatus));
             return;
         }
