@@ -4,6 +4,7 @@ import persistence.action.ActionQueue;
 import persistence.entity.CollectionPersister;
 import persistence.entity.EntityEntry;
 import persistence.entity.EntityKey;
+import persistence.entity.EntityLoader;
 import persistence.entity.EntityPersister;
 import persistence.entity.PersistenceContext;
 import persistence.event.EventSource;
@@ -52,15 +53,14 @@ public class SessionImpl implements EventSource {
 
         check(entityEntry.isNotReadable(), "Entity is not managed: " + clazz.getSimpleName());
 
-        final T entity = metamodel.findEntityLoader(clazz).loadEntity(clazz, entityKey);
+        LoadEvent<T> event = new LoadEvent<>(this, clazz, (Serializable) id, entityEntry);
         sessionService.LOAD.fireEventOnEachListener(
-                LoadEvent.create(this, (Serializable) id, entity, entityEntry),
+                event,
                 LoadEventListener::onLoad
         );
 
-        return entity;
+        return event.getResultEntity();
     }
-
 
     private EntityEntry getEntityEntryOrDefault(EntityKey entityKey, Supplier<EntityEntry> defaultEntrySupplier) {
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entityKey);
@@ -169,5 +169,10 @@ public class SessionImpl implements EventSource {
     @Override
     public CollectionPersister findCollectionPersister(TableAssociationDefinition association) {
         return metamodel.findCollectionPersister(association);
+    }
+
+    @Override
+    public EntityLoader findEntityLoader(Class<?> clazz) {
+        return metamodel.findEntityLoader(clazz);
     }
 }

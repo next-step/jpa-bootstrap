@@ -6,40 +6,43 @@ import persistence.event.EventSource;
 
 import java.io.Serializable;
 
-public class LoadEvent extends AbstractEvent {
+public class LoadEvent<T> extends AbstractEvent {
 
     private final Serializable identifier;
-    private final Object entity;
+    private final Class<T> entityClass;
     private final EntityEntry entityEntry;
 
-    private LoadEvent(EventSource source,
-                      Serializable identifier,
-                      Object entity,
-                      EntityEntry entityEntry) {
+    private T resultEntity;
+
+    public LoadEvent(EventSource source,
+                     Class<T> entityClass,
+                     Serializable identifier,
+                     EntityEntry entityEntry) {
 
         super(source);
         this.identifier = identifier;
-        this.entity = entity;
+        this.entityClass = entityClass;
+        this.resultEntity = null;
         this.entityEntry = entityEntry;
-    }
-
-    public static LoadEvent create(EventSource source,
-                                   Serializable identifier,
-                                   Object entity,
-                                   EntityEntry entityEntry) {
-
-        return new LoadEvent(source, identifier, entity, entityEntry);
     }
 
     public Serializable getIdentifier() {
         return identifier;
     }
 
-    public Object getEntity() {
-        return entity;
+    public Class<T> getEntityClass() {
+        return entityClass;
     }
 
     public EntityEntry getEntityEntry() {
         return entityEntry;
+    }
+
+    public T getResultEntity() {
+        return resultEntity;
+    }
+
+    public void setResultEntity(T resultEntity) {
+        this.resultEntity = resultEntity;
     }
 }

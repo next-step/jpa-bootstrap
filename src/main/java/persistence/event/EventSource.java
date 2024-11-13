@@ -2,6 +2,7 @@ package persistence.event;
 
 import persistence.action.ActionQueue;
 import persistence.entity.CollectionPersister;
+import persistence.entity.EntityLoader;
 import persistence.entity.EntityPersister;
 import persistence.entity.PersistenceContext;
 import persistence.session.EntityManager;
@@ -16,4 +17,6 @@ public interface EventSource extends EntityManager {
     EntityPersister findEntityPersister(Class<?> clazz);
 
     CollectionPersister findCollectionPersister(TableAssociationDefinition association);
+
+    EntityLoader findEntityLoader(Class<?> clazz);
 }
