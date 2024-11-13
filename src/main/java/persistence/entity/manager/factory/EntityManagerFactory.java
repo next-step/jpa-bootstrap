@@ -25,6 +25,7 @@ public class EntityManagerFactory {
 
     private EntityManager createEntityManager() {
         final EntityManager entityManager = new DefaultEntityManager(metamodel);
-        return currentSessionContext.openSession(entityManager);
+        currentSessionContext.openSession(entityManager);
+        return entityManager;
     }
 }
