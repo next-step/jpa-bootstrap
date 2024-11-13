@@ -1,7 +1,5 @@
 package persistence.entity.proxy;
 
-import persistence.entity.LazyLoader;
-
 import java.lang.reflect.Proxy;
 import java.util.List;
 

@@ -45,7 +45,7 @@ public class InsertQuery {
         return entityTable.getEntityColumns()
                 .stream()
                 .filter(this::isAvailable)
-                .map(entityColumn -> entityColumn.getValue(entity))
+                .map(entityColumn -> entityColumn.extractValue(entity))
                 .collect(Collectors.toList());
     }
 

@@ -6,7 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
-@Table(name = "users")
+@Table
 @Entity
 public class EntityWithOnlyId {
     @Id

@@ -1,9 +1,16 @@
 package persistence.bootstrap;
 
 import jdbc.JdbcTemplate;
-import persistence.entity.CollectionPersister;
-import persistence.entity.EntityLoader;
-import persistence.entity.EntityPersister;
+import persistence.bootstrap.binder.CollectionLoaderBinder;
+import persistence.bootstrap.binder.CollectionPersisterBinder;
+import persistence.bootstrap.binder.EntityAssociationBinder;
+import persistence.bootstrap.binder.EntityLoaderBinder;
+import persistence.bootstrap.binder.EntityPersisterBinder;
+import persistence.bootstrap.binder.EntityTableBinder;
+import persistence.bootstrap.binder.RowMapperBinder;
+import persistence.entity.loader.EntityLoader;
+import persistence.entity.persister.CollectionPersister;
+import persistence.entity.persister.EntityPersister;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.DmlQueries;
@@ -11,15 +18,20 @@ import persistence.sql.dml.DmlQueries;
 import java.util.List;
 
 public class Metamodel {
+    private final JdbcTemplate jdbcTemplate;
     private final EntityTableBinder entityTableBinder;
+    private final EntityAssociationBinder entityAssociationBinder;
     private final EntityLoaderBinder entityLoaderBinder;
     private final EntityPersisterBinder entityPersisterBinder;
     private final CollectionPersisterBinder collectionPersisterBinder;
 
     public Metamodel(JdbcTemplate jdbcTemplate, DmlQueries dmlQueries, ProxyFactory proxyFactory, String... basePackages) {
-        final List<Class<?>> entityTypes = new EntityHolder(basePackages).getEntityTypes();
+        this.jdbcTemplate = jdbcTemplate;
+
+        final List<Class<?>> entityTypes = new ComponentScanner(basePackages).getEntityTypes();
 
         this.entityTableBinder = new EntityTableBinder(entityTypes);
+        this.entityAssociationBinder = new EntityAssociationBinder(entityTableBinder);
 
         RowMapperBinder rowMapperBinder = new RowMapperBinder(entityTypes, entityTableBinder);
         CollectionLoaderBinder collectionLoaderBinder = new CollectionLoaderBinder(entityTypes, entityTableBinder, rowMapperBinder, jdbcTemplate, dmlQueries);
@@ -32,6 +44,8 @@ public class Metamodel {
         this.entityPersisterBinder =
                 new EntityPersisterBinder(entityTypes, entityTableBinder, collectionLoaderBinder,
                         jdbcTemplate, dmlQueries);
+
+        DatabaseSyncManager.sync(entityTableBinder, entityAssociationBinder, jdbcTemplate);
     }
 
     public EntityTable getEntityTable(Class<?> entityType) {
@@ -48,5 +62,15 @@ public class Metamodel {
 
     public CollectionPersister getCollectionPersister(Class<?> entityType, String columnName) {
         return collectionPersisterBinder.getCollectionPersister(entityType, columnName);
+    }
+
+    public void close() {
+        DatabaseSyncManager.clear(entityTableBinder, jdbcTemplate);
+
+        entityTableBinder.clear();
+        entityAssociationBinder.clear();
+        entityLoaderBinder.clear();
+        entityPersisterBinder.clear();
+        collectionPersisterBinder.clear();
     }
 }

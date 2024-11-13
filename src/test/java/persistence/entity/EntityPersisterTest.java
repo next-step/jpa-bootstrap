@@ -2,12 +2,18 @@ package persistence.entity;
 
 import database.H2ConnectionFactory;
 import fixture.EntityWithId;
-import jdbc.DefaultRowMapper;
 import jdbc.JdbcTemplate;
+import jdbc.mapper.DefaultRowMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.bootstrap.Metamodel;
+import persistence.entity.loader.CollectionLoader;
+import persistence.entity.loader.EntityLoader;
+import persistence.entity.manager.DefaultEntityManager;
+import persistence.entity.manager.EntityManager;
+import persistence.entity.persister.EntityPersister;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.DeleteQuery;
@@ -18,25 +24,24 @@ import util.TestHelper;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static util.QueryUtils.*;
 
 class EntityPersisterTest {
     private JdbcTemplate jdbcTemplate;
+    private Metamodel metamodel;
     private EntityManager entityManager;
     private SelectQuery selectQuery;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        entityManager = TestHelper.createEntityManager("domain", "fixture");
+        metamodel = TestHelper.createMetamodel("domain", "fixture");
+        entityManager = new DefaultEntityManager(metamodel);
         selectQuery = new SelectQuery();
-
-        createTable(EntityWithId.class);
     }
 
     @AfterEach
     void tearDown() {
-        dropTable(EntityWithId.class);
+        metamodel.close();
     }
 
     @Test

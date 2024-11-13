@@ -3,7 +3,7 @@ package persistence.dialect;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import persistence.meta.JavaTypeConvertor;
+import persistence.sql.JavaTypeConvertor;
 
 import java.lang.reflect.Field;
 

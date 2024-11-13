@@ -59,23 +59,11 @@ public class EntityTable {
     }
 
     public Object getIdValue(Object entity) {
-        return getIdEntityColumn().getValue(entity);
+        return getIdEntityColumn().extractValue(entity);
     }
 
     public boolean isIdGenerationFromDatabase() {
         return getIdEntityColumn().isIdGenerationFromDatabase();
-    }
-
-    public EntityKey toEntityKey(Object entity) {
-        return new EntityKey(type, getIdValue(entity));
-    }
-
-    public int getColumnCount() {
-        return getEntityColumns().size();
-    }
-
-    public EntityColumn getEntityColumn(int index) {
-        return getEntityColumns().get(index);
     }
 
     public boolean isOneToMany() {
@@ -108,7 +96,7 @@ public class EntityTable {
     }
 
     public List<?> getAssociationColumnValue(Object entity) {
-        return (List<?>) getAssociationEntityColumn().getValue(entity);
+        return (List<?>) getAssociationEntityColumn().extractValue(entity);
     }
 
     public Field getAssociationField() {

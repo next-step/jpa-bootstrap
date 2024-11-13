@@ -3,7 +3,7 @@ package persistence.sql.ddl;
 import persistence.dialect.Dialect;
 import persistence.meta.EntityColumn;
 import persistence.meta.EntityTable;
-import persistence.meta.JavaTypeConvertor;
+import persistence.sql.JavaTypeConvertor;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,23 +16,21 @@ public class CreateQuery {
     private static final String GENERATION_COLUMN_DEFINITION = "AUTO_INCREMENT";
     private static final String PRIMARY_KEY_COLUMN_DEFINITION = "PRIMARY KEY";
 
-    private final EntityTable entityTable;
     private final Dialect dialect;
 
-    public CreateQuery(EntityTable entityTable, Dialect dialect) {
-        this.entityTable = entityTable;
+    public CreateQuery(Dialect dialect) {
         this.dialect = dialect;
     }
 
-    public String create() {
-        return QUERY_TEMPLATE.formatted(entityTable.getTableName(), getColumnClause());
+    public String create(EntityTable entityTable) {
+        return QUERY_TEMPLATE.formatted(entityTable.getTableName(), getColumnClause(entityTable));
     }
 
-    public String create(EntityTable parentEntityTable) {
-        return QUERY_TEMPLATE.formatted(entityTable.getTableName(), getColumnClause(parentEntityTable));
+    public String create(EntityTable entityTable, EntityTable parentEntityTable) {
+        return QUERY_TEMPLATE.formatted(entityTable.getTableName(), getColumnClause(entityTable, parentEntityTable));
     }
 
-    private String getColumnClause() {
+    private String getColumnClause(EntityTable entityTable) {
         final List<String> columnDefinitions = entityTable.getEntityColumns()
                 .stream()
                 .filter(this::isAvailable)
@@ -42,7 +40,7 @@ public class CreateQuery {
         return String.join(COLUMN_DELIMITER, columnDefinitions);
     }
 
-    private Object getColumnClause(EntityTable parentEntityTable) {
+    private Object getColumnClause(EntityTable entityTable, EntityTable parentEntityTable) {
         final List<String> columnDefinitions = entityTable.getEntityColumns()
                 .stream()
                 .filter(this::isAvailable)

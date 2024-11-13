@@ -1,7 +1,6 @@
 package persistence.entity.proxy;
 
 import jakarta.persistence.OneToMany;
-import persistence.entity.LazyLoader;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
@@ -40,7 +39,7 @@ public class LazyLoadingHandler implements InvocationHandler {
     }
 
     private void setLoadedCollection() {
-        final Field associationField = getAssociationField(parentEntity.getClass());
+        final Field associationField = findAssociationField(parentEntity.getClass());
         try {
             associationField.setAccessible(true);
             associationField.set(parentEntity, collection);
@@ -49,7 +48,7 @@ public class LazyLoadingHandler implements InvocationHandler {
         }
     }
 
-    private Field getAssociationField(Class<?> entityType) {
+    private Field findAssociationField(Class<?> entityType) {
         return Arrays.stream(entityType.getDeclaredFields())
                 .filter(this::isOneToMany)
                 .findFirst()

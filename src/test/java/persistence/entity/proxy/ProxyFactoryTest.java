@@ -3,15 +3,16 @@ package persistence.entity.proxy;
 import database.H2ConnectionFactory;
 import domain.OrderItem;
 import domain.OrderLazy;
-import jdbc.DefaultRowMapper;
 import jdbc.JdbcTemplate;
+import jdbc.mapper.DefaultRowMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.entity.CollectionLoader;
-import persistence.entity.EntityManager;
-import persistence.entity.LazyLoader;
+import persistence.bootstrap.Metamodel;
+import persistence.entity.loader.CollectionLoader;
+import persistence.entity.manager.DefaultEntityManager;
+import persistence.entity.manager.EntityManager;
 import persistence.meta.EntityTable;
 import persistence.sql.dml.SelectQuery;
 import util.TestHelper;
@@ -20,19 +21,17 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static util.QueryUtils.*;
 
 class ProxyFactoryTest {
+    private Metamodel metamodel;
     private final OrderLazy order = new OrderLazy("OrderNumber1");
     private final OrderItem orderItem1 = new OrderItem("Product1", 10);
     private final OrderItem orderItem2 = new OrderItem("Product2", 20);
 
     @BeforeEach
     void setUp() {
-        createTable(OrderLazy.class);
-        createTable(OrderItem.class, OrderLazy.class);
-
-        final EntityManager entityManager = TestHelper.createEntityManager("domain", "fixture");
+        metamodel = TestHelper.createMetamodel("domain", "fixture");
+        final EntityManager entityManager = new DefaultEntityManager(metamodel);
         order.addOrderItem(orderItem1);
         order.addOrderItem(orderItem2);
         entityManager.persist(order);
@@ -40,8 +39,7 @@ class ProxyFactoryTest {
 
     @AfterEach
     void tearDown() {
-        dropTable(OrderLazy.class);
-        dropTable(OrderItem.class);
+        metamodel.close();
     }
 
     @Test

@@ -2,6 +2,7 @@ package persistence.bootstrap;
 
 import database.H2ConnectionFactory;
 import jdbc.JdbcTemplate;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.proxy.ProxyFactory;
@@ -13,6 +14,13 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MetamodelTest {
+    private Metamodel metamodel;
+
+    @AfterEach
+    void tearDown() {
+        metamodel.close();
+    }
+
     @Test
     @DisplayName("Metamodel을 생성한다.")
     void constructor() {
@@ -22,7 +30,8 @@ class MetamodelTest {
         final ProxyFactory proxyFactory = new ProxyFactory();
 
         // when
-        final Metamodel metamodel = new Metamodel(jdbcTemplate, dmlQueries, proxyFactory, "domain", "fixture");
+        metamodel = new Metamodel(
+                jdbcTemplate, dmlQueries, proxyFactory, "domain", "fixture");
 
         // then
         assertAll(

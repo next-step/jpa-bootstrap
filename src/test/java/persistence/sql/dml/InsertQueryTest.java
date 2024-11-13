@@ -22,7 +22,7 @@ class InsertQueryTest {
         final String sql = insertQuery.insert(entityTable, entity);
 
         // then
-        assertThat(sql).isEqualTo("INSERT INTO users (nick_name, old, email) VALUES ('Jaden', 30, 'test@email.com')");
+        assertThat(sql).isEqualTo("INSERT INTO entity (nick_name, old, email) VALUES ('Jaden', 30, 'test@email.com')");
     }
 
     @Test

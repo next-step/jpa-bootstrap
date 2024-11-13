@@ -14,23 +14,23 @@ public class QueryUtils {
 
     public static void createTable(Class<?> entityType) {
         final EntityTable entityTable = new EntityTable(entityType);
-        final CreateQuery createQuery = new CreateQuery(entityTable, new H2Dialect());
+        final CreateQuery createQuery = new CreateQuery(new H2Dialect());
         final JdbcTemplate jdbcTemplate  = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        jdbcTemplate.execute(createQuery.create());
+        jdbcTemplate.execute(createQuery.create(entityTable));
     }
 
     public static void createTable(Class<?> entityType, Class<?> parentEntityType) {
         final EntityTable entityTable = new EntityTable(entityType);
         final EntityTable parentEntityTable = new EntityTable(parentEntityType);
-        final CreateQuery createQuery = new CreateQuery(entityTable, new H2Dialect());
+        final CreateQuery createQuery = new CreateQuery(new H2Dialect());
         final JdbcTemplate jdbcTemplate  = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        jdbcTemplate.execute(createQuery.create(parentEntityTable));
+        jdbcTemplate.execute(createQuery.create(entityTable, parentEntityTable));
     }
 
     public static void dropTable(Class<?> entityType) {
         final EntityTable entityTable = new EntityTable(entityType);
-        final DropQuery dropQuery = new DropQuery(entityTable.getTableName());
+        final DropQuery dropQuery = new DropQuery();
         final JdbcTemplate jdbcTemplate  = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        jdbcTemplate.execute(dropQuery.drop());
+        jdbcTemplate.execute(dropQuery.drop(entityTable));
     }
 }

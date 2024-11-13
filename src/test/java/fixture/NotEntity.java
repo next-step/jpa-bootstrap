@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
-@Table(name = "users")
+@Table
 public class NotEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
