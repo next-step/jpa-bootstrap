@@ -1,7 +1,5 @@
 package persistence.bootstrap;
 
-import persistence.bootstrap.binder.EntityBinder;
-
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -17,24 +15,13 @@ public class ComponentScanner {
     private static final String DIRECTORY_DELIMITER = "/";
     private static final String CLASS_FILE_POSTFIX = ".class";
 
-    private final EntityBinder entityBinder;
-
-    public ComponentScanner(String... basePackages) {
-        final List<Class<?>> classes = componentScan(basePackages);
-        this.entityBinder = new EntityBinder(classes);
-    }
-
-    public List<Class<?>> getEntityTypes() {
-        return entityBinder.getEntityTypes();
-    }
-
-    private List<Class<?>> componentScan(String[] basePackages) {
+    public static List<Class<?>> scan(String... basePackages) {
         return Arrays.stream(basePackages)
                 .flatMap(basePackage -> scan(basePackage).stream())
                 .toList();
     }
 
-    private List<Class<?>> scan(String basePackage) {
+    private static List<Class<?>> scan(String basePackage) {
         String path = basePackage.replace(PACKAGE_DELIMITER, DIRECTORY_DELIMITER);
         File baseDir = getBaseDir(path);
 
@@ -44,7 +31,7 @@ public class ComponentScanner {
         return new ArrayList<>();
     }
 
-    private File getBaseDir(String path) {
+    private static File getBaseDir(String path) {
         final URL resource = Thread.currentThread()
                 .getContextClassLoader()
                 .getResource(path);
@@ -56,14 +43,14 @@ public class ComponentScanner {
         return new File(resource.getFile());
     }
 
-    private List<Class<?>> scan(String basePackage, File baseDir) {
+    private static List<Class<?>> scan(String basePackage, File baseDir) {
         return Arrays.stream(baseDir.listFiles())
                 .flatMap(file -> getEntityTypes(basePackage, file).stream())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
-    private List<Class<?>> getEntityTypes(String basePackage, File file) {
+    private static List<Class<?>> getEntityTypes(String basePackage, File file) {
         if (file.isDirectory()) {
             return scan(getSubPackage(basePackage, file), file);
         }
@@ -75,20 +62,20 @@ public class ComponentScanner {
         return new ArrayList<>();
     }
 
-    private String getSubPackage(String basePackage, File file) {
+    private static String getSubPackage(String basePackage, File file) {
         return basePackage + PACKAGE_DELIMITER + file.getName();
     }
 
-    private boolean isClassFile(File file) {
+    private static boolean isClassFile(File file) {
         return file.getName().endsWith(CLASS_FILE_POSTFIX);
     }
 
-    private String getTypeName(String basePackage, File file) {
+    private static String getTypeName(String basePackage, File file) {
         return basePackage + PACKAGE_DELIMITER
                 + file.getName().substring(0, file.getName().length() - CLASS_FILE_POSTFIX.length());
     }
 
-    private List<Class<?>> getClass(String entityTypeName) {
+    private static List<Class<?>> getClass(String entityTypeName) {
         try {
             final Class<?> clazz = Class.forName(entityTypeName);
             return List.of(clazz);

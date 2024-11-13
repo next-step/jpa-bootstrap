@@ -2,6 +2,9 @@ package persistence.bootstrap;
 
 import fixture.EntityWithId;
 import fixture.EntityWithOnlyId;
+import fixture.EntityWithoutDefaultConstructor;
+import fixture.EntityWithoutId;
+import fixture.EntityWithoutTable;
 import fixture.NotEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,12 +23,15 @@ class EntityBinderTest {
         final List<Class<?>> classes = List.of(EntityWithId.class, EntityWithOnlyId.class, NotEntity.class);
 
         // when
-        final EntityBinder entityBinder = new EntityBinder(classes);
+        final EntityBinder entityBinder = new EntityBinder("fixture");
 
         // then
         assertAll(
-                () -> assertThat(entityBinder.getEntityTypes()).hasSize(2),
-                () -> assertThat(entityBinder.getEntityTypes()).contains(EntityWithId.class, EntityWithOnlyId.class)
+                () -> assertThat(entityBinder.getEntityTypes()).hasSize(5),
+                () -> assertThat(entityBinder.getEntityTypes()).contains(
+                        EntityWithoutId.class, EntityWithoutDefaultConstructor.class, EntityWithOnlyId.class,
+                        EntityWithoutTable.class, EntityWithId.class
+                )
         );
     }
 }

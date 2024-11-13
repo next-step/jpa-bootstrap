@@ -4,6 +4,7 @@ import jdbc.JdbcTemplate;
 import persistence.bootstrap.binder.CollectionLoaderBinder;
 import persistence.bootstrap.binder.CollectionPersisterBinder;
 import persistence.bootstrap.binder.EntityAssociationBinder;
+import persistence.bootstrap.binder.EntityBinder;
 import persistence.bootstrap.binder.EntityLoaderBinder;
 import persistence.bootstrap.binder.EntityPersisterBinder;
 import persistence.bootstrap.binder.EntityTableBinder;
@@ -28,7 +29,7 @@ public class Metamodel {
     public Metamodel(JdbcTemplate jdbcTemplate, DmlQueries dmlQueries, ProxyFactory proxyFactory, String... basePackages) {
         this.jdbcTemplate = jdbcTemplate;
 
-        final List<Class<?>> entityTypes = new ComponentScanner(basePackages).getEntityTypes();
+        final List<Class<?>> entityTypes = new EntityBinder(basePackages).getEntityTypes();
 
         this.entityTableBinder = new EntityTableBinder(entityTypes);
         this.entityAssociationBinder = new EntityAssociationBinder(entityTableBinder);
