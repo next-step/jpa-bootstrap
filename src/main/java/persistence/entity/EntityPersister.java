@@ -57,13 +57,17 @@ public class EntityPersister {
     }
 
     public void update(Object entity) {
-        final String query = updateQueryBuilder.build(
+        final String query = getUpdateQuery(entity);
+        jdbcTemplate.execute(query);
+    }
+
+    public String getUpdateQuery(Object entity) {
+        return updateQueryBuilder.build(
                 getTableName(),
-                getIdName(),
+                getIdColumnName(),
                 getEntityId(entity),
                 getUpdateColumnMaps(entity)
         );
-        jdbcTemplate.execute(query);
     }
 
     private LinkedHashMap<String, Object> getUpdateColumnMaps(Object entity) {
@@ -81,8 +85,16 @@ public class EntityPersister {
     }
 
     public void delete(Object entity) {
-        String query = deleteQueryBuilder.build(entity, tableDefinition);
+        String query = getDeleteQuery(entity);
         jdbcTemplate.execute(query);
+    }
+
+    public String getDeleteQuery(Object entity) {
+        return deleteQueryBuilder.build(
+                getTableName(),
+                getIdColumnName(),
+                getEntityId(entity)
+        );
     }
 
     public String getJoinColumnName(Class<?> entityClass) {
@@ -134,5 +146,9 @@ public class EntityPersister {
 
     public List<TableAssociationDefinition> getAssociations() {
         return tableDefinition.getAssociations();
+    }
+
+    public boolean isIdentityIdentifier() {
+        return tableDefinition.isIdentityIdentifier();
     }
 }

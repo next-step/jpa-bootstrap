@@ -17,6 +17,7 @@ import persistence.session.SchemaManagementToolCoordinator;
 import persistence.sql.Dialect;
 import persistence.sql.H2Dialect;
 import persistence.sql.ddl.query.DropQueryBuilder;
+import persistence.sql.definition.TableDefinition;
 
 import java.sql.SQLException;
 
@@ -85,7 +86,6 @@ class EntityLoaderTest {
     @DisplayName("Entity Loader는 EntityLoaderTestEntity1 클래스 타입으로 값을 읽어 반환 후 영속성 컨텍스트에 값을 추가한다.")
     void loadEntity() throws Exception {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityLoader entityLoader = new EntityLoader(jdbcTemplate, metamodel);
 
         EntityLoaderTestEntity1 entity1 = new EntityLoaderTestEntity1(1L, 30);
         EntityLoaderTestEntity1 entity2 = new EntityLoaderTestEntity1(2L, 40);
@@ -97,6 +97,10 @@ class EntityLoaderTest {
         EntityKey entityKey1 = new EntityKey(1L, EntityLoaderTestEntity1.class);
         EntityKey entityKey2 = new EntityKey(2L, EntityLoaderTestEntity1.class);
 
+        EntityLoader entityLoader = new EntityLoader(
+                new TableDefinition(EntityLoaderTestEntity1.class),
+                jdbcTemplate, metamodel
+        );
         EntityLoaderTestEntity1 loadedEntity1 = entityLoader.loadEntity(EntityLoaderTestEntity1.class, entityKey1);
         EntityLoaderTestEntity1 loadedEntity2 = entityLoader.loadEntity(EntityLoaderTestEntity1.class, entityKey2);
 
@@ -113,7 +117,10 @@ class EntityLoaderTest {
     @DisplayName("Entity Loader는 EntityLoaderTestEntity2 클래스 타입으로 값을 읽어 반환 후 영속성 컨텍스트에 값을 추가한다.")
     void loadEntityOtherClassType() throws SQLException {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(server.getConnection());
-        EntityLoader entityLoader = new EntityLoader(jdbcTemplate, metamodel);
+        EntityLoader entityLoader = new EntityLoader(
+                new TableDefinition(EntityLoaderTestEntity2.class),
+                jdbcTemplate, metamodel
+        );
 
         EntityLoaderTestEntity2 entity1 = new EntityLoaderTestEntity2(1L, "John");
         EntityLoaderTestEntity2 entity2 = new EntityLoaderTestEntity2(2L, "Jane");

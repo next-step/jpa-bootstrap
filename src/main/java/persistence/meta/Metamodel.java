@@ -2,20 +2,22 @@ package persistence.meta;
 
 import jdbc.JdbcTemplate;
 import persistence.entity.CollectionPersister;
+import persistence.entity.EntityLoader;
 import persistence.entity.EntityPersister;
 import persistence.sql.definition.TableAssociationDefinition;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Metamodel {
     private final Map<Class<?>, EntityPersister> entityPersisters;
+    private final Map<Class<?>, EntityLoader> entityLoaders;
     private final Map<TableAssociationDefinition, CollectionPersister> collectionPersisters;
 
     public Metamodel(Metadata metadata,
                      JdbcTemplate jdbcTemplate) {
         this.entityPersisters = collectEntityPersisters(metadata, jdbcTemplate);
+        this.entityLoaders = collectEntityLoaders(metadata, jdbcTemplate);
         this.collectionPersisters = collectCollectionPersisters(metadata, jdbcTemplate);
     }
 
@@ -25,6 +27,15 @@ public class Metamodel {
                 Collectors.toUnmodifiableMap(
                         clazz -> clazz,
                         clazz -> new EntityPersister(metadata.findTableDefinition(clazz), jdbcTemplate)
+                )
+        );
+    }
+
+    private Map<Class<?>, EntityLoader> collectEntityLoaders(Metadata metadata, JdbcTemplate jdbcTemplate) {
+        return metadata.getEntityClasses().stream().collect(
+                Collectors.toUnmodifiableMap(
+                        clazz -> clazz,
+                        clazz -> new EntityLoader(metadata.findTableDefinition(clazz), jdbcTemplate, this)
                 )
         );
     }
@@ -52,14 +63,12 @@ public class Metamodel {
         return entityPersisters.get(clazz);
     }
 
-    public CollectionPersister findCollectionPersister(TableAssociationDefinition association) {
-        return collectionPersisters.get(association);
+    public EntityLoader findEntityLoader(Class<?> clazz) {
+        return entityLoaders.get(clazz);
     }
 
-    public List<TableAssociationDefinition> resolveEagerAssociation(Class<?> entityClass) {
-        return entityPersisters.get(entityClass).getAssociations()
-                .stream().filter(TableAssociationDefinition::isEager)
-                .collect(Collectors.toList());
+    public CollectionPersister findCollectionPersister(TableAssociationDefinition association) {
+        return collectionPersisters.get(association);
     }
 
 }

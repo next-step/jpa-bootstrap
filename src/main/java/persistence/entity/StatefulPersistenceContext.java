@@ -1,7 +1,5 @@
 package persistence.entity;
 
-import persistence.sql.definition.TableDefinition;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +38,7 @@ public class StatefulPersistenceContext implements PersistenceContext {
     public void removeEntity(EntityKey entityKey) {
         managedEntities.remove(entityKey);
         entitySnapshots.remove(entityKey);
+        entityEntries.remove(entityKey);
     }
 
     @Override

@@ -89,4 +89,8 @@ public class TableId implements ColumnDefinitionAware {
     public boolean isPrimaryKey() {
         return true;
     }
+
+    public boolean isIdentity() {
+        return strategy instanceof IdentityKeyGenerationStrategy;
+    }
 }

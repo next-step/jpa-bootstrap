@@ -5,7 +5,7 @@ import bootstrap.EntityComponentScanner;
 import bootstrap.FileSystemExplorer;
 import database.DatabaseServer;
 import persistence.session.EntityManagerFactory;
-import persistence.session.EntityManagerFactoryImpl;
+import persistence.session.SessionFactoryImpl;
 import persistence.session.ThreadLocalCurrentSessionContext;
 import persistence.sql.Dialect;
 import persistence.sql.H2Dialect;
@@ -80,7 +80,7 @@ public class MetadataImpl implements Metadata {
     @Override
     public EntityManagerFactory buildEntityManagerFactory() {
         try {
-            return new EntityManagerFactoryImpl(
+            return new SessionFactoryImpl(
                     new ThreadLocalCurrentSessionContext(),
                     this
             );

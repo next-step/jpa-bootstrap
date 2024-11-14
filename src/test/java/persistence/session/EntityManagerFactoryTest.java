@@ -2,14 +2,12 @@ package persistence.session;
 
 import database.DatabaseServer;
 import database.H2;
-import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.meta.Metadata;
 import persistence.meta.MetadataImpl;
-import persistence.meta.Metamodel;
 
 import java.sql.SQLException;
 
@@ -35,7 +33,7 @@ public class EntityManagerFactoryTest {
     @Test
     @DisplayName("openSession이 호출될 때마다 새로운 세션을 생성한다.")
     void currentSessionExists() throws SQLException {
-        EntityManagerFactory entityManagerFactory = new EntityManagerFactoryImpl(
+        EntityManagerFactory entityManagerFactory = new SessionFactoryImpl(
                 new ThreadLocalCurrentSessionContext(),
                 metadata
         );
