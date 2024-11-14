@@ -6,6 +6,8 @@ import persistence.entity.manager.DefaultEntityManager;
 import persistence.entity.manager.EntityManager;
 
 public class EntityManagerFactory {
+    private static volatile EntityManagerFactory instance;
+
     private final CurrentSessionContext currentSessionContext;
     private final Metamodel metamodel;
 

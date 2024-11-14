@@ -5,15 +5,14 @@ import persistence.entity.persister.CollectionPersister;
 import persistence.meta.EntityTable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CollectionPersisterBinder {
     private final Map<String, CollectionPersister> entityPersisterRegistry = new HashMap<>();
 
-    public CollectionPersisterBinder(List<Class<?>> entityTypes, EntityTableBinder entityTableBinder,
+    public CollectionPersisterBinder(EntityBinder entityBinder, EntityTableBinder entityTableBinder,
                                      JdbcTemplate jdbcTemplate) {
-        for (Class<?> entityType : entityTypes) {
+        for (Class<?> entityType : entityBinder.getEntityTypes()) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
             if (entityTable.isOneToMany()) {
                 final EntityTable childEntityTable = entityTableBinder.getEntityTable(entityTable.getAssociationColumnType());

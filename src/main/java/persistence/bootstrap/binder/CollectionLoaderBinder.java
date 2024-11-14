@@ -6,15 +6,14 @@ import persistence.entity.loader.CollectionLoader;
 import persistence.meta.EntityTable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CollectionLoaderBinder {
     private final Map<String, CollectionLoader> collectionLoaderRegistry = new HashMap<>();
 
-    public CollectionLoaderBinder(List<Class<?>> entityTypes, EntityTableBinder entityTableBinder,
+    public CollectionLoaderBinder(EntityBinder entityBinder, EntityTableBinder entityTableBinder,
                                   RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate) {
-        for (Class<?> entityType : entityTypes) {
+        for (Class<?> entityType : entityBinder.getEntityTypes()) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
             if (entityTable.isOneToMany()) {
                 final Class<?> associationColumnType = entityTable.getAssociationColumnType();

@@ -9,9 +9,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.bootstrap.Metamodel;
+import persistence.bootstrap.Metadata;
 import persistence.entity.loader.CollectionLoader;
-import persistence.entity.manager.DefaultEntityManager;
 import persistence.entity.manager.EntityManager;
 import persistence.meta.EntityTable;
 import util.TestHelper;
@@ -22,15 +21,15 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProxyFactoryTest {
-    private Metamodel metamodel;
+    private Metadata metadata;
     private final OrderLazy order = new OrderLazy("OrderNumber1");
     private final OrderItem orderItem1 = new OrderItem("Product1", 10);
     private final OrderItem orderItem2 = new OrderItem("Product2", 20);
 
     @BeforeEach
     void setUp() {
-        metamodel = TestHelper.createMetamodel("domain", "fixture");
-        final EntityManager entityManager = new DefaultEntityManager(metamodel);
+        metadata = TestHelper.createMetadata("domain", "fixture");
+        final EntityManager entityManager = metadata.getEntityManagerFactory().openSession();
         order.addOrderItem(orderItem1);
         order.addOrderItem(orderItem2);
         entityManager.persist(order);
@@ -38,7 +37,7 @@ class ProxyFactoryTest {
 
     @AfterEach
     void tearDown() {
-        metamodel.close();
+        metadata.close();
     }
 
     @Test

@@ -4,22 +4,22 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.bootstrap.Metamodel;
+import persistence.bootstrap.Metadata;
 import util.TestHelper;
 
 import static org.assertj.core.api.Assertions.*;
 
 class CurrentSessionContextTest {
-    private Metamodel metamodel;
+    private Metadata metadata;
 
     @BeforeEach
     void setUp() {
-        metamodel = TestHelper.createMetamodel("fixture");
+        metadata = TestHelper.createMetadata("fixture");
     }
 
     @AfterEach
     void tearDown() {
-        metamodel.close();
+        metadata.close();
     }
 
     @Test
@@ -27,10 +27,11 @@ class CurrentSessionContextTest {
     void openSession_exception() {
         // given
         final CurrentSessionContext currentSessionContext = new CurrentSessionContext();
-        currentSessionContext.openSession(new DefaultEntityManager(metamodel));
+        final EntityManager entityManager = metadata.getEntityManagerFactory().openSession();
+        currentSessionContext.openSession(entityManager);
 
         // when & then
-        assertThatThrownBy(() -> currentSessionContext.openSession(new DefaultEntityManager(metamodel)))
+        assertThatThrownBy(() -> currentSessionContext.openSession(new DefaultEntityManager(metadata.getMetamodel())))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage(CurrentSessionContext.SESSION_ALREADY_CREATED_MESSAGE);
 

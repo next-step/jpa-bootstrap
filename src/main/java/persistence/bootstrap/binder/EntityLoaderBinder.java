@@ -8,18 +8,15 @@ import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class EntityLoaderBinder {
     private final Map<String, EntityLoader> entityLoaderRegistry = new HashMap<>();
 
-    public EntityLoaderBinder(List<Class<?>> entityTypes, EntityTableBinder entityTableBinder,
-                              CollectionLoaderBinder collectionLoaderBinder, RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate,
-                              ProxyFactory proxyFactory) {
-        for (Class<?> entityType : entityTypes) {
-            final EntityLoader entityLoader =
-                    createEntityLoader(entityTableBinder, collectionLoaderBinder, rowMapperBinder, jdbcTemplate, proxyFactory, entityType);
+    public EntityLoaderBinder(EntityBinder entityBinder, EntityTableBinder entityTableBinder, CollectionLoaderBinder collectionLoaderBinder,
+                              RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate) {
+        for (Class<?> entityType : entityBinder.getEntityTypes()) {
+            final EntityLoader entityLoader = createEntityLoader(entityTableBinder, collectionLoaderBinder, rowMapperBinder, jdbcTemplate, entityType);
             entityLoaderRegistry.put(entityType.getTypeName(), entityLoader);
         }
     }
@@ -29,20 +26,17 @@ public class EntityLoaderBinder {
     }
 
     private EntityLoader createEntityLoader(EntityTableBinder entityTableBinder, CollectionLoaderBinder collectionLoaderBinder,
-                                            RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate,
-                                            ProxyFactory proxyFactory, Class<?> entityType) {
+                                            RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate, Class<?> entityType) {
         final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
         final RowMapper rowMapper = rowMapperBinder.getRowMapper(entityType);
         if (entityTable.getAssociationEntityColumn() == null) {
-            return new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, proxyFactory,
-                    rowMapper, null);
+            return new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, ProxyFactory.getInstance(), rowMapper, null);
         }
 
         final EntityTable childEntityTable = entityTableBinder.getEntityTable(entityTable.getAssociationColumnType());
         final CollectionLoader collectionLoader =
                 collectionLoaderBinder.getCollectionLoader(entityType, entityTable.getAssociationColumnName());
-        return new EntityLoader(entityTable, childEntityTable, jdbcTemplate, proxyFactory,
-                rowMapper, collectionLoader);
+        return new EntityLoader(entityTable, childEntityTable, jdbcTemplate, ProxyFactory.getInstance(), rowMapper, collectionLoader);
     }
 
     public void clear() {

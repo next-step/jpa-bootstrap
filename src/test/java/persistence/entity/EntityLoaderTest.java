@@ -10,14 +10,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.bootstrap.Metamodel;
+import persistence.bootstrap.Metadata;
 import persistence.entity.loader.CollectionLoader;
 import persistence.entity.loader.EntityLoader;
-import persistence.entity.manager.DefaultEntityManager;
 import persistence.entity.manager.EntityManager;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.SelectQuery;
 import util.TestHelper;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,21 +23,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EntityLoaderTest {
     private JdbcTemplate jdbcTemplate;
-    private Metamodel metamodel;
+    private Metadata metadata;
     private EntityManager entityManager;
-    private SelectQuery selectQuery;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        metamodel = TestHelper.createMetamodel("domain", "fixture");
-        entityManager = new DefaultEntityManager(metamodel);
-        selectQuery = SelectQuery.getInstance();
+        metadata = TestHelper.createMetadata("domain", "fixture");
+        entityManager = metadata.getEntityManagerFactory().openSession();
     }
 
     @AfterEach
     void tearDown() {
-        metamodel.close();
+        metadata.close();
     }
 
     @Test
