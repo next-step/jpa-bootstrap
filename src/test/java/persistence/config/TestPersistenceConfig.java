@@ -2,7 +2,6 @@ package persistence.config;
 
 import boot.MetaModel;
 import boot.Metadata;
-import database.ConnectionHolder;
 import database.DatabaseServer;
 import database.H2;
 import persistence.proxy.ProxyFactory;
@@ -25,6 +24,7 @@ import persistence.sql.ddl.impl.H2ColumnTypeSupplier;
 import persistence.sql.ddl.impl.H2Dialect;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.EntityManagerFactory;
+import persistence.sql.dml.impl.DefaultEntityManagerFactory;
 import persistence.sql.dml.impl.DefaultDatabase;
 import persistence.sql.fixture.TestPerson;
 import persistence.sql.fixture.TestPersonFakeRowMapper;
@@ -83,7 +83,7 @@ public class TestPersistenceConfig {
     }
 
     public EntityManagerFactory entityManagerFactory() throws SQLException {
-        return new EntityManagerFactory(metaModel());
+        return new DefaultEntityManagerFactory(metaModel());
     }
 
     public MetaModel metaModel() throws SQLException {
