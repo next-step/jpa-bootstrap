@@ -11,8 +11,7 @@ public class ReflectionUtils {
     }
 
     public static Class<?> collectionClass(Type type) {
-        if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
+        if (type instanceof ParameterizedType parameterizedType) {
             Type[] typeArguments = parameterizedType.getActualTypeArguments();
 
             if (typeArguments != null && typeArguments.length > 0) {
@@ -33,5 +32,20 @@ public class ReflectionUtils {
             return (Class<? extends Collection<Object>>) field.getType();
         }
         throw new IllegalArgumentException("Field is not a Collection type");
+    }
+
+    public static <T> boolean hasGenericType(Class<?> aClass, Class<T> entityClass) {
+        Type[] genericInterfaces = aClass.getGenericInterfaces();
+        for (Type genericInterface : genericInterfaces) {
+            if (genericInterface instanceof ParameterizedType parameterizedType) {
+                Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                for (Type actualTypeArgument : actualTypeArguments) {
+                    if (actualTypeArgument.getTypeName().equals(entityClass.getTypeName())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

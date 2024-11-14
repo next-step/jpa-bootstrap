@@ -22,31 +22,39 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class DefaultEntityPersister implements EntityPersister {
+public class DefaultEntityPersister<T> implements EntityPersister<T> {
     private static final Logger logger = Logger.getLogger(DefaultEntityPersister.class.getName());
     private final Database database;
     private final NameConverter nameConverter;
-    private final MetadataLoader<?> metadataLoader;
+    private final MetadataLoader<T> metadataLoader;
 
-    public DefaultEntityPersister(Database database, NameConverter nameConverter, MetadataLoader<?> metadataLoader) {
+    public DefaultEntityPersister(Database database, NameConverter nameConverter, MetadataLoader<T> metadataLoader) {
         this.database = database;
         this.nameConverter = nameConverter;
         this.metadataLoader = metadataLoader;
     }
 
     @Override
-    public Object insert(Object entity) {
+    public T insert(Object entity) {
+        if (metadataLoader.getEntityType() != entity.getClass()) {
+            throw new IllegalArgumentException("Entity type is not matched");
+        }
+
         InsertColumnValueClause clause = InsertColumnValueClause.newInstance(entity, nameConverter);
 
         String insertQuery = QueryBuilderFactory.getInstance().buildQuery(QueryType.INSERT, metadataLoader, clause);
+        logger.info("Entity: %s | insertQuery: %s".formatted(entity, insertQuery));
         Object id = database.executeUpdate(insertQuery);
         updatePrimaryKeyValue(entity, id);
 
-        return entity;
+        return (T) entity;
     }
 
     @Override
-    public Object insert(Object entity, Object parentEntity) {
+    public <P> T insert(Object entity, P parentEntity) {
+        if (metadataLoader.getEntityType() != entity.getClass()) {
+            throw new IllegalArgumentException("Entity type is not matched");
+        }
         InsertColumnValueClause clause = InsertColumnValueClause.newInstance(entity, parentEntity, nameConverter);
 
         String insertQuery = QueryBuilderFactory.getInstance().buildQuery(QueryType.INSERT, metadataLoader, clause);
@@ -55,11 +63,15 @@ public class DefaultEntityPersister implements EntityPersister {
         Object id = database.executeUpdate(insertQuery);
         updatePrimaryKeyValue(entity, id);
 
-        return entity;
+        return (T) entity;
     }
 
     @Override
     public void update(Object entity, Object snapshotEntity) {
+        if (metadataLoader.getEntityType() != entity.getClass() || metadataLoader.getEntityType() != snapshotEntity.getClass()) {
+            throw new IllegalArgumentException("Entity type is not matched");
+        }
+
         List<Field> updateTargetFields = getUpdateTargetFields(entity, snapshotEntity);
         UpdateQueryClauses updateQueryClauses = UpdateQueryClauses.builder(nameConverter)
                 .where(entity, metadataLoader)
@@ -68,6 +80,7 @@ public class DefaultEntityPersister implements EntityPersister {
 
         String mergeQuery = QueryBuilderFactory.getInstance()
                 .buildQuery(QueryType.UPDATE, metadataLoader, updateQueryClauses.clauseArrays());
+        logger.info("Entity: %s, Snapshot Entity: %s | mergeQuery: %s".formatted(entity, snapshotEntity, mergeQuery));
         database.executeUpdate(mergeQuery);
     }
 
@@ -105,6 +118,10 @@ public class DefaultEntityPersister implements EntityPersister {
 
     @Override
     public void delete(Object entity) {
+        if (metadataLoader.getEntityType() != entity.getClass()) {
+            throw new IllegalArgumentException("Entity type is not matched");
+        }
+
         DeleteQueryClauses deleteQueryClauses = DeleteQueryClauses.builder(nameConverter)
                 .where(entity, metadataLoader)
                 .build();
@@ -112,6 +129,7 @@ public class DefaultEntityPersister implements EntityPersister {
         String removeQuery = QueryBuilderFactory.getInstance().buildQuery(QueryType.DELETE, metadataLoader,
                 deleteQueryClauses.clauseArrays());
 
+        logger.info("Entity: %s | removeQuery: %s".formatted(entity, removeQuery));
         database.executeUpdate(removeQuery);
     }
 
@@ -129,7 +147,7 @@ public class DefaultEntityPersister implements EntityPersister {
     }
 
     @Override
-    public MetadataLoader<?> getMetadataLoader() {
+    public MetadataLoader<T> getMetadataLoader() {
         return metadataLoader;
     }
 }

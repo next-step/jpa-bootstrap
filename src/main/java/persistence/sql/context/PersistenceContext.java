@@ -8,17 +8,17 @@ import persistence.sql.entity.data.Status;
 
 public interface PersistenceContext {
 
-    <T> EntityEntry addEntry(T entity, Status status, EntityPersister entityPersister);
+    EntityEntry addEntry(Object entity, Status status, EntityPersister<?> entityPersister);
 
-    <T> EntityEntry addLoadingEntry(Object primaryKey, MetadataLoader<T> metadataLoader);
+    EntityEntry addLoadingEntry(Object primaryKey, MetadataLoader<?> metadataLoader);
 
-    <T, ID> EntityEntry getEntry(Class<T> entityType, ID id);
+    <ID> EntityEntry getEntry(Class<?> entityType, ID id);
 
     CollectionEntry getCollectionEntry(CollectionKeyHolder key);
 
     CollectionEntry addCollectionEntry(CollectionKeyHolder key, CollectionEntry collectionEntry);
 
-    <T, ID> void deleteEntry(T entity, ID id);
+    <ID> void deleteEntry(Object entity, ID id);
 
     void cleanup();
 

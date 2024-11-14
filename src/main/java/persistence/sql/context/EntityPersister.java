@@ -2,15 +2,15 @@ package persistence.sql.context;
 
 import persistence.sql.dml.MetadataLoader;
 
-public interface EntityPersister {
+public interface EntityPersister<T> {
 
-    Object insert(Object entity);
+    T insert(Object entity);
 
-    Object insert(Object entity, Object parentEntity);
+    <P> T insert(Object entity, P parentEntity);
 
     void update(Object entity, Object snapshotEntity);
 
     void delete(Object entity);
 
-    MetadataLoader<?> getMetadataLoader();
+    MetadataLoader<T> getMetadataLoader();
 }

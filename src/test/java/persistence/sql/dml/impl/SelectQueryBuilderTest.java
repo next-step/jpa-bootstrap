@@ -28,7 +28,7 @@ class SelectQueryBuilderTest {
         String query = builder.build(loader, clause);
 
         // then
-        assertThat(query).isEqualTo("SELECT users.id, users.nick_name, users.old, users.email,  FROM users users WHERE id = 1");
+        assertThat(query).isEqualTo("SELECT users.id, users.nick_name, users.old, users.email FROM users users WHERE id = 1");
     }
 
     @Test

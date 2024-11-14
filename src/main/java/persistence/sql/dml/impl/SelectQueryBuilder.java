@@ -14,6 +14,7 @@ import persistence.sql.dml.MetadataLoader;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SelectQueryBuilder implements QueryBuilder {
     private final NameConverter nameConverter;
@@ -69,6 +70,8 @@ public class SelectQueryBuilder implements QueryBuilder {
                 .map(clause -> ((LeftJoinClause) clause).columns())
                 .collect(Collectors.joining(DELIMITER));
 
-        return originColumn + DELIMITER + joinColumns;
+        return Stream.of(originColumn, joinColumns)
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.joining(DELIMITER));
     }
 }

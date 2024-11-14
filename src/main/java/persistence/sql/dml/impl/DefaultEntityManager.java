@@ -50,17 +50,16 @@ public class DefaultEntityManager implements EntityManager {
         if (!isNew(entity)) {
             throw new EntityExistsException("Entity already exists");
         }
-        EntityPersister entityPersister = metaModel.entityPersister(entity.getClass());
+        EntityPersister<T> entityPersister = metaModel.entityPersister((Class<T>) entity.getClass());
 
         entityPersister.insert(entity);
-        EntityEntry entityEntry = persistenceContext.addEntry(entity, Status.SAVING, entityPersister);
+        persistenceContext.addEntry(entity, Status.SAVING, entityPersister);
 
         if (existsPersistChildEntity(entity)) {
             persistChildEntity(entity);
         }
 
         if (!transaction.isActive()) {
-            entityEntry.updateStatus(Status.MANAGED);
             persistenceContext.cleanup();
         }
     }
@@ -90,14 +89,13 @@ public class DefaultEntityManager implements EntityManager {
         }
     }
 
-    private <T> void persistIfIsNewChildEntity(T entity, Object childEntity) {
+    private <T, P> void persistIfIsNewChildEntity(T entity, P childEntity) {
         if (isNew(childEntity)) {
-            EntityPersister entityPersister = metaModel.entityPersister(childEntity.getClass());
+            EntityPersister<P> entityPersister = metaModel.entityPersister((Class<P>) childEntity.getClass());
             entityPersister.insert(childEntity, entity);
-            EntityEntry entityEntry = persistenceContext.addEntry(childEntity, Status.SAVING, entityPersister);
+            persistenceContext.addEntry(childEntity, Status.SAVING, entityPersister);
 
             if (!transaction.isActive()) {
-                entityEntry.updateStatus(Status.MANAGED);
                 persistenceContext.cleanup();
             }
         }
@@ -166,7 +164,7 @@ public class DefaultEntityManager implements EntityManager {
 
         entry.updateEntity(entity);
         if (!transaction.isActive()) {
-            EntityPersister entityPersister = metaModel.entityPersister(entity.getClass());
+            EntityPersister<T> entityPersister = metaModel.entityPersister((Class<T>) entity.getClass());
             entityPersister.update(entity, entry.getSnapshot());
             entry.synchronizingSnapshot();
             persistenceContext.cleanup();
@@ -192,7 +190,7 @@ public class DefaultEntityManager implements EntityManager {
 
         entityEntry.updateStatus(Status.DELETED);
         if (!transaction.isActive()) {
-            EntityPersister entityPersister = metaModel.entityPersister(entity.getClass());
+            EntityPersister<T> entityPersister = metaModel.entityPersister((Class<T>) entity.getClass());
             entityPersister.delete(entity);
             persistenceContext.deleteEntry(entity, id);
         }
@@ -233,7 +231,7 @@ public class DefaultEntityManager implements EntityManager {
     @Override
     public <T> List<T> findAll(Class<T> entityClass) {
         EntityLoader<T> entityLoader = metaModel.entityLoader(entityClass);
-        EntityPersister entityPersister = metaModel.entityPersister(entityClass);
+        EntityPersister<T> entityPersister = metaModel.entityPersister(entityClass);
 
         List<T> loadedEntities = entityLoader.loadAll();
         for (T loadedEntity : loadedEntities) {

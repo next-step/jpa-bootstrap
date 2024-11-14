@@ -14,7 +14,7 @@ public class EntityEntry {
     private Status status;
     private Object entity;
     private Object snapshot;
-    private KeyHolder key;
+    private final KeyHolder key;
 
     public EntityEntry(MetadataLoader<?> loader, Status status, Object entity, Object snapshot, KeyHolder key) {
         this.loader = loader;
@@ -63,6 +63,10 @@ public class EntityEntry {
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Failed to create snapshot entity");
         }
+    }
+
+    public Class<?> getEntityType() {
+        return loader.getEntityType();
     }
 
     public KeyHolder getKey() {

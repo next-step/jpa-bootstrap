@@ -89,6 +89,7 @@ public class EntityLoader<T> implements Loader<T> {
     @Override
     public List<T> loadAllByForeignKey(Object foreignKey, MetadataLoader<?> foreignLoader) {
         String selectQuery = createSelectQuery(foreignKey, foreignLoader);
+        logger.info("Entity: %s | selectQuery: %s".formatted(metadataLoader.getEntityType(), selectQuery));
 
         return database.executeQuery(selectQuery, resultSet -> {
             List<T> entities = new ArrayList<>();
@@ -104,6 +105,7 @@ public class EntityLoader<T> implements Loader<T> {
     @Override
     public T load(Object primaryKey) {
         String selectQuery = createSelectQuery(primaryKey);
+        logger.info("Entity: %s | selectQuery: %s".formatted(metadataLoader.getEntityType(), selectQuery));
 
         return database.executeQuery(selectQuery, resultSet -> {
             if (resultSet.next()) {
@@ -289,7 +291,7 @@ public class EntityLoader<T> implements Loader<T> {
                     persistenceContext,
                     entityLoader,
                     this
-                    );
+            );
 
             try {
                 lazyField.setAccessible(true);

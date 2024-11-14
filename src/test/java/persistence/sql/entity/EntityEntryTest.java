@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DisplayName("EntityEntry 테스트")
 class EntityEntryTest extends TestEntityInitialize {
-    private MetadataLoader<?> metadataLoader = new SimpleMetadataLoader<>(TestPerson.class);
+    private final MetadataLoader<TestPerson> metadataLoader = new SimpleMetadataLoader<>(TestPerson.class);
 
     public static Stream<Arguments> provideNullEntityOrSnapshotEntry() {
         EntityEntry entityNullEntry = createDummyEntry();
@@ -40,7 +40,7 @@ class EntityEntryTest extends TestEntityInitialize {
     private static EntityEntry createDummyEntry() {
         TestPerson catsbi = new TestPerson(1L, "catsbi", 55, "casbi@naver.com", 123);
         SimpleMetadataLoader<TestPerson> loader = new SimpleMetadataLoader<>(TestPerson.class);
-        Object snapshot = createSnapshot(catsbi, loader);
+        TestPerson snapshot = createSnapshot(catsbi, loader);
 
         return new EntityEntry(loader, Status.MANAGED, catsbi, snapshot, new KeyHolder(TestPerson.class, catsbi.getId()));
     }
@@ -95,7 +95,7 @@ class EntityEntryTest extends TestEntityInitialize {
         // given
         Long primaryKey = 1L;
 
-        EntityEntry actual = EntityEntry.newLoadingEntry(primaryKey,metadataLoader);
+        EntityEntry actual = EntityEntry.newLoadingEntry(primaryKey, metadataLoader);
 
         assertAll(
                 () -> assertThat(actual).isNotNull(),

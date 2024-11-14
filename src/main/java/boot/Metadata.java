@@ -32,14 +32,6 @@ public class Metadata {
         return database;
     }
 
-    public MetadataLoader<?> metadataLoader(Class<?> entityType) {
-        if (entityType == null || !entityBindingMap.containsKey(entityType)) {
-            throw new IllegalArgumentException("Not Found MetadataLoader | from: " + entityType);
-        }
-
-        return entityBindingMap.get(entityType);
-    }
-
     public Map<Class<?>, MetadataLoader<?>> getEntityBinding() {
         return new HashMap<>(entityBindingMap);
     }
