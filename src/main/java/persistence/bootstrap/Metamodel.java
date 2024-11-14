@@ -11,6 +11,10 @@ import persistence.bootstrap.binder.RowMapperBinder;
 import persistence.entity.loader.EntityLoader;
 import persistence.entity.persister.CollectionPersister;
 import persistence.entity.persister.EntityPersister;
+import persistence.event.EventListenerGroup;
+import persistence.event.EventListenerRegistry;
+import persistence.event.EventType;
+import persistence.event.LoadEventListener;
 import persistence.meta.EntityTable;
 
 public class Metamodel {
@@ -18,8 +22,11 @@ public class Metamodel {
     private final EntityLoaderBinder entityLoaderBinder;
     private final EntityPersisterBinder entityPersisterBinder;
     private final CollectionPersisterBinder collectionPersisterBinder;
+    private final EventListenerRegistry eventListenerRegistry;
 
-    public Metamodel(JdbcTemplate jdbcTemplate, EntityBinder entityBinder, EntityTableBinder entityTableBinder) {
+    public Metamodel(JdbcTemplate jdbcTemplate, EntityBinder entityBinder, EntityTableBinder entityTableBinder,
+                     EventListenerRegistry eventListenerRegistry) {
+        this.eventListenerRegistry = eventListenerRegistry;
         RowMapperBinder rowMapperBinder = new RowMapperBinder(entityBinder, entityTableBinder);
         CollectionLoaderBinder collectionLoaderBinder = new CollectionLoaderBinder(entityBinder, entityTableBinder, rowMapperBinder, jdbcTemplate);
 
@@ -43,6 +50,10 @@ public class Metamodel {
 
     public CollectionPersister getCollectionPersister(Class<?> entityType, String columnName) {
         return collectionPersisterBinder.getCollectionPersister(entityType, columnName);
+    }
+
+    public EventListenerGroup<LoadEventListener> getLoadEventListenerGroup() {
+        return eventListenerRegistry.getEventListenerGroup(EventType.LOAD);
     }
 
     public void close() {

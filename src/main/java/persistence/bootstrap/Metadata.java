@@ -7,6 +7,7 @@ import persistence.bootstrap.binder.EntityTableBinder;
 import persistence.dialect.Dialect;
 import persistence.entity.manager.CurrentSessionContext;
 import persistence.entity.manager.factory.EntityManagerFactory;
+import persistence.event.EventListenerRegistry;
 
 import java.sql.Connection;
 
@@ -22,7 +23,7 @@ public class Metadata {
 
         this.jdbcTemplate = new JdbcTemplate(connection);
         this.entityTableBinder = entityTableBinder;
-        this.metamodel = new Metamodel(jdbcTemplate, entityBinder, entityTableBinder);
+        this.metamodel = new Metamodel(jdbcTemplate, entityBinder, entityTableBinder, new EventListenerRegistry());
 
         DatabaseSyncManager.sync(entityTableBinder, entityAssociationBinder, new JdbcTemplate(connection), dialect);
     }

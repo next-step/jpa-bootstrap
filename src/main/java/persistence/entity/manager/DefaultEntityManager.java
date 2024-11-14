@@ -1,10 +1,11 @@
 package persistence.entity.manager;
 
 import persistence.bootstrap.Metamodel;
-import persistence.entity.loader.EntityLoader;
 import persistence.entity.manager.factory.PersistenceContext;
 import persistence.entity.persister.CollectionPersister;
 import persistence.entity.persister.EntityPersister;
+import persistence.event.LoadEvent;
+import persistence.event.LoadEventListener;
 import persistence.meta.EntityColumn;
 import persistence.meta.EntityTable;
 
@@ -26,17 +27,9 @@ public class DefaultEntityManager implements EntityManager {
 
     @Override
     public <T> T find(Class<T> entityType, Object id) {
-        final T managedEntity = persistenceContext.getEntity(entityType, id);
-        if (managedEntity != null) {
-            return managedEntity;
-        }
-
-        final EntityLoader entityLoader = metamodel.getEntityLoader(entityType);
-        final T entity = entityLoader.load(id);
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-
-        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
-        return entity;
+        final LoadEvent<T> loadEvent = new LoadEvent<>(metamodel, persistenceContext, entityType, id);
+        metamodel.getLoadEventListenerGroup().doEvent(loadEvent, LoadEventListener::onLoad);
+        return loadEvent.getResult();
     }
 
     @Override
