@@ -19,4 +19,8 @@ public class EventListenerGroup<T> {
     public <U> void doEvent(U event, BiConsumer<T, U> action) {
         listeners.forEach(listener -> action.accept(listener, event));
     }
+
+    public EventType<T> getEventType() {
+        return eventType;
+    }
 }

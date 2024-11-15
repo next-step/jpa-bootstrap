@@ -6,6 +6,8 @@ import persistence.entity.persister.CollectionPersister;
 import persistence.entity.persister.EntityPersister;
 import persistence.event.LoadEvent;
 import persistence.event.LoadEventListener;
+import persistence.event.PersistEvent;
+import persistence.event.PersistEventListener;
 import persistence.meta.EntityColumn;
 import persistence.meta.EntityTable;
 
@@ -33,12 +35,13 @@ public class DefaultEntityManager implements EntityManager {
     }
 
     @Override
-    public void persist(Object entity) {
+    public <T> void persist(T entity) {
         validatePersist(entity);
 
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
         if (entityTable.isIdGenerationFromDatabase()) {
-            persistImmediately(entity, entityTable);
+            final PersistEvent<T> persistEvent = new PersistEvent<>(metamodel, persistenceContext, entity);
+            metamodel.getPersistEventListenerGroup().doEvent(persistEvent, PersistEventListener::onPersist);
             return;
         }
 

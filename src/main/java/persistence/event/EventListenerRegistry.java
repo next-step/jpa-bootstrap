@@ -8,6 +8,7 @@ public class EventListenerRegistry {
 
     public EventListenerRegistry() {
         registerLoadEventListener();
+        registerPersistEventListener();
     }
 
     public <T> EventListenerGroup<T> getEventListenerGroup(EventType<T> eventType) {
@@ -19,5 +20,11 @@ public class EventListenerRegistry {
         eventListenerGroup.appendListener(new CacheLoadEventListener());
         eventListenerGroup.appendListener(new DefaultLoadEventListener());
         eventListenerGroupRegistry.put(EventType.LOAD, eventListenerGroup);
+    }
+
+    private void registerPersistEventListener() {
+        final EventListenerGroup<PersistEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.PERSIST);
+        eventListenerGroup.appendListener(new DefaultPersistEventListener());
+        eventListenerGroupRegistry.put(EventType.PERSIST, eventListenerGroup);
     }
 }

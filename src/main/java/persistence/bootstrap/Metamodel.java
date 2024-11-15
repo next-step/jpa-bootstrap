@@ -15,6 +15,7 @@ import persistence.event.EventListenerGroup;
 import persistence.event.EventListenerRegistry;
 import persistence.event.EventType;
 import persistence.event.LoadEventListener;
+import persistence.event.PersistEventListener;
 import persistence.meta.EntityTable;
 
 public class Metamodel {
@@ -54,6 +55,10 @@ public class Metamodel {
 
     public EventListenerGroup<LoadEventListener> getLoadEventListenerGroup() {
         return eventListenerRegistry.getEventListenerGroup(EventType.LOAD);
+    }
+
+    public EventListenerGroup<PersistEventListener> getPersistEventListenerGroup() {
+        return eventListenerRegistry.getEventListenerGroup(EventType.PERSIST);
     }
 
     public void close() {
