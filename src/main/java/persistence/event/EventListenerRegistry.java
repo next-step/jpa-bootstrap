@@ -1,12 +1,18 @@
 package persistence.event;
 
+import persistence.event.clear.ClearEventListener;
+import persistence.event.clear.DefaultClearEventListener;
 import persistence.event.delete.DefaultDeleteEventListener;
 import persistence.event.delete.DeleteEventListener;
 import persistence.event.dirtycheck.DefaultDirtyCheckEventListener;
 import persistence.event.dirtycheck.DirtyCheckEventListener;
+import persistence.event.flush.DefaultFlushEventListener;
+import persistence.event.flush.FlushEventListener;
 import persistence.event.load.CacheLoadEventListener;
 import persistence.event.load.DefaultLoadEventListener;
 import persistence.event.load.LoadEventListener;
+import persistence.event.merge.DefaultMergeEventListener;
+import persistence.event.merge.MergeEventListener;
 import persistence.event.persist.DefaultPersistEventListener;
 import persistence.event.persist.OnflushPersistEventListener;
 import persistence.event.persist.PersistEventListener;
@@ -26,6 +32,9 @@ public class EventListenerRegistry {
         registerDeleteEventListener();
         registerUpdateEventListener();
         registerDirtyCheckEventListener();
+        registerMergeEventListener();
+        flushEventListener();
+        clearEventListener();
     }
 
     public <T> EventListenerGroup<T> getEventListenerGroup(EventType<T> eventType) {
@@ -67,5 +76,23 @@ public class EventListenerRegistry {
         final EventListenerGroup<DirtyCheckEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.DIRTY_CHECK);
         eventListenerGroup.appendListener(new DefaultDirtyCheckEventListener());
         eventListenerGroupRegistry.put(EventType.DIRTY_CHECK, eventListenerGroup);
+    }
+
+    private void registerMergeEventListener() {
+        final EventListenerGroup<MergeEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.MERGE);
+        eventListenerGroup.appendListener(new DefaultMergeEventListener());
+        eventListenerGroupRegistry.put(EventType.MERGE, eventListenerGroup);
+    }
+
+    private void flushEventListener() {
+        final EventListenerGroup<FlushEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.FLUSH);
+        eventListenerGroup.appendListener(new DefaultFlushEventListener());
+        eventListenerGroupRegistry.put(EventType.FLUSH, eventListenerGroup);
+    }
+
+    private void clearEventListener() {
+        final EventListenerGroup<ClearEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.CLEAR);
+        eventListenerGroup.appendListener(new DefaultClearEventListener());
+        eventListenerGroupRegistry.put(EventType.CLEAR, eventListenerGroup);
     }
 }

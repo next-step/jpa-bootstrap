@@ -12,7 +12,7 @@ public class DefaultDirtyCheckEventListener implements DirtyCheckEventListener {
     public <T> void onDirtyCheck(DirtyCheckEvent<T> dirtyCheckEvent) {
         final Metamodel metamodel = dirtyCheckEvent.getMetamodel();
         final T entity = dirtyCheckEvent.getEntity();
-        final T snapshot = dirtyCheckEvent.getSnapshot();
+        final Object snapshot = dirtyCheckEvent.getSnapshot();
 
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
         final List<EntityColumn> result = entityTable.getEntityColumns()

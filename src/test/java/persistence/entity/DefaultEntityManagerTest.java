@@ -187,7 +187,6 @@ class DefaultEntityManagerTest {
         assertThatThrownBy(() -> entityManager.remove(entity))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage(DefaultEntityManager.NOT_REMOVABLE_STATUS_FAILED_MESSAGE);
-
     }
 
     @Test

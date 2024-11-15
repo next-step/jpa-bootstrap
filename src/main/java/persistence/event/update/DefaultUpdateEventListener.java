@@ -1,8 +1,9 @@
 package persistence.event.update;
 
+import persistence.action.ActionQueue;
+import persistence.action.UpdateAction;
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.factory.PersistenceContext;
-import persistence.entity.persister.EntityPersister;
 import persistence.event.dirtycheck.DirtyCheckEvent;
 import persistence.event.dirtycheck.DirtyCheckEventListener;
 import persistence.meta.EntityColumn;
@@ -15,10 +16,11 @@ public class DefaultUpdateEventListener implements UpdateEventListener {
     public <T> void onUpdate(UpdateEvent<T> updateEvent) {
         final Metamodel metamodel = updateEvent.getMetamodel();
         final PersistenceContext persistenceContext = updateEvent.getPersistenceContext();
+        final ActionQueue actionQueue = updateEvent.getActionQueue();
         final T entity = updateEvent.getEntity();
 
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        final T snapshot = (T) persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue(entity));
+        final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue(entity));
         if (snapshot == null) {
             return;
         }
@@ -31,8 +33,6 @@ public class DefaultUpdateEventListener implements UpdateEventListener {
             return;
         }
 
-        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
-        entityPersister.update(entity, dirtiedEntityColumns);
-        persistenceContext.addEntity(entity, entityTable);
+        actionQueue.addAction(new UpdateAction<>(metamodel, persistenceContext, entity, dirtiedEntityColumns));
     }
 }

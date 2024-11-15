@@ -8,10 +8,10 @@ import java.util.List;
 public class DirtyCheckEvent<T> {
     private final Metamodel metamodel;
     private final T entity;
-    private final T snapshot;
+    private final Object snapshot;
     private List<EntityColumn> result;
 
-    public DirtyCheckEvent(Metamodel metamodel, T entity, T snapshot) {
+    public DirtyCheckEvent(Metamodel metamodel, T entity, Object snapshot) {
         this.metamodel = metamodel;
         this.entity = entity;
         this.snapshot = snapshot;
@@ -25,7 +25,7 @@ public class DirtyCheckEvent<T> {
         return entity;
     }
 
-    public T getSnapshot() {
+    public Object getSnapshot() {
         return snapshot;
     }
 

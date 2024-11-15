@@ -7,6 +7,8 @@ public interface EntityManager {
 
     <T> void remove(T entity);
 
+    <T> void merge(T entity);
+
     void flush();
 
     void clear();

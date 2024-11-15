@@ -3,14 +3,18 @@ package persistence.entity.manager;
 import persistence.action.ActionQueue;
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.factory.PersistenceContext;
+import persistence.event.clear.ClearEvent;
+import persistence.event.clear.ClearEventListener;
 import persistence.event.delete.DeleteEvent;
 import persistence.event.delete.DeleteEventListener;
+import persistence.event.flush.FlushEvent;
+import persistence.event.flush.FlushEventListener;
 import persistence.event.load.LoadEvent;
 import persistence.event.load.LoadEventListener;
+import persistence.event.merge.MergeEvent;
+import persistence.event.merge.MergeEventListener;
 import persistence.event.persist.PersistEvent;
 import persistence.event.persist.PersistEventListener;
-import persistence.event.update.UpdateEvent;
-import persistence.event.update.UpdateEventListener;
 
 public class DefaultEntityManager implements EntityManager {
     public static final String NOT_PERSISTABLE_STATUS_FAILED_MESSAGE = "엔티티가 영속화 가능한 상태가 아닙니다.";
@@ -46,24 +50,20 @@ public class DefaultEntityManager implements EntityManager {
     }
 
     @Override
+    public <T> void merge(T entity) {
+        final MergeEvent<T> mergeEvent = new MergeEvent<>(metamodel, persistenceContext, actionQueue, entity);
+        metamodel.getMergeEventListenerGroup().doEvent(mergeEvent, MergeEventListener::onMerge);
+    }
+
+    @Override
     public void flush() {
-        actionQueue.executeAll();
-        updateAll();
+        final FlushEvent flushEvent = new FlushEvent(metamodel, persistenceContext, actionQueue);
+        metamodel.getFlushEventListenerGroup().doEvent(flushEvent, FlushEventListener::onFlush);
     }
 
     @Override
     public void clear() {
-        persistenceContext.clear();
+        final ClearEvent clearEvent = new ClearEvent(persistenceContext, actionQueue);
+        metamodel.getClearEventListenerGroup().doEvent(clearEvent, ClearEventListener::onClear);
     }
-
-    private void updateAll() {
-        persistenceContext.getAllEntity()
-                .forEach(this::update);
-    }
-
-    private <T> void update(T entity) {
-        final UpdateEvent<T> updateEvent = new UpdateEvent<>(metamodel, persistenceContext, entity);
-        metamodel.getUpdateEventListenerGroup().doEvent(updateEvent, UpdateEventListener::onUpdate);
-    }
-
 }

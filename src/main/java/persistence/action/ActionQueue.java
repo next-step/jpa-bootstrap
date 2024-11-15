@@ -36,4 +36,10 @@ public class ActionQueue {
             updateAction.execute();
         }
     }
+
+    public void clear() {
+        persists.clear();
+        deletes.clear();
+        updates.clear();
+    }
 }
