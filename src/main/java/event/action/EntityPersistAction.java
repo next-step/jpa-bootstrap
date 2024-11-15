@@ -15,6 +15,6 @@ public class EntityPersistAction implements EntityAction{
 
     @Override
     public void execute() {
-        this.entityPersister.remove(entityData);
+        this.entityPersister.persist(entityData);
     }
 }
