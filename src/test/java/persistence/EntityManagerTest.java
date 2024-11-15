@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /*
 - Persist로 Person 저장 후 영속성 컨텍스트에 존재하는지 확인한다.
@@ -116,16 +117,53 @@ class EntityManagerTest {
                 .contains(1L, "test1", 29, "changed@test.com");
     }
 
-    @DisplayName("Persist로 Person 저장 후 영속성 컨텍스트에 존재하는지 확인한다.")
+    @DisplayName("영속성 컨텍스트 Clear후 Flush하여 데이터가 반영됐는지 확인한다.")
     @Test
     void flushTest() {
         Person person = createPerson(1);
         this.entityManager.persist(person);
-//        this.entityManager.flush();
+
+        this.entityManager.clear();
+
+        this.entityManager.flush();
         Person findPerson = this.entityManager.find(Person.class, 1L);
         assertThat(findPerson)
                 .extracting("id", "name", "age", "email")
                 .contains(1L, "test1", 29, "test@test.com");
+    }
+
+    @DisplayName("영속성 컨텍스트를 clear하고 flush하여 데이터가 수정됐는지 확인한다.")
+    @Test
+    void mergeFlushTest() {
+        Person person = createPerson(1);
+        this.entityManager.persist(person);
+
+        person.changeEmail("changed@test.com");
+        this.entityManager.merge(person);
+
+        this.entityManager.clear();
+        this.entityManager.flush();
+
+        Person findPerson = this.entityManager.find(Person.class, 1L);
+        assertThat(findPerson)
+                .extracting("id", "name", "age", "email")
+                .contains(1L, "test1", 29, "changed@test.com");
+    }
+
+    @DisplayName("영속성 컨텍스트를 clear하고 flush를 하지않으면 데이터가 반영되지 않았는지 확인한다.")
+    @Test
+    void clearTest() {
+        Person person = createPerson(1);
+        this.entityManager.persist(person);
+
+        person.changeEmail("changed@test.com");
+        this.entityManager.merge(person);
+
+        this.entityManager.clear();
+
+        assertThatThrownBy(() -> this.entityManager.find(Person.class, 1L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Expected 1 result, got 0");
     }
 
     private Person createPerson(int i) {
