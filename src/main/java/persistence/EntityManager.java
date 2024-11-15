@@ -13,4 +13,6 @@ public interface EntityManager {
 
     void flush();
 
+    void clear();
+
 }

@@ -134,6 +134,11 @@ public class EntityManagerImpl implements EntityManager {
         this.actionQueue.execute();
     }
 
+    @Override
+    public void clear() {
+        this.persistenceContext.clear();
+    }
+
     private EntityData checkDirtyCheck(EntityData entityBuilderData) {
         EntityKey entityKey = new EntityKey(entityBuilderData);
 
