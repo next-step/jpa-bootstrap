@@ -11,6 +11,7 @@ import persistence.bootstrap.binder.RowMapperBinder;
 import persistence.entity.loader.EntityLoader;
 import persistence.entity.persister.CollectionPersister;
 import persistence.entity.persister.EntityPersister;
+import persistence.event.DeleteEventListener;
 import persistence.event.EventListenerGroup;
 import persistence.event.EventListenerRegistry;
 import persistence.event.EventType;
@@ -63,6 +64,10 @@ public class Metamodel {
 
     public EventListenerGroup<PersistEventListener> getPersistOnflushEventListenerGroup() {
         return eventListenerRegistry.getEventListenerGroup(EventType.PERSIST_ONFLUSH);
+    }
+
+    public EventListenerGroup<DeleteEventListener> getDeleteEventListenerGroup() {
+        return eventListenerRegistry.getEventListenerGroup(EventType.DELETE);
     }
 
     public void close() {

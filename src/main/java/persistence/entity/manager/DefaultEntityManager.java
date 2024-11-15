@@ -2,8 +2,9 @@ package persistence.entity.manager;
 
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.factory.PersistenceContext;
-import persistence.entity.persister.CollectionPersister;
 import persistence.entity.persister.EntityPersister;
+import persistence.event.DeleteEvent;
+import persistence.event.DeleteEventListener;
 import persistence.event.LoadEvent;
 import persistence.event.LoadEventListener;
 import persistence.event.PersistEvent;
@@ -91,22 +92,13 @@ public class DefaultEntityManager implements EntityManager {
         }
     }
 
-    private void persist(Object entity, EntityTable entityTable) {
-        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
-        entityPersister.insert(entity);
-        if (entityTable.isOneToMany()) {
-            final CollectionPersister collectionPersister = metamodel.getCollectionPersister(
-                    entity.getClass(), entityTable.getAssociationColumnName());
-            collectionPersister.insert(entityTable.getAssociationColumnValue(entity), entity);
-        }
-    }
-
-    private void deleteAll() {
+    private <T> void deleteAll() {
         final Queue<Object> removeQueue = persistenceContext.getRemoveQueue();
         while (!removeQueue.isEmpty()) {
-            final Object entity = removeQueue.poll();
-            final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
-            entityPersister.delete(entity);
+            final T entity = (T) removeQueue.poll();
+
+            final DeleteEvent<T> persistEvent = new DeleteEvent<>(metamodel, entity);
+            metamodel.getDeleteEventListenerGroup().doEvent(persistEvent, DeleteEventListener::onDelete);
         }
     }
 
