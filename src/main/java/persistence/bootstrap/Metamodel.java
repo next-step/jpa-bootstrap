@@ -67,10 +67,6 @@ public class Metamodel {
         return eventListenerRegistry.getEventListenerGroup(EventType.PERSIST);
     }
 
-    public EventListenerGroup<PersistEventListener> getPersistOnflushEventListenerGroup() {
-        return eventListenerRegistry.getEventListenerGroup(EventType.PERSIST_ONFLUSH);
-    }
-
     public EventListenerGroup<DeleteEventListener> getDeleteEventListenerGroup() {
         return eventListenerRegistry.getEventListenerGroup(EventType.DELETE);
     }

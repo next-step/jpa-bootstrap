@@ -14,7 +14,6 @@ import persistence.event.load.LoadEventListener;
 import persistence.event.merge.DefaultMergeEventListener;
 import persistence.event.merge.MergeEventListener;
 import persistence.event.persist.DefaultPersistEventListener;
-import persistence.event.persist.OnflushPersistEventListener;
 import persistence.event.persist.PersistEventListener;
 import persistence.event.update.DefaultUpdateEventListener;
 import persistence.event.update.UpdateEventListener;
@@ -28,7 +27,6 @@ public class EventListenerRegistry {
     public EventListenerRegistry() {
         registerLoadEventListener();
         registerPersistEventListener();
-        registerPersistOnflushEventListener();
         registerDeleteEventListener();
         registerUpdateEventListener();
         registerDirtyCheckEventListener();
@@ -52,12 +50,6 @@ public class EventListenerRegistry {
         final EventListenerGroup<PersistEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.PERSIST);
         eventListenerGroup.appendListener(new DefaultPersistEventListener());
         eventListenerGroupRegistry.put(EventType.PERSIST, eventListenerGroup);
-    }
-
-    private void registerPersistOnflushEventListener() {
-        final EventListenerGroup<PersistEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.PERSIST);
-        eventListenerGroup.appendListener(new OnflushPersistEventListener());
-        eventListenerGroupRegistry.put(EventType.PERSIST_ONFLUSH, eventListenerGroup);
     }
 
     private void registerDeleteEventListener() {

@@ -12,7 +12,6 @@ import persistence.event.update.UpdateEventListener;
 public class EventType<T> {
     public static final EventType<LoadEventListener> LOAD = create("load", LoadEventListener.class);
     public static final EventType<PersistEventListener> PERSIST = create("create", PersistEventListener.class);
-    public static final EventType<PersistEventListener> PERSIST_ONFLUSH = create("create-onflush", PersistEventListener.class);
     public static final EventType<DeleteEventListener> DELETE = create("delete", DeleteEventListener.class);
     public static final EventType<UpdateEventListener> UPDATE = create("update", UpdateEventListener.class);
     public static final EventType<DirtyCheckEventListener> DIRTY_CHECK = create("dirty-check", DirtyCheckEventListener.class);
