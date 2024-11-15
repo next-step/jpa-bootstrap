@@ -74,7 +74,12 @@ public class EntityPersisterTest {
         Person person = createPerson(1);
         this.entityPersister.persist(new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person)));
 
-        Person findPerson = this.entityLoader.find(Person.class, person.getId());
+        EntityMetaData entityMetaData = new EntityMetaData(Person.class);
+        EntityObjectData entityObjectData = new EntityObjectData(Person.class, 1L);
+
+        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
+
+        Person findPerson = this.entityLoader.find(entityData);
 
         assertThat(findPerson)
                 .extracting("id", "name", "age", "email")
@@ -85,10 +90,13 @@ public class EntityPersisterTest {
     @Test
     void removeTest() {
         Person person = createPerson(1);
-        this.entityPersister.persist(new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person)));
-        this.entityPersister.remove(new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person)));
 
-        assertThatThrownBy(() -> this.entityLoader.find(Person.class, person.getId()))
+        EntityData entityData = new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person));
+
+        this.entityPersister.persist(entityData);
+        this.entityPersister.remove(entityData);
+
+        assertThatThrownBy(() -> this.entityLoader.find(entityData))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Expected 1 result, got 0");
     }
@@ -97,12 +105,16 @@ public class EntityPersisterTest {
     @Test
     void updateTest() {
         Person person = createPerson(1);
-        this.entityPersister.persist(new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person)));
+
+        EntityData entityData = new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person));
+
+        this.entityPersister.persist(entityData);
 
         person.changeEmail("changed@test.com");
-        this.entityPersister.merge(new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person)));
+        EntityData changeEntityData = new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person));
+        this.entityPersister.merge(changeEntityData);
 
-        Person findPerson = this.entityLoader.find(Person.class, person.getId());
+        Person findPerson = this.entityLoader.find(entityData);
 
         assertThat(findPerson)
                 .extracting("id", "name", "age", "email")
