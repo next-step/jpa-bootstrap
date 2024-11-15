@@ -23,11 +23,16 @@ public class EntityKey {
         return id;
     }
 
+    public Class<?> getClazz() {
+        return clazz;
+    }
+
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof EntityKey other)) return false;
-        return Objects.equals(id, other.id) && clazz.equals(other.clazz);
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        EntityKey entityKey = (EntityKey) object;
+        return Objects.equals(id, entityKey.id) && this.clazz == entityKey.getClazz();
     }
 
     @Override

@@ -6,6 +6,13 @@ import builder.dml.EntityData;
 import builder.dml.EntityMetaData;
 import builder.dml.EntityObjectData;
 import builder.dml.builder.DMLQueryBuilder;
+import event.EventListenerRegistry;
+import event.EventType;
+import event.action.ActionQueue;
+import event.delete.DeleteEventListener;
+import event.load.LoadEventListener;
+import event.merge.MergeEventListener;
+import event.persist.PersistEventListener;
 import jdbc.JdbcTemplate;
 
 import java.util.List;
@@ -13,16 +20,24 @@ import java.util.List;
 public class EntityManagerImpl implements EntityManager {
 
     private final PersistenceContext persistenceContext;
+    private final ActionQueue actionQueue;
+    private final EventListenerRegistry eventListenerRegistry;
     private final Metamodel metamodel;
-    private final EntityLoader entityLoader;
 
-    public EntityManagerImpl(JdbcTemplate jdbcTemplate, PersistenceContext persistenceContext, Metamodel metamodel, DMLQueryBuilder dmlQueryBuilder) {
-        this.entityLoader = new EntityLoader(jdbcTemplate, dmlQueryBuilder);
+    public EntityManagerImpl(
+            JdbcTemplate jdbcTemplate,
+            PersistenceContext persistenceContext,
+            Metamodel metamodel,
+            DMLQueryBuilder dmlQueryBuilder
+    ) {
         this.persistenceContext = persistenceContext;
+        this.actionQueue = new ActionQueue();
         this.metamodel = metamodel;
+        this.eventListenerRegistry = new EventListenerRegistry(this.actionQueue, metamodel, new EntityLoader(jdbcTemplate, dmlQueryBuilder));
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T find(Class<T> clazz, Object id) {
         EntityKey entityKey = new EntityKey(id, clazz);
         EntityEntry entityEntry = this.persistenceContext.getEntityEntryMap(entityKey);
@@ -32,14 +47,12 @@ public class EntityManagerImpl implements EntityManager {
             return clazz.cast(persistEntityData.getEntityInstance());
         }
 
-        T findObject = this.entityLoader.find(clazz, id);
+        EntityData entityData = createEntityData(clazz, id);
+
+        LoadEventListener<T> eventListener = (LoadEventListener<T>) this.eventListenerRegistry.getEventListenerGroup(EventType.LOAD).getEventListener();
+        T findObject = eventListener.onLoad(entityData);
+
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.LOADING);
-
-        EntityMetaData entityMetaData = this.metamodel.entityMetaData(clazz);
-        EntityObjectData entityObjectData = new EntityObjectData(clazz, id);
-
-        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
-
         insertPersistenceContext(entityKey, entityData);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.MANAGED);
 
@@ -48,10 +61,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void persist(Object entityInstance) {
-        EntityMetaData entityMetaData = this.metamodel.entityMetaData(entityInstance.getClass());
-        EntityObjectData entityObjectData = new EntityObjectData(entityInstance);
-
-        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
+        EntityData entityData = createEntityData(entityInstance);
         EntityKey entityKey = new EntityKey(entityData);
 
         EntityEntry entityEntry = this.persistenceContext.getEntityEntryMap(entityKey);
@@ -62,7 +72,8 @@ public class EntityManagerImpl implements EntityManager {
 
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.SAVING);
 
-        this.metamodel.entityPersister(entityInstance.getClass()).persist(entityData);
+        PersistEventListener eventListener = (PersistEventListener) this.eventListenerRegistry.getEventListenerGroup(EventType.PERSIST).getEventListener();
+        eventListener.onPersist(entityData);
 
         insertPersistenceContext(entityKey, entityData);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.MANAGED);
@@ -70,10 +81,8 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void merge(Object entityInstance) {
-        EntityMetaData entityMetaData = this.metamodel.entityMetaData(entityInstance.getClass());
-        EntityObjectData entityObjectData = new EntityObjectData(entityInstance);
+        EntityData entityData = createEntityData(entityInstance);
 
-        EntityData entityData = new EntityData(entityMetaData, entityObjectData);
         EntityKey entityKey = new EntityKey(entityData);
 
         EntityEntry entityEntry = this.persistenceContext.getEntityEntryMap(entityKey);
@@ -89,7 +98,8 @@ public class EntityManagerImpl implements EntityManager {
             return;
         }
 
-        metamodel.entityPersister(entityInstance.getClass()).merge(diffBuilderData);
+        MergeEventListener mergeEventListener = (MergeEventListener) this.eventListenerRegistry.getEventListenerGroup(EventType.MERGE).getEventListener();
+        mergeEventListener.onMerge(diffBuilderData);
 
         insertPersistenceContext(entityKey, entityData);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.MANAGED);
@@ -110,11 +120,18 @@ public class EntityManagerImpl implements EntityManager {
         }
 
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.DELETED);
-        metamodel.entityPersister(entityInstance.getClass()).remove(entityData);
+
+        DeleteEventListener deleteEventListener = (DeleteEventListener) this.eventListenerRegistry.getEventListenerGroup(EventType.DELETE).getEventListener();
+        deleteEventListener.onDelete(entityData);
 
         this.persistenceContext.deleteEntity(entityKey);
         this.persistenceContext.deleteDatabaseSnapshot(entityKey);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.GONE);
+    }
+
+    @Override
+    public void flush() {
+        this.actionQueue.execute();
     }
 
     private EntityData checkDirtyCheck(EntityData entityBuilderData) {
@@ -130,5 +147,19 @@ public class EntityManagerImpl implements EntityManager {
     private void insertPersistenceContext(EntityKey entityKey, EntityData EntityData) {
         this.persistenceContext.insertEntity(entityKey, EntityData);
         this.persistenceContext.insertDatabaseSnapshot(entityKey, EntityData);
+    }
+
+    private EntityData createEntityData(Class<?> clazz, Object id) {
+        EntityMetaData entityMetaData = this.metamodel.entityMetaData(clazz);
+        EntityObjectData entityObjectData = new EntityObjectData(clazz, id);
+
+        return new EntityData(entityMetaData, entityObjectData);
+    }
+
+    private EntityData createEntityData(Object entityInstance) {
+        EntityMetaData entityMetaData = this.metamodel.entityMetaData(entityInstance.getClass());
+        EntityObjectData entityObjectData = new EntityObjectData(entityInstance);
+
+        return new EntityData(entityMetaData, entityObjectData);
     }
 }
