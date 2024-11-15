@@ -1,16 +1,19 @@
-package persistence.event;
+package persistence.event.persist;
 
+import persistence.action.ActionQueue;
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.factory.PersistenceContext;
 
-public class UpdateEvent<T> {
+public class PersistEvent<T> {
     private final Metamodel metamodel;
     private final PersistenceContext persistenceContext;
+    private final ActionQueue actionQueue;
     private final T entity;
 
-    public UpdateEvent(Metamodel metamodel, PersistenceContext persistenceContext, T entity) {
+    public PersistEvent(Metamodel metamodel, PersistenceContext persistenceContext, ActionQueue actionQueue, T entity) {
         this.metamodel = metamodel;
         this.persistenceContext = persistenceContext;
+        this.actionQueue = actionQueue;
         this.entity = entity;
     }
 
@@ -20,6 +23,10 @@ public class UpdateEvent<T> {
 
     public PersistenceContext getPersistenceContext() {
         return persistenceContext;
+    }
+
+    public ActionQueue getActionQueue() {
+        return actionQueue;
     }
 
     public T getEntity() {

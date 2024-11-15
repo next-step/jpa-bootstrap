@@ -5,7 +5,7 @@ public interface EntityManager {
 
     <T> void persist(T entity);
 
-    void remove(Object entity);
+    <T> void remove(T entity);
 
     void flush();
 

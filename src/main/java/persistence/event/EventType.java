@@ -1,5 +1,11 @@
 package persistence.event;
 
+import persistence.event.delete.DeleteEventListener;
+import persistence.event.dirtycheck.DirtyCheckEventListener;
+import persistence.event.load.LoadEventListener;
+import persistence.event.persist.PersistEventListener;
+import persistence.event.update.UpdateEventListener;
+
 public class EventType<T> {
     public static final EventType<LoadEventListener> LOAD = create("load", LoadEventListener.class);
     public static final EventType<PersistEventListener> PERSIST = create("create", PersistEventListener.class);

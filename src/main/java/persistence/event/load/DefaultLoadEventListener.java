@@ -1,4 +1,4 @@
-package persistence.event;
+package persistence.event.load;
 
 import persistence.bootstrap.Metamodel;
 import persistence.entity.loader.EntityLoader;

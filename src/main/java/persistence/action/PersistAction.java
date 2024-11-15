@@ -1,4 +1,4 @@
-package persistence.event;
+package persistence.action;
 
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.EntityStatus;
@@ -7,13 +7,18 @@ import persistence.entity.persister.CollectionPersister;
 import persistence.entity.persister.EntityPersister;
 import persistence.meta.EntityTable;
 
-public class DefaultPersistEventListener implements PersistEventListener {
-    @Override
-    public <T> void onPersist(PersistEvent<T> persistEvent) {
-        final Metamodel metamodel = persistEvent.getMetamodel();
-        final PersistenceContext persistenceContext = persistEvent.getPersistenceContext();
-        final T entity = persistEvent.getEntity();
+public class PersistAction<T> {
+    private final Metamodel metamodel;
+    private final PersistenceContext persistenceContext;
+    private final T entity;
 
+    public PersistAction(Metamodel metamodel, PersistenceContext persistenceContext, T entity) {
+        this.metamodel = metamodel;
+        this.persistenceContext = persistenceContext;
+        this.entity = entity;
+    }
+
+    public void execute() {
         final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
 
@@ -23,8 +28,6 @@ public class DefaultPersistEventListener implements PersistEventListener {
                     metamodel.getCollectionPersister(entity.getClass(), entityTable.getAssociationColumnName());
             collectionPersister.insert(entityTable.getAssociationColumnValue(entity), entity);
         }
-
-        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
         persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
     }
 }

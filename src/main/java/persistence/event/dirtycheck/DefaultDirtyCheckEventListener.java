@@ -1,4 +1,4 @@
-package persistence.event;
+package persistence.event.dirtycheck;
 
 import persistence.bootstrap.Metamodel;
 import persistence.meta.EntityColumn;

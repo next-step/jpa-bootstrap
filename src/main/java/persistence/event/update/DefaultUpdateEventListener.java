@@ -1,8 +1,10 @@
-package persistence.event;
+package persistence.event.update;
 
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.factory.PersistenceContext;
 import persistence.entity.persister.EntityPersister;
+import persistence.event.dirtycheck.DirtyCheckEvent;
+import persistence.event.dirtycheck.DirtyCheckEventListener;
 import persistence.meta.EntityColumn;
 import persistence.meta.EntityTable;
 

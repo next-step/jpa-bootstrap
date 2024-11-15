@@ -1,18 +1,16 @@
 package persistence.entity.manager;
 
+import persistence.action.ActionQueue;
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.factory.PersistenceContext;
-import persistence.event.DeleteEvent;
-import persistence.event.DeleteEventListener;
-import persistence.event.LoadEvent;
-import persistence.event.LoadEventListener;
-import persistence.event.PersistEvent;
-import persistence.event.PersistEventListener;
-import persistence.event.UpdateEvent;
-import persistence.event.UpdateEventListener;
-import persistence.meta.EntityTable;
-
-import java.util.Queue;
+import persistence.event.delete.DeleteEvent;
+import persistence.event.delete.DeleteEventListener;
+import persistence.event.load.LoadEvent;
+import persistence.event.load.LoadEventListener;
+import persistence.event.persist.PersistEvent;
+import persistence.event.persist.PersistEventListener;
+import persistence.event.update.UpdateEvent;
+import persistence.event.update.UpdateEventListener;
 
 public class DefaultEntityManager implements EntityManager {
     public static final String NOT_PERSISTABLE_STATUS_FAILED_MESSAGE = "엔티티가 영속화 가능한 상태가 아닙니다.";
@@ -20,10 +18,12 @@ public class DefaultEntityManager implements EntityManager {
 
     private final Metamodel metamodel;
     private final PersistenceContext persistenceContext;
+    private final ActionQueue actionQueue;
 
     public DefaultEntityManager(Metamodel metamodel) {
         this.metamodel = metamodel;
         this.persistenceContext = new PersistenceContext();
+        this.actionQueue = new ActionQueue();
     }
 
     @Override
@@ -35,69 +35,25 @@ public class DefaultEntityManager implements EntityManager {
 
     @Override
     public <T> void persist(T entity) {
-        validatePersist(entity);
-
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        if (entityTable.isIdGenerationFromDatabase()) {
-            final PersistEvent<T> persistEvent = new PersistEvent<>(metamodel, persistenceContext, entity);
-            metamodel.getPersistEventListenerGroup().doEvent(persistEvent, PersistEventListener::onPersist);
-            return;
-        }
-
-        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
-        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
-        persistenceContext.addToPersistQueue(entity);
+        final PersistEvent<T> persistEvent = new PersistEvent<>(metamodel, persistenceContext, actionQueue, entity);
+        metamodel.getPersistEventListenerGroup().doEvent(persistEvent, PersistEventListener::onPersist);
     }
 
     @Override
-    public void remove(Object entity) {
-        final EntityEntry entityEntry = persistenceContext.getEntityEntry(entity);
-        if (!entityEntry.isRemovable()) {
-            throw new IllegalStateException(NOT_REMOVABLE_STATUS_FAILED_MESSAGE);
-        }
-
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        persistenceContext.removeEntity(entity, entityTable.getIdValue(entity));
-        persistenceContext.addToRemoveQueue(entity);
+    public <T> void remove(T entity) {
+        final DeleteEvent<T> deleteEvent = new DeleteEvent<>(metamodel, persistenceContext, actionQueue, entity);
+        metamodel.getDeleteEventListenerGroup().doEvent(deleteEvent, DeleteEventListener::onDelete);
     }
 
     @Override
     public void flush() {
-        persistAll();
-        deleteAll();
+        actionQueue.executeAll();
         updateAll();
     }
 
     @Override
     public void clear() {
         persistenceContext.clear();
-    }
-
-    private void validatePersist(Object entity) {
-        final EntityEntry entityEntry = persistenceContext.getEntityEntry(entity);
-        if (entityEntry != null && !entityEntry.isPersistable()) {
-            throw new IllegalStateException(NOT_PERSISTABLE_STATUS_FAILED_MESSAGE);
-        }
-    }
-
-    private <T> void persistAll() {
-        final Queue<Object> persistQueue = persistenceContext.getPersistQueue();
-        while (!persistQueue.isEmpty()) {
-            final T entity = (T) persistQueue.poll();
-
-            final PersistEvent<T> persistEvent = new PersistEvent<>(metamodel, persistenceContext, entity);
-            metamodel.getPersistOnflushEventListenerGroup().doEvent(persistEvent, PersistEventListener::onPersist);
-        }
-    }
-
-    private <T> void deleteAll() {
-        final Queue<Object> removeQueue = persistenceContext.getRemoveQueue();
-        while (!removeQueue.isEmpty()) {
-            final T entity = (T) removeQueue.poll();
-
-            final DeleteEvent<T> deleteEvent = new DeleteEvent<>(metamodel, entity);
-            metamodel.getDeleteEventListenerGroup().doEvent(deleteEvent, DeleteEventListener::onDelete);
-        }
     }
 
     private void updateAll() {

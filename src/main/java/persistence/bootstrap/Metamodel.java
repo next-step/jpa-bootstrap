@@ -11,14 +11,14 @@ import persistence.bootstrap.binder.RowMapperBinder;
 import persistence.entity.loader.EntityLoader;
 import persistence.entity.persister.CollectionPersister;
 import persistence.entity.persister.EntityPersister;
-import persistence.event.DeleteEventListener;
-import persistence.event.DirtyCheckEventListener;
 import persistence.event.EventListenerGroup;
 import persistence.event.EventListenerRegistry;
 import persistence.event.EventType;
-import persistence.event.LoadEventListener;
-import persistence.event.PersistEventListener;
-import persistence.event.UpdateEventListener;
+import persistence.event.delete.DeleteEventListener;
+import persistence.event.dirtycheck.DirtyCheckEventListener;
+import persistence.event.load.LoadEventListener;
+import persistence.event.persist.PersistEventListener;
+import persistence.event.update.UpdateEventListener;
 import persistence.meta.EntityTable;
 
 public class Metamodel {

@@ -1,4 +1,4 @@
-package persistence.event;
+package persistence.event.load;
 
 import persistence.entity.manager.factory.PersistenceContext;
 
