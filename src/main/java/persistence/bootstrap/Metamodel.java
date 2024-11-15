@@ -12,11 +12,13 @@ import persistence.entity.loader.EntityLoader;
 import persistence.entity.persister.CollectionPersister;
 import persistence.entity.persister.EntityPersister;
 import persistence.event.DeleteEventListener;
+import persistence.event.DirtyCheckEventListener;
 import persistence.event.EventListenerGroup;
 import persistence.event.EventListenerRegistry;
 import persistence.event.EventType;
 import persistence.event.LoadEventListener;
 import persistence.event.PersistEventListener;
+import persistence.event.UpdateEventListener;
 import persistence.meta.EntityTable;
 
 public class Metamodel {
@@ -68,6 +70,12 @@ public class Metamodel {
 
     public EventListenerGroup<DeleteEventListener> getDeleteEventListenerGroup() {
         return eventListenerRegistry.getEventListenerGroup(EventType.DELETE);
+    }
+    public EventListenerGroup<UpdateEventListener> getUpdateEventListenerGroup() {
+        return eventListenerRegistry.getEventListenerGroup(EventType.UPDATE);
+    }
+    public EventListenerGroup<DirtyCheckEventListener> getDirtyCheckEventListenerGroup() {
+        return eventListenerRegistry.getEventListenerGroup(EventType.DIRTY_CHECK);
     }
 
     public void close() {

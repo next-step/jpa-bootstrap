@@ -2,18 +2,16 @@ package persistence.entity.manager;
 
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.factory.PersistenceContext;
-import persistence.entity.persister.EntityPersister;
 import persistence.event.DeleteEvent;
 import persistence.event.DeleteEventListener;
 import persistence.event.LoadEvent;
 import persistence.event.LoadEventListener;
 import persistence.event.PersistEvent;
 import persistence.event.PersistEventListener;
-import persistence.meta.EntityColumn;
+import persistence.event.UpdateEvent;
+import persistence.event.UpdateEventListener;
 import persistence.meta.EntityTable;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.Queue;
 
 public class DefaultEntityManager implements EntityManager {
@@ -97,8 +95,8 @@ public class DefaultEntityManager implements EntityManager {
         while (!removeQueue.isEmpty()) {
             final T entity = (T) removeQueue.poll();
 
-            final DeleteEvent<T> persistEvent = new DeleteEvent<>(metamodel, entity);
-            metamodel.getDeleteEventListenerGroup().doEvent(persistEvent, DeleteEventListener::onDelete);
+            final DeleteEvent<T> deleteEvent = new DeleteEvent<>(metamodel, entity);
+            metamodel.getDeleteEventListenerGroup().doEvent(deleteEvent, DeleteEventListener::onDelete);
         }
     }
 
@@ -107,32 +105,9 @@ public class DefaultEntityManager implements EntityManager {
                 .forEach(this::update);
     }
 
-    private void update(Object entity) {
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue(entity));
-        if (snapshot == null) {
-            return;
-        }
-
-        final List<EntityColumn> dirtiedEntityColumns = findDirtiedEntityColumns(entity, snapshot);
-        if (dirtiedEntityColumns.isEmpty()) {
-            return;
-        }
-
-        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
-        entityPersister.update(entity, dirtiedEntityColumns);
-        persistenceContext.addEntity(entity, entityTable);
+    private <T> void update(T entity) {
+        final UpdateEvent<T> updateEvent = new UpdateEvent<>(metamodel, persistenceContext, entity);
+        metamodel.getUpdateEventListenerGroup().doEvent(updateEvent, UpdateEventListener::onUpdate);
     }
 
-    private List<EntityColumn> findDirtiedEntityColumns(Object entity, Object snapshot) {
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        return entityTable.getEntityColumns()
-                .stream()
-                .filter(entityColumn -> isDirtied(entity, snapshot, entityColumn))
-                .toList();
-    }
-
-    private boolean isDirtied(Object entity, Object snapshot, EntityColumn entityColumn) {
-        return !Objects.equals(entityColumn.extractValue(entity), entityColumn.extractValue(snapshot));
-    }
 }

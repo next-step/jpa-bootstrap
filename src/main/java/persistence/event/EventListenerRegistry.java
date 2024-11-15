@@ -11,6 +11,8 @@ public class EventListenerRegistry {
         registerPersistEventListener();
         registerPersistOnflushEventListener();
         registerDeleteEventListener();
+        registerUpdateEventListener();
+        registerDirtyCheckEventListener();
     }
 
     public <T> EventListenerGroup<T> getEventListenerGroup(EventType<T> eventType) {
@@ -40,5 +42,17 @@ public class EventListenerRegistry {
         final EventListenerGroup<DeleteEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.DELETE);
         eventListenerGroup.appendListener(new DefaultDeleteEventListener());
         eventListenerGroupRegistry.put(EventType.DELETE, eventListenerGroup);
+    }
+
+    private void registerUpdateEventListener() {
+        final EventListenerGroup<UpdateEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.UPDATE);
+        eventListenerGroup.appendListener(new DefaultUpdateEventListener());
+        eventListenerGroupRegistry.put(EventType.UPDATE, eventListenerGroup);
+    }
+
+    private void registerDirtyCheckEventListener() {
+        final EventListenerGroup<DirtyCheckEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.DIRTY_CHECK);
+        eventListenerGroup.appendListener(new DefaultDirtyCheckEventListener());
+        eventListenerGroupRegistry.put(EventType.DIRTY_CHECK, eventListenerGroup);
     }
 }
