@@ -81,20 +81,13 @@ public class DefaultEntityManager implements EntityManager {
         }
     }
 
-    private void persistImmediately(Object entity, EntityTable entityTable) {
-        persist(entity, entityTable);
-        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
-        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
-    }
-
-    private void persistAll() {
+    private <T> void persistAll() {
         final Queue<Object> persistQueue = persistenceContext.getPersistQueue();
         while (!persistQueue.isEmpty()) {
-            final Object entity = persistQueue.poll();
-            final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+            final T entity = (T) persistQueue.poll();
 
-            persist(entity, entityTable);
-            persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
+            final PersistEvent<T> persistEvent = new PersistEvent<>(metamodel, persistenceContext, entity);
+            metamodel.getPersistOnflushEventListenerGroup().doEvent(persistEvent, PersistEventListener::onPersist);
         }
     }
 

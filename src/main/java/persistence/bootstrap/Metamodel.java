@@ -61,6 +61,10 @@ public class Metamodel {
         return eventListenerRegistry.getEventListenerGroup(EventType.PERSIST);
     }
 
+    public EventListenerGroup<PersistEventListener> getPersistOnflushEventListenerGroup() {
+        return eventListenerRegistry.getEventListenerGroup(EventType.PERSIST_ONFLUSH);
+    }
+
     public void close() {
         entityTableBinder.clear();
         entityLoaderBinder.clear();

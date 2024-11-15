@@ -9,6 +9,7 @@ public class EventListenerRegistry {
     public EventListenerRegistry() {
         registerLoadEventListener();
         registerPersistEventListener();
+        registerPersistOnflushEventListener();
     }
 
     public <T> EventListenerGroup<T> getEventListenerGroup(EventType<T> eventType) {
@@ -26,5 +27,11 @@ public class EventListenerRegistry {
         final EventListenerGroup<PersistEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.PERSIST);
         eventListenerGroup.appendListener(new DefaultPersistEventListener());
         eventListenerGroupRegistry.put(EventType.PERSIST, eventListenerGroup);
+    }
+
+    private void registerPersistOnflushEventListener() {
+        final EventListenerGroup<PersistEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.PERSIST);
+        eventListenerGroup.appendListener(new OnflushPersistEventListener());
+        eventListenerGroupRegistry.put(EventType.PERSIST_ONFLUSH, eventListenerGroup);
     }
 }

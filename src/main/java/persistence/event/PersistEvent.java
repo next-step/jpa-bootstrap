@@ -6,7 +6,7 @@ import persistence.entity.manager.factory.PersistenceContext;
 public class PersistEvent<T> {
     private final Metamodel metamodel;
     private final PersistenceContext persistenceContext;
-    private T entity;
+    private final T entity;
 
     public PersistEvent(Metamodel metamodel, PersistenceContext persistenceContext, T entity) {
         this.metamodel = metamodel;
