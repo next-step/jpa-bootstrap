@@ -20,7 +20,6 @@ public class DefaultLoadEventListener implements LoadEventListener {
 
         final EntityLoader entityLoader = metamodel.getEntityLoader(entityType);
         final T result = entityLoader.load(id);
-        persistenceContext.addEntity(result, id);
         loadEvent.setResult(result);
     }
 }

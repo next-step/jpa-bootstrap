@@ -15,11 +15,9 @@ import persistence.event.merge.MergeEvent;
 import persistence.event.merge.MergeEventListener;
 import persistence.event.persist.PersistEvent;
 import persistence.event.persist.PersistEventListener;
+import persistence.meta.EntityTable;
 
 public class DefaultEntityManager implements EntityManager {
-    public static final String NOT_PERSISTABLE_STATUS_FAILED_MESSAGE = "엔티티가 영속화 가능한 상태가 아닙니다.";
-    public static final String NOT_REMOVABLE_STATUS_FAILED_MESSAGE = "엔티티가 제거 가능한 상태가 아닙니다.";
-
     private final Metamodel metamodel;
     private final PersistenceContext persistenceContext;
     private final ActionQueue actionQueue;
@@ -34,6 +32,8 @@ public class DefaultEntityManager implements EntityManager {
     public <T> T find(Class<T> entityType, Object id) {
         final LoadEvent<T> loadEvent = new LoadEvent<>(metamodel, persistenceContext, entityType, id);
         metamodel.getLoadEventListenerGroup().doEvent(loadEvent, LoadEventListener::onLoad);
+
+        persistenceContext.addEntity(loadEvent.getResult(), id);
         return loadEvent.getResult();
     }
 
@@ -41,18 +41,29 @@ public class DefaultEntityManager implements EntityManager {
     public <T> void persist(T entity) {
         final PersistEvent<T> persistEvent = new PersistEvent<>(metamodel, persistenceContext, actionQueue, entity);
         metamodel.getPersistEventListenerGroup().doEvent(persistEvent, PersistEventListener::onPersist);
+
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
+        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
     }
 
     @Override
     public <T> void remove(T entity) {
         final DeleteEvent<T> deleteEvent = new DeleteEvent<>(metamodel, persistenceContext, actionQueue, entity);
         metamodel.getDeleteEventListenerGroup().doEvent(deleteEvent, DeleteEventListener::onDelete);
+
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        persistenceContext.removeEntity(entity, entityTable.getIdValue(entity));
     }
 
     @Override
     public <T> void merge(T entity) {
         final MergeEvent<T> mergeEvent = new MergeEvent<>(metamodel, persistenceContext, actionQueue, entity);
         metamodel.getMergeEventListenerGroup().doEvent(mergeEvent, MergeEventListener::onMerge);
+
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
+        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
     }
 
     @Override

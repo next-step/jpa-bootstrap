@@ -5,7 +5,6 @@ import persistence.action.DeleteAction;
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.EntityEntry;
 import persistence.entity.manager.factory.PersistenceContext;
-import persistence.meta.EntityTable;
 
 public class DefaultDeleteEventListener implements DeleteEventListener {
     public static final String NOT_REMOVABLE_STATUS_FAILED_MESSAGE = "엔티티가 제거 가능한 상태가 아닙니다.";
@@ -21,9 +20,6 @@ public class DefaultDeleteEventListener implements DeleteEventListener {
         if (!entityEntry.isRemovable()) {
             throw new IllegalStateException(NOT_REMOVABLE_STATUS_FAILED_MESSAGE);
         }
-
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        persistenceContext.removeEntity(entity, entityTable.getIdValue(entity));
 
         actionQueue.addAction(new DeleteAction<>(metamodel, entity));
     }

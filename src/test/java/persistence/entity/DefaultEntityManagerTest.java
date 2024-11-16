@@ -9,8 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.bootstrap.Metadata;
-import persistence.entity.manager.DefaultEntityManager;
 import persistence.entity.manager.EntityManager;
+import persistence.event.delete.DefaultDeleteEventListener;
+import persistence.event.persist.DefaultPersistEventListener;
 import util.TestHelper;
 
 import static org.assertj.core.api.Assertions.*;
@@ -152,7 +153,7 @@ class DefaultEntityManagerTest {
         // when & then
         assertThatThrownBy(() -> entityManager.persist(entity))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage(DefaultEntityManager.NOT_PERSISTABLE_STATUS_FAILED_MESSAGE);
+                .hasMessage(DefaultPersistEventListener.NOT_PERSISTABLE_STATUS_FAILED_MESSAGE);
 
     }
 
@@ -187,7 +188,7 @@ class DefaultEntityManagerTest {
         // when & then
         assertThatThrownBy(() -> entityManager.remove(entity))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage(DefaultEntityManager.NOT_REMOVABLE_STATUS_FAILED_MESSAGE);
+                .hasMessage(DefaultDeleteEventListener.NOT_REMOVABLE_STATUS_FAILED_MESSAGE);
     }
 
     @Test

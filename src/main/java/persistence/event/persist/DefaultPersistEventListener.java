@@ -4,7 +4,6 @@ import persistence.action.ActionQueue;
 import persistence.action.PersistAction;
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.EntityEntry;
-import persistence.entity.manager.EntityStatus;
 import persistence.entity.manager.factory.PersistenceContext;
 import persistence.entity.persister.CollectionPersister;
 import persistence.entity.persister.EntityPersister;
@@ -30,7 +29,7 @@ public class DefaultPersistEventListener implements PersistEventListener {
             return;
         }
 
-        persistLazy(persistenceContext, entity, entityTable, actionQueue, metamodel);
+        persistLazy(persistenceContext, entity, actionQueue, metamodel);
     }
 
     private <T> void persistImmediately(EntityPersister entityPersister, T entity, EntityTable entityTable,
@@ -38,13 +37,9 @@ public class DefaultPersistEventListener implements PersistEventListener {
         entityPersister.insert(entity);
         persistCollection(entityTable, metamodel, entity);
 
-        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
-        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
     }
 
-    private <T> void persistLazy(PersistenceContext persistenceContext, T entity, EntityTable entityTable, ActionQueue actionQueue, Metamodel metamodel) {
-        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
-        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
+    private <T> void persistLazy(PersistenceContext persistenceContext, T entity, ActionQueue actionQueue, Metamodel metamodel) {
         actionQueue.addAction(new PersistAction<>(metamodel, persistenceContext, entity));
     }
 
