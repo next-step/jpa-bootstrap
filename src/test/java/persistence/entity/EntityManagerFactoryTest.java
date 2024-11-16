@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.bootstrap.Metadata;
-import persistence.entity.manager.CurrentSessionContext;
 import persistence.entity.manager.EntityManager;
 import persistence.entity.manager.factory.EntityManagerFactory;
 import util.TestHelper;
@@ -16,12 +15,10 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EntityManagerFactoryTest {
-    private CurrentSessionContext currentSessionContext;
     private Metadata metadata;
 
     @BeforeEach
     void setUp() {
-        currentSessionContext = new CurrentSessionContext();
         metadata = TestHelper.createMetadata("domain");
     }
 

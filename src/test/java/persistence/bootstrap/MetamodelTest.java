@@ -34,14 +34,15 @@ class MetamodelTest {
 
         // then
         assertAll(
-                () -> assertThat(getBinder(metamodel, "entityTableBinder")).isNotNull(),
-                () -> assertThat(getBinder(metamodel, "entityLoaderBinder")).isNotNull(),
-                () -> assertThat(getBinder(metamodel, "entityPersisterBinder")).isNotNull(),
-                () -> assertThat(getBinder(metamodel, "collectionPersisterBinder")).isNotNull()
+                () -> assertThat(getField(metamodel, "entityTableBinder")).isNotNull(),
+                () -> assertThat(getField(metamodel, "entityLoaderBinder")).isNotNull(),
+                () -> assertThat(getField(metamodel, "entityPersisterBinder")).isNotNull(),
+                () -> assertThat(getField(metamodel, "collectionPersisterBinder")).isNotNull(),
+                () -> assertThat(getField(metamodel, "eventListenerRegistry")).isNotNull()
         );
     }
 
-    private Object getBinder(Metamodel metamodel, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+    private Object getField(Metamodel metamodel, String fieldName) throws NoSuchFieldException, IllegalAccessException {
         final Field field = metamodel.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
         return field.get(metamodel);

@@ -69,7 +69,7 @@ class EntityPersisterTest {
     void update() {
         // given
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
-        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate        );
+        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate);
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
         final EntityWithId updatedEntity = new EntityWithId(entity.getId(), "Jackson", 20, "test2@email.com");
@@ -99,7 +99,7 @@ class EntityPersisterTest {
     void delete() {
         // given
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
-        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate        );
+        final EntityPersister entityPersister = new EntityPersister(entityTable, jdbcTemplate);
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
