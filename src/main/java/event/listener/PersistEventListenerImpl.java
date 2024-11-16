@@ -7,11 +7,10 @@ import event.action.EntityPersistAction;
 
 public class PersistEventListenerImpl<T> implements EventListener<T> {
 
-    private final ActionQueue actionQueue;
     private final Metamodel metamodel;
+    private ActionQueue actionQueue;
 
-    public PersistEventListenerImpl(ActionQueue actionQueue, Metamodel metamodel) {
-        this.actionQueue = actionQueue;
+    public PersistEventListenerImpl(Metamodel metamodel) {
         this.metamodel = metamodel;
     }
 
@@ -20,5 +19,10 @@ public class PersistEventListenerImpl<T> implements EventListener<T> {
     public T handleEvent(EntityData entityData) {
         this.actionQueue.addAction(new EntityPersistAction(entityData, this.metamodel.entityPersister()));
         return (T) entityData.getEntityObjectData().getEntityInstance();
+    }
+
+    @Override
+    public void setActionQueue(ActionQueue actionQueue) {
+        this.actionQueue = actionQueue;
     }
 }

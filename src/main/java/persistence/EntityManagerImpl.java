@@ -7,20 +7,19 @@ import builder.dml.EntityMetaData;
 import builder.dml.EntityObjectData;
 import event.EventListenerRegistry;
 import event.EventType;
-import event.listener.EventListener;
 
 import java.util.List;
 
 public class EntityManagerImpl implements EntityManager {
 
     private final PersistenceContext persistenceContext;
-    private final EventListenerRegistry eventListenerRegistry;
+    private final EventListenerRegistry<?> eventListenerRegistry;
     private final Metamodel metamodel;
 
     public EntityManagerImpl(
             PersistenceContext persistenceContext,
             Metamodel metamodel,
-            EventListenerRegistry eventListenerRegistry
+            EventListenerRegistry<?> eventListenerRegistry
     ) {
         this.persistenceContext = persistenceContext;
         this.metamodel = metamodel;
@@ -40,8 +39,7 @@ public class EntityManagerImpl implements EntityManager {
 
         EntityData entityData = createEntityData(clazz, id);
 
-        EventListener<?> eventListener = this.eventListenerRegistry.getEventListener(EventType.LOAD);
-        T findObject = (T) eventListener.handleEvent(entityData);
+        T findObject = (T) this.eventListenerRegistry.handleEvent(EventType.LOAD, entityData);
 
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.LOADING);
         insertPersistenceContext(entityKey, entityData);
@@ -63,8 +61,7 @@ public class EntityManagerImpl implements EntityManager {
 
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.SAVING);
 
-        EventListener<?> eventListener = this.eventListenerRegistry.getEventListener(EventType.PERSIST);
-        eventListener.handleEvent(entityData);
+        this.eventListenerRegistry.handleEvent(EventType.PERSIST, entityData);
 
         insertPersistenceContext(entityKey, entityData);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.MANAGED);
@@ -89,8 +86,7 @@ public class EntityManagerImpl implements EntityManager {
             return;
         }
 
-        EventListener<?> mergeEventListener = this.eventListenerRegistry.getEventListener(EventType.MERGE);
-        mergeEventListener.handleEvent(diffBuilderData);
+        this.eventListenerRegistry.handleEvent(EventType.MERGE, entityData);
 
         insertPersistenceContext(entityKey, entityData);
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.MANAGED);
@@ -112,8 +108,7 @@ public class EntityManagerImpl implements EntityManager {
 
         this.persistenceContext.insertEntityEntryMap(entityKey, EntityStatus.DELETED);
 
-        EventListener<?> deleteEventListener = this.eventListenerRegistry.getEventListener(EventType.DELETE);
-        deleteEventListener.handleEvent(entityData);
+        this.eventListenerRegistry.handleEvent(EventType.DELETE, entityData);
 
         this.persistenceContext.deleteEntity(entityKey);
         this.persistenceContext.deleteDatabaseSnapshot(entityKey);

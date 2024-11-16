@@ -7,11 +7,10 @@ import event.action.EntityMergeAction;
 
 public class MergeEventListenerImpl<T> implements EventListener<T> {
 
-    private final ActionQueue actionQueue;
     private final Metamodel metamodel;
+    private ActionQueue actionQueue;
 
-    public MergeEventListenerImpl(ActionQueue actionQueue, Metamodel metamodel) {
-        this.actionQueue = actionQueue;
+    public MergeEventListenerImpl(Metamodel metamodel) {
         this.metamodel = metamodel;
     }
 
@@ -21,4 +20,10 @@ public class MergeEventListenerImpl<T> implements EventListener<T> {
         this.actionQueue.addAction(new EntityMergeAction(entityData, this.metamodel.entityPersister()));
         return (T) entityData.getEntityObjectData().getEntityInstance();
     }
+
+    @Override
+    public void setActionQueue(ActionQueue actionQueue) {
+        this.actionQueue = actionQueue;
+    }
+
 }

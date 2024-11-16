@@ -51,7 +51,7 @@ class EntityManagerTest {
         Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
         metamodel.init();
 
-        this.entityManager = new EntityManagerImpl(persistenceContext, metamodel, new EventListenerRegistry(new ActionQueue(), metamodel, new EntityLoader(jdbcTemplate, new DMLQueryBuilder())));
+        this.entityManager = new EntityManagerImpl(persistenceContext, metamodel, new EventListenerRegistry<>(metamodel, new EntityLoader(jdbcTemplate, new DMLQueryBuilder())).addActionQueue(new ActionQueue()));
     }
 
     //정확한 테스트를 위해 메소드마다 테이블 DROP 후 DB종료
