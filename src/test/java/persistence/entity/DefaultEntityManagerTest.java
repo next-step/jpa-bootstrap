@@ -215,6 +215,55 @@ class DefaultEntityManagerTest {
         );
     }
 
+    @Test
+    @DisplayName("persistence context에 존재하는 엔티티를 머지한다.")
+    void mergeAndFlush_exists() {
+        // given
+        final EntityManager entityManager = metadata.getEntityManagerFactory().openSession();
+        final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
+        insertData(entity, entityManager);
+
+        final EntityWithId updatedEntity = new EntityWithId(entity.getId(), "Yang", 35, "test2@email.com");
+        entityManager.merge(updatedEntity);
+
+        // when
+        entityManager.flush();
+
+        // then
+        final EntityWithId managedEntity = entityManager.find(entity.getClass(), entity.getId());
+        assertAll(
+                () -> assertThat(managedEntity).isNotNull(),
+                () -> assertThat(managedEntity.getId()).isEqualTo(updatedEntity.getId()),
+                () -> assertThat(managedEntity.getName()).isEqualTo(updatedEntity.getName()),
+                () -> assertThat(managedEntity.getAge()).isEqualTo(updatedEntity.getAge()),
+                () -> assertThat(managedEntity.getEmail()).isEqualTo(updatedEntity.getEmail()),
+                () -> assertThat(managedEntity.getIndex()).isNull()
+        );
+    }
+
+    @Test
+    @DisplayName("persistence context에 존재하지 않는 엔티티를 머지한다.")
+    void mergeAndFlush_notExists() {
+        // given
+        final EntityManager entityManager = metadata.getEntityManagerFactory().openSession();
+        final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
+        entityManager.merge(entity);
+
+        // when
+        entityManager.flush();
+
+        // then
+        final EntityWithId managedEntity = entityManager.find(entity.getClass(), entity.getId());
+        assertAll(
+                () -> assertThat(managedEntity).isNotNull(),
+                () -> assertThat(managedEntity.getId()).isNotNull(),
+                () -> assertThat(managedEntity.getName()).isEqualTo(entity.getName()),
+                () -> assertThat(managedEntity.getAge()).isEqualTo(entity.getAge()),
+                () -> assertThat(managedEntity.getEmail()).isEqualTo(entity.getEmail()),
+                () -> assertThat(managedEntity.getIndex()).isNotNull()
+        );
+    }
+
     private void insertData(Object entity, EntityManager entityManager) {
         entityManager.persist(entity);
     }
