@@ -35,7 +35,8 @@ class DefaultEntityManagerTest {
         // given
         final EntityManager entityManager = metadata.getEntityManagerFactory().openSession();
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
-        insertData(entity, entityManager);
+        entityManager.persist(entity);
+        entityManager.clear();
 
         // when
         final EntityWithId managedEntity = entityManager.find(entity.getClass(), entity.getId());
@@ -47,7 +48,7 @@ class DefaultEntityManagerTest {
                 () -> assertThat(managedEntity.getName()).isEqualTo(entity.getName()),
                 () -> assertThat(managedEntity.getAge()).isEqualTo(entity.getAge()),
                 () -> assertThat(managedEntity.getEmail()).isEqualTo(entity.getEmail()),
-                () -> assertThat(managedEntity.getIndex()).isNotNull()
+                () -> assertThat(managedEntity.getIndex()).isNull()
         );
     }
 
@@ -61,7 +62,7 @@ class DefaultEntityManagerTest {
         final OrderItem orderItem2 = new OrderItem("Product2", 20);
         order.addOrderItem(orderItem1);
         order.addOrderItem(orderItem2);
-        insertData(order, entityManager);
+        entityManager.persist(order);
         entityManager.clear();
 
         // when
@@ -146,7 +147,7 @@ class DefaultEntityManagerTest {
         // given
         final EntityManager entityManager = metadata.getEntityManagerFactory().openSession();
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
-        insertData(entity, entityManager);
+        entityManager.persist(entity);
 
         // when & then
         assertThatThrownBy(() -> entityManager.persist(entity))
@@ -161,7 +162,7 @@ class DefaultEntityManagerTest {
         // given
         final EntityManager entityManager = metadata.getEntityManagerFactory().openSession();
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
-        insertData(entity, entityManager);
+        entityManager.persist(entity);
 
         // when
         entityManager.remove(entity);
@@ -195,7 +196,7 @@ class DefaultEntityManagerTest {
         // given
         final EntityManager entityManager = metadata.getEntityManagerFactory().openSession();
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
-        insertData(entity, entityManager);
+        entityManager.persist(entity);
         entity.setName("Yang");
         entity.setAge(35);
         entity.setEmail("test2@email.com");
@@ -221,7 +222,7 @@ class DefaultEntityManagerTest {
         // given
         final EntityManager entityManager = metadata.getEntityManagerFactory().openSession();
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
-        insertData(entity, entityManager);
+        entityManager.persist(entity);
 
         final EntityWithId updatedEntity = new EntityWithId(entity.getId(), "Yang", 35, "test2@email.com");
         entityManager.merge(updatedEntity);
@@ -262,9 +263,5 @@ class DefaultEntityManagerTest {
                 () -> assertThat(managedEntity.getEmail()).isEqualTo(entity.getEmail()),
                 () -> assertThat(managedEntity.getIndex()).isNotNull()
         );
-    }
-
-    private void insertData(Object entity, EntityManager entityManager) {
-        entityManager.persist(entity);
     }
 }
