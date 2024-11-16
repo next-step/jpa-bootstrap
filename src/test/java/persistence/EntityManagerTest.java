@@ -10,6 +10,8 @@ import builder.dml.EntityData;
 import builder.dml.builder.DMLQueryBuilder;
 import database.H2DBConnection;
 import entity.Person;
+import event.EventListenerRegistry;
+import event.action.ActionQueue;
 import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +51,7 @@ class EntityManagerTest {
         Metamodel metamodel = new MetamodelImpl(jdbcTemplate);
         metamodel.init();
 
-        this.entityManager = new EntityManagerImpl(jdbcTemplate, persistenceContext, metamodel, new DMLQueryBuilder());
+        this.entityManager = new EntityManagerImpl(persistenceContext, metamodel, new EventListenerRegistry(new ActionQueue(), metamodel, new EntityLoader(jdbcTemplate, new DMLQueryBuilder())));
     }
 
     //정확한 테스트를 위해 메소드마다 테이블 DROP 후 DB종료
@@ -117,7 +119,7 @@ class EntityManagerTest {
                 .contains(1L, "test1", 29, "changed@test.com");
     }
 
-    @DisplayName("영속성 컨텍스트 Clear후 Flush하여 데이터가 반영됐는지 확인한다.")
+    @DisplayName("영속성 컨텍스트 Clear하여 데이터가 반영됐는지 확인한다.")
     @Test
     void flushTest() {
         Person person = createPerson(1);
@@ -125,14 +127,13 @@ class EntityManagerTest {
 
         this.entityManager.clear();
 
-        this.entityManager.flush();
         Person findPerson = this.entityManager.find(Person.class, 1L);
         assertThat(findPerson)
                 .extracting("id", "name", "age", "email")
                 .contains(1L, "test1", 29, "test@test.com");
     }
 
-    @DisplayName("영속성 컨텍스트를 clear하고 flush하여 데이터가 수정됐는지 확인한다.")
+    @DisplayName("영속성 컨텍스트를 clear하여 데이터가 수정됐는지 확인한다.")
     @Test
     void mergeFlushTest() {
         Person person = createPerson(1);
@@ -142,28 +143,11 @@ class EntityManagerTest {
         this.entityManager.merge(person);
 
         this.entityManager.clear();
-        this.entityManager.flush();
 
         Person findPerson = this.entityManager.find(Person.class, 1L);
         assertThat(findPerson)
                 .extracting("id", "name", "age", "email")
                 .contains(1L, "test1", 29, "changed@test.com");
-    }
-
-    @DisplayName("영속성 컨텍스트를 clear하고 flush를 하지않으면 데이터가 반영되지 않았는지 확인한다.")
-    @Test
-    void clearTest() {
-        Person person = createPerson(1);
-        this.entityManager.persist(person);
-
-        person.changeEmail("changed@test.com");
-        this.entityManager.merge(person);
-
-        this.entityManager.clear();
-
-        assertThatThrownBy(() -> this.entityManager.find(Person.class, 1L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Expected 1 result, got 0");
     }
 
     private Person createPerson(int i) {
