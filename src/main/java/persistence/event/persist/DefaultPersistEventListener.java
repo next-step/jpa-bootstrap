@@ -23,30 +23,43 @@ public class DefaultPersistEventListener implements PersistEventListener {
         final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
 
-        validatePersist(entity, persistenceContext);
+        validate(entity, persistenceContext);
 
         if (entityTable.isIdGenerationFromDatabase()) {
-            entityPersister.insert(entity);
-            if (entityTable.isOneToMany()) {
-                final CollectionPersister collectionPersister =
-                        metamodel.getCollectionPersister(entity.getClass(), entityTable.getAssociationColumnName());
-                collectionPersister.insert(entityTable.getAssociationColumnValue(entity), entity);
-            }
-
-            persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
-            persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
+            persistImmediately(entityPersister, entity, entityTable, metamodel, persistenceContext);
             return;
         }
 
+        persistLazy(persistenceContext, entity, entityTable, actionQueue, metamodel);
+    }
+
+    private <T> void persistImmediately(EntityPersister entityPersister, T entity, EntityTable entityTable,
+                                        Metamodel metamodel, PersistenceContext persistenceContext) {
+        entityPersister.insert(entity);
+        persistCollection(entityTable, metamodel, entity);
+
+        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
+        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
+    }
+
+    private <T> void persistLazy(PersistenceContext persistenceContext, T entity, EntityTable entityTable, ActionQueue actionQueue, Metamodel metamodel) {
         persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
         persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
         actionQueue.addAction(new PersistAction<>(metamodel, persistenceContext, entity));
     }
 
-    private void validatePersist(Object entity, PersistenceContext persistenceContext) {
+    private void validate(Object entity, PersistenceContext persistenceContext) {
         final EntityEntry entityEntry = persistenceContext.getEntityEntry(entity);
         if (entityEntry != null && !entityEntry.isPersistable()) {
             throw new IllegalStateException(NOT_PERSISTABLE_STATUS_FAILED_MESSAGE);
+        }
+    }
+
+    private <T> void persistCollection(EntityTable entityTable, Metamodel metamodel, T entity) {
+        if (entityTable.isOneToMany()) {
+            final CollectionPersister collectionPersister =
+                    metamodel.getCollectionPersister(entity.getClass(), entityTable.getAssociationColumnName());
+            collectionPersister.insert(entityTable.getAssociationColumnValue(entity), entity);
         }
     }
 }
