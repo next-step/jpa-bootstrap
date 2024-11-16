@@ -14,14 +14,16 @@ public class CollectionPersisterBinder {
                                      JdbcTemplate jdbcTemplate) {
         for (Class<?> entityType : entityBinder.getEntityTypes()) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
-            if (entityTable.isOneToMany()) {
-                final EntityTable childEntityTable = entityTableBinder.getEntityTable(entityTable.getAssociationColumnType());
-                final CollectionPersister collectionPersister =
-                        new CollectionPersister(childEntityTable, entityTable, jdbcTemplate);
-
-                final String collectionKey = getKey(entityType, entityTable.getAssociationColumnName());
-                entityPersisterRegistry.put(collectionKey, collectionPersister);
+            if (!entityTable.isOneToMany()) {
+                continue;
             }
+
+            final EntityTable childEntityTable = entityTableBinder.getEntityTable(entityTable.getAssociationColumnType());
+            final CollectionPersister collectionPersister =
+                    new CollectionPersister(childEntityTable, entityTable, jdbcTemplate);
+
+            final String collectionKey = getKey(entityType, entityTable.getAssociationColumnName());
+            entityPersisterRegistry.put(collectionKey, collectionPersister);
         }
     }
 

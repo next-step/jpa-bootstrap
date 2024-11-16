@@ -21,8 +21,7 @@ public class CollectionLoader {
 
     public List<?> load(AssociationCondition associationCondition) {
         final SelectQuery selectQuery = SelectQuery.getInstance();
-        final String sql = selectQuery.findCollection(
-                entityTable, associationCondition.getColumnName(), associationCondition.getId());
+        final String sql = selectQuery.findCollection(entityTable, associationCondition.getColumnName(), associationCondition.getId());
         return jdbcTemplate.query(sql, rowMapper);
     }
 }

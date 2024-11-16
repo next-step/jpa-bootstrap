@@ -19,8 +19,8 @@ public class DatabaseSyncManager {
     public static void sync(EntityTableBinder entityTableBinder, EntityAssociationBinder entityAssociationBinder,
                             JdbcTemplate jdbcTemplate, Dialect dialect) {
         final CreateQuery createQuery = new CreateQuery(dialect);
-
         final List<EntityTable> entityTables = entityTableBinder.getAllEntityTables();
+
         for (EntityTable entityTable : entityTables) {
             final String sql = getSql(entityAssociationBinder, entityTable, createQuery);
             jdbcTemplate.execute(sql);
@@ -29,8 +29,8 @@ public class DatabaseSyncManager {
 
     public static void clear(EntityTableBinder entityTableBinder, JdbcTemplate jdbcTemplate) {
         final DropQuery dropQuery = new DropQuery();
-
         final List<EntityTable> entityTables = entityTableBinder.getAllEntityTables();
+
         for (EntityTable entityTable : entityTables) {
             final String sql = dropQuery.drop(entityTable);
             jdbcTemplate.execute(sql);

@@ -15,16 +15,18 @@ public class CollectionLoaderBinder {
                                   RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate) {
         for (Class<?> entityType : entityBinder.getEntityTypes()) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
-            if (entityTable.isOneToMany()) {
-                final Class<?> associationColumnType = entityTable.getAssociationColumnType();
-                final EntityTable childEntityTable = entityTableBinder.getEntityTable(associationColumnType);
-                final RowMapper rowMapper = rowMapperBinder.getRowMapper(associationColumnType);
-                final CollectionLoader collectionLoader =
-                        new CollectionLoader(childEntityTable, jdbcTemplate, rowMapper);
-
-                final String collectionKey = getKey(entityType, entityTable.getAssociationColumnName());
-                collectionLoaderRegistry.put(collectionKey, collectionLoader);
+            if (!entityTable.isOneToMany()) {
+                continue;
             }
+
+            final Class<?> associationColumnType = entityTable.getAssociationColumnType();
+            final EntityTable childEntityTable = entityTableBinder.getEntityTable(associationColumnType);
+            final RowMapper rowMapper = rowMapperBinder.getRowMapper(associationColumnType);
+            final CollectionLoader collectionLoader =
+                    new CollectionLoader(childEntityTable, jdbcTemplate, rowMapper);
+
+            final String collectionKey = getKey(entityType, entityTable.getAssociationColumnName());
+            collectionLoaderRegistry.put(collectionKey, collectionLoader);
         }
     }
 

@@ -34,6 +34,7 @@ public class Metamodel {
     public Metamodel(JdbcTemplate jdbcTemplate, EntityBinder entityBinder, EntityTableBinder entityTableBinder,
                      EventListenerRegistry eventListenerRegistry) {
         this.eventListenerRegistry = eventListenerRegistry;
+
         RowMapperBinder rowMapperBinder = new RowMapperBinder(entityBinder, entityTableBinder);
         CollectionLoaderBinder collectionLoaderBinder = new CollectionLoaderBinder(entityBinder, entityTableBinder, rowMapperBinder, jdbcTemplate);
 
@@ -95,5 +96,6 @@ public class Metamodel {
         entityLoaderBinder.clear();
         entityPersisterBinder.clear();
         collectionPersisterBinder.clear();
+        eventListenerRegistry.clear();
     }
 }

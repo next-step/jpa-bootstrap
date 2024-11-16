@@ -22,8 +22,8 @@ public class CollectionPersister {
     public void insert(List<?> collection, Object parentEntity) {
         final InsertQuery insertQuery = InsertQuery.getInstance();
         for (Object entity : collection) {
-            final String sql = insertQuery.insert(
-                    entityTable, parentEntityTable.getAssociationColumnName(), parentEntityTable.getIdValue(parentEntity), entity);
+            final String sql =
+                    insertQuery.insert(entityTable, parentEntityTable.getAssociationColumnName(), parentEntityTable.getIdValue(parentEntity), entity);
             jdbcTemplate.executeAndReturnGeneratedKeys(sql, new DefaultIdMapper(entity));
         }
     }

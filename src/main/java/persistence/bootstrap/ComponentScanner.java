@@ -39,7 +39,6 @@ public class ComponentScanner {
         if (resource == null) {
             throw new IllegalArgumentException(NOT_EXISTS_PACKAGE_FAILED_MESSAGE);
         }
-
         return new File(resource.getFile());
     }
 
@@ -71,8 +70,7 @@ public class ComponentScanner {
     }
 
     private static String getTypeName(String basePackage, File file) {
-        return basePackage + PACKAGE_DELIMITER
-                + file.getName().substring(0, file.getName().length() - CLASS_FILE_POSTFIX.length());
+        return basePackage + PACKAGE_DELIMITER + file.getName().substring(0, file.getName().length() - CLASS_FILE_POSTFIX.length());
     }
 
     private static List<Class<?>> getClass(String entityTypeName) {

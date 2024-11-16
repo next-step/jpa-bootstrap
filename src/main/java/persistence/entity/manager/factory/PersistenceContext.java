@@ -7,17 +7,12 @@ import persistence.entity.manager.EntityStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PersistenceContext {
     private final Map<EntityKey, Object> entityRegistry = new ConcurrentHashMap<>();
     private final Map<EntityKey, Object> entitySnapshotRegistry = new ConcurrentHashMap<>();
     private final Map<Object, EntityEntry> entityEntryRegistry = new ConcurrentHashMap<>();
-
-    private final Queue<Object> persistQueue = new ConcurrentLinkedQueue<>();
-    private final Queue<Object> removeQueue = new ConcurrentLinkedQueue<>();
 
     public void addEntity(Object entity, Object id) {
         final EntityKey entityKey = new EntityKey(entity.getClass(), id);
@@ -42,24 +37,6 @@ public class PersistenceContext {
         return entityType.cast(entitySnapshotRegistry.get(entityKey));
     }
 
-    public void addToPersistQueue(Object entity) {
-        persistQueue.offer(entity);
-        createOrUpdateStatus(entity, EntityStatus.MANAGED);
-    }
-
-    public void addToRemoveQueue(Object entity) {
-        removeQueue.offer(entity);
-        createOrUpdateStatus(entity, EntityStatus.DELETED);
-    }
-
-    public Queue<Object> getPersistQueue() {
-        return persistQueue;
-    }
-
-    public Queue<Object> getRemoveQueue() {
-        return removeQueue;
-    }
-
     public List<Object> getAllEntity() {
         return new ArrayList<>(entityRegistry.values());
     }
@@ -81,8 +58,6 @@ public class PersistenceContext {
         entityRegistry.clear();
         entitySnapshotRegistry.clear();
         entityEntryRegistry.clear();
-        persistQueue.clear();
-        removeQueue.clear();
     }
 
     private void addSnapshot(Object entity, EntityKey entityKey) {

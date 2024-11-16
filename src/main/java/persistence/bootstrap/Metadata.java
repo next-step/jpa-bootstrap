@@ -18,13 +18,12 @@ public class Metadata {
 
     public Metadata(Connection connection, Dialect dialect, String... basePackages) {
         final EntityBinder entityBinder = new EntityBinder(basePackages);
-        final EntityTableBinder entityTableBinder = new EntityTableBinder(entityBinder.getEntityTypes());
-        final EntityAssociationBinder entityAssociationBinder = new EntityAssociationBinder(entityTableBinder);
 
         this.jdbcTemplate = new JdbcTemplate(connection);
-        this.entityTableBinder = entityTableBinder;
+        this.entityTableBinder = new EntityTableBinder(entityBinder.getEntityTypes());
         this.metamodel = new Metamodel(jdbcTemplate, entityBinder, entityTableBinder, new EventListenerRegistry());
 
+        final EntityAssociationBinder entityAssociationBinder = new EntityAssociationBinder(entityTableBinder);
         DatabaseSyncManager.sync(entityTableBinder, entityAssociationBinder, new JdbcTemplate(connection), dialect);
     }
 

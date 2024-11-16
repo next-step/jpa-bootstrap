@@ -39,6 +39,10 @@ public class EventListenerRegistry {
         return (EventListenerGroup<T>) eventListenerGroupRegistry.get(eventType);
     }
 
+    public void clear() {
+        eventListenerGroupRegistry.clear();
+    }
+
     private void registerLoadEventListener() {
         final EventListenerGroup<LoadEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.LOAD);
         eventListenerGroup.appendListener(new CacheLoadEventListener());
