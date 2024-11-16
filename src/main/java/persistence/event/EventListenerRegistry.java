@@ -8,7 +8,6 @@ import persistence.event.dirtycheck.DefaultDirtyCheckEventListener;
 import persistence.event.dirtycheck.DirtyCheckEventListener;
 import persistence.event.flush.DefaultFlushEventListener;
 import persistence.event.flush.FlushEventListener;
-import persistence.event.load.CacheLoadEventListener;
 import persistence.event.load.DefaultLoadEventListener;
 import persistence.event.load.LoadEventListener;
 import persistence.event.merge.DefaultMergeEventListener;
@@ -45,7 +44,6 @@ public class EventListenerRegistry {
 
     private void registerLoadEventListener() {
         final EventListenerGroup<LoadEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.LOAD);
-        eventListenerGroup.appendListener(new CacheLoadEventListener());
         eventListenerGroup.appendListener(new DefaultLoadEventListener());
         eventListenerGroupRegistry.put(EventType.LOAD, eventListenerGroup);
     }

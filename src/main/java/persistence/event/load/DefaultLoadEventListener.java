@@ -12,7 +12,9 @@ public class DefaultLoadEventListener implements LoadEventListener {
         final Class<T> entityType = loadEvent.getEntityType();
         final Object id = loadEvent.getId();
 
-        if (loadEvent.getResult() != null) {
+        final T managedEntity = persistenceContext.getEntity(entityType, id);
+        if (managedEntity != null) {
+            loadEvent.setResult(managedEntity);
             return;
         }
 
