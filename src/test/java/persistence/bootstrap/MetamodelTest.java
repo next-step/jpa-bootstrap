@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import persistence.dialect.Dialect;
 import persistence.dialect.H2Dialect;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static util.ReflectionUtils.*;
 
 class MetamodelTest {
     private Metadata metadata;
@@ -34,17 +34,11 @@ class MetamodelTest {
 
         // then
         assertAll(
-                () -> assertThat(getField(metamodel, "entityTableBinder")).isNotNull(),
-                () -> assertThat(getField(metamodel, "entityLoaderBinder")).isNotNull(),
-                () -> assertThat(getField(metamodel, "entityPersisterBinder")).isNotNull(),
-                () -> assertThat(getField(metamodel, "collectionPersisterBinder")).isNotNull(),
-                () -> assertThat(getField(metamodel, "eventListenerRegistry")).isNotNull()
+                () -> assertThat(getFieldValue(metamodel, "entityTableBinder")).isNotNull(),
+                () -> assertThat(getFieldValue(metamodel, "entityLoaderBinder")).isNotNull(),
+                () -> assertThat(getFieldValue(metamodel, "entityPersisterBinder")).isNotNull(),
+                () -> assertThat(getFieldValue(metamodel, "collectionPersisterBinder")).isNotNull(),
+                () -> assertThat(getFieldValue(metamodel, "eventListenerRegistry")).isNotNull()
         );
-    }
-
-    private Object getField(Metamodel metamodel, String fieldName) throws NoSuchFieldException, IllegalAccessException {
-        final Field field = metamodel.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(metamodel);
     }
 }
