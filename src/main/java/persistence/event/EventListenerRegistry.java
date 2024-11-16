@@ -31,8 +31,8 @@ public class EventListenerRegistry {
         registerUpdateEventListener();
         registerDirtyCheckEventListener();
         registerMergeEventListener();
-        flushEventListener();
-        clearEventListener();
+        registerFlushEventListener();
+        registerClearEventListener();
     }
 
     public <T> EventListenerGroup<T> getEventListenerGroup(EventType<T> eventType) {
@@ -80,13 +80,13 @@ public class EventListenerRegistry {
         eventListenerGroupRegistry.put(EventType.MERGE, eventListenerGroup);
     }
 
-    private void flushEventListener() {
+    private void registerFlushEventListener() {
         final EventListenerGroup<FlushEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.FLUSH);
         eventListenerGroup.appendListener(new DefaultFlushEventListener());
         eventListenerGroupRegistry.put(EventType.FLUSH, eventListenerGroup);
     }
 
-    private void clearEventListener() {
+    private void registerClearEventListener() {
         final EventListenerGroup<ClearEventListener> eventListenerGroup = new EventListenerGroup<>(EventType.CLEAR);
         eventListenerGroup.appendListener(new DefaultClearEventListener());
         eventListenerGroupRegistry.put(EventType.CLEAR, eventListenerGroup);
