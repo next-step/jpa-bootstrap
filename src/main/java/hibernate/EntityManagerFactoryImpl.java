@@ -3,10 +3,10 @@ package hibernate;
 import boot.Metamodel;
 import boot.MetamodelImpl;
 import builder.dml.builder.DMLQueryBuilder;
+import event.EventListenerRegistry;
+import event.action.ActionQueue;
 import jdbc.JdbcTemplate;
-import persistence.EntityManager;
-import persistence.EntityManagerImpl;
-import persistence.PersistenceContextImpl;
+import persistence.*;
 
 public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
@@ -44,6 +44,15 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     }
 
     private EntityManager createEntityManager() {
-        return new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), metamodel, dmlQueryBuilder);
+        return new EntityManagerImpl(createPersistenceContext(), metamodel, createEventListenerRegistry());
     }
+
+    private PersistenceContext createPersistenceContext() {
+        return new PersistenceContextImpl();
+    }
+
+    private EventListenerRegistry createEventListenerRegistry() {
+        return new EventListenerRegistry(new ActionQueue(), metamodel, new EntityLoader(jdbcTemplate, dmlQueryBuilder));
+    }
+
 }
