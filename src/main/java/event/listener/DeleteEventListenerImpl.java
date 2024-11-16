@@ -1,11 +1,11 @@
-package event.delete;
+package event.listener;
 
 import boot.Metamodel;
 import builder.dml.EntityData;
 import event.action.ActionQueue;
 import event.action.EntityDeleteAction;
 
-public class DeleteEventListenerImpl implements DeleteEventListener {
+public class DeleteEventListenerImpl<T> implements EventListener<T> {
 
     private final ActionQueue actionQueue;
     private final Metamodel metamodel;
@@ -16,7 +16,10 @@ public class DeleteEventListenerImpl implements DeleteEventListener {
     }
 
     @Override
-    public void onDelete(EntityData entityData) {
+    @SuppressWarnings("unchecked")
+    public T handleEvent(EntityData entityData) {
         this.actionQueue.addAction(new EntityDeleteAction(entityData, this.metamodel.entityPersister()));
+        return (T) entityData.getEntityObjectData().getEntityInstance();
     }
+
 }

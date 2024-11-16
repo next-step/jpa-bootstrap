@@ -1,9 +1,9 @@
-package event.load;
+package event.listener;
 
 import builder.dml.EntityData;
 import persistence.EntityLoader;
 
-public class LoadEventListenerImpl<T> implements LoadEventListener<T> {
+public class LoadEventListenerImpl<T> implements EventListener<T> {
 
     private final EntityLoader entityLoader;
 
@@ -12,7 +12,7 @@ public class LoadEventListenerImpl<T> implements LoadEventListener<T> {
     }
 
     @Override
-    public T onLoad(EntityData entityData) {
-        return (T) this.entityLoader.find(entityData);
+    public T handleEvent(EntityData entityData) {
+        return this.entityLoader.find(entityData);
     }
 }
