@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class ComponentScanner {
     public static final String NOT_EXISTS_PACKAGE_FAILED_MESSAGE = "존재하지 않는 패키지입니다.";
-    private static final String ENTITY_SCAN_FAILD_MESSAGE = "엔티티 스캔에 실패하였습니다.";
+    private static final String ENTITY_SCAN_FAILD_MESSAGE = "컴포넌트 스캔에 실패하였습니다.";
     private static final String PACKAGE_DELIMITER = ".";
     private static final String DIRECTORY_DELIMITER = "/";
     private static final String CLASS_FILE_POSTFIX = ".class";

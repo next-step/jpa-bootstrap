@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ComponentScannerTest {
     @Test
-    @DisplayName("엔티티를 찾는다.")
-    void constructor() {
+    @DisplayName("컴포넌트를 찾는다.")
+        void scan() {
         // when
         final List<Class<?>> entityTypes = ComponentScanner.scan( "fixture");
 
