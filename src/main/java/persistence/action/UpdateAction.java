@@ -26,6 +26,6 @@ public class UpdateAction<T> {
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
 
         entityPersister.update(entity, dirtiedEntityColumns);
-        persistenceContext.addEntity(entity, entityTable);
+        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
     }
 }

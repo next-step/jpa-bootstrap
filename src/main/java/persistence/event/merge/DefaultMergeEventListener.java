@@ -20,9 +20,9 @@ public class DefaultMergeEventListener implements MergeEventListener {
 
         final EntityLoader entityLoader = metamodel.getEntityLoader(entity.getClass());
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        final Object idValue = entityTable.getIdValue(entity);
 
-        final Object managedEntity = entityLoader.load(entityTable.getIdValue(entity));
-        if (managedEntity == null) {
+        if (idValue == null || entityLoader.load(idValue) == null) {
             final PersistEvent<T> persistEvent = new PersistEvent<>(metamodel, persistenceContext, actionQueue, entity);
             metamodel.getPersistEventListenerGroup().doEvent(persistEvent, PersistEventListener::onPersist);
         }
