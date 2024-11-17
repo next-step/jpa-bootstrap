@@ -15,4 +15,10 @@ public class ReflectionUtils {
         }
         return null;
     }
+
+    public static Object getFieldValue(Object instance, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+        final Field field = instance.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(instance);
+    }
 }

@@ -1,17 +1,17 @@
 package persistence.entity.manager;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public class CurrentSessionContext {
+    public static final String SESSION_ALREADY_CREATED_MESSAGE = "세션이 이미 생성되어 있습니다.";
+
     private final ThreadLocal<EntityManager> sessionRegistry = new ThreadLocal<>();
 
-    public synchronized EntityManager openSession(EntityManager entityManager) {
+    public void openSession(EntityManager entityManager) {
         if (isOpened()) {
-            return sessionRegistry.get();
+            throw new IllegalStateException(SESSION_ALREADY_CREATED_MESSAGE);
         }
         sessionRegistry.set(entityManager);
-        return entityManager;
     }
 
     public Optional<EntityManager> getSession() {
@@ -20,13 +20,13 @@ public class CurrentSessionContext {
 
     public void closeSession() {
         final EntityManager entityManager = sessionRegistry.get();
-        if (Objects.nonNull(entityManager)) {
+        if (entityManager != null) {
             entityManager.clear();
         }
         sessionRegistry.remove();
     }
 
     private boolean isOpened() {
-        return Objects.nonNull(sessionRegistry.get());
+        return sessionRegistry.get() != null;
     }
 }

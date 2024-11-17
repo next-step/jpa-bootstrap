@@ -3,9 +3,11 @@ package persistence.entity.manager;
 public interface EntityManager {
     <T> T find(Class<T> clazz, Object id);
 
-    void persist(Object entity);
+    <T> void persist(T entity);
 
-    void remove(Object entity);
+    <T> void remove(T entity);
+
+    <T> void merge(T entity);
 
     void flush();
 

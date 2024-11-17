@@ -1,50 +1,44 @@
 package persistence.bootstrap;
 
 import database.H2ConnectionFactory;
-import jdbc.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.entity.proxy.ProxyFactory;
-import persistence.sql.dml.DmlQueries;
+import persistence.dialect.Dialect;
+import persistence.dialect.H2Dialect;
 
-import java.lang.reflect.Field;
+import java.sql.Connection;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static util.ReflectionUtils.*;
 
 class MetamodelTest {
-    private Metamodel metamodel;
+    private Metadata metadata;
 
     @AfterEach
     void tearDown() {
-        metamodel.close();
+        metadata.close();
     }
 
     @Test
     @DisplayName("Metamodel을 생성한다.")
     void constructor() {
         // given
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        final DmlQueries dmlQueries = new DmlQueries();
-        final ProxyFactory proxyFactory = new ProxyFactory();
+        final Connection connection = H2ConnectionFactory.getConnection();
+        final Dialect dialect = new H2Dialect();
+        metadata = new Metadata(connection, dialect, "domain");
 
         // when
-        metamodel = new Metamodel(
-                jdbcTemplate, dmlQueries, proxyFactory, "domain", "fixture");
+        final Metamodel metamodel = metadata.getMetamodel();
 
         // then
         assertAll(
-                () -> assertThat(getBinder(metamodel, "entityTableBinder")).isNotNull(),
-                () -> assertThat(getBinder(metamodel, "entityLoaderBinder")).isNotNull(),
-                () -> assertThat(getBinder(metamodel, "entityPersisterBinder")).isNotNull(),
-                () -> assertThat(getBinder(metamodel, "collectionPersisterBinder")).isNotNull()
+                () -> assertThat(getFieldValue(metamodel, "entityTableBinder")).isNotNull(),
+                () -> assertThat(getFieldValue(metamodel, "entityLoaderBinder")).isNotNull(),
+                () -> assertThat(getFieldValue(metamodel, "entityPersisterBinder")).isNotNull(),
+                () -> assertThat(getFieldValue(metamodel, "collectionPersisterBinder")).isNotNull(),
+                () -> assertThat(getFieldValue(metamodel, "eventListenerRegistry")).isNotNull()
         );
-    }
-
-    private Object getBinder(Metamodel metamodel, String fieldName) throws NoSuchFieldException, IllegalAccessException {
-        final Field field = metamodel.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(metamodel);
     }
 }

@@ -17,7 +17,7 @@ public class TableName {
 
     private String getName(Class<?> entityType) {
         final Table table = entityType.getAnnotation(Table.class);
-        if (Objects.nonNull(table) && Objects.nonNull(table.name()) && !table.name().isBlank()) {
+        if (table != null && table.name() != null && !table.name().isBlank()) {
             return table.name();
         }
         return entityType.getSimpleName()

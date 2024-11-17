@@ -1,13 +1,15 @@
 package persistence.bootstrap.binder;
 
 import jakarta.persistence.Entity;
+import persistence.bootstrap.ComponentScanner;
 
 import java.util.List;
 
 public class EntityBinder {
     private final List<Class<?>> entityTypes;
 
-    public EntityBinder(List<Class<?>> classes) {
+    public EntityBinder(String... basePackages) {
+        final List<Class<?>> classes = ComponentScanner.scan(basePackages);
         this.entityTypes = findEntity(classes);
     }
 

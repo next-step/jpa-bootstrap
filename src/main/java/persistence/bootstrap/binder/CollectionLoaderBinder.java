@@ -4,29 +4,29 @@ import jdbc.JdbcTemplate;
 import jdbc.mapper.RowMapper;
 import persistence.entity.loader.CollectionLoader;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.DmlQueries;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CollectionLoaderBinder {
     private final Map<String, CollectionLoader> collectionLoaderRegistry = new HashMap<>();
 
-    public CollectionLoaderBinder(List<Class<?>> entityTypes, EntityTableBinder entityTableBinder,
-                                  RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate, DmlQueries dmlQueries) {
-        for (Class<?> entityType : entityTypes) {
+    public CollectionLoaderBinder(EntityBinder entityBinder, EntityTableBinder entityTableBinder,
+                                  RowMapperBinder rowMapperBinder, JdbcTemplate jdbcTemplate) {
+        for (Class<?> entityType : entityBinder.getEntityTypes()) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
-            if (entityTable.isOneToMany()) {
-                final Class<?> associationColumnType = entityTable.getAssociationColumnType();
-                final EntityTable childEntityTable = entityTableBinder.getEntityTable(associationColumnType);
-                final RowMapper rowMapper = rowMapperBinder.getRowMapper(associationColumnType);
-                final CollectionLoader collectionLoader =
-                        new CollectionLoader(childEntityTable, jdbcTemplate, dmlQueries.getSelectQuery(), rowMapper);
-
-                final String collectionKey = getKey(entityType, entityTable.getAssociationColumnName());
-                collectionLoaderRegistry.put(collectionKey, collectionLoader);
+            if (!entityTable.isOneToMany()) {
+                continue;
             }
+
+            final Class<?> associationColumnType = entityTable.getAssociationColumnType();
+            final EntityTable childEntityTable = entityTableBinder.getEntityTable(associationColumnType);
+            final RowMapper rowMapper = rowMapperBinder.getRowMapper(associationColumnType);
+            final CollectionLoader collectionLoader =
+                    new CollectionLoader(childEntityTable, jdbcTemplate, rowMapper);
+
+            final String collectionKey = getKey(entityType, entityTable.getAssociationColumnName());
+            collectionLoaderRegistry.put(collectionKey, collectionLoader);
         }
     }
 

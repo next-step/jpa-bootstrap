@@ -12,7 +12,7 @@ class DeleteQueryTest {
     @DisplayName("delete 쿼리를 생성한다.")
     void delete() {
         // given
-        final DeleteQuery deleteQuery = new DeleteQuery();
+        final DeleteQuery deleteQuery = DeleteQuery.getInstance();
         final EntityWithId entity = new EntityWithId(1L, "Jaden", 30, "test@email.com");
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
 

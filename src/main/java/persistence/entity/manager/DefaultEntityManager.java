@@ -1,157 +1,80 @@
 package persistence.entity.manager;
 
+import persistence.action.ActionQueue;
 import persistence.bootstrap.Metamodel;
-import persistence.entity.loader.EntityLoader;
 import persistence.entity.manager.factory.PersistenceContext;
-import persistence.entity.persister.CollectionPersister;
-import persistence.entity.persister.EntityPersister;
-import persistence.meta.EntityColumn;
+import persistence.event.clear.ClearEvent;
+import persistence.event.clear.ClearEventListener;
+import persistence.event.delete.DeleteEvent;
+import persistence.event.delete.DeleteEventListener;
+import persistence.event.flush.FlushEvent;
+import persistence.event.flush.FlushEventListener;
+import persistence.event.load.LoadEvent;
+import persistence.event.load.LoadEventListener;
+import persistence.event.merge.MergeEvent;
+import persistence.event.merge.MergeEventListener;
+import persistence.event.persist.PersistEvent;
+import persistence.event.persist.PersistEventListener;
 import persistence.meta.EntityTable;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Queue;
-
 public class DefaultEntityManager implements EntityManager {
-    public static final String NOT_PERSISTABLE_STATUS_FAILED_MESSAGE = "엔티티가 영속화 가능한 상태가 아닙니다.";
-    public static final String NOT_REMOVABLE_STATUS_FAILED_MESSAGE = "엔티티가 제거 가능한 상태가 아닙니다.";
-
     private final Metamodel metamodel;
     private final PersistenceContext persistenceContext;
+    private final ActionQueue actionQueue;
 
     public DefaultEntityManager(Metamodel metamodel) {
         this.metamodel = metamodel;
         this.persistenceContext = new PersistenceContext();
+        this.actionQueue = new ActionQueue();
     }
 
     @Override
     public <T> T find(Class<T> entityType, Object id) {
-        final T managedEntity = persistenceContext.getEntity(entityType, id);
-        if (Objects.nonNull(managedEntity)) {
-            return managedEntity;
-        }
+        final LoadEvent<T> loadEvent = new LoadEvent<>(metamodel, persistenceContext, entityType, id);
+        metamodel.getLoadEventListenerGroup().doEvent(loadEvent, LoadEventListener::onLoad);
 
-        final EntityLoader entityLoader = metamodel.getEntityLoader(entityType);
-        final T entity = entityLoader.load(id);
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-
-        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
-        return entity;
+        persistenceContext.addEntity(loadEvent.getResult(), id);
+        return loadEvent.getResult();
     }
 
     @Override
-    public void persist(Object entity) {
-        validatePersist(entity);
+    public <T> void persist(T entity) {
+        final PersistEvent<T> persistEvent = new PersistEvent<>(metamodel, persistenceContext, actionQueue, entity);
+        metamodel.getPersistEventListenerGroup().doEvent(persistEvent, PersistEventListener::onPersist);
 
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        if (entityTable.isIdGenerationFromDatabase()) {
-            persistImmediately(entity, entityTable);
-            return;
-        }
-
         persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
         persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
-        persistenceContext.addToPersistQueue(entity);
     }
 
     @Override
-    public void remove(Object entity) {
-        final EntityEntry entityEntry = persistenceContext.getEntityEntry(entity);
-        if (!entityEntry.isRemovable()) {
-            throw new IllegalStateException(NOT_REMOVABLE_STATUS_FAILED_MESSAGE);
-        }
+    public <T> void remove(T entity) {
+        final DeleteEvent<T> deleteEvent = new DeleteEvent<>(metamodel, persistenceContext, actionQueue, entity);
+        metamodel.getDeleteEventListenerGroup().doEvent(deleteEvent, DeleteEventListener::onDelete);
 
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
         persistenceContext.removeEntity(entity, entityTable.getIdValue(entity));
-        persistenceContext.addToRemoveQueue(entity);
+    }
+
+    @Override
+    public <T> void merge(T entity) {
+        final MergeEvent<T> mergeEvent = new MergeEvent<>(metamodel, persistenceContext, actionQueue, entity);
+        metamodel.getMergeEventListenerGroup().doEvent(mergeEvent, MergeEventListener::onMerge);
+
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
+        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
     }
 
     @Override
     public void flush() {
-        persistAll();
-        deleteAll();
-        updateAll();
+        final FlushEvent flushEvent = new FlushEvent(metamodel, persistenceContext, actionQueue);
+        metamodel.getFlushEventListenerGroup().doEvent(flushEvent, FlushEventListener::onFlush);
     }
 
     @Override
     public void clear() {
-        persistenceContext.clear();
-    }
-
-    private void validatePersist(Object entity) {
-        final EntityEntry entityEntry = persistenceContext.getEntityEntry(entity);
-        if (Objects.nonNull(entityEntry) && !entityEntry.isPersistable()) {
-            throw new IllegalStateException(NOT_PERSISTABLE_STATUS_FAILED_MESSAGE);
-        }
-    }
-
-    private void persistImmediately(Object entity, EntityTable entityTable) {
-        persist(entity, entityTable);
-        persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
-        persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
-    }
-
-    private void persistAll() {
-        final Queue<Object> persistQueue = persistenceContext.getPersistQueue();
-        while (!persistQueue.isEmpty()) {
-            final Object entity = persistQueue.poll();
-            final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-
-            persist(entity, entityTable);
-            persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
-        }
-    }
-
-    private void persist(Object entity, EntityTable entityTable) {
-        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
-        entityPersister.insert(entity);
-        if (entityTable.isOneToMany()) {
-            final CollectionPersister collectionPersister = metamodel.getCollectionPersister(
-                    entity.getClass(), entityTable.getAssociationColumnName());
-            collectionPersister.insert(entityTable.getAssociationColumnValue(entity), entity);
-        }
-    }
-
-    private void deleteAll() {
-        final Queue<Object> removeQueue = persistenceContext.getRemoveQueue();
-        while (!removeQueue.isEmpty()) {
-            final Object entity = removeQueue.poll();
-            final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
-            entityPersister.delete(entity);
-        }
-    }
-
-    private void updateAll() {
-        persistenceContext.getAllEntity()
-                .forEach(this::update);
-    }
-
-    private void update(Object entity) {
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue(entity));
-        if (Objects.isNull(snapshot)) {
-            return;
-        }
-
-        final List<EntityColumn> dirtiedEntityColumns = findDirtiedEntityColumns(entity, snapshot);
-        if (dirtiedEntityColumns.isEmpty()) {
-            return;
-        }
-
-        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
-        entityPersister.update(entity, dirtiedEntityColumns);
-        persistenceContext.addEntity(entity, entityTable);
-    }
-
-    private List<EntityColumn> findDirtiedEntityColumns(Object entity, Object snapshot) {
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        return entityTable.getEntityColumns()
-                .stream()
-                .filter(entityColumn -> isDirtied(entity, snapshot, entityColumn))
-                .toList();
-    }
-
-    private boolean isDirtied(Object entity, Object snapshot, EntityColumn entityColumn) {
-        return !Objects.equals(entityColumn.extractValue(entity), entityColumn.extractValue(snapshot));
+        final ClearEvent clearEvent = new ClearEvent(persistenceContext, actionQueue);
+        metamodel.getClearEventListenerGroup().doEvent(clearEvent, ClearEventListener::onClear);
     }
 }

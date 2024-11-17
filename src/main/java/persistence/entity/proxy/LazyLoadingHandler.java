@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class LazyLoadingHandler implements InvocationHandler {
     private static final String LAZY_LOADING_FAILED_MESSAGE = "Lazy 로딩에 실패하였습니다.";
@@ -57,6 +56,6 @@ public class LazyLoadingHandler implements InvocationHandler {
 
     private boolean isOneToMany(Field field) {
         final OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-        return Objects.nonNull(oneToMany);
+        return oneToMany != null;
     }
 }

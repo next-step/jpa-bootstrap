@@ -6,8 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.bootstrap.Metamodel;
-import persistence.entity.manager.CurrentSessionContext;
+import persistence.bootstrap.Metadata;
 import persistence.entity.manager.EntityManager;
 import persistence.entity.manager.factory.EntityManagerFactory;
 import util.TestHelper;
@@ -16,25 +15,23 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EntityManagerFactoryTest {
-    private CurrentSessionContext currentSessionContext;
-    private Metamodel metamodel;
+    private Metadata metadata;
 
     @BeforeEach
     void setUp() {
-        currentSessionContext = new CurrentSessionContext();
-        metamodel = TestHelper.createMetamodel("domain");
+        metadata = TestHelper.createMetadata("domain");
     }
 
     @AfterEach
     void tearDown() {
-        metamodel.close();
+        metadata.close();
     }
 
     @Test
     @DisplayName("신규 세션을 오픈한다.")
     void openSession() {
         // given
-        final EntityManagerFactory entityManagerFactory = new EntityManagerFactory(currentSessionContext, metamodel);
+        final EntityManagerFactory entityManagerFactory = metadata.getEntityManagerFactory();
 
         // when
         final EntityManager entityManager = entityManagerFactory.openSession();
@@ -47,7 +44,7 @@ class EntityManagerFactoryTest {
     @DisplayName("세션 오픈 후 재오픈하면 동일한 세션을 반환한다.")
     void openSession_repeat() {
         // given
-        final EntityManagerFactory entityManagerFactory = new EntityManagerFactory(currentSessionContext, metamodel);
+        final EntityManagerFactory entityManagerFactory = metadata.getEntityManagerFactory();
         final EntityManager entityManager = entityManagerFactory.openSession();
 
         // when
@@ -61,7 +58,7 @@ class EntityManagerFactoryTest {
     @DisplayName("세션을 종료한다.")
     void closeSession() {
         // given
-        final EntityManagerFactory entityManagerFactory = new EntityManagerFactory(currentSessionContext, metamodel);
+        final EntityManagerFactory entityManagerFactory = metadata.getEntityManagerFactory();
         final EntityManager entityManager = entityManagerFactory.openSession();
 
         // when
@@ -76,7 +73,7 @@ class EntityManagerFactoryTest {
     @DisplayName("신규 세션을 오픈하고 엔티티를 영속화한다.")
     void openSessionAndPersist() {
         // given
-        final EntityManagerFactory entityManagerFactory = new EntityManagerFactory(currentSessionContext, metamodel);
+        final EntityManagerFactory entityManagerFactory = metadata.getEntityManagerFactory();
         final EntityManager entityManager = entityManagerFactory.openSession();
 
         final Order order = new Order("orderNumber");

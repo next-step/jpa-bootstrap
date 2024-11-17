@@ -60,7 +60,7 @@ public class ColumnOption {
 
     private boolean isNotNull(Field field) {
         final Column column = field.getAnnotation(Column.class);
-        if (Objects.isNull(column)) {
+        if (column == null) {
             return false;
         }
         return !column.nullable();
@@ -68,12 +68,12 @@ public class ColumnOption {
 
     private boolean isOneToMany(Field field) {
         final OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-        return Objects.nonNull(oneToMany);
+        return oneToMany != null;
     }
 
     private FetchType getFetchType(Field field) {
         final OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-        if (Objects.isNull(oneToMany)) {
+        if (oneToMany == null) {
             return null;
         }
         return oneToMany.fetch();
@@ -81,7 +81,7 @@ public class ColumnOption {
 
     private String getAssociationColumnName(Field field) {
         final JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
-        if (Objects.isNull(joinColumn) || Objects.isNull(joinColumn.name()) || joinColumn.name().isBlank()) {
+        if (joinColumn == null || joinColumn.name() == null || joinColumn.name().isBlank()) {
             return null;
         }
         return joinColumn.name();
@@ -89,7 +89,7 @@ public class ColumnOption {
 
     private Class<?> getAssociationColumnType(Field field) {
         final JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
-        if (Objects.isNull(joinColumn)) {
+        if (joinColumn == null) {
             return null;
         }
         return getGenericType(field);

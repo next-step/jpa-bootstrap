@@ -9,12 +9,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.bootstrap.Metamodel;
+import persistence.bootstrap.Metadata;
 import persistence.entity.loader.CollectionLoader;
-import persistence.entity.manager.DefaultEntityManager;
 import persistence.entity.manager.EntityManager;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.SelectQuery;
 import util.TestHelper;
 
 import java.util.List;
@@ -24,19 +22,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CollectionLoaderTest {
     private JdbcTemplate jdbcTemplate;
-    private Metamodel metamodel;
+    private Metadata metadata;
     private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        metamodel = TestHelper.createMetamodel("domain", "fixture");
-        entityManager = new DefaultEntityManager(metamodel);
+        metadata = TestHelper.createMetadata("domain", "fixture");
+        entityManager = metadata.getEntityManagerFactory().openSession();
     }
 
     @AfterEach
     void tearDown() {
-        metamodel.close();
+        metadata.close();
     }
 
     @Test
@@ -45,7 +43,7 @@ class CollectionLoaderTest {
         // given
         final EntityTable entityTable = new EntityTable(OrderItem.class);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, new SelectQuery(), rowMapper);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, rowMapper);
         final Order order = new Order("OrderNumber1");
         final OrderItem orderItem1 = new OrderItem("Product1", 10);
         final OrderItem orderItem2 = new OrderItem("Product2", 20);

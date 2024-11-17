@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SimpleFieldMapping implements FieldMapping {
@@ -24,7 +23,7 @@ public class SimpleFieldMapping implements FieldMapping {
 
         for (int i = 0; i < getColumnCount(resultSet); i++) {
             Field field = getField(entityTable.getFields(), fieldIndex);
-            if (Objects.nonNull(field)) {
+            if (field != null) {
                 mapField(resultSet, entity, field, i + 1);
             }
         }

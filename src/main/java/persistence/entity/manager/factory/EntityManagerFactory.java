@@ -6,6 +6,8 @@ import persistence.entity.manager.DefaultEntityManager;
 import persistence.entity.manager.EntityManager;
 
 public class EntityManagerFactory {
+    private static volatile EntityManagerFactory instance;
+
     private final CurrentSessionContext currentSessionContext;
     private final Metamodel metamodel;
 
@@ -25,6 +27,7 @@ public class EntityManagerFactory {
 
     private EntityManager createEntityManager() {
         final EntityManager entityManager = new DefaultEntityManager(metamodel);
-        return currentSessionContext.openSession(entityManager);
+        currentSessionContext.openSession(entityManager);
+        return entityManager;
     }
 }

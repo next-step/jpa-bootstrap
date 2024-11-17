@@ -3,27 +3,27 @@ package persistence.bootstrap.binder;
 import jdbc.JdbcTemplate;
 import persistence.entity.persister.CollectionPersister;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.DmlQueries;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CollectionPersisterBinder {
     private final Map<String, CollectionPersister> entityPersisterRegistry = new HashMap<>();
 
-    public CollectionPersisterBinder(List<Class<?>> entityTypes, EntityTableBinder entityTableBinder,
-                                     JdbcTemplate jdbcTemplate, DmlQueries dmlQueries) {
-        for (Class<?> entityType : entityTypes) {
+    public CollectionPersisterBinder(EntityBinder entityBinder, EntityTableBinder entityTableBinder,
+                                     JdbcTemplate jdbcTemplate) {
+        for (Class<?> entityType : entityBinder.getEntityTypes()) {
             final EntityTable entityTable = entityTableBinder.getEntityTable(entityType);
-            if (entityTable.isOneToMany()) {
-                final EntityTable childEntityTable = entityTableBinder.getEntityTable(entityTable.getAssociationColumnType());
-                final CollectionPersister collectionPersister =
-                        new CollectionPersister(childEntityTable, entityTable, jdbcTemplate, dmlQueries.getInsertQuery());
-
-                final String collectionKey = getKey(entityType, entityTable.getAssociationColumnName());
-                entityPersisterRegistry.put(collectionKey, collectionPersister);
+            if (!entityTable.isOneToMany()) {
+                continue;
             }
+
+            final EntityTable childEntityTable = entityTableBinder.getEntityTable(entityTable.getAssociationColumnType());
+            final CollectionPersister collectionPersister =
+                    new CollectionPersister(childEntityTable, entityTable, jdbcTemplate);
+
+            final String collectionKey = getKey(entityType, entityTable.getAssociationColumnName());
+            entityPersisterRegistry.put(collectionKey, collectionPersister);
         }
     }
 

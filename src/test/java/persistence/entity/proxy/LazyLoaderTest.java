@@ -10,18 +10,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.entity.loader.CollectionLoader;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.SelectQuery;
 
 import static org.assertj.core.api.Assertions.*;
 
 class LazyLoaderTest {
     private JdbcTemplate jdbcTemplate;
-    private SelectQuery selectQuery;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        selectQuery = new SelectQuery();
     }
 
     @Test
@@ -30,7 +27,7 @@ class LazyLoaderTest {
         // given
         final EntityTable entityTable = new EntityTable(OrderLazy.class);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, rowMapper);
 
         // when
         final LazyLoader lazyLoader = new LazyLoader(entityTable, collectionLoader);
@@ -45,7 +42,7 @@ class LazyLoaderTest {
         // given
         final EntityTable entityTable = new EntityTable(Order.class);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, rowMapper);
 
         // when & then
         assertThatThrownBy(() -> new LazyLoader(entityTable, collectionLoader))

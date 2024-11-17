@@ -10,14 +10,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import persistence.bootstrap.Metamodel;
+import persistence.bootstrap.Metadata;
 import persistence.entity.loader.CollectionLoader;
 import persistence.entity.loader.EntityLoader;
-import persistence.entity.manager.DefaultEntityManager;
 import persistence.entity.manager.EntityManager;
 import persistence.entity.proxy.ProxyFactory;
 import persistence.meta.EntityTable;
-import persistence.sql.dml.SelectQuery;
 import util.TestHelper;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,21 +23,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EntityLoaderTest {
     private JdbcTemplate jdbcTemplate;
-    private Metamodel metamodel;
+    private Metadata metadata;
     private EntityManager entityManager;
-    private SelectQuery selectQuery;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(H2ConnectionFactory.getConnection());
-        metamodel = TestHelper.createMetamodel("domain", "fixture");
-        entityManager = new DefaultEntityManager(metamodel);
-        selectQuery = new SelectQuery();
+        metadata = TestHelper.createMetadata("domain", "fixture");
+        entityManager = metadata.getEntityManagerFactory().openSession();
     }
 
     @AfterEach
     void tearDown() {
-        metamodel.close();
+        metadata.close();
     }
 
     @Test
@@ -48,8 +44,9 @@ class EntityLoaderTest {
         // given
         final EntityTable entityTable = new EntityTable(EntityWithId.class);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
-        final EntityLoader entityLoader = new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, rowMapper);
+        final EntityLoader entityLoader =
+                new EntityLoader(entityTable, EntityTable.EMPTY, jdbcTemplate, ProxyFactory.getInstance(), rowMapper, collectionLoader);
         final EntityWithId entity = new EntityWithId("Jaden", 30, "test@email.com", 1);
         insertData(entity);
 
@@ -74,8 +71,9 @@ class EntityLoaderTest {
         final EntityTable entityTable = new EntityTable(Order.class);
         final EntityTable childEntityTable = new EntityTable(OrderItem.class);
         final DefaultRowMapper rowMapper = new DefaultRowMapper(entityTable, childEntityTable);
-        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, selectQuery, rowMapper);
-        final EntityLoader entityLoader = new EntityLoader(entityTable, childEntityTable, jdbcTemplate, new SelectQuery(), new ProxyFactory(), rowMapper, collectionLoader);
+        final CollectionLoader collectionLoader = new CollectionLoader(entityTable, jdbcTemplate, rowMapper);
+        final EntityLoader entityLoader =
+                new EntityLoader(entityTable, childEntityTable, jdbcTemplate, ProxyFactory.getInstance(), rowMapper, collectionLoader);
         final Order order = new Order("OrderNumber1");
         final OrderItem orderItem1 = new OrderItem("Product1", 10);
         final OrderItem orderItem2 = new OrderItem("Product2", 20);

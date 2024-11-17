@@ -39,7 +39,7 @@ public class ColumnLength {
         if (!lengthNeededTypes.contains(field.getType())) {
             return MIN_LENGTH;
         }
-        if (Objects.isNull(column)) {
+        if (column == null) {
             return MAX_LENGTH;
         }
         return column.length();

@@ -9,7 +9,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AssociationFieldMapping implements FieldMapping {
@@ -58,13 +57,13 @@ public class AssociationFieldMapping implements FieldMapping {
 
         for (int i = 0; i < getColumnCount(resultSet); i++) {
             Field field = getField(entityTable.getFields(), fieldIndex);
-            if (Objects.nonNull(field)) {
+            if (field != null) {
                 mapField(resultSet, entity, field, i + 1);
                 continue;
             }
 
             Field childField = getField(childEntityTable.getFields(), childFieldIndex);
-            if (Objects.nonNull(childField)) {
+            if (childField != null) {
                 mapField(resultSet, childEntity, childField, i + 1);
             }
         }
