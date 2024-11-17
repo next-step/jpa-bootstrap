@@ -1,5 +1,7 @@
 package persistence.event.persist;
 
-public interface PersistEventListener {
+import persistence.event.EventListener;
+
+public interface PersistEventListener extends EventListener {
     <T> void onPersist(PersistEvent<T> persistEvent);
 }

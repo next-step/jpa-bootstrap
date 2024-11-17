@@ -1,5 +1,7 @@
 package persistence.event.delete;
 
-public interface DeleteEventListener {
+import persistence.event.EventListener;
+
+public interface DeleteEventListener extends EventListener {
     <T> void onDelete(DeleteEvent<T> deleteEvent);
 }

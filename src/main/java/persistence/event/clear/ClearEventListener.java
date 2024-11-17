@@ -1,5 +1,7 @@
 package persistence.event.clear;
 
-public interface ClearEventListener {
+import persistence.event.EventListener;
+
+public interface ClearEventListener extends EventListener {
     void onClear(ClearEvent clearEvent);
 }

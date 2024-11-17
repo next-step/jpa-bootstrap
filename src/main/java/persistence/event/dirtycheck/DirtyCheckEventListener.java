@@ -1,5 +1,7 @@
 package persistence.event.dirtycheck;
 
-public interface DirtyCheckEventListener {
+import persistence.event.EventListener;
+
+public interface DirtyCheckEventListener extends EventListener {
     <T> void onDirtyCheck(DirtyCheckEvent<T> dirtyCheckEvent);
 }

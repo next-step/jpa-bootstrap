@@ -16,7 +16,7 @@ class EventListenerRegistryTest {
     @ParameterizedTest
     @MethodSource("testParameters")
     @DisplayName("이벤트 리스터 그룹을 반환한다.")
-    void getEventListenerGroup(EventType<?> eventType, int expected) {
+    void getEventListenerGroup(EventType eventType, int expected) {
         // given
         final EventListenerRegistry eventListenerRegistry = new EventListenerRegistry();
 

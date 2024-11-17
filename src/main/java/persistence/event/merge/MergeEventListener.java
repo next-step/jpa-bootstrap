@@ -1,5 +1,7 @@
 package persistence.event.merge;
 
-public interface MergeEventListener {
+import persistence.event.EventListener;
+
+public interface MergeEventListener extends EventListener {
     <T> void onMerge(MergeEvent<T> mergeEvent);
 }
