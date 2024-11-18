@@ -1,35 +1,43 @@
 package persistence.event.delete;
 
-import persistence.action.ActionQueue;
-import persistence.bootstrap.Metamodel;
-import persistence.entity.manager.factory.PersistenceContext;
+import persistence.event.Event;
+import persistence.event.EventListener;
+import persistence.event.EventType;
 
-public class DeleteEvent<T> {
-    private final Metamodel metamodel;
-    private final PersistenceContext persistenceContext;
-    private final ActionQueue actionQueue;
+public class DeleteEvent<T> implements Event<T> {
     private final T entity;
 
-    public DeleteEvent(Metamodel metamodel, PersistenceContext persistenceContext, ActionQueue actionQueue, T entity) {
-        this.metamodel = metamodel;
-        this.persistenceContext = persistenceContext;
-        this.actionQueue = actionQueue;
+    public DeleteEvent(T entity) {
         this.entity = entity;
     }
 
-    public Metamodel getMetamodel() {
-        return metamodel;
+    @Override
+    public Class<T> getEntityType() {
+        return null;
     }
 
-    public PersistenceContext getPersistenceContext() {
-        return persistenceContext;
-    }
-
-    public ActionQueue getActionQueue() {
-        return actionQueue;
-    }
-
+    @Override
     public T getEntity() {
         return entity;
+    }
+
+    @Override
+    public Object getId() {
+        return null;
+    }
+
+    @Override
+    public T getResult() {
+        return null;
+    }
+
+    @Override
+    public void setResult(T result) {
+
+    }
+
+    @Override
+    public EventType<? extends EventListener> getEventType() {
+        return EventType.DELETE;
     }
 }

@@ -4,35 +4,43 @@ import persistence.action.ActionQueue;
 import persistence.action.UpdateAction;
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.factory.PersistenceContext;
-import persistence.event.dirtycheck.DirtyCheckEvent;
-import persistence.event.dirtycheck.DirtyCheckEventListener;
+import persistence.event.Event;
 import persistence.meta.EntityColumn;
 import persistence.meta.EntityTable;
 
 import java.util.List;
+import java.util.Objects;
 
 public class DefaultUpdateEventListener implements UpdateEventListener {
+    private final Metamodel metamodel;
+    private final PersistenceContext persistenceContext;
+    private final ActionQueue actionQueue;
+
+    public DefaultUpdateEventListener(Metamodel metamodel, PersistenceContext persistenceContext, ActionQueue actionQueue) {
+        this.metamodel = metamodel;
+        this.persistenceContext = persistenceContext;
+        this.actionQueue = actionQueue;
+    }
+
     @Override
-    public <T> void onUpdate(UpdateEvent<T> updateEvent) {
-        final Metamodel metamodel = updateEvent.getMetamodel();
-        final PersistenceContext persistenceContext = updateEvent.getPersistenceContext();
-        final ActionQueue actionQueue = updateEvent.getActionQueue();
-        final T entity = updateEvent.getEntity();
+    public <T> void on(Event<T> event) {
+        final T entity = event.getEntity();
 
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
         final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue(entity));
-        if (snapshot == null) {
-            return;
-        }
+        final List<EntityColumn> dirtiedEntityColumns = entityTable.getEntityColumns()
+                .stream()
+                .filter(entityColumn -> isDirtied(entity, snapshot, entityColumn))
+                .toList();
 
-        final DirtyCheckEvent<T> dirtyCheckEvent = new DirtyCheckEvent<>(metamodel, entity, snapshot);
-        metamodel.getDirtyCheckEventListenerGroup().doEvent(dirtyCheckEvent, DirtyCheckEventListener::onDirtyCheck);
-
-        final List<EntityColumn> dirtiedEntityColumns = dirtyCheckEvent.getResult();
         if (dirtiedEntityColumns.isEmpty()) {
             return;
         }
 
         actionQueue.addAction(new UpdateAction<>(metamodel, persistenceContext, entity, dirtiedEntityColumns));
+    }
+
+    private boolean isDirtied(Object entity, Object snapshot, EntityColumn entityColumn) {
+        return !Objects.equals(entityColumn.extractValue(entity), entityColumn.extractValue(snapshot));
     }
 }

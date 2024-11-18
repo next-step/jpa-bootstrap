@@ -1,43 +1,46 @@
 package persistence.event.load;
 
-import persistence.bootstrap.Metamodel;
-import persistence.entity.manager.factory.PersistenceContext;
+import persistence.event.Event;
+import persistence.event.EventListener;
+import persistence.event.EventType;
 
-public class LoadEvent<T> {
-    private final Metamodel metamodel;
-    private final PersistenceContext persistenceContext;
+public class LoadEvent<T> implements Event<T> {
     private final Class<T> entityType;
     private final Object id;
     private T result;
 
-    public LoadEvent(Metamodel metamodel, PersistenceContext persistenceContext, Class<T> entityType, Object id) {
-        this.metamodel = metamodel;
-        this.persistenceContext = persistenceContext;
+    public LoadEvent(Class<T> entityType, Object id) {
         this.entityType = entityType;
         this.id = id;
     }
 
-    public Metamodel getMetamodel() {
-        return metamodel;
-    }
-
-    public PersistenceContext getPersistenceContext() {
-        return persistenceContext;
-    }
-
+    @Override
     public Class<T> getEntityType() {
         return entityType;
     }
 
+    @Override
+    public T getEntity() {
+        return null;
+    }
+
+    @Override
     public Object getId() {
         return id;
     }
 
+    @Override
     public T getResult() {
         return result;
     }
 
+    @Override
     public void setResult(T result) {
         this.result = result;
+    }
+
+    @Override
+    public EventType<? extends EventListener> getEventType() {
+        return EventType.LOAD;
     }
 }

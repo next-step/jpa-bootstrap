@@ -1,5 +1,6 @@
 package persistence.event.load;
 
-public interface LoadEventListener {
-    <T> void onLoad(LoadEvent<T> loadEvent);
+import persistence.event.EventListener;
+
+public interface LoadEventListener extends EventListener {
 }

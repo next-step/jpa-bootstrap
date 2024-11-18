@@ -2,36 +2,32 @@ package persistence.entity.manager;
 
 import persistence.action.ActionQueue;
 import persistence.bootstrap.Metamodel;
+import persistence.entity.loader.EntityLoader;
 import persistence.entity.manager.factory.PersistenceContext;
-import persistence.event.clear.ClearEvent;
-import persistence.event.clear.ClearEventListener;
+import persistence.event.EventDispatcher;
 import persistence.event.delete.DeleteEvent;
-import persistence.event.delete.DeleteEventListener;
-import persistence.event.flush.FlushEvent;
-import persistence.event.flush.FlushEventListener;
 import persistence.event.load.LoadEvent;
-import persistence.event.load.LoadEventListener;
-import persistence.event.merge.MergeEvent;
-import persistence.event.merge.MergeEventListener;
 import persistence.event.persist.PersistEvent;
-import persistence.event.persist.PersistEventListener;
+import persistence.event.update.UpdateEvent;
 import persistence.meta.EntityTable;
 
 public class DefaultEntityManager implements EntityManager {
     private final Metamodel metamodel;
     private final PersistenceContext persistenceContext;
     private final ActionQueue actionQueue;
+    private final EventDispatcher eventDispatcher;
 
     public DefaultEntityManager(Metamodel metamodel) {
         this.metamodel = metamodel;
         this.persistenceContext = new PersistenceContext();
         this.actionQueue = new ActionQueue();
+        this.eventDispatcher = new EventDispatcher(metamodel, persistenceContext, actionQueue);
     }
 
     @Override
     public <T> T find(Class<T> entityType, Object id) {
-        final LoadEvent<T> loadEvent = new LoadEvent<>(metamodel, persistenceContext, entityType, id);
-        metamodel.getLoadEventListenerGroup().doEvent(loadEvent, LoadEventListener::onLoad);
+        final LoadEvent<T> loadEvent = new LoadEvent<>(entityType, id);
+        eventDispatcher.dispatch(loadEvent);
 
         persistenceContext.addEntity(loadEvent.getResult(), id);
         return loadEvent.getResult();
@@ -39,8 +35,8 @@ public class DefaultEntityManager implements EntityManager {
 
     @Override
     public <T> void persist(T entity) {
-        final PersistEvent<T> persistEvent = new PersistEvent<>(metamodel, persistenceContext, actionQueue, entity);
-        metamodel.getPersistEventListenerGroup().doEvent(persistEvent, PersistEventListener::onPersist);
+        final PersistEvent<T> persistEvent = new PersistEvent<>(entity);
+        eventDispatcher.dispatch(persistEvent);
 
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
         persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
@@ -49,8 +45,8 @@ public class DefaultEntityManager implements EntityManager {
 
     @Override
     public <T> void remove(T entity) {
-        final DeleteEvent<T> deleteEvent = new DeleteEvent<>(metamodel, persistenceContext, actionQueue, entity);
-        metamodel.getDeleteEventListenerGroup().doEvent(deleteEvent, DeleteEventListener::onDelete);
+        final DeleteEvent<T> deleteEvent = new DeleteEvent<>(entity);
+        eventDispatcher.dispatch(deleteEvent);
 
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
         persistenceContext.removeEntity(entity, entityTable.getIdValue(entity));
@@ -58,23 +54,46 @@ public class DefaultEntityManager implements EntityManager {
 
     @Override
     public <T> void merge(T entity) {
-        final MergeEvent<T> mergeEvent = new MergeEvent<>(metamodel, persistenceContext, actionQueue, entity);
-        metamodel.getMergeEventListenerGroup().doEvent(mergeEvent, MergeEventListener::onMerge);
-
+        final EntityLoader entityLoader = metamodel.getEntityLoader(entity.getClass());
         final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        final Object idValue = entityTable.getIdValue(entity);
+
+        if (idValue == null || entityLoader.load(idValue) == null) {
+            persist(entity);
+            return;
+        }
+
+        final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue(entity));
+        if (snapshot == null) {
+            return;
+        }
+
+        final UpdateEvent<T> updateEvent = new UpdateEvent<>(entity);
+        eventDispatcher.dispatch(updateEvent);
+
         persistenceContext.addEntity(entity, entityTable.getIdValue(entity));
         persistenceContext.createOrUpdateStatus(entity, EntityStatus.MANAGED);
     }
 
     @Override
     public void flush() {
-        final FlushEvent flushEvent = new FlushEvent(metamodel, persistenceContext, actionQueue);
-        metamodel.getFlushEventListenerGroup().doEvent(flushEvent, FlushEventListener::onFlush);
+        actionQueue.executeAll();
+        updateAllEntity();
     }
 
     @Override
     public void clear() {
-        final ClearEvent clearEvent = new ClearEvent(persistenceContext, actionQueue);
-        metamodel.getClearEventListenerGroup().doEvent(clearEvent, ClearEventListener::onClear);
+        persistenceContext.clear();
+        actionQueue.clear();
+    }
+
+    private void updateAllEntity() {
+        persistenceContext.getAllEntity()
+                .forEach(this::update);
+    }
+
+    private <T> void update(T entity) {
+        final UpdateEvent<T> updateEvent = new UpdateEvent<>(entity);
+        eventDispatcher.dispatch(updateEvent);
     }
 }
