@@ -1,7 +1,5 @@
 package persistence.event.update;
 
-import persistence.event.EventListener;
-
-public interface UpdateEventListener extends EventListener {
+public interface UpdateEventListener {
     <T> void onUpdate(UpdateEvent<T> updateEvent);
 }

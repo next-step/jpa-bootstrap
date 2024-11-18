@@ -1,7 +1,5 @@
 package persistence.event.flush;
 
-import persistence.event.EventListener;
-
-public interface FlushEventListener extends EventListener {
+public interface FlushEventListener {
     void onFlush(FlushEvent flushEvent);
 }

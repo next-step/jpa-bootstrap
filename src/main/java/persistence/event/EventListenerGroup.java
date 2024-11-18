@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 public class EventListenerGroup<T> {
-    private final EventType eventType;
+    private final EventType<T> eventType;
     private final List<T> listeners = new ArrayList<>();
 
-    public EventListenerGroup(EventType eventType) {
+    public EventListenerGroup(EventType<T> eventType) {
         this.eventType = eventType;
     }
 
@@ -20,7 +20,7 @@ public class EventListenerGroup<T> {
         listeners.forEach(listener -> action.accept(listener, event));
     }
 
-    public EventType getEventType() {
+    public EventType<T> getEventType() {
         return eventType;
     }
 }

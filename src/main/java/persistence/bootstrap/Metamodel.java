@@ -61,34 +61,34 @@ public class Metamodel {
     }
 
     public EventListenerGroup<LoadEventListener> getLoadEventListenerGroup() {
-        return (EventListenerGroup<LoadEventListener>) eventListenerRegistry.getEventListenerGroup(EventType.LOAD);
+        return eventListenerRegistry.getEventListenerGroup(EventType.LOAD);
     }
 
     public EventListenerGroup<PersistEventListener> getPersistEventListenerGroup() {
-        return (EventListenerGroup<PersistEventListener>) eventListenerRegistry.getEventListenerGroup(EventType.PERSIST);
+        return eventListenerRegistry.getEventListenerGroup(EventType.PERSIST);
     }
 
     public EventListenerGroup<DeleteEventListener> getDeleteEventListenerGroup() {
-        return (EventListenerGroup<DeleteEventListener>) eventListenerRegistry.getEventListenerGroup(EventType.DELETE);
+        return eventListenerRegistry.getEventListenerGroup(EventType.DELETE);
     }
     public EventListenerGroup<UpdateEventListener> getUpdateEventListenerGroup() {
-        return (EventListenerGroup<UpdateEventListener>) eventListenerRegistry.getEventListenerGroup(EventType.UPDATE);
+        return eventListenerRegistry.getEventListenerGroup(EventType.UPDATE);
     }
 
     public EventListenerGroup<DirtyCheckEventListener> getDirtyCheckEventListenerGroup() {
-        return (EventListenerGroup<DirtyCheckEventListener>) eventListenerRegistry.getEventListenerGroup(EventType.DIRTY_CHECK);
+        return eventListenerRegistry.getEventListenerGroup(EventType.DIRTY_CHECK);
     }
 
     public EventListenerGroup<MergeEventListener> getMergeEventListenerGroup() {
-        return (EventListenerGroup<MergeEventListener>) eventListenerRegistry.getEventListenerGroup(EventType.MERGE);
+        return eventListenerRegistry.getEventListenerGroup(EventType.MERGE);
     }
 
     public EventListenerGroup<FlushEventListener> getFlushEventListenerGroup() {
-        return (EventListenerGroup<FlushEventListener>) eventListenerRegistry.getEventListenerGroup(EventType.FLUSH);
+        return eventListenerRegistry.getEventListenerGroup(EventType.FLUSH);
     }
 
     public EventListenerGroup<ClearEventListener> getClearEventListenerGroup() {
-        return (EventListenerGroup<ClearEventListener>) eventListenerRegistry.getEventListenerGroup(EventType.CLEAR);
+        return eventListenerRegistry.getEventListenerGroup(EventType.CLEAR);
     }
 
     public void close() {
