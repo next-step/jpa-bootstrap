@@ -26,31 +26,35 @@ public class EventDispatcher {
         eventListenerGroup.doEvent(event, EventListener::on);
     }
 
+    public void registerEventListener(EventType<? extends EventListener> eventType, EventListener... eventListeners) {
+        final EventListenerGroup<EventListener> eventListenerGroup = new EventListenerGroup<>(eventType);
+        for (EventListener eventListener : eventListeners) {
+            eventListenerGroup.appendListener(eventListener);
+        }
+        eventListenerGroupRegistry.put(eventType, eventListenerGroup);
+    }
+
     public void clear() {
         eventListenerGroupRegistry.clear();
     }
 
     private void registerLoadEventListener(Metamodel metamodel, PersistenceContext persistenceContext) {
-        final EventListenerGroup<EventListener> eventListenerGroup = new EventListenerGroup<>(EventType.LOAD);
-        eventListenerGroup.appendListener(new DefaultLoadEventListener(metamodel, persistenceContext));
-        eventListenerGroupRegistry.put(EventType.LOAD, eventListenerGroup);
+        final DefaultLoadEventListener eventListener = new DefaultLoadEventListener(metamodel, persistenceContext);
+        registerEventListener(EventType.LOAD, eventListener);
     }
 
     private void registerPersistEventListener(Metamodel metamodel, PersistenceContext persistenceContext, ActionQueue actionQueue) {
-        final EventListenerGroup<EventListener> eventListenerGroup = new EventListenerGroup<>(EventType.PERSIST);
-        eventListenerGroup.appendListener(new DefaultPersistEventListener(metamodel, persistenceContext, actionQueue));
-        eventListenerGroupRegistry.put(EventType.PERSIST, eventListenerGroup);
+        final DefaultPersistEventListener eventListener = new DefaultPersistEventListener(metamodel, persistenceContext, actionQueue);
+        registerEventListener(EventType.PERSIST, eventListener);
     }
 
     private void registerDeleteEventListener(Metamodel metamodel, PersistenceContext persistenceContext, ActionQueue actionQueue) {
-        final EventListenerGroup<EventListener> eventListenerGroup = new EventListenerGroup<>(EventType.DELETE);
-        eventListenerGroup.appendListener(new DefaultDeleteEventListener(metamodel, persistenceContext, actionQueue));
-        eventListenerGroupRegistry.put(EventType.DELETE, eventListenerGroup);
+        final DefaultDeleteEventListener eventListener = new DefaultDeleteEventListener(metamodel, persistenceContext, actionQueue);
+        registerEventListener(EventType.DELETE, eventListener);
     }
 
     private void registerUpdateEventListener(Metamodel metamodel, PersistenceContext persistenceContext, ActionQueue actionQueue) {
-        final EventListenerGroup<EventListener> eventListenerGroup = new EventListenerGroup<>(EventType.UPDATE);
-        eventListenerGroup.appendListener(new DefaultUpdateEventListener(metamodel, persistenceContext, actionQueue));
-        eventListenerGroupRegistry.put(EventType.UPDATE, eventListenerGroup);
+        final DefaultUpdateEventListener eventListener = new DefaultUpdateEventListener(metamodel, persistenceContext, actionQueue);
+        registerEventListener(EventType.UPDATE, eventListener);
     }
 }
