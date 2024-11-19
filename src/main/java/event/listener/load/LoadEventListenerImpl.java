@@ -1,10 +1,10 @@
-package event.listener;
+package event.listener.load;
 
 import builder.dml.EntityData;
-import event.action.ActionQueue;
+import event.listener.EventListener;
 import persistence.EntityLoader;
 
-public class LoadEventListenerImpl<T> implements EventListener<T> {
+public class LoadEventListenerImpl<T> implements LoadEventListener<T> {
 
     private final EntityLoader entityLoader;
 
@@ -13,11 +13,8 @@ public class LoadEventListenerImpl<T> implements EventListener<T> {
     }
 
     @Override
-    public T handleEvent(EntityData entityData) {
+    public T onLoad(EntityData entityData) {
         return this.entityLoader.find(entityData);
     }
 
-    @Override
-    public void setActionQueue(ActionQueue actionQueue) {
-    }
 }
