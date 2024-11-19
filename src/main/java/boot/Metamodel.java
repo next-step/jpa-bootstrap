@@ -11,9 +11,8 @@ public interface Metamodel {
 
     EntityMetaData entityMetaData(Class<?> entityClass);
 
-    EntityPersister entityPersister(Class<?> entityClass);
+    EntityPersister entityPersister();
 
-    CollectionPersister collectionPersister(String roll);
+    CollectionPersister collectionPersister();
 
-    List<String> getEntityClasses();
 }

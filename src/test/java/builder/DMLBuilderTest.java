@@ -121,7 +121,7 @@ class DMLBuilderTest {
     @Test
     void buildDMLBuilderJoinFindAllTest() {
         //given
-        EntityData entityData = new EntityData(new EntityMetaData(Order.class));
+        EntityData entityData = new EntityData(new EntityMetaData(Order.class), new EntityObjectData(Order.class));
 
         SelectAllQueryBuilder queryBuilder = new SelectAllQueryBuilder();
 

@@ -11,4 +11,8 @@ public interface EntityManager {
 
     void remove(Object entityInstance);
 
+    void flush();
+
+    void clear();
+
 }

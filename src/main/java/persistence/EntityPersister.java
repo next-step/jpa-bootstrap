@@ -11,7 +11,6 @@ public class EntityPersister {
     private final JdbcTemplate jdbcTemplate;
     private final DMLQueryBuilder dmlQueryBuilder;
     private Metamodel metamodel;
-    private Class<?> entityClass;
 
     public EntityPersister(JdbcTemplate jdbcTemplate, Metamodel metamodel, DMLQueryBuilder dmlQueryBuilder) {
         this.jdbcTemplate = jdbcTemplate;
@@ -19,9 +18,8 @@ public class EntityPersister {
         this.dmlQueryBuilder = dmlQueryBuilder;
     }
 
-    public EntityPersister(Class<?> entityClass, JdbcTemplate jdbcTemplate, DMLQueryBuilder dmlQueryBuilder) {
+    public EntityPersister(JdbcTemplate jdbcTemplate, DMLQueryBuilder dmlQueryBuilder) {
         this.jdbcTemplate = jdbcTemplate;
-        this.entityClass = entityClass;
         this.dmlQueryBuilder = dmlQueryBuilder;
     }
 
@@ -37,10 +35,7 @@ public class EntityPersister {
     private void joinPersist(EntityData entityData) {
         entityData.getJoinEntity().getJoinEntityData()
                 .forEach(joinEntityData ->
-                        this.metamodel.collectionPersister(
-                                entityData.getClazz().getSimpleName() +
-                                        DOT +
-                                        joinEntityData.getClazz().getSimpleName()).persist(joinEntityData)
+                        this.metamodel.collectionPersister().persist(joinEntityData)
                 );
     }
 

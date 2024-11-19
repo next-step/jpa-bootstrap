@@ -52,4 +52,11 @@ public class PersistenceContextImpl implements PersistenceContext {
         return this.entityEntryMap.get(entityKey);
     }
 
+    @Override
+    public void clear() {
+        this.entityMap.clear();
+        this.entityEntryMap.clear();
+        this.snapShotMap.clear();
+    }
+
 }

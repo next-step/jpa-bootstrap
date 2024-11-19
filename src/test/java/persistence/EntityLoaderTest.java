@@ -83,9 +83,14 @@ class EntityLoaderTest {
     @Test
     void findTest() {
         Person person = createPerson(1);
-        this.entityPersister.persist(new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person)));
 
-        assertThat(this.entityLoader.find(Person.class, 1L))
+        EntityData entityData = new EntityData(new EntityMetaData(person.getClass()), new EntityObjectData(person));
+
+        this.entityPersister.persist(entityData);
+
+        Person findPerson = this.entityLoader.find(entityData);
+
+        assertThat(findPerson)
                 .extracting("id", "name", "age", "email")
                 .contains(1L, "test1", 29, "test@test.com");
     }
@@ -94,9 +99,12 @@ class EntityLoaderTest {
     @Test
     void findOrderTest() {
         Order order = new Order(1L, "1234", List.of(createOrderItem(1, 1L)));
-        this.entityPersister.persist(new EntityData(new EntityMetaData(order.getClass()), new EntityObjectData(order)));
 
-        Order findOrder = this.entityLoader.find(Order.class, 1L);
+        EntityData entityData = new EntityData(new EntityMetaData(order.getClass()), new EntityObjectData(order));
+
+        this.entityPersister.persist(entityData);
+
+        Order findOrder = this.entityLoader.find(entityData);
 
         assertAll(
                 () -> assertThat(findOrder)
@@ -127,9 +135,12 @@ class EntityLoaderTest {
     @Test
     void findOrderLazyTest() {
         OrderLazy order = new OrderLazy(1L, "1234", List.of(createOrderItem(1, 1L)));
-        this.entityPersister.persist(new EntityData(new EntityMetaData(order.getClass()), new EntityObjectData(order)));
 
-        OrderLazy findOrder = this.entityLoader.find(OrderLazy.class, 1L);
+        EntityData entityData = new EntityData(new EntityMetaData(order.getClass()), new EntityObjectData(order));
+
+        this.entityPersister.persist(entityData);
+
+        OrderLazy findOrder = this.entityLoader.find(entityData);
 
         assertAll(
                 () -> assertThat(findOrder)

@@ -20,4 +20,6 @@ public interface PersistenceContext {
 
     EntityEntry getEntityEntryMap(EntityKey entityKey);
 
+    void clear();
+
 }

@@ -11,16 +11,9 @@ public class CollectionPersister {
     private final JdbcTemplate jdbcTemplate;
     private final DMLQueryBuilder dmlQueryBuilder;
 
-    private Class<?> entityClass;
-
-    public CollectionPersister(Class<?> entityClass, JdbcTemplate jdbcTemplate, DMLQueryBuilder dmlQueryBuilder) {
+    public CollectionPersister(JdbcTemplate jdbcTemplate, DMLQueryBuilder dmlQueryBuilder) {
         this.jdbcTemplate = jdbcTemplate;
-        this.entityClass = entityClass;
         this.dmlQueryBuilder = dmlQueryBuilder;
-    }
-
-    public String getSimpleName() {
-        return entityClass.getSimpleName();
     }
 
     public void persist(JoinEntityData joinEntityData) {

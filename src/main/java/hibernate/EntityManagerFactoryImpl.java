@@ -3,10 +3,10 @@ package hibernate;
 import boot.Metamodel;
 import boot.MetamodelImpl;
 import builder.dml.builder.DMLQueryBuilder;
+import event.EventListenerRegistry;
+import event.action.ActionQueue;
 import jdbc.JdbcTemplate;
-import persistence.EntityManager;
-import persistence.EntityManagerImpl;
-import persistence.PersistenceContextImpl;
+import persistence.*;
 
 public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
@@ -18,10 +18,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     public EntityManagerFactoryImpl(CurrentSessionContext currentSessionContext, JdbcTemplate jdbcTemplate, DMLQueryBuilder dmlQueryBuilder) {
         this.currentSessionContext = currentSessionContext;
         this.jdbcTemplate = jdbcTemplate;
-        this.dmlQueryBuilder = dmlQueryBuilder;
 
         this.metamodel = new MetamodelImpl(this.jdbcTemplate);
         this.metamodel.init();
+
+        this.dmlQueryBuilder = dmlQueryBuilder;
     }
 
     @Override
@@ -44,6 +45,17 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     }
 
     private EntityManager createEntityManager() {
-        return new EntityManagerImpl(jdbcTemplate, new PersistenceContextImpl(), metamodel, dmlQueryBuilder);
+        ActionQueue actionQueue = new ActionQueue();
+        return new EntityManagerImpl(
+                createPersistenceContext(),
+                metamodel,
+                EventListenerRegistry.createEventListenerRegistry(metamodel, new EntityLoader(jdbcTemplate, dmlQueryBuilder), actionQueue),
+                actionQueue
+        );
     }
+
+    private PersistenceContext createPersistenceContext() {
+        return new PersistenceContextImpl();
+    }
+
 }
