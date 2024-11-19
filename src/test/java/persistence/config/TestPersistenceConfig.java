@@ -4,9 +4,12 @@ import boot.MetaModel;
 import boot.Metadata;
 import database.DatabaseServer;
 import database.H2;
+import event.DeleteEventListener;
+import event.EventListenerGroup;
 import event.EventListenerRegistry;
 import event.EventType;
 import event.SaveOrUpdateEventListener;
+import event.impl.DefaultDeleteEventListener;
 import event.impl.DefaultEventListenerGroup;
 import event.impl.DefaultEventListenerRegistry;
 import event.impl.DefaultSaveOrUpdateEventListener;
@@ -94,14 +97,27 @@ public class TestPersistenceConfig {
 
     private EventListenerRegistry eventListenerRegistry() {
         DefaultEventListenerRegistry registry = new DefaultEventListenerRegistry();
-        DefaultEventListenerGroup<SaveOrUpdateEventListener> saveOrUpdateGroup =
-                new DefaultEventListenerGroup<>(EventType.SAVE_OR_UPDATE);
-        registry.addEventListenerGroup(EventType.SAVE_OR_UPDATE, saveOrUpdateGroup);
+        registry.addEventListenerGroup(EventType.SAVE_OR_UPDATE, saveOrUpdateEventListenerGroup());
+        registry.addEventListenerGroup(EventType.DELETE, deleteEventListenerGroup());
 
-        saveOrUpdateGroup.addEventListener(new DefaultSaveOrUpdateEventListener());
 
         // TODO add event listeners
         return registry;
+    }
+
+    private EventListenerGroup<?> deleteEventListenerGroup() {
+        DefaultEventListenerGroup<DeleteEventListener> listeners = new DefaultEventListenerGroup<>(EventType.DELETE);
+        listeners.addEventListener(new DefaultDeleteEventListener());
+
+        return listeners;
+    }
+
+    private EventListenerGroup<SaveOrUpdateEventListener> saveOrUpdateEventListenerGroup() {
+        DefaultEventListenerGroup<SaveOrUpdateEventListener> saveOrUpdateGroup =
+                new DefaultEventListenerGroup<>(EventType.SAVE_OR_UPDATE);
+        saveOrUpdateGroup.addEventListener(new DefaultSaveOrUpdateEventListener());
+
+        return saveOrUpdateGroup;
     }
 
     public MetaModel metaModel() throws SQLException {

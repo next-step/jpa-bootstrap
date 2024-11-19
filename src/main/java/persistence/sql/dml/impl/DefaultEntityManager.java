@@ -5,6 +5,7 @@ import database.ConnectionHolder;
 import event.EventListenerGroup;
 import event.EventListenerRegistry;
 import event.EventType;
+import event.impl.DeleteEvent;
 import event.impl.SaveOrUpdateEvent;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.EntityExistsException;
@@ -107,22 +108,10 @@ public class DefaultEntityManager implements EntityManager {
         if (entity == null) {
             throw new IllegalArgumentException("Entity must not be null");
         }
-        EntityLoader<?> entityLoader = metaModel.entityLoader(entity.getClass());
-        MetadataLoader<?> loader = entityLoader.getMetadataLoader();
 
-        Object id = Clause.extractValue(loader.getPrimaryKeyField(), entity);
-
-        EntityEntry entityEntry = persistenceContext.getEntry(entity.getClass(), id);
-        if (entityEntry == null) {
-            throw new IllegalStateException("Entity not found. ");
-        }
-
-        entityEntry.updateStatus(Status.DELETED);
-        if (!transaction.isActive()) {
-            EntityPersister<T> entityPersister = metaModel.entityPersister((Class<T>) entity.getClass());
-            entityPersister.delete(entity);
-            persistenceContext.deleteEntry(entity, id);
-        }
+        DeleteEvent deleteEvent = DeleteEvent.create(entity, this);
+        eventListenerRegistry.getEventListenerGroup(EventType.DELETE)
+                .fireEvent(deleteEvent);
     }
 
     @Override

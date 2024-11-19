@@ -2,37 +2,19 @@ package event.impl;
 
 import event.Event;
 import persistence.sql.clause.Clause;
+import persistence.sql.dml.EntityManager;
 import persistence.sql.dml.MetadataLoader;
 
-public class DeleteEvent implements Event {
-    private final Object entity;
-    private final String entityName;
-    private final Object entityId;
+public record DeleteEvent(Object entity,
+                          String entityName,
+                          Object entityId,
+                          MetadataLoader<?> metadataLoader,
+                          EntityManager entityManager) implements Event {
 
-    public DeleteEvent(Object entity, String entityName, Object entityId) {
-        this.entity = entity;
-        this.entityName = entityName;
-        this.entityId = entityId;
-    }
+    public static DeleteEvent create(Object entity, EntityManager entityManager) {
+        MetadataLoader<?> loader = entityManager.getMetadataLoader(entity.getClass());
+        Object primaryKey = Clause.extractValue(loader.getPrimaryKeyField(), entity);
 
-    public static DeleteEvent create(Object entity, MetadataLoader<?> metadataLoader) {
-        Object primaryKey = Clause.extractValue(metadataLoader.getPrimaryKeyField(), entity);
-
-        return new DeleteEvent(entity, metadataLoader.getEntityName(), primaryKey);
-    }
-
-    @Override
-    public Object entity() {
-        return entity;
-    }
-
-    @Override
-    public String entityName() {
-        return entityName;
-    }
-
-    @Override
-    public Object entityId() {
-        return entityId;
+        return new DeleteEvent(entity, loader.getEntityName(), primaryKey, loader, entityManager);
     }
 }
