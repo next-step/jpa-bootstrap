@@ -3,6 +3,7 @@ package persistence.sql.dml;
 import persistence.sql.context.EntityPersister;
 import persistence.sql.context.PersistenceContext;
 import persistence.sql.event.FlushEventListener;
+import persistence.sql.loader.EntityLoader;
 import persistence.sql.transaction.Transaction;
 
 import java.util.List;
@@ -56,4 +57,6 @@ public interface EntityManager extends FlushEventListener {
     <T> MetadataLoader<T> getMetadataLoader(Class<T> entityClass);
 
     <T> EntityPersister<T> getEntityPersister(Class<T> entityClass);
+
+    <T> EntityLoader<T> getEntityLoader(Class<T> entityClass);
 }

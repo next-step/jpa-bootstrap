@@ -1,23 +1,16 @@
 package event.impl;
 
 import event.Event;
+import persistence.sql.dml.EntityManager;
 import persistence.sql.dml.MetadataLoader;
 
-public class LoadEvent implements Event {
-    private final MetadataLoader<?> metadataLoader;
-    private final Object entityId;
-    private final Object foreignKey;
-    private final MetadataLoader<?> foreignMetadataLoader;
+public record LoadEvent<T>(MetadataLoader<T> metadataLoader, Object entityId,
+                           EntityManager entityManager) implements Event {
 
-    public LoadEvent(Object entityId, MetadataLoader<?> metadataLoader) {
-        this(metadataLoader, entityId, null, null);
-    }
+    public static <T> LoadEvent<T> create(Class<T> returnType, Object primaryKey, EntityManager entityManager) {
+        MetadataLoader<T> metadataLoader = entityManager.getMetadataLoader(returnType);
 
-    public LoadEvent(MetadataLoader<?> metadataLoader, Object entityId, Object foreignKey, MetadataLoader<?> foreignMetadataLoader) {
-        this.metadataLoader = metadataLoader;
-        this.entityId = entityId;
-        this.foreignKey = foreignKey;
-        this.foreignMetadataLoader = foreignMetadataLoader;
+        return new LoadEvent<>(metadataLoader, primaryKey, entityManager);
     }
 
     @Override
@@ -28,18 +21,5 @@ public class LoadEvent implements Event {
     @Override
     public String entityName() {
         return metadataLoader.getEntityName();
-    }
-
-    @Override
-    public Object entityId() {
-        return entityId;
-    }
-
-    public MetadataLoader<?> getForeignMetadataLoader() {
-        return foreignMetadataLoader;
-    }
-
-    public Object getForeignKey() {
-        return foreignKey;
     }
 }

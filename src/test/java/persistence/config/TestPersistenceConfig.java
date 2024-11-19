@@ -8,10 +8,12 @@ import event.DeleteEventListener;
 import event.EventListenerGroup;
 import event.EventListenerRegistry;
 import event.EventType;
+import event.LoadEventListener;
 import event.SaveOrUpdateEventListener;
 import event.impl.DefaultDeleteEventListener;
 import event.impl.DefaultEventListenerGroup;
 import event.impl.DefaultEventListenerRegistry;
+import event.impl.DefaultLoadEventListener;
 import event.impl.DefaultSaveOrUpdateEventListener;
 import persistence.proxy.ProxyFactory;
 import persistence.proxy.impl.JdkProxyFactory;
@@ -99,10 +101,16 @@ public class TestPersistenceConfig {
         DefaultEventListenerRegistry registry = new DefaultEventListenerRegistry();
         registry.addEventListenerGroup(EventType.SAVE_OR_UPDATE, saveOrUpdateEventListenerGroup());
         registry.addEventListenerGroup(EventType.DELETE, deleteEventListenerGroup());
+        registry.addEventListenerGroup(EventType.LOAD, loadEventListenerGroup());
 
-
-        // TODO add event listeners
         return registry;
+    }
+
+    private EventListenerGroup<?> loadEventListenerGroup() {
+        DefaultEventListenerGroup<LoadEventListener> listeners = new DefaultEventListenerGroup<>(EventType.LOAD);
+        listeners.addEventListener(new DefaultLoadEventListener());
+
+        return listeners;
     }
 
     private EventListenerGroup<?> deleteEventListenerGroup() {

@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 public class EntityLoader<T> implements Loader<T> {
@@ -273,7 +274,7 @@ public class EntityLoader<T> implements Loader<T> {
 
     public void updateLazyLoadingField(T parentEntity,
                                        PersistenceContext persistenceContext,
-                                       MetaModel metaModel,
+                                       Function<Class<?>, EntityLoader<?>> entityLoaderFunction,
                                        BiConsumer<CollectionKeyHolder, CollectionEntry> onAfterLoadConsumer) {
         List<Field> lazyFields = metadataLoader.getFieldAllByPredicate(EntityLoader::isLazy);
         Object foreignKey = Clause.extractValue(metadataLoader.getPrimaryKeyField(), parentEntity);
@@ -282,7 +283,7 @@ public class EntityLoader<T> implements Loader<T> {
             Class<? extends Collection<Object>> lazyFieldType = ReflectionUtils.getCollectionFieldType(lazyField);
             Class<?> lazyFieldGenericType = ReflectionUtils.collectionClass(lazyField.getGenericType());
             MetadataLoader<?> lazyLoader = new SimpleMetadataLoader<>(lazyFieldGenericType);
-            EntityLoader<?> entityLoader = metaModel.entityLoader(lazyFieldGenericType);
+            EntityLoader<?> entityLoader = entityLoaderFunction.apply(lazyFieldGenericType);
 
             Collection<Object> lazyProxy = proxyFactory.createProxyCollection(foreignKey,
                     metadataLoader.getEntityType(),

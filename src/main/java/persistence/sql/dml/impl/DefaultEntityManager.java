@@ -6,6 +6,7 @@ import event.EventListenerGroup;
 import event.EventListenerRegistry;
 import event.EventType;
 import event.impl.DeleteEvent;
+import event.impl.LoadEvent;
 import event.impl.SaveOrUpdateEvent;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.EntityExistsException;
@@ -120,30 +121,17 @@ public class DefaultEntityManager implements EntityManager {
             throw new IllegalArgumentException("Primary key must not be null");
         }
 
+        LoadEvent<T> event = LoadEvent.create(returnType, primaryKey, this);
+        EventListenerGroup<?> eventListenerGroup = eventListenerRegistry.getEventListenerGroup(EventType.LOAD);
+        eventListenerGroup.fireEvent(event);
+
         EntityEntry entry = persistenceContext.getEntry(returnType, primaryKey);
 
-        if (entry != null) {
+        if (entry != null && entry.getEntityType() == returnType) {
             return returnType.cast(entry.getEntity());
         }
 
-        EntityLoader<T> entityLoader = metaModel.entityLoader(returnType);
-        entry = persistenceContext.addLoadingEntry(primaryKey, entityLoader.getMetadataLoader());
-
-        T loadedEntity = entityLoader.load(primaryKey);
-        if (loadedEntity != null) {
-            entry.updateEntity(loadedEntity);
-            entry.updateStatus(Status.MANAGED);
-        }
-
-        if (entityLoader.existLazyLoading()) {
-            entityLoader.updateLazyLoadingField(loadedEntity, persistenceContext, metaModel, (collectionKeyHolder, collectionEntry) -> {
-                if (transaction.isActive()) {
-                    persistenceContext.addCollectionEntry(collectionKeyHolder, collectionEntry);
-                }
-            });
-        }
-
-        return loadedEntity;
+        return null;
     }
 
     @Override
@@ -172,6 +160,11 @@ public class DefaultEntityManager implements EntityManager {
     @Override
     public <T> EntityPersister<T> getEntityPersister(Class<T> entityClass) {
         return metaModel.entityPersister(entityClass);
+    }
+
+    @Override
+    public <T> EntityLoader<T> getEntityLoader(Class<T> entityClass) {
+        return metaModel.entityLoader(entityClass);
     }
 
     @Override
