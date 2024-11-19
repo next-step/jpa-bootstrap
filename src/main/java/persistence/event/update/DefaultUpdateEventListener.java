@@ -24,20 +24,22 @@ public class DefaultUpdateEventListener implements UpdateEventListener {
 
     @Override
     public <T> void on(Event<T> event) {
-        final T entity = event.getEntity();
+        if (event instanceof UpdateEvent<T> updateEvent) {
+            final T entity = updateEvent.getEntity();
 
-        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
-        final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue(entity));
-        final List<EntityColumn> dirtiedEntityColumns = entityTable.getEntityColumns()
-                .stream()
-                .filter(entityColumn -> isDirtied(entity, snapshot, entityColumn))
-                .toList();
+            final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+            final Object snapshot = persistenceContext.getSnapshot(entity.getClass(), entityTable.getIdValue(entity));
+            final List<EntityColumn> dirtiedEntityColumns = entityTable.getEntityColumns()
+                    .stream()
+                    .filter(entityColumn -> isDirtied(entity, snapshot, entityColumn))
+                    .toList();
 
-        if (dirtiedEntityColumns.isEmpty()) {
-            return;
+            if (dirtiedEntityColumns.isEmpty()) {
+                return;
+            }
+
+            actionQueue.addAction(new UpdateAction<>(metamodel, persistenceContext, entity, dirtiedEntityColumns));
         }
-
-        actionQueue.addAction(new UpdateAction<>(metamodel, persistenceContext, entity, dirtiedEntityColumns));
     }
 
     private boolean isDirtied(Object entity, Object snapshot, EntityColumn entityColumn) {

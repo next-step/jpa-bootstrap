@@ -22,13 +22,15 @@ public class DefaultDeleteEventListener implements DeleteEventListener {
 
     @Override
     public <T> void on(Event<T> event) {
-        final T entity = event.getEntity();
+        if (event instanceof DeleteEvent<T> deleteEvent) {
+            final T entity = deleteEvent.getEntity();
 
-        final EntityEntry entityEntry = persistenceContext.getEntityEntry(entity);
-        if (!entityEntry.isRemovable()) {
-            throw new IllegalStateException(NOT_REMOVABLE_STATUS_FAILED_MESSAGE);
+            final EntityEntry entityEntry = persistenceContext.getEntityEntry(entity);
+            if (!entityEntry.isRemovable()) {
+                throw new IllegalStateException(NOT_REMOVABLE_STATUS_FAILED_MESSAGE);
+            }
+
+            actionQueue.addAction(new DeleteAction<>(metamodel, entity));
         }
-
-        actionQueue.addAction(new DeleteAction<>(metamodel, entity));
     }
 }

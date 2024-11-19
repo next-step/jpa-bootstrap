@@ -16,17 +16,19 @@ public class DefaultLoadEventListener implements LoadEventListener {
 
     @Override
     public <T> void on(Event<T> event) {
-        final Class<T> entityType = event.getEntityType();
-        final Object id = event.getId();
+        if (event instanceof LoadEvent<T> loadEvent) {
+            final Class<T> entityType = loadEvent.getEntityType();
+            final Object id = loadEvent.getId();
 
-        final T managedEntity = persistenceContext.getEntity(entityType, id);
-        if (managedEntity != null) {
-            event.setResult(managedEntity);
-            return;
+            final T managedEntity = persistenceContext.getEntity(entityType, id);
+            if (managedEntity != null) {
+                loadEvent.setResult(managedEntity);
+                return;
+            }
+
+            final EntityLoader entityLoader = metamodel.getEntityLoader(entityType);
+            final T result = entityLoader.load(id);
+            loadEvent.setResult(result);
         }
-
-        final EntityLoader entityLoader = metamodel.getEntityLoader(entityType);
-        final T result = entityLoader.load(id);
-        event.setResult(result);
     }
 }
