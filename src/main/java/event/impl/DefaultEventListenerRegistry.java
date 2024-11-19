@@ -9,15 +9,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DefaultEventListenerRegistry implements EventListenerRegistry {
-    private static final Map<EventType<? extends EventListener>, EventListenerGroup> listenerGroups = new HashMap<>();
+    private static final Map<EventType<? extends EventListener>, EventListenerGroup<?>> listenerGroups = new HashMap<>();
 
     @Override
-    public void addEventListenerGroup(EventType<? extends EventListener> eventType, EventListenerGroup listenerGroup) {
+    public void addEventListenerGroup(EventType<? extends EventListener> eventType, EventListenerGroup<?> listenerGroup) {
         listenerGroups.put(eventType, listenerGroup);
     }
 
     @Override
-    public EventListenerGroup getEventListenerGroup(EventType<? extends EventListener> eventType) {
+    public EventListenerGroup<?> getEventListenerGroup(EventType<? extends EventListener> eventType) {
         return listenerGroups.get(eventType);
     }
 }

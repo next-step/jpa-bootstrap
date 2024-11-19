@@ -1,7 +1,8 @@
 package event;
 
-public interface LoadEventListener {
-    void onLoad();
-    <T> T onLoad(T t);
+import event.impl.LoadEvent;
+
+public interface LoadEventListener extends EventListener{
+    <T> T onLoad(LoadEvent event);
 
 }

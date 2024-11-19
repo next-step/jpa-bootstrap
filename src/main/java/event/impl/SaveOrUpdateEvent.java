@@ -1,11 +1,13 @@
 package event.impl;
 
 import event.Event;
+import persistence.sql.clause.Clause;
+import persistence.sql.dml.MetadataLoader;
 
 public class SaveOrUpdateEvent implements Event {
-    private Object entity;
-    private String entityName;
-    private Object entityId;
+    private final Object entity;
+    private final String entityName;
+    private final Object entityId;
 
     public SaveOrUpdateEvent(Object entity, String entityName, Object entityId) {
         this.entity = entity;
@@ -13,7 +15,12 @@ public class SaveOrUpdateEvent implements Event {
         this.entityId = entityId;
     }
 
-    public static
+    public static SaveOrUpdateEvent create(Object entity, MetadataLoader<?> metadataLoader) {
+        Object primaryKey = Clause.extractValue(metadataLoader.getPrimaryKeyField(), entity);
+
+        return new SaveOrUpdateEvent(entity, metadataLoader.getEntityName(), primaryKey);
+
+    }
 
     @Override
     public Object getEntity() {
