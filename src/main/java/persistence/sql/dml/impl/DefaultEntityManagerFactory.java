@@ -3,7 +3,6 @@ package persistence.sql.dml.impl;
 import boot.MetaModel;
 import boot.Metadata;
 import event.EventListenerRegistry;
-import event.impl.DefaultEventListenerRegistry;
 import persistence.proxy.ProxyFactory;
 import persistence.sql.context.impl.DefaultPersistenceContext;
 import persistence.sql.dml.EntityManager;

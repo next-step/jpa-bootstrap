@@ -1,6 +1,5 @@
 package persistence.sql.loader;
 
-import boot.MetaModel;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import persistence.proxy.ProxyFactory;

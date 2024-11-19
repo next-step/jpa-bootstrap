@@ -21,7 +21,7 @@ public class DefaultDatabase implements Database {
     public Connection getConnection() {
         try {
 
-            if(connection == null || connection.isClosed()) {
+            if (connection == null || connection.isClosed()) {
                 connection = server.getConnection();
             }
 

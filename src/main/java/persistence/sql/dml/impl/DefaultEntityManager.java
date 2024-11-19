@@ -8,9 +8,7 @@ import event.EventType;
 import event.impl.DeleteEvent;
 import event.impl.LoadEvent;
 import event.impl.SaveOrUpdateEvent;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.OneToMany;
 import persistence.sql.clause.Clause;
 import persistence.sql.context.EntityPersister;
 import persistence.sql.context.PersistenceContext;
@@ -24,8 +22,6 @@ import persistence.sql.transaction.impl.EntityTransaction;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 public class DefaultEntityManager implements EntityManager {
@@ -34,15 +30,12 @@ public class DefaultEntityManager implements EntityManager {
     private final Transaction transaction;
     private final EventListenerRegistry eventListenerRegistry;
 
-
     public DefaultEntityManager(PersistenceContext persistenceContext, MetaModel metaModel, EventListenerRegistry registry) {
         this.persistenceContext = persistenceContext;
         this.metaModel = metaModel;
         this.transaction = new EntityTransaction(this);
         this.eventListenerRegistry = registry;
     }
-
-
 
     @Override
     public Transaction getTransaction() {
@@ -89,8 +82,6 @@ public class DefaultEntityManager implements EntityManager {
         if (entity == null) {
             throw new IllegalArgumentException("Entity must not be null");
         }
-        EntityLoader<?> entityLoader = metaModel.entityLoader(entity.getClass());
-        MetadataLoader<?> loader = entityLoader.getMetadataLoader();
 
         if (isNew(entity)) {
             persist(entity);
