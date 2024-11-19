@@ -13,7 +13,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     private final CurrentSessionContext currentSessionContext;
     private final JdbcTemplate jdbcTemplate;
     private final Metamodel metamodel;
-    private final EventListenerRegistry<?> eventListenerRegistry;
+    private final DMLQueryBuilder dmlQueryBuilder;
 
     public EntityManagerFactoryImpl(CurrentSessionContext currentSessionContext, JdbcTemplate jdbcTemplate, DMLQueryBuilder dmlQueryBuilder) {
         this.currentSessionContext = currentSessionContext;
@@ -22,7 +22,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         this.metamodel = new MetamodelImpl(this.jdbcTemplate);
         this.metamodel.init();
 
-        this.eventListenerRegistry = new EventListenerRegistry<>(metamodel, new EntityLoader(jdbcTemplate, dmlQueryBuilder));
+        this.dmlQueryBuilder = dmlQueryBuilder;
     }
 
     @Override
@@ -45,7 +45,13 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     }
 
     private EntityManager createEntityManager() {
-        return new EntityManagerImpl(createPersistenceContext(), metamodel, this.eventListenerRegistry.addActionQueue(new ActionQueue()));
+        ActionQueue actionQueue = new ActionQueue();
+        return new EntityManagerImpl(
+                createPersistenceContext(),
+                metamodel,
+                EventListenerRegistry.createEventListenerRegistry(metamodel, new EntityLoader(jdbcTemplate, dmlQueryBuilder), actionQueue),
+                actionQueue
+        );
     }
 
     private PersistenceContext createPersistenceContext() {
