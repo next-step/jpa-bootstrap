@@ -1,5 +1,7 @@
 package persistence.sql.dml;
 
+import persistence.sql.context.EntityPersister;
+import persistence.sql.context.PersistenceContext;
 import persistence.sql.event.FlushEventListener;
 import persistence.sql.transaction.Transaction;
 
@@ -22,6 +24,8 @@ public interface EntityManager extends FlushEventListener {
      * @param entity 수정할 엔티티
      */
     <T> T merge(T entity);
+
+    boolean isNew(Object entity);
 
     /**
      * 엔티티를 삭제한다.
@@ -46,4 +50,10 @@ public interface EntityManager extends FlushEventListener {
      * @return 조회된 엔티티 목록
      */
     <T> List<T> findAll(Class<T> entityClass);
+
+    PersistenceContext getPersistenceContext();
+
+    <T> MetadataLoader<T> getMetadataLoader(Class<T> entityClass);
+
+    <T> EntityPersister<T> getEntityPersister(Class<T> entityClass);
 }

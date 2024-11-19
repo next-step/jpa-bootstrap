@@ -21,17 +21,17 @@ public class LoadEvent implements Event {
     }
 
     @Override
-    public Object getEntity() {
+    public Object entity() {
         return null;
     }
 
     @Override
-    public String getEntityName() {
+    public String entityName() {
         return metadataLoader.getEntityName();
     }
 
     @Override
-    public Object getEntityId() {
+    public Object entityId() {
         return entityId;
     }
 

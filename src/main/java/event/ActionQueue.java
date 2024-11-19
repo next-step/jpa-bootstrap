@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActionQueue {
-    private List<EntityInsertAction> insertions = new ArrayList<>();
-    private List<EntityDeleteAction> deletions = new ArrayList<>();
-    private List<EntityUpdateAction> updates = new ArrayList<>();
+    private final List<EntityInsertAction> insertions = new ArrayList<>();
+    private final List<EntityDeleteAction> deletions = new ArrayList<>();
+    private final List<EntityUpdateAction> updates = new ArrayList<>();
 
     public void addInsertion(EntityInsertAction action) {
         insertions.add(action);

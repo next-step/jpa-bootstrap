@@ -2,38 +2,38 @@ package event.impl;
 
 import event.Event;
 import persistence.sql.clause.Clause;
+import persistence.sql.dml.EntityManager;
 import persistence.sql.dml.MetadataLoader;
 
-public class SaveOrUpdateEvent implements Event {
-    private final Object entity;
-    private final String entityName;
-    private final Object entityId;
+public record SaveOrUpdateEvent(
+        Object entity,
+        Object primaryKey,
+        MetadataLoader<?> metadataLoader,
+        EntityManager entityManager) implements Event {
 
-    public SaveOrUpdateEvent(Object entity, String entityName, Object entityId) {
-        this.entity = entity;
-        this.entityName = entityName;
-        this.entityId = entityId;
-    }
+    public static SaveOrUpdateEvent create(Object entity, EntityManager entityManager) {
+        MetadataLoader<?> loader = entityManager.getMetadataLoader(entity.getClass());
+        Object primaryKey = Clause.extractValue(loader.getPrimaryKeyField(), entity);
 
-    public static SaveOrUpdateEvent create(Object entity, MetadataLoader<?> metadataLoader) {
-        Object primaryKey = Clause.extractValue(metadataLoader.getPrimaryKeyField(), entity);
-
-        return new SaveOrUpdateEvent(entity, metadataLoader.getEntityName(), primaryKey);
-
+        return new SaveOrUpdateEvent(entity, primaryKey, loader, entityManager);
     }
 
     @Override
-    public Object getEntity() {
-        return entity;
+    public String entityName() {
+        return metadataLoader.getEntityName();
     }
 
     @Override
-    public String getEntityName() {
-        return entityName;
+    public Object entityId() {
+        return primaryKey;
     }
 
     @Override
-    public Object getEntityId() {
-        return entityId;
+    public EntityManager entityManager() {
+        return entityManager;
+    }
+
+    public Class<?> entityType() {
+        return entity.getClass();
     }
 }

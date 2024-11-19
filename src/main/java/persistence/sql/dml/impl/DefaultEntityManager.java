@@ -2,6 +2,10 @@ package persistence.sql.dml.impl;
 
 import boot.MetaModel;
 import database.ConnectionHolder;
+import event.EventListenerGroup;
+import event.EventListenerRegistry;
+import event.EventType;
+import event.impl.SaveOrUpdateEvent;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.OneToMany;
@@ -26,13 +30,17 @@ public class DefaultEntityManager implements EntityManager {
     private final PersistenceContext persistenceContext;
     private final MetaModel metaModel;
     private final Transaction transaction;
+    private final EventListenerRegistry eventListenerRegistry;
 
 
-    public DefaultEntityManager(PersistenceContext persistenceContext, MetaModel metaModel) {
+    public DefaultEntityManager(PersistenceContext persistenceContext, MetaModel metaModel, EventListenerRegistry registry) {
         this.persistenceContext = persistenceContext;
         this.metaModel = metaModel;
         this.transaction = new EntityTransaction(this);
+        this.eventListenerRegistry = registry;
     }
+
+
 
     @Override
     public Transaction getTransaction() {
@@ -50,86 +58,18 @@ public class DefaultEntityManager implements EntityManager {
         if (!isNew(entity)) {
             throw new EntityExistsException("Entity already exists");
         }
-        EntityPersister<T> entityPersister = metaModel.entityPersister((Class<T>) entity.getClass());
+        SaveOrUpdateEvent saveOrUpdateEvent = SaveOrUpdateEvent.create(entity, this);
 
-        entityPersister.insert(entity);
-        persistenceContext.addEntry(entity, Status.SAVING, entityPersister);
-
-        if (existsPersistChildEntity(entity)) {
-            persistChildEntity(entity);
-        }
+        EventListenerGroup<?> eventListenerGroup = eventListenerRegistry.getEventListenerGroup(EventType.SAVE_OR_UPDATE);
+        eventListenerGroup.fireEvent(saveOrUpdateEvent);
 
         if (!transaction.isActive()) {
             persistenceContext.cleanup();
         }
     }
 
-    private <T> void persistChildEntity(T entity) {
-        MetadataLoader<?> loader = metaModel.entityLoader(entity.getClass()).getMetadataLoader();
-        List<Field> fields = loader.getFieldAllByPredicate(this::isCascadePersist);
-
-        for (Field field : fields) {
-            persistChildEntities(entity, field);
-        }
-    }
-
-    private <T> void persistChildEntities(T entity, Field field) {
-        try {
-            field.setAccessible(true);
-            Collection<?> childEntities = (Collection<?>) field.get(entity);
-
-            if (childEntities == null || childEntities.isEmpty()) {
-                return;
-            }
-
-            childEntities.forEach(childEntity -> persistIfIsNewChildEntity(entity, childEntity));
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    private <T, P> void persistIfIsNewChildEntity(T entity, P childEntity) {
-        if (isNew(childEntity)) {
-            EntityPersister<P> entityPersister = metaModel.entityPersister((Class<P>) childEntity.getClass());
-            entityPersister.insert(childEntity, entity);
-            persistenceContext.addEntry(childEntity, Status.SAVING, entityPersister);
-
-            if (!transaction.isActive()) {
-                persistenceContext.cleanup();
-            }
-        }
-    }
-
-    private <T> boolean existsPersistChildEntity(T entity) {
-        EntityLoader<?> entityLoader = metaModel.entityLoader(entity.getClass());
-        MetadataLoader<?> loader = entityLoader.getMetadataLoader();
-        List<Field> fields = loader.getFieldAllByPredicate(this::isCascadePersist);
-
-        return fields.stream().anyMatch(field -> isNotEmptyField(entity, field));
-    }
-
-    private boolean isCascadePersist(Field field) {
-        OneToMany anno = field.getAnnotation(OneToMany.class);
-
-        return anno != null
-                && Arrays.stream(anno.cascade())
-                .anyMatch(cascadeType -> CascadeType.PERSIST == cascadeType);
-    }
-
-    private <T> boolean isNotEmptyField(T entity, Field field) {
-        try {
-            field.setAccessible(true);
-            Object value = field.get(entity);
-
-            return Collection.class.isAssignableFrom(field.getType()) && !((Collection<?>) value).isEmpty();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    private boolean isNew(Object entity) {
+    @Override
+    public boolean isNew(Object entity) {
         EntityLoader<?> entityLoader = metaModel.entityLoader(entity.getClass());
         MetadataLoader<?> loader = entityLoader.getMetadataLoader();
 
@@ -155,20 +95,9 @@ public class DefaultEntityManager implements EntityManager {
             return entity;
         }
 
-        Object id = Clause.extractValue(loader.getPrimaryKeyField(), entity);
-
-        EntityEntry entry = persistenceContext.getEntry(entity.getClass(), id);
-        if (entry == null) {
-            throw new IllegalStateException("Entity not found. ");
-        }
-
-        entry.updateEntity(entity);
-        if (!transaction.isActive()) {
-            EntityPersister<T> entityPersister = metaModel.entityPersister((Class<T>) entity.getClass());
-            entityPersister.update(entity, entry.getSnapshot());
-            entry.synchronizingSnapshot();
-            persistenceContext.cleanup();
-        }
+        SaveOrUpdateEvent event = SaveOrUpdateEvent.create(entity, this);
+        eventListenerRegistry.getEventListenerGroup(EventType.SAVE_OR_UPDATE)
+                .fireEvent(event);
 
         return entity;
     }
@@ -239,6 +168,21 @@ public class DefaultEntityManager implements EntityManager {
         }
 
         return loadedEntities;
+    }
+
+    @Override
+    public PersistenceContext getPersistenceContext() {
+        return persistenceContext;
+    }
+
+    @Override
+    public <T> MetadataLoader<T> getMetadataLoader(Class<T> entityClass) {
+        return metaModel.entityLoader(entityClass).getMetadataLoader();
+    }
+
+    @Override
+    public <T> EntityPersister<T> getEntityPersister(Class<T> entityClass) {
+        return metaModel.entityPersister(entityClass);
     }
 
     @Override

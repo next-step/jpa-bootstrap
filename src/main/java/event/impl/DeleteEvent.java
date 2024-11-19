@@ -22,17 +22,17 @@ public class DeleteEvent implements Event {
     }
 
     @Override
-    public Object getEntity() {
+    public Object entity() {
         return entity;
     }
 
     @Override
-    public String getEntityName() {
+    public String entityName() {
         return entityName;
     }
 
     @Override
-    public Object getEntityId() {
+    public Object entityId() {
         return entityId;
     }
 }

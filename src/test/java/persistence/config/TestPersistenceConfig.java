@@ -4,6 +4,12 @@ import boot.MetaModel;
 import boot.Metadata;
 import database.DatabaseServer;
 import database.H2;
+import event.EventListenerRegistry;
+import event.EventType;
+import event.SaveOrUpdateEventListener;
+import event.impl.DefaultEventListenerGroup;
+import event.impl.DefaultEventListenerRegistry;
+import event.impl.DefaultSaveOrUpdateEventListener;
 import persistence.proxy.ProxyFactory;
 import persistence.proxy.impl.JdkProxyFactory;
 import persistence.sql.common.util.CamelToSnakeConverter;
@@ -24,8 +30,8 @@ import persistence.sql.ddl.impl.H2ColumnTypeSupplier;
 import persistence.sql.ddl.impl.H2Dialect;
 import persistence.sql.dml.Database;
 import persistence.sql.dml.EntityManagerFactory;
-import persistence.sql.dml.impl.DefaultEntityManagerFactory;
 import persistence.sql.dml.impl.DefaultDatabase;
+import persistence.sql.dml.impl.DefaultEntityManagerFactory;
 import persistence.sql.fixture.TestPerson;
 import persistence.sql.fixture.TestPersonFakeRowMapper;
 import persistence.sql.node.EntityNode;
@@ -83,7 +89,19 @@ public class TestPersistenceConfig {
     }
 
     public EntityManagerFactory entityManagerFactory() throws SQLException {
-        return new DefaultEntityManagerFactory(metaModel());
+        return new DefaultEntityManagerFactory(metaModel(), eventListenerRegistry());
+    }
+
+    private EventListenerRegistry eventListenerRegistry() {
+        DefaultEventListenerRegistry registry = new DefaultEventListenerRegistry();
+        DefaultEventListenerGroup<SaveOrUpdateEventListener> saveOrUpdateGroup =
+                new DefaultEventListenerGroup<>(EventType.SAVE_OR_UPDATE);
+        registry.addEventListenerGroup(EventType.SAVE_OR_UPDATE, saveOrUpdateGroup);
+
+        saveOrUpdateGroup.addEventListener(new DefaultSaveOrUpdateEventListener());
+
+        // TODO add event listeners
+        return registry;
     }
 
     public MetaModel metaModel() throws SQLException {
