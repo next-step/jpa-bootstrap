@@ -53,7 +53,7 @@ public class DefaultEntityManager implements EntityManager {
         if (!isNew(entity)) {
             throw new EntityExistsException("Entity already exists");
         }
-        SaveOrUpdateEvent saveOrUpdateEvent = SaveOrUpdateEvent.create(entity, this);
+        SaveOrUpdateEvent<T> saveOrUpdateEvent = SaveOrUpdateEvent.create(entity, this);
 
         EventListenerGroup<?> eventListenerGroup = eventListenerRegistry.getEventListenerGroup(EventType.SAVE_OR_UPDATE);
         eventListenerGroup.fireEvent(saveOrUpdateEvent);

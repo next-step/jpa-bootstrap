@@ -5,16 +5,17 @@ import persistence.sql.clause.Clause;
 import persistence.sql.dml.EntityManager;
 import persistence.sql.dml.MetadataLoader;
 
-public record DeleteEvent(Object entity,
+public record DeleteEvent<T>(T entity,
                           String entityName,
                           Object entityId,
-                          MetadataLoader<?> metadataLoader,
-                          EntityManager entityManager) implements Event {
+                          MetadataLoader<T> metadataLoader,
+                          EntityManager entityManager) implements Event<T> {
 
-    public static DeleteEvent create(Object entity, EntityManager entityManager) {
-        MetadataLoader<?> loader = entityManager.getMetadataLoader(entity.getClass());
+    @SuppressWarnings("unchecked")
+    public static <T> DeleteEvent<T> create(T entity, EntityManager entityManager) {
+        MetadataLoader<T> loader = entityManager.getMetadataLoader((Class<T>) entity.getClass());
         Object primaryKey = Clause.extractValue(loader.getPrimaryKeyField(), entity);
 
-        return new DeleteEvent(entity, loader.getEntityName(), primaryKey, loader, entityManager);
+        return new DeleteEvent<>(entity, loader.getEntityName(), primaryKey, loader, entityManager);
     }
 }

@@ -5,7 +5,7 @@ import persistence.sql.dml.EntityManager;
 import persistence.sql.dml.MetadataLoader;
 
 public record LoadEvent<T>(MetadataLoader<T> metadataLoader, Object entityId,
-                           EntityManager entityManager) implements Event {
+                           EntityManager entityManager) implements Event<T> {
 
     public static <T> LoadEvent<T> create(Class<T> returnType, Object primaryKey, EntityManager entityManager) {
         MetadataLoader<T> metadataLoader = entityManager.getMetadataLoader(returnType);
@@ -14,7 +14,7 @@ public record LoadEvent<T>(MetadataLoader<T> metadataLoader, Object entityId,
     }
 
     @Override
-    public Object entity() {
+    public T entity() {
         return null;
     }
 

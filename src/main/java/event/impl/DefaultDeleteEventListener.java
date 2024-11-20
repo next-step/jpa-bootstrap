@@ -38,8 +38,11 @@ public class DefaultDeleteEventListener implements DeleteEventListener {
 
     @Override
     public void onEvent(Event event) {
-        if (event instanceof DeleteEvent) {
-            onDelete((DeleteEvent) event);
+        if (event instanceof DeleteEvent<?> deleteEvent) {
+            onDelete(deleteEvent);
+            return;
         }
+
+        throw new IllegalArgumentException("Event type not supported: " + event.getClass().getName());
     }
 }

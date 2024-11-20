@@ -50,6 +50,9 @@ public class DefaultLoadEventListener implements LoadEventListener {
     public void onEvent(Event event) {
         if (event instanceof LoadEvent<?> loadEvent) {
             onLoad(loadEvent);
+            return;
         }
+
+        throw new IllegalArgumentException("Event type not supported: " + event.getClass().getName());
     }
 }

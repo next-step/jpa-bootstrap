@@ -1,7 +1,7 @@
 package event;
 
-public interface Event {
-    Object entity();
+public interface Event<T> {
+    T entity();
 
     String entityName();
 
