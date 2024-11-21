@@ -1,34 +1,22 @@
 package persistence.event.persist;
 
-import persistence.action.ActionQueue;
-import persistence.bootstrap.Metamodel;
-import persistence.entity.manager.factory.PersistenceContext;
+import persistence.event.Event;
+import persistence.event.EventListener;
+import persistence.event.EventType;
 
-public class PersistEvent<T> {
-    private final Metamodel metamodel;
-    private final PersistenceContext persistenceContext;
-    private final ActionQueue actionQueue;
+public class PersistEvent<T> implements Event<T> {
     private final T entity;
 
-    public PersistEvent(Metamodel metamodel, PersistenceContext persistenceContext, ActionQueue actionQueue, T entity) {
-        this.metamodel = metamodel;
-        this.persistenceContext = persistenceContext;
-        this.actionQueue = actionQueue;
+    public PersistEvent(T entity) {
         this.entity = entity;
     }
 
-    public Metamodel getMetamodel() {
-        return metamodel;
+    @Override
+    public EventType<? extends EventListener> getEventType() {
+        return EventType.PERSIST;
     }
 
-    public PersistenceContext getPersistenceContext() {
-        return persistenceContext;
-    }
-
-    public ActionQueue getActionQueue() {
-        return actionQueue;
-    }
-
+    @Override
     public T getEntity() {
         return entity;
     }

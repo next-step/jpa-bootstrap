@@ -37,8 +37,7 @@ class MetamodelTest {
                 () -> assertThat(getFieldValue(metamodel, "entityTableBinder")).isNotNull(),
                 () -> assertThat(getFieldValue(metamodel, "entityLoaderBinder")).isNotNull(),
                 () -> assertThat(getFieldValue(metamodel, "entityPersisterBinder")).isNotNull(),
-                () -> assertThat(getFieldValue(metamodel, "collectionPersisterBinder")).isNotNull(),
-                () -> assertThat(getFieldValue(metamodel, "eventListenerRegistry")).isNotNull()
+                () -> assertThat(getFieldValue(metamodel, "collectionPersisterBinder")).isNotNull()
         );
     }
 }

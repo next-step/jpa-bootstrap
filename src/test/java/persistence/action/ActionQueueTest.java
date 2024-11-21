@@ -9,10 +9,13 @@ import persistence.bootstrap.Metadata;
 import persistence.bootstrap.Metamodel;
 import persistence.entity.manager.EntityManager;
 import persistence.entity.manager.factory.PersistenceContext;
-import persistence.event.dirtycheck.DirtyCheckEvent;
-import persistence.event.dirtycheck.DirtyCheckEventListener;
+import persistence.meta.EntityColumn;
+import persistence.meta.EntityTable;
 import util.ReflectionUtils;
 import util.TestHelper;
+
+import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -68,13 +71,20 @@ class ActionQueueTest {
         final Metamodel metamodel = metadata.getMetamodel();
         final EntityWithId updateEntity = new EntityWithId(defaultEntity.getId(), "Jason", 20, "test1@email.com");
 
-        final DirtyCheckEvent<EntityWithId> dirtyCheckEvent = new DirtyCheckEvent<>(metamodel, defaultEntity, updateEntity);
-        metamodel.getDirtyCheckEventListenerGroup().doEvent(dirtyCheckEvent, DirtyCheckEventListener::onDirtyCheck);
-        return new UpdateAction<>(metamodel, getPersistenceContext(), updateEntity, dirtyCheckEvent.getResult());
+        final EntityTable entityTable = metamodel.getEntityTable(EntityWithId.class);
+        final List<EntityColumn> dirtiedEntityColumns = entityTable.getEntityColumns()
+                .stream()
+                .filter(entityColumn -> isDirtied(updateEntity, defaultEntity, entityColumn))
+                .toList();
+        return new UpdateAction<>(metamodel, getPersistenceContext(), updateEntity, dirtiedEntityColumns);
     }
 
     private DeleteAction<EntityWithId> createDeleteAction() {
         return new DeleteAction<>(metadata.getMetamodel(), entityForPersist);
+    }
+
+    private boolean isDirtied(Object entity, Object snapshot, EntityColumn entityColumn) {
+        return !Objects.equals(entityColumn.extractValue(entity), entityColumn.extractValue(snapshot));
     }
 
     private PersistenceContext getPersistenceContext() throws NoSuchFieldException, IllegalAccessException {

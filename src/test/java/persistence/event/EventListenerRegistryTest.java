@@ -1,49 +1,54 @@
 package persistence.event;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
+import persistence.action.ActionQueue;
+import persistence.bootstrap.Metadata;
+import persistence.entity.manager.factory.PersistenceContext;
+import persistence.event.load.DefaultLoadEventListener;
 import util.ReflectionUtils;
+import util.TestHelper;
 
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 class EventListenerRegistryTest {
-    @ParameterizedTest
-    @MethodSource("testParameters")
-    @DisplayName("이벤트 리스터 그룹을 반환한다.")
-    void getEventListenerGroup(EventType eventType, int expected) {
+    private Metadata metadata;
+
+    @BeforeEach
+    void setUp() {
+        metadata = TestHelper.createMetadata("domain");
+    }
+
+    @AfterEach
+    void tearDown() {
+        metadata.close();
+    }
+
+    @Test
+    @DisplayName("이벤트 리스너를 등록한다.")
+    void registerEventListener() throws NoSuchFieldException, IllegalAccessException {
         // given
-        final EventListenerRegistry eventListenerRegistry = new EventListenerRegistry();
+        final PersistenceContext persistenceContext = new PersistenceContext();
+        final EventListenerRegistry eventListenerRegistry =
+                new EventListenerRegistry(metadata.getMetamodel(), persistenceContext, new ActionQueue());
 
         // when
-        final EventListenerGroup<?> eventListenerGroup = eventListenerRegistry.getEventListenerGroup(eventType);
+        eventListenerRegistry.registerEventListener(
+                EventType.LOAD, new DefaultLoadEventListener(metadata.getMetamodel(), persistenceContext));
 
         // then
-        assertAll(
-                () -> assertThat(eventListenerGroup.getEventType()).isEqualTo(eventType),
-                () -> assertThat(getListeners(eventListenerGroup)).hasSize(expected)
-        );
+        assertThat(getEventListeners(eventListenerRegistry)).hasSize(2);
     }
 
-    private <T> List<T> getListeners(EventListenerGroup<T> eventListenerGroup) throws NoSuchFieldException, IllegalAccessException {
-        return (List<T>) ReflectionUtils.getFieldValue(eventListenerGroup, "listeners");
-    }
-
-    private static Stream<Arguments> testParameters() {
-        return Stream.of(
-                Arguments.of(EventType.LOAD, 1),
-                Arguments.of(EventType.PERSIST, 1),
-                Arguments.of(EventType.DELETE, 1),
-                Arguments.of(EventType.UPDATE, 1),
-                Arguments.of(EventType.DIRTY_CHECK, 1),
-                Arguments.of(EventType.MERGE, 1),
-                Arguments.of(EventType.FLUSH, 1),
-                Arguments.of(EventType.CLEAR, 1)
-        );
+    private List<EventListener> getEventListeners(EventListenerRegistry eventListenerRegistry) throws NoSuchFieldException, IllegalAccessException {
+        final Map<EventType<?>, EventListenerGroup<EventListener>> eventListenerGroupRegistry =
+                (Map<EventType<?>, EventListenerGroup<EventListener>>) ReflectionUtils.getFieldValue(eventListenerRegistry, "eventListenerGroupRegistry");
+        final EventListenerGroup<EventListener> eventListenerGroup = eventListenerGroupRegistry.get(EventType.LOAD);
+        return (List<EventListener>) ReflectionUtils.getFieldValue(eventListenerGroup, "listeners");
     }
 }
