@@ -15,8 +15,8 @@ public class DefaultDeleteEventListener<T> extends DeleteEventListener<T> {
     @Override
     public void onDelete(DeleteEvent<T> event) {
         EntityManager entityManager = event.entityManager();
-        Object entity = event.entity();
-        MetadataLoader<?> loader = event.metadataLoader();
+        T entity = event.entity();
+        MetadataLoader<T> loader = event.metadataLoader();
         PersistenceContext persistenceContext = entityManager.getPersistenceContext();
         Transaction transaction = entityManager.getTransaction();
 
@@ -26,7 +26,7 @@ public class DefaultDeleteEventListener<T> extends DeleteEventListener<T> {
 
         entityEntry.updateStatus(Status.DELETED);
         if (!transaction.isActive()) {
-            EntityPersister<?> entityPersister = entityManager.getEntityPersister(entity.getClass());
+            EntityPersister<T> entityPersister = entityManager.getEntityPersister(loader.getEntityType());
             entityPersister.delete(entity);
             persistenceContext.deleteEntry(entity, id);
         }
