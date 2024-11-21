@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("DefaultPersistenceContext 테스트")
 class DefaultPersistenceContextTest extends TestEntityInitialize {
@@ -67,12 +68,12 @@ class DefaultPersistenceContextTest extends TestEntityInitialize {
 
 
     @Test
-    @DisplayName("getEntry 함수는 유효하지 않은 식별자를 전달하면 null을 반환한다.")
+    @DisplayName("getEntry 함수는 유효하지 않은 식별자를 전달하면 예외를 던진다.")
     void testGetEntryWithInvalidId() {
-        // when
-        EntityEntry actual = context.getEntry(TestPerson.class, 999L);
-
-        assertThat(actual).isNull();
+        // when, then
+        assertThatThrownBy(() -> context.getEntry(TestPerson.class, 999L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Not found entity entry");
     }
 
     @Test

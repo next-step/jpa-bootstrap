@@ -21,7 +21,7 @@ public class DefaultLoadEventListener<T> extends LoadEventListener<T> {
         Object primaryKey = event.entityId();
         Class<T> returnType = originLoader.getEntityType();
 
-        EntityEntry entry = persistenceContext.getEntry(returnType, primaryKey);
+        EntityEntry entry = persistenceContext.getEntryOrNull(returnType, primaryKey);
 
         if (entry != null) {
             return;

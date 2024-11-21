@@ -8,11 +8,10 @@ import event.EventType;
 import event.LoadEventListener;
 import event.SaveOrUpdateEventListener;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.EnumMap;
 
 public class DefaultEventListenerRegistry implements EventListenerRegistry {
-    private final Map<EventType, EventListenerGroup<?>> listenerGroups = new HashMap<>();
+    private final EnumMap<EventType, EventListenerGroup<?>> listenerGroups = new EnumMap<>(EventType.class);
 
     @Override
     public void addEventListenerGroup(EventType eventType, EventListenerGroup<?> listenerGroup) {
@@ -22,12 +21,7 @@ public class DefaultEventListenerRegistry implements EventListenerRegistry {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends EventListener<?>> EventListenerGroup<T> getEventListenerGroup(EventType eventType) {
-        EventListenerGroup<?> eventListenerGroup = listenerGroups.get(eventType);
-
-        if (eventListenerGroup == null) {
-            eventListenerGroup = new DefaultEventListenerGroup<>(eventType);
-            listenerGroups.put(eventType, eventListenerGroup);
-        }
+        EventListenerGroup<?> eventListenerGroup = listenerGroups.computeIfAbsent(eventType, k -> new DefaultEventListenerGroup<>(eventType));
 
         if (eventListenerGroup.getEventType() == eventType) {
             return (EventListenerGroup<T>) eventListenerGroup;

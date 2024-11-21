@@ -36,6 +36,16 @@ public class DefaultPersistenceContext implements PersistenceContext {
 
     @Override
     public <ID> EntityEntry getEntry(Class<?> entityType, ID id) {
+        EntityEntry entry = getEntryOrNull(entityType, id);
+        if (entry != null) {
+            return entry;
+        }
+
+        throw new IllegalArgumentException("Not found entity entry");
+    }
+
+    @Override
+    public <ID> EntityEntry getEntryOrNull(Class<?> entityType, ID id) {
         KeyHolder key = new KeyHolder(entityType, id);
 
         EntityEntry entityEntry = context.get(key);
@@ -43,7 +53,7 @@ public class DefaultPersistenceContext implements PersistenceContext {
             return entityEntry;
         }
 
-        throw new IllegalArgumentException("Not found entity entry");
+        return null;
     }
 
     @Override

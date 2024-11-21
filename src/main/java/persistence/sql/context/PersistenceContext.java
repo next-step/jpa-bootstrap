@@ -14,6 +14,8 @@ public interface PersistenceContext {
 
     <ID> EntityEntry getEntry(Class<?> entityType, ID id);
 
+    <ID> EntityEntry getEntryOrNull(Class<?> entityType, ID id);
+
     CollectionEntry getCollectionEntry(CollectionKeyHolder key);
 
     CollectionEntry addCollectionEntry(CollectionKeyHolder key, CollectionEntry collectionEntry);
