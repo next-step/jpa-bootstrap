@@ -25,21 +25,19 @@ public class DefaultPersistEventListener implements PersistEventListener {
 
     @Override
     public <T> void on(Event<T> event) {
-        if (event instanceof PersistEvent<T> persistEvent) {
-            final T entity = persistEvent.getEntity();
+        final T entity = event.getEntity();
 
-            final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
-            final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
+        final EntityPersister entityPersister = metamodel.getEntityPersister(entity.getClass());
+        final EntityTable entityTable = metamodel.getEntityTable(entity.getClass());
 
-            validate(entity, persistenceContext);
+        validate(entity, persistenceContext);
 
-            if (entityTable.isIdGenerationFromDatabase()) {
-                persistImmediately(entityPersister, entity, entityTable, metamodel);
-                return;
-            }
-
-            persistLazy(persistenceContext, entity, actionQueue, metamodel);
+        if (entityTable.isIdGenerationFromDatabase()) {
+            persistImmediately(entityPersister, entity, entityTable, metamodel);
+            return;
         }
+
+        persistLazy(persistenceContext, entity, actionQueue, metamodel);
     }
 
     private <T> void persistImmediately(EntityPersister entityPersister, T entity, EntityTable entityTable,

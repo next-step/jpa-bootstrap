@@ -16,6 +16,7 @@ public class UpdateEvent<T> implements Event<T> {
         return EventType.UPDATE;
     }
 
+    @Override
     public T getEntity() {
         return entity;
     }

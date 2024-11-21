@@ -16,6 +16,7 @@ public class PersistEvent<T> implements Event<T> {
         return EventType.PERSIST;
     }
 
+    @Override
     public T getEntity() {
         return entity;
     }

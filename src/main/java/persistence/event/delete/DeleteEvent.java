@@ -16,6 +16,7 @@ public class DeleteEvent<T> implements Event<T> {
         return EventType.DELETE;
     }
 
+    @Override
     public T getEntity() {
         return entity;
     }

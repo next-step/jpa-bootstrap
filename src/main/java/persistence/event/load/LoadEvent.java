@@ -19,18 +19,22 @@ public class LoadEvent<T> implements Event<T> {
         return EventType.LOAD;
     }
 
+    @Override
     public Class<T> getEntityType() {
         return entityType;
     }
 
+    @Override
     public Object getId() {
         return id;
     }
 
+    @Override
     public T getResult() {
         return result;
     }
 
+    @Override
     public void setResult(T result) {
         this.result = result;
     }
