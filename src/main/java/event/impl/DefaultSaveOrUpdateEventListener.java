@@ -18,20 +18,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class DefaultSaveOrUpdateEventListener implements SaveOrUpdateEventListener {
+public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListener<T> {
 
     @Override
-    public void onEvent(Event event) {
-        if (event instanceof SaveOrUpdateEvent saveOrUpdateEvent) {
-            onSaveOrUpdate(saveOrUpdateEvent);
-            return;
-        }
-
-        throw new IllegalArgumentException("Event type not supported: " + event.getClass().getName());
-    }
-
-    @Override
-    public void onSaveOrUpdate(SaveOrUpdateEvent event) {
+    public void onSaveOrUpdate(SaveOrUpdateEvent<T> event) {
         EntityManager entityManager = event.entityManager();
 
         if (entityManager.isNew(event.entity())) {
@@ -42,12 +32,12 @@ public class DefaultSaveOrUpdateEventListener implements SaveOrUpdateEventListen
         onUpdate(event);
     }
 
-    private void onSave(SaveOrUpdateEvent event) {
+    private void onSave(SaveOrUpdateEvent<T> event) {
         EntityManager entityManager = event.entityManager();
         PersistenceContext persistenceContext = entityManager.getPersistenceContext();
         EntityPersister<?> entityPersister = entityManager.getEntityPersister(event.entityType());
 
-        Object entity = event.entity();
+        T entity = event.entity();
         entityPersister.insert(entity);
         persistenceContext.addEntry(entity, Status.SAVING, entityPersister);
 
@@ -57,7 +47,7 @@ public class DefaultSaveOrUpdateEventListener implements SaveOrUpdateEventListen
 
     }
 
-    private void onUpdate(SaveOrUpdateEvent event) {
+    private void onUpdate(SaveOrUpdateEvent<T> event) {
         EntityManager entityManager = event.entityManager();
         PersistenceContext persistenceContext = entityManager.getPersistenceContext();
         MetadataLoader<?> loader = entityManager.getMetadataLoader(event.entityType());
@@ -80,7 +70,7 @@ public class DefaultSaveOrUpdateEventListener implements SaveOrUpdateEventListen
         }
     }
 
-    private <T> void persistChildEntity(T entity, EntityManager entityManager) {
+    private void persistChildEntity(T entity, EntityManager entityManager) {
         MetadataLoader<?> loader = entityManager.getMetadataLoader(entity.getClass());
         List<Field> fields = loader.getFieldAllByPredicate(this::isCascadePersist);
 
@@ -89,7 +79,7 @@ public class DefaultSaveOrUpdateEventListener implements SaveOrUpdateEventListen
         }
     }
 
-    private <T> void persistChildEntities(T entity, Field field, EntityManager entityManager) {
+    private void persistChildEntities(T entity, Field field, EntityManager entityManager) {
         try {
             field.setAccessible(true);
             Collection<?> childEntities = (Collection<?>) field.get(entity);
@@ -105,7 +95,7 @@ public class DefaultSaveOrUpdateEventListener implements SaveOrUpdateEventListen
         }
     }
 
-    private <T, P> void persistIfIsNewChildEntity(T entity, P childEntity, EntityManager entityManager) {
+    private <P> void persistIfIsNewChildEntity(T entity, P childEntity, EntityManager entityManager) {
         if (entityManager.isNew(childEntity)) {
             Transaction transaction = entityManager.getTransaction();
             PersistenceContext persistenceContext = entityManager.getPersistenceContext();
@@ -119,7 +109,7 @@ public class DefaultSaveOrUpdateEventListener implements SaveOrUpdateEventListen
         }
     }
 
-    private <T> boolean existsPersistChildEntity(T entity, MetadataLoader<?> loader) {
+    private boolean existsPersistChildEntity(T entity, MetadataLoader<?> loader) {
         List<Field> fields = loader.getFieldAllByPredicate(this::isCascadePersist);
 
         return fields.stream().anyMatch(field -> isNotEmptyField(entity, field));
@@ -133,7 +123,7 @@ public class DefaultSaveOrUpdateEventListener implements SaveOrUpdateEventListen
                 .anyMatch(cascadeType -> CascadeType.PERSIST == cascadeType);
     }
 
-    private <T> boolean isNotEmptyField(T entity, Field field) {
+    private boolean isNotEmptyField(T entity, Field field) {
         try {
             field.setAccessible(true);
             Object value = field.get(entity);

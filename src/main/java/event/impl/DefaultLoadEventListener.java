@@ -10,10 +10,10 @@ import persistence.sql.entity.data.Status;
 import persistence.sql.loader.EntityLoader;
 import persistence.sql.transaction.Transaction;
 
-public class DefaultLoadEventListener implements LoadEventListener {
+public class DefaultLoadEventListener<T> extends LoadEventListener<T> {
 
     @Override
-    public <T> void onLoad(LoadEvent<T> event) {
+    public void onLoad(LoadEvent<T> event) {
         EntityManager entityManager = event.entityManager();
         PersistenceContext persistenceContext = entityManager.getPersistenceContext();
         Transaction transaction = entityManager.getTransaction();
@@ -44,15 +44,5 @@ public class DefaultLoadEventListener implements LoadEventListener {
                         }
                     });
         }
-    }
-
-    @Override
-    public void onEvent(Event event) {
-        if (event instanceof LoadEvent<?> loadEvent) {
-            onLoad(loadEvent);
-            return;
-        }
-
-        throw new IllegalArgumentException("Event type not supported: " + event.getClass().getName());
     }
 }

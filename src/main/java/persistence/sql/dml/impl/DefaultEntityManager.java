@@ -2,9 +2,7 @@ package persistence.sql.dml.impl;
 
 import boot.MetaModel;
 import database.ConnectionHolder;
-import event.EventListenerGroup;
 import event.EventListenerRegistry;
-import event.EventType;
 import event.impl.DeleteEvent;
 import event.impl.LoadEvent;
 import event.impl.SaveOrUpdateEvent;
@@ -54,9 +52,7 @@ public class DefaultEntityManager implements EntityManager {
             throw new EntityExistsException("Entity already exists");
         }
         SaveOrUpdateEvent<T> saveOrUpdateEvent = SaveOrUpdateEvent.create(entity, this);
-
-        EventListenerGroup<?> eventListenerGroup = eventListenerRegistry.getEventListenerGroup(EventType.SAVE_OR_UPDATE);
-        eventListenerGroup.fireEvent(saveOrUpdateEvent);
+        eventListenerRegistry.fireEventOnEachListener(saveOrUpdateEvent);
 
         if (!transaction.isActive()) {
             persistenceContext.cleanup();
@@ -88,9 +84,8 @@ public class DefaultEntityManager implements EntityManager {
             return entity;
         }
 
-        SaveOrUpdateEvent event = SaveOrUpdateEvent.create(entity, this);
-        eventListenerRegistry.getEventListenerGroup(EventType.SAVE_OR_UPDATE)
-                .fireEvent(event);
+        SaveOrUpdateEvent<T> event = SaveOrUpdateEvent.create(entity, this);
+        eventListenerRegistry.fireEventOnEachListener(event);
 
         return entity;
     }
@@ -101,9 +96,8 @@ public class DefaultEntityManager implements EntityManager {
             throw new IllegalArgumentException("Entity must not be null");
         }
 
-        DeleteEvent deleteEvent = DeleteEvent.create(entity, this);
-        eventListenerRegistry.getEventListenerGroup(EventType.DELETE)
-                .fireEvent(deleteEvent);
+        DeleteEvent<T> deleteEvent = DeleteEvent.create(entity, this);
+        eventListenerRegistry.fireEventOnEachListener(deleteEvent);
     }
 
     @Override
@@ -113,8 +107,7 @@ public class DefaultEntityManager implements EntityManager {
         }
 
         LoadEvent<T> event = LoadEvent.create(returnType, primaryKey, this);
-        EventListenerGroup<?> eventListenerGroup = eventListenerRegistry.getEventListenerGroup(EventType.LOAD);
-        eventListenerGroup.fireEvent(event);
+        eventListenerRegistry.fireEventOnEachListener(event);
 
         EntityEntry entry = persistenceContext.getEntry(returnType, primaryKey);
 

@@ -1,7 +1,6 @@
 package event.impl;
 
 import event.DeleteEventListener;
-import event.Event;
 import persistence.sql.clause.Clause;
 import persistence.sql.context.EntityPersister;
 import persistence.sql.context.PersistenceContext;
@@ -11,10 +10,10 @@ import persistence.sql.entity.EntityEntry;
 import persistence.sql.entity.data.Status;
 import persistence.sql.transaction.Transaction;
 
-public class DefaultDeleteEventListener implements DeleteEventListener {
+public class DefaultDeleteEventListener<T> extends DeleteEventListener<T> {
 
     @Override
-    public void onDelete(DeleteEvent event) {
+    public void onDelete(DeleteEvent<T> event) {
         EntityManager entityManager = event.entityManager();
         Object entity = event.entity();
         MetadataLoader<?> loader = event.metadataLoader();
@@ -34,15 +33,5 @@ public class DefaultDeleteEventListener implements DeleteEventListener {
             entityPersister.delete(entity);
             persistenceContext.deleteEntry(entity, id);
         }
-    }
-
-    @Override
-    public void onEvent(Event event) {
-        if (event instanceof DeleteEvent<?> deleteEvent) {
-            onDelete(deleteEvent);
-            return;
-        }
-
-        throw new IllegalArgumentException("Event type not supported: " + event.getClass().getName());
     }
 }

@@ -9,7 +9,7 @@ public record SaveOrUpdateEvent<T>(
         T entity,
         Object primaryKey,
         MetadataLoader<T> metadataLoader,
-        EntityManager entityManager) implements Event {
+        EntityManager entityManager) implements Event<T> {
 
     @SuppressWarnings("unchecked")
     public static <T> SaveOrUpdateEvent<T> create(T entity, EntityManager entityManager) {

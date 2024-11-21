@@ -1,38 +1,39 @@
 package event.impl;
 
-import event.Event;
-import event.EventListener;
 import event.EventListenerGroup;
 import event.EventType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
-public class DefaultEventListenerGroup<T extends EventListener> implements EventListenerGroup<T> {
-    private final EventType<T> eventType;
-    private final List<EventListener> listeners;
+public class DefaultEventListenerGroup<T> implements EventListenerGroup<T> {
+    private final EventType eventType;
+    private final List<T> listeners;
 
-    public DefaultEventListenerGroup(EventType<T> eventType) {
+    public DefaultEventListenerGroup(EventType eventType) {
         this(eventType, new ArrayList<>());
     }
 
-    public DefaultEventListenerGroup(EventType<T> eventType, List<EventListener> listeners) {
+    public DefaultEventListenerGroup(EventType eventType, List<T> listeners) {
         this.eventType = eventType;
         this.listeners = listeners;
     }
 
     @Override
-    public void addEventListener(EventListener listener) {
+    public void addEventListener(T listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void fireEvent(Event event) {
-        listeners.forEach(listener -> listener.onEvent(event));
+    public <U> void fireEventOnEachListener(U event, BiConsumer<T, U> actionOnEvent) {
+        for (T listener : listeners) {
+            actionOnEvent.accept(listener, event);
+        }
     }
 
     @Override
-    public EventType<T> getEventType() {
+    public EventType getEventType() {
         return eventType;
     }
 }

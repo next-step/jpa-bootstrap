@@ -1,5 +1,5 @@
 package event;
 
-public interface EventListener {
-    void onEvent(Event event);
+public interface EventListener<T> {
+    void onEvent(Event<T> event);
 }
