@@ -43,7 +43,7 @@ public class DefaultPersistenceContext implements PersistenceContext {
             return entityEntry;
         }
 
-        return null;
+        throw new IllegalArgumentException("Not found entity entry");
     }
 
     @Override

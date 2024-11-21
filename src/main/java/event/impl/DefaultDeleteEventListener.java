@@ -23,9 +23,6 @@ public class DefaultDeleteEventListener<T> extends DeleteEventListener<T> {
         Object id = Clause.extractValue(loader.getPrimaryKeyField(), entity);
 
         EntityEntry entityEntry = persistenceContext.getEntry(entity.getClass(), id);
-        if (entityEntry == null) {
-            throw new IllegalStateException("Entity not found. ");
-        }
 
         entityEntry.updateStatus(Status.DELETED);
         if (!transaction.isActive()) {
