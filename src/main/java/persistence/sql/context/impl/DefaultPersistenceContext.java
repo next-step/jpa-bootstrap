@@ -1,10 +1,13 @@
 package persistence.sql.context.impl;
 
-import boot.MetaModel;
+import event.impl.EntityDeleteAction;
+import event.impl.EntityInsertAction;
+import event.impl.EntityUpdateAction;
 import persistence.sql.context.CollectionKeyHolder;
 import persistence.sql.context.EntityPersister;
 import persistence.sql.context.KeyHolder;
 import persistence.sql.context.PersistenceContext;
+import persistence.sql.dml.EntityManager;
 import persistence.sql.dml.MetadataLoader;
 import persistence.sql.entity.CollectionEntry;
 import persistence.sql.entity.EntityEntry;
@@ -79,43 +82,46 @@ public class DefaultPersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public void dirtyCheck(MetaModel metaModel) {
+    public void dirtyCheck(EntityManager entityManager) {
         for (EntityEntry entry : context.values()) {
-            EntityPersister<?> persister = metaModel.entityPersister(entry.getEntity().getClass());
-            handleEntry(persister, entry);
+            EntityPersister<?> persister = entityManager.getEntityPersister(entry.getEntityType());
+            handleEntry(persister, entry, entityManager);
         }
     }
 
-    private void handleEntry(EntityPersister<?> persister, EntityEntry entry) {
+    private void handleEntry(EntityPersister<?> persister, EntityEntry entry, EntityManager entityManager) {
         switch (entry.getStatus()) {
             case SAVING:
-                handleSavingEntry(persister, entry);
+                handleSavingEntry(persister, entry, entityManager);
                 break;
             case MANAGED:
-                handleUpdateEntry(persister, entry);
+                handleUpdateEntry(persister, entry, entityManager);
                 break;
             case DELETED:
-                handleDeleteEntry(persister, entry);
+                handleDeleteEntry(persister, entry, entityManager);
                 break;
         }
     }
 
-    private void handleSavingEntry(EntityPersister<?> persister, EntityEntry entry) {
-        persister.insert(entry.getEntity());
+    private void handleSavingEntry(EntityPersister<?> persister, EntityEntry entry, EntityManager entityManager) {
+        EntityInsertAction<?> action = EntityInsertAction.create(persister, entry.getEntity(), entry.getEntityType());
+        entityManager.addInsertionAction(action);
         entry.updateStatus(Status.MANAGED);
         entry.synchronizingSnapshot();
     }
 
-    private void handleUpdateEntry(EntityPersister<?> persister, EntityEntry entry) {
+    private void handleUpdateEntry(EntityPersister<?> persister, EntityEntry entry, EntityManager entityManager) {
         if (!entry.isDirty()) {
             return;
         }
-        persister.update(entry.getEntity(), entry.getSnapshot());
+        EntityUpdateAction<?> action = EntityUpdateAction.create(persister, entry.getEntity(), entry.getSnapshot(), entry.getEntityType());
+        entityManager.addUpdateAction(action);
         entry.synchronizingSnapshot();
     }
 
-    private void handleDeleteEntry(EntityPersister<?> persister, EntityEntry entry) {
-        persister.delete(entry.getEntity());
+    private void handleDeleteEntry(EntityPersister<?> persister, EntityEntry entry, EntityManager entityManager) {
+        EntityDeleteAction<?> action = EntityDeleteAction.create(persister, entry.getEntity(), entry.getEntityType());
+        entityManager.addDeletionAction(action);
         entry.updateStatus(Status.GONE);
         context.remove(entry.getKey());
     }

@@ -8,7 +8,6 @@ import persistence.sql.dml.EntityManager;
 import persistence.sql.dml.MetadataLoader;
 import persistence.sql.entity.EntityEntry;
 import persistence.sql.entity.data.Status;
-import persistence.sql.transaction.Transaction;
 
 public class DefaultDeleteEventListener<T> extends DeleteEventListener<T> {
 
@@ -18,17 +17,13 @@ public class DefaultDeleteEventListener<T> extends DeleteEventListener<T> {
         T entity = event.entity();
         MetadataLoader<T> loader = event.metadataLoader();
         PersistenceContext persistenceContext = entityManager.getPersistenceContext();
-        Transaction transaction = entityManager.getTransaction();
+        EntityPersister<T> entityPersister = entityManager.getEntityPersister(loader.getEntityType());
 
         Object id = Clause.extractValue(loader.getPrimaryKeyField(), entity);
 
         EntityEntry entityEntry = persistenceContext.getEntry(entity.getClass(), id);
+        entityManager.addDeletionAction(new EntityDeleteAction<>(entity, entityPersister));
 
         entityEntry.updateStatus(Status.DELETED);
-        if (!transaction.isActive()) {
-            EntityPersister<T> entityPersister = entityManager.getEntityPersister(loader.getEntityType());
-            entityPersister.delete(entity);
-            persistenceContext.deleteEntry(entity, id);
-        }
     }
 }

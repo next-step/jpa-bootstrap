@@ -45,7 +45,6 @@ public class EntityEntry {
         KeyHolder key = new KeyHolder(entity.getClass(), id);
 
         return new EntityEntry(loader, status, entity, createSnapshot(entity, loader), key);
-
     }
 
     @SuppressWarnings("unchecked")

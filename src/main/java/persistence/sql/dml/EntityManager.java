@@ -1,5 +1,9 @@
 package persistence.sql.dml;
 
+import event.impl.ChildEntityInsertAction;
+import event.impl.EntityDeleteAction;
+import event.impl.EntityInsertAction;
+import event.impl.EntityUpdateAction;
 import persistence.sql.context.EntityPersister;
 import persistence.sql.context.PersistenceContext;
 import persistence.sql.event.FlushEventListener;
@@ -59,4 +63,12 @@ public interface EntityManager extends FlushEventListener {
     <T> EntityPersister<T> getEntityPersister(Class<T> entityClass);
 
     <T> EntityLoader<T> getEntityLoader(Class<T> entityClass);
+
+    void addInsertionAction(EntityInsertAction<?> action);
+
+    void addChildInsertAction(ChildEntityInsertAction<?, ?> action);
+
+    void addDeletionAction(EntityDeleteAction<?> action);
+
+    void addUpdateAction(EntityUpdateAction<?> action);
 }

@@ -1,8 +1,9 @@
 package event.impl;
 
-import event.Event;
 import event.SaveOrUpdateEventListener;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
 import persistence.sql.clause.Clause;
 import persistence.sql.context.EntityPersister;
@@ -34,13 +35,20 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
 
     private void onSave(SaveOrUpdateEvent<T> event) {
         EntityManager entityManager = event.entityManager();
+        MetadataLoader<T> metadataLoader = event.metadataLoader();
         PersistenceContext persistenceContext = entityManager.getPersistenceContext();
-        EntityPersister<?> entityPersister = entityManager.getEntityPersister(event.entityType());
+        EntityPersister<T> entityPersister = entityManager.getEntityPersister(event.entityType());
 
         T entity = event.entity();
-        entityPersister.insert(entity);
-        persistenceContext.addEntry(entity, Status.SAVING, entityPersister);
+        Status status = Status.MANAGED;
+        EntityInsertAction<T> action = new EntityInsertAction<>(entity, entityPersister);
 
+        if (!executeIfIdentityGenerationType(metadataLoader, action)) {
+            entityManager.addInsertionAction(action);
+            status = Status.SAVING;
+        }
+
+        persistenceContext.addEntry(entity, status, entityPersister);
         if (existsPersistChildEntity(entity, event.metadataLoader())) {
             persistChildEntity(entity, entityManager);
         }
@@ -50,9 +58,10 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
     private void onUpdate(SaveOrUpdateEvent<T> event) {
         EntityManager entityManager = event.entityManager();
         PersistenceContext persistenceContext = entityManager.getPersistenceContext();
-        MetadataLoader<?> loader = entityManager.getMetadataLoader(event.entityType());
+        MetadataLoader<T> loader = entityManager.getMetadataLoader(event.entityType());
+        EntityPersister<T> entityPersister = entityManager.getEntityPersister(event.entityType());
         Transaction transaction = entityManager.getTransaction();
-        Object entity = event.entity();
+        T entity = event.entity();
 
         Object id = Clause.extractValue(loader.getPrimaryKeyField(), entity);
 
@@ -62,11 +71,9 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
         }
 
         entry.updateEntity(entity);
+        entityManager.addUpdateAction(new EntityUpdateAction<>(entity, (T) entry.getSnapshot(), entityPersister));
         if (!transaction.isActive()) {
-            EntityPersister<?> entityPersister = entityManager.getEntityPersister(event.entityType());
-            entityPersister.update(entity, entry.getSnapshot());
             entry.synchronizingSnapshot();
-            persistenceContext.cleanup();
         }
     }
 
@@ -95,18 +102,48 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
         }
     }
 
-    private <P> void persistIfIsNewChildEntity(T entity, P childEntity, EntityManager entityManager) {
+    private <C> void persistIfIsNewChildEntity(T entity, C childEntity, EntityManager entityManager) {
         if (entityManager.isNew(childEntity)) {
-            Transaction transaction = entityManager.getTransaction();
             PersistenceContext persistenceContext = entityManager.getPersistenceContext();
-            EntityPersister<P> entityPersister = entityManager.getEntityPersister((Class<P>) childEntity.getClass());
-            entityPersister.insert(childEntity, entity);
-            persistenceContext.addEntry(childEntity, Status.SAVING, entityPersister);
+            Class<C> childEntityType = (Class<C>) childEntity.getClass();
+            EntityPersister<C> entityPersister = entityManager.getEntityPersister(childEntityType);
+            MetadataLoader<C> metadataLoader = entityManager.getMetadataLoader(childEntityType);
+            Status status = Status.MANAGED;
+            ChildEntityInsertAction<T, C> action = new ChildEntityInsertAction<>(entity, childEntity, entityPersister);
 
-            if (!transaction.isActive()) {
-                persistenceContext.cleanup();
+            if (!executeIfIdentityGenerationType(metadataLoader, action)) {
+                entityManager.addChildInsertAction(action);
+                status = Status.SAVING;
             }
+
+            persistenceContext.addEntry(childEntity, status, entityPersister);
         }
+    }
+
+    private <C> boolean executeIfIdentityGenerationType(MetadataLoader<C> metadataLoader, ChildEntityInsertAction<T, C> action) {
+        if (isIdentityGenerationType(metadataLoader)) {
+            action.execute();
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean executeIfIdentityGenerationType(MetadataLoader<?> metadataLoader,
+                                                    EntityInsertAction<?> action) {
+        if (isIdentityGenerationType(metadataLoader)) {
+            action.execute();
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isIdentityGenerationType(MetadataLoader<?> metadataLoader) {
+        Field idField = metadataLoader.getPrimaryKeyField();
+        GeneratedValue anno = idField.getAnnotation(GeneratedValue.class);
+
+        return anno != null && anno.strategy() == GenerationType.IDENTITY;
     }
 
     private boolean existsPersistChildEntity(T entity, MetadataLoader<?> loader) {

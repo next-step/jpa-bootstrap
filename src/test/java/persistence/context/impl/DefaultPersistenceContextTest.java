@@ -5,10 +5,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.TestEntityInitialize;
-import persistence.sql.config.PersistenceConfig;
+import persistence.config.TestPersistenceConfig;
 import persistence.sql.context.EntityPersister;
 import persistence.sql.context.KeyHolder;
 import persistence.sql.context.PersistenceContext;
+import persistence.sql.dml.EntityManager;
+import persistence.sql.dml.EntityManagerFactory;
 import persistence.sql.entity.EntityEntry;
 import persistence.sql.entity.data.Status;
 import persistence.sql.fixture.TestPerson;
@@ -25,13 +27,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class DefaultPersistenceContextTest extends TestEntityInitialize {
     private PersistenceContext context;
     private MetaModel metaModel;
+    private EntityManager entityManager;
     private EntityPersister entityPersister;
 
     @BeforeEach
     void setup() throws SQLException {
-        PersistenceConfig config = PersistenceConfig.getInstance();
-        metaModel = config.metalModel();
-
+        TestPersistenceConfig config = TestPersistenceConfig.getInstance();
+        metaModel = config.metaModel();
+        EntityManagerFactory factory = config.entityManagerFactory();
+        entityManager = factory.entityManager();
         context = config.persistenceContext();
         entityPersister = metaModel.entityPersister(TestPerson.class);
     }
@@ -108,7 +112,8 @@ class DefaultPersistenceContextTest extends TestEntityInitialize {
         entryMap.put(entityEntry.getKey(), entityEntry);
 
         //when
-        context.dirtyCheck(metaModel);
+        context.dirtyCheck(entityManager);
+        entityManager.onFlush();
         TestPerson actual = metaModel.entityLoader(TestPerson.class).load(catsbiEntity.getId());
 
         assertThat(context.getEntry(TestPerson.class, catsbiEntity.getId())).isNotNull();
@@ -126,7 +131,8 @@ class DefaultPersistenceContextTest extends TestEntityInitialize {
 
         // when
         catsbiEntity.setName("newCatsbi");
-        context.dirtyCheck(metaModel);
+        context.dirtyCheck(entityManager);
+        entityManager.onFlush();
 
         // then
         TestPerson actual = loader.load(catsbiEntity.getId());
@@ -144,7 +150,8 @@ class DefaultPersistenceContextTest extends TestEntityInitialize {
 
         // when
         entityEntry.updateStatus(Status.DELETED);
-        context.dirtyCheck(metaModel);
+        context.dirtyCheck(entityManager);
+        entityManager.onFlush();
         TestPerson actual = loader.load(catsbiEntity.getId());
 
         // then

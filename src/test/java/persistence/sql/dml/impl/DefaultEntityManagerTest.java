@@ -203,8 +203,8 @@ class DefaultEntityManagerTest extends TestEntityInitialize {
         testOrder.addOrderItem(apple);
         testOrder.addOrderItem(grape);
 
-        entityManager.persist(testOrder);
         entityManager.getTransaction().begin();
+        entityManager.persist(testOrder);
         entityManager.getTransaction().commit();
 
         // when

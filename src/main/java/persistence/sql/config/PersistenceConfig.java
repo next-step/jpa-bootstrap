@@ -4,6 +4,17 @@ import boot.MetaModel;
 import boot.Metadata;
 import database.DatabaseServer;
 import database.H2;
+import event.DeleteEventListener;
+import event.EventListenerGroup;
+import event.EventListenerRegistry;
+import event.EventType;
+import event.LoadEventListener;
+import event.SaveOrUpdateEventListener;
+import event.impl.DefaultDeleteEventListener;
+import event.impl.DefaultEventListenerGroup;
+import event.impl.DefaultEventListenerRegistry;
+import event.impl.DefaultLoadEventListener;
+import event.impl.DefaultSaveOrUpdateEventListener;
 import persistence.proxy.ProxyFactory;
 import persistence.proxy.impl.JdkProxyFactory;
 import persistence.sql.common.util.CamelToSnakeConverter;
@@ -21,7 +32,9 @@ import persistence.sql.ddl.impl.ConstraintPrimaryKeySupplier;
 import persistence.sql.ddl.impl.H2ColumnTypeSupplier;
 import persistence.sql.ddl.impl.H2Dialect;
 import persistence.sql.dml.Database;
+import persistence.sql.dml.EntityManagerFactory;
 import persistence.sql.dml.impl.DefaultDatabase;
+import persistence.sql.dml.impl.DefaultEntityManagerFactory;
 import persistence.sql.node.EntityNode;
 
 import java.sql.SQLException;
@@ -80,6 +93,19 @@ public class PersistenceConfig {
         return metaModel;
     }
 
+    public EntityManagerFactory entityManagerFactory() throws SQLException {
+        return new DefaultEntityManagerFactory(metaModel(), eventListenerRegistry());
+    }
+
+    public MetaModel metaModel() throws SQLException {
+        if (metaModel != null) {
+            return metaModel;
+        }
+        metaModel = MetaModel.newInstance(metadata(), proxyFactory());
+
+        return metaModel;
+    }
+
     public Metadata metadata() throws SQLException {
         if (metadata != null) {
             return metadata;
@@ -87,6 +113,37 @@ public class PersistenceConfig {
         Set<EntityNode<?>> nodes = tableScanner().scan("persistence.sql.fixture");
         metadata = Metadata.create(nodes, database());
         return metadata;
+    }
+
+    private EventListenerRegistry eventListenerRegistry() {
+        DefaultEventListenerRegistry registry = new DefaultEventListenerRegistry();
+        registry.addEventListenerGroup(EventType.SAVE_OR_UPDATE, saveOrUpdateEventListenerGroup());
+        registry.addEventListenerGroup(EventType.DELETE, deleteEventListenerGroup());
+        registry.addEventListenerGroup(EventType.LOAD, loadEventListenerGroup());
+
+        return registry;
+    }
+
+    private EventListenerGroup<?> loadEventListenerGroup() {
+        DefaultEventListenerGroup<LoadEventListener> listeners = new DefaultEventListenerGroup<>(EventType.LOAD);
+        listeners.addEventListener(new DefaultLoadEventListener());
+
+        return listeners;
+    }
+
+    private EventListenerGroup<?> deleteEventListenerGroup() {
+        DefaultEventListenerGroup<DeleteEventListener> listeners = new DefaultEventListenerGroup<>(EventType.DELETE);
+        listeners.addEventListener(new DefaultDeleteEventListener());
+
+        return listeners;
+    }
+
+    private EventListenerGroup<SaveOrUpdateEventListener> saveOrUpdateEventListenerGroup() {
+        DefaultEventListenerGroup<SaveOrUpdateEventListener> saveOrUpdateGroup =
+                new DefaultEventListenerGroup<>(EventType.SAVE_OR_UPDATE);
+        saveOrUpdateGroup.addEventListener(new DefaultSaveOrUpdateEventListener());
+
+        return saveOrUpdateGroup;
     }
 
     public PersistenceContext persistenceContext() throws SQLException {

@@ -2,8 +2,13 @@ package persistence.sql.dml.impl;
 
 import boot.MetaModel;
 import database.ConnectionHolder;
+import event.ActionQueue;
 import event.EventListenerRegistry;
+import event.impl.ChildEntityInsertAction;
 import event.impl.DeleteEvent;
+import event.impl.EntityDeleteAction;
+import event.impl.EntityInsertAction;
+import event.impl.EntityUpdateAction;
 import event.impl.LoadEvent;
 import event.impl.SaveOrUpdateEvent;
 import jakarta.persistence.EntityExistsException;
@@ -27,12 +32,16 @@ public class DefaultEntityManager implements EntityManager {
     private final MetaModel metaModel;
     private final Transaction transaction;
     private final EventListenerRegistry eventListenerRegistry;
+    private final ActionQueue actionQueue;
 
-    public DefaultEntityManager(PersistenceContext persistenceContext, MetaModel metaModel, EventListenerRegistry registry) {
+    public DefaultEntityManager(PersistenceContext persistenceContext,
+                                MetaModel metaModel,
+                                EventListenerRegistry registry) {
         this.persistenceContext = persistenceContext;
         this.metaModel = metaModel;
         this.transaction = new EntityTransaction(this);
         this.eventListenerRegistry = registry;
+        this.actionQueue = new ActionQueue();
     }
 
     @Override
@@ -55,7 +64,7 @@ public class DefaultEntityManager implements EntityManager {
         eventListenerRegistry.fireEventOnEachListener(saveOrUpdateEvent);
 
         if (!transaction.isActive()) {
-            persistenceContext.cleanup();
+            onFlush();
         }
     }
 
@@ -87,6 +96,10 @@ public class DefaultEntityManager implements EntityManager {
         SaveOrUpdateEvent<T> event = SaveOrUpdateEvent.create(entity, this);
         eventListenerRegistry.fireEventOnEachListener(event);
 
+        if (!transaction.isActive()) {
+            onFlush();
+        }
+
         return entity;
     }
 
@@ -98,6 +111,10 @@ public class DefaultEntityManager implements EntityManager {
 
         DeleteEvent<T> deleteEvent = DeleteEvent.create(entity, this);
         eventListenerRegistry.fireEventOnEachListener(deleteEvent);
+
+        if (!transaction.isActive()) {
+            onFlush();
+        }
     }
 
     @Override
@@ -153,7 +170,28 @@ public class DefaultEntityManager implements EntityManager {
 
     @Override
     public void onFlush() {
-        persistenceContext.dirtyCheck(metaModel);
+        persistenceContext.dirtyCheck(this);
+        actionQueue.executeAction();
         persistenceContext.cleanup();
+    }
+
+    @Override
+    public void addInsertionAction(EntityInsertAction<?> action) {
+        actionQueue.addInsertion(action);
+    }
+
+    @Override
+    public void addChildInsertAction(ChildEntityInsertAction<?, ?> action) {
+        actionQueue.addChildEntityInsertion(action);
+    }
+
+    @Override
+    public void addDeletionAction(EntityDeleteAction<?> action) {
+        actionQueue.addDeletion(action);
+    }
+
+    @Override
+    public void addUpdateAction(EntityUpdateAction<?> action) {
+        actionQueue.addUpdate(action);
     }
 }

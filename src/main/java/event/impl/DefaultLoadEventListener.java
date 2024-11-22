@@ -1,6 +1,5 @@
 package event.impl;
 
-import event.Event;
 import event.LoadEventListener;
 import persistence.sql.context.PersistenceContext;
 import persistence.sql.dml.EntityManager;
