@@ -2,8 +2,6 @@ package event.impl;
 
 import event.SaveOrUpdateEventListener;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
 import persistence.sql.clause.Clause;
 import persistence.sql.context.EntityPersister;
@@ -33,7 +31,6 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
 
     private void onSave(SaveOrUpdateEvent<T> event) {
         EntityManager entityManager = event.entityManager();
-        MetadataLoader<T> metadataLoader = event.metadataLoader();
         PersistenceContext persistenceContext = entityManager.getPersistenceContext();
         EntityPersister<T> entityPersister = entityManager.getEntityPersister(event.entityType());
 
@@ -105,7 +102,6 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
             PersistenceContext persistenceContext = entityManager.getPersistenceContext();
             Class<C> childEntityType = (Class<C>) childEntity.getClass();
             EntityPersister<C> entityPersister = entityManager.getEntityPersister(childEntityType);
-            MetadataLoader<C> metadataLoader = entityManager.getMetadataLoader(childEntityType);
             Status status = Status.MANAGED;
             ChildEntityInsertAction<T, C> action = new ChildEntityInsertAction<>(entity, childEntity, entityPersister);
 
@@ -131,22 +127,6 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
 
     private boolean isUnsaved(Object id, EntityPersister<?> entityPersister) {
         return entityPersister.isIdentifierUnsaved(id);
-    }
-
-    private <C> boolean executeIfIdentityGenerationType(MetadataLoader<C> metadataLoader, ChildEntityInsertAction<T, C> action) {
-        if (isIdentityGenerationType(metadataLoader)) {
-            action.execute();
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean isIdentityGenerationType(MetadataLoader<?> metadataLoader) {
-        Field idField = metadataLoader.getPrimaryKeyField();
-        GeneratedValue anno = idField.getAnnotation(GeneratedValue.class);
-
-        return anno != null && anno.strategy() == GenerationType.IDENTITY;
     }
 
     private boolean existsPersistChildEntity(T entity, MetadataLoader<?> loader) {
