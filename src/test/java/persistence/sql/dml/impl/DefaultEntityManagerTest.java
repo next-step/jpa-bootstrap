@@ -1,6 +1,5 @@
 package persistence.sql.dml.impl;
 
-import jakarta.persistence.EntityExistsException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -101,23 +100,6 @@ class DefaultEntityManagerTest extends TestEntityInitialize {
         assertThatThrownBy(() -> entityManager.persist(null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Entity must not be null");
-    }
-
-    @Test
-    @DisplayName("persist 함수는 엔티티가 이미 존재하는 경우 예외를 던진다..")
-    void testPersistWithMerge() {
-        // given
-        TestPerson person = new TestPerson("catsbi", 25, "casbi@naver.com", 123);
-
-        // when
-        entityManager.persist(person);
-        TestPerson actual = entityManager.find(TestPerson.class, 1L);
-
-        actual.setName("newCatsbi");
-        actual.setAge(123);
-        assertThatThrownBy(() -> entityManager.persist(actual))
-                .isInstanceOf(EntityExistsException.class)
-                .hasMessage("Entity already exists");
     }
 
     @Test

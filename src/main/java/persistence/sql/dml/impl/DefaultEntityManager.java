@@ -4,11 +4,7 @@ import boot.MetaModel;
 import database.ConnectionHolder;
 import event.ActionQueue;
 import event.EventListenerRegistry;
-import event.impl.ChildEntityInsertAction;
 import event.impl.DeleteEvent;
-import event.impl.EntityDeleteAction;
-import event.impl.EntityInsertAction;
-import event.impl.EntityUpdateAction;
 import event.impl.LoadEvent;
 import event.impl.SaveOrUpdateEvent;
 import jakarta.persistence.EntityExistsException;
@@ -68,8 +64,7 @@ public class DefaultEntityManager implements EntityManager {
         }
     }
 
-    @Override
-    public boolean isNew(Object entity) {
+    private boolean isNew(Object entity) {
         EntityLoader<?> entityLoader = metaModel.entityLoader(entity.getClass());
         MetadataLoader<?> loader = entityLoader.getMetadataLoader();
 
@@ -176,22 +171,7 @@ public class DefaultEntityManager implements EntityManager {
     }
 
     @Override
-    public void addInsertionAction(EntityInsertAction<?> action) {
-        actionQueue.addInsertion(action);
-    }
-
-    @Override
-    public void addChildInsertAction(ChildEntityInsertAction<?, ?> action) {
-        actionQueue.addChildEntityInsertion(action);
-    }
-
-    @Override
-    public void addDeletionAction(EntityDeleteAction<?> action) {
-        actionQueue.addDeletion(action);
-    }
-
-    @Override
-    public void addUpdateAction(EntityUpdateAction<?> action) {
-        actionQueue.addUpdate(action);
+    public ActionQueue getActionQueue() {
+        return actionQueue;
     }
 }

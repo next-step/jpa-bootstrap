@@ -1,9 +1,10 @@
 package event.impl;
 
-import event.EntityAction;
 import persistence.sql.context.EntityPersister;
 
-public class EntityInsertAction<T> implements EntityAction {
+import java.util.Objects;
+
+public class EntityInsertAction<T> extends AbstractEntityInsertAction {
     private final T entity;
     private final EntityPersister<T> persister;
 
@@ -24,5 +25,25 @@ public class EntityInsertAction<T> implements EntityAction {
     @Override
     public void execute() {
         persister.insert(entity);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof EntityInsertAction<?> that)) {
+            return false;
+        }
+        return Objects.equals(entity, that.entity) && Objects.equals(persister, that.persister);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entity, persister);
+    }
+
+    public boolean isDelayed() {
+        return isNotIdentityGenerationType(persister.getMetadataLoader());
     }
 }

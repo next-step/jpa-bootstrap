@@ -1,5 +1,7 @@
 package persistence.sql.context.impl;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -32,6 +34,10 @@ public class DefaultEntityPersister<T> implements EntityPersister<T> {
         this.database = database;
         this.nameConverter = nameConverter;
         this.metadataLoader = metadataLoader;
+    }
+
+    private static boolean isIdentityStrategy(GeneratedValue anno) {
+        return anno != null && anno.strategy() == GenerationType.IDENTITY;
     }
 
     @Override
@@ -133,7 +139,6 @@ public class DefaultEntityPersister<T> implements EntityPersister<T> {
         database.executeUpdate(removeQuery);
     }
 
-
     private void updatePrimaryKeyValue(Object entity, Object id) {
         Field primaryKeyField = metadataLoader.getPrimaryKeyField();
         primaryKeyField.setAccessible(true);
@@ -149,5 +154,27 @@ public class DefaultEntityPersister<T> implements EntityPersister<T> {
     @Override
     public MetadataLoader<T> getMetadataLoader() {
         return metadataLoader;
+    }
+
+    @Override
+    public Object getIdentifier(Object entity) {
+        Field primaryKeyField = metadataLoader.getPrimaryKeyField();
+        primaryKeyField.setAccessible(true);
+
+        try {
+            return primaryKeyField.get(entity);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean isIdentifierUnsaved(Object id) {
+        Field idField = metadataLoader.getPrimaryKeyField();
+        GeneratedValue anno = idField.getAnnotation(GeneratedValue.class);
+
+        // TODO : 아이디 생성전략이 SEQUENCE, TABLE, AUTO 일 경우에 대한 처리 추후 추가 필요
+        return isIdentityStrategy(anno) && id == null;
     }
 }

@@ -23,9 +23,7 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
 
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent<T> event) {
-        EntityManager entityManager = event.entityManager();
-
-        if (entityManager.isNew(event.entity())) {
+        if (isNew(event.entity(), event.entityManager())) {
             onSave(event);
             return;
         }
@@ -43,11 +41,11 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
         Status status = Status.MANAGED;
         EntityInsertAction<T> action = new EntityInsertAction<>(entity, entityPersister);
 
-        if (!executeIfIdentityGenerationType(metadataLoader, action)) {
-            entityManager.addInsertionAction(action);
+        if (action.isDelayed()) {
             status = Status.SAVING;
         }
 
+        entityManager.getActionQueue().addInsertion(action);
         persistenceContext.addEntry(entity, status, entityPersister);
         if (existsPersistChildEntity(entity, event.metadataLoader())) {
             persistChildEntity(entity, entityManager);
@@ -71,7 +69,7 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
         }
 
         entry.updateEntity(entity);
-        entityManager.addUpdateAction(new EntityUpdateAction<>(entity, (T) entry.getSnapshot(), entityPersister));
+        entityManager.getActionQueue().addUpdate(new EntityUpdateAction<>(entity, (T) entry.getSnapshot(), entityPersister));
         if (!transaction.isActive()) {
             entry.synchronizingSnapshot();
         }
@@ -103,7 +101,7 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
     }
 
     private <C> void persistIfIsNewChildEntity(T entity, C childEntity, EntityManager entityManager) {
-        if (entityManager.isNew(childEntity)) {
+        if (isNew(childEntity, entityManager)) {
             PersistenceContext persistenceContext = entityManager.getPersistenceContext();
             Class<C> childEntityType = (Class<C>) childEntity.getClass();
             EntityPersister<C> entityPersister = entityManager.getEntityPersister(childEntityType);
@@ -111,26 +109,31 @@ public class DefaultSaveOrUpdateEventListener<T> extends SaveOrUpdateEventListen
             Status status = Status.MANAGED;
             ChildEntityInsertAction<T, C> action = new ChildEntityInsertAction<>(entity, childEntity, entityPersister);
 
-            if (!executeIfIdentityGenerationType(metadataLoader, action)) {
-                entityManager.addChildInsertAction(action);
+            if (action.isDelayed()) {
                 status = Status.SAVING;
             }
 
+            entityManager.getActionQueue().addChildEntityInsertion(action);
             persistenceContext.addEntry(childEntity, status, entityPersister);
         }
     }
 
-    private <C> boolean executeIfIdentityGenerationType(MetadataLoader<C> metadataLoader, ChildEntityInsertAction<T, C> action) {
-        if (isIdentityGenerationType(metadataLoader)) {
-            action.execute();
+    private boolean isNew(Object entity, EntityManager entityManager) {
+        EntityPersister<?> entityPersister = entityManager.getEntityPersister(entity.getClass());
+
+        Object id = entityPersister.getIdentifier(entity);
+        if (isUnsaved(id, entityPersister)) {
             return true;
         }
 
-        return false;
+        return entityManager.find(entity.getClass(), id) == null;
     }
 
-    private boolean executeIfIdentityGenerationType(MetadataLoader<?> metadataLoader,
-                                                    EntityInsertAction<?> action) {
+    private boolean isUnsaved(Object id, EntityPersister<?> entityPersister) {
+        return entityPersister.isIdentifierUnsaved(id);
+    }
+
+    private <C> boolean executeIfIdentityGenerationType(MetadataLoader<C> metadataLoader, ChildEntityInsertAction<T, C> action) {
         if (isIdentityGenerationType(metadataLoader)) {
             action.execute();
             return true;

@@ -105,7 +105,7 @@ public class DefaultPersistenceContext implements PersistenceContext {
 
     private void handleSavingEntry(EntityPersister<?> persister, EntityEntry entry, EntityManager entityManager) {
         EntityInsertAction<?> action = EntityInsertAction.create(persister, entry.getEntity(), entry.getEntityType());
-        entityManager.addInsertionAction(action);
+        entityManager.getActionQueue().addInsertion(action);
         entry.updateStatus(Status.MANAGED);
         entry.synchronizingSnapshot();
     }
@@ -115,13 +115,13 @@ public class DefaultPersistenceContext implements PersistenceContext {
             return;
         }
         EntityUpdateAction<?> action = EntityUpdateAction.create(persister, entry.getEntity(), entry.getSnapshot(), entry.getEntityType());
-        entityManager.addUpdateAction(action);
+        entityManager.getActionQueue().addUpdate(action);
         entry.synchronizingSnapshot();
     }
 
     private void handleDeleteEntry(EntityPersister<?> persister, EntityEntry entry, EntityManager entityManager) {
         EntityDeleteAction<?> action = EntityDeleteAction.create(persister, entry.getEntity(), entry.getEntityType());
-        entityManager.addDeletionAction(action);
+        entityManager.getActionQueue().addDeletion(action);
         entry.updateStatus(Status.GONE);
         context.remove(entry.getKey());
     }

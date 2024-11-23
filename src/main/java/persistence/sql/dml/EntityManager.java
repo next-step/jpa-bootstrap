@@ -1,9 +1,6 @@
 package persistence.sql.dml;
 
-import event.impl.ChildEntityInsertAction;
-import event.impl.EntityDeleteAction;
-import event.impl.EntityInsertAction;
-import event.impl.EntityUpdateAction;
+import event.ActionQueue;
 import persistence.sql.context.EntityPersister;
 import persistence.sql.context.PersistenceContext;
 import persistence.sql.event.FlushEventListener;
@@ -29,8 +26,6 @@ public interface EntityManager extends FlushEventListener {
      * @param entity 수정할 엔티티
      */
     <T> T merge(T entity);
-
-    boolean isNew(Object entity);
 
     /**
      * 엔티티를 삭제한다.
@@ -64,11 +59,5 @@ public interface EntityManager extends FlushEventListener {
 
     <T> EntityLoader<T> getEntityLoader(Class<T> entityClass);
 
-    void addInsertionAction(EntityInsertAction<?> action);
-
-    void addChildInsertAction(ChildEntityInsertAction<?, ?> action);
-
-    void addDeletionAction(EntityDeleteAction<?> action);
-
-    void addUpdateAction(EntityUpdateAction<?> action);
+    ActionQueue getActionQueue();
 }

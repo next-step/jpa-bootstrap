@@ -1,9 +1,8 @@
 package event.impl;
 
-import event.EntityAction;
 import persistence.sql.context.EntityPersister;
 
-public class ChildEntityInsertAction<T, C> implements EntityAction {
+public class ChildEntityInsertAction<T, C> extends AbstractEntityInsertAction {
     private final T parentEntity;
     private final C childEntity;
     private final EntityPersister<C> persister;
@@ -21,6 +20,10 @@ public class ChildEntityInsertAction<T, C> implements EntityAction {
     @Override
     public void execute() {
         persister.insert(childEntity, parentEntity);
+    }
+
+    public boolean isDelayed() {
+        return isNotIdentityGenerationType(persister.getMetadataLoader());
     }
 
     public static class Builder<T, C> {

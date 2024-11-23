@@ -28,11 +28,27 @@ public class ActionQueue {
     }
 
     public void addInsertion(EntityInsertAction<?> action) {
-        insertions.add(action);
+        if (action == null || insertions.contains(action)) {
+            return;
+        }
+
+        if (action.isDelayed()) {
+            insertions.add(action);
+        } else {
+            action.execute();
+        }
     }
 
     public void addChildEntityInsertion(ChildEntityInsertAction<?, ?> action) {
-        childEntityInsertions.add(action);
+        if (action == null || childEntityInsertions.contains(action)) {
+            return;
+        }
+
+        if (action.isDelayed()) {
+            childEntityInsertions.add(action);
+        } else {
+            action.execute();
+        }
     }
 
     public void addDeletion(EntityDeleteAction<?> action) {

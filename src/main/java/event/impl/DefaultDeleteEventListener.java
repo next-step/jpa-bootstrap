@@ -22,7 +22,7 @@ public class DefaultDeleteEventListener<T> extends DeleteEventListener<T> {
         Object id = Clause.extractValue(loader.getPrimaryKeyField(), entity);
 
         EntityEntry entityEntry = persistenceContext.getEntry(entity.getClass(), id);
-        entityManager.addDeletionAction(new EntityDeleteAction<>(entity, entityPersister));
+        entityManager.getActionQueue().addDeletion(new EntityDeleteAction<>(entity, entityPersister));
 
         entityEntry.updateStatus(Status.DELETED);
     }
