@@ -13,4 +13,8 @@ public interface EntityPersister<T> {
     void delete(Object entity);
 
     MetadataLoader<T> getMetadataLoader();
+
+    Object getIdentifier(Object entity);
+
+    boolean isIdentifierUnsaved(Object id);
 }

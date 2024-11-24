@@ -1,6 +1,10 @@
 package persistence.sql.dml;
 
+import event.ActionQueue;
+import persistence.sql.context.EntityPersister;
+import persistence.sql.context.PersistenceContext;
 import persistence.sql.event.FlushEventListener;
+import persistence.sql.loader.EntityLoader;
 import persistence.sql.transaction.Transaction;
 
 import java.util.List;
@@ -46,4 +50,14 @@ public interface EntityManager extends FlushEventListener {
      * @return 조회된 엔티티 목록
      */
     <T> List<T> findAll(Class<T> entityClass);
+
+    PersistenceContext getPersistenceContext();
+
+    <T> MetadataLoader<T> getMetadataLoader(Class<T> entityClass);
+
+    <T> EntityPersister<T> getEntityPersister(Class<T> entityClass);
+
+    <T> EntityLoader<T> getEntityLoader(Class<T> entityClass);
+
+    ActionQueue getActionQueue();
 }

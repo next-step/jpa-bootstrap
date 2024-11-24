@@ -3,6 +3,10 @@ package persistence.sql.clause;
 public interface JoinClause extends Clause {
     String JOIN_QUERY_FORMAT = "LEFT JOIN %s ON %s = %s";
 
+    static String combineAlias(String alias, String column) {
+        return alias + "." + column;
+    }
+
     String columns();
 
     String table();
@@ -24,9 +28,5 @@ public interface JoinClause extends Clause {
     @Override
     default String clause() {
         return JOIN_QUERY_FORMAT.formatted(table(), leftColumn(), rightColumn());
-    }
-
-    static String combineAlias(String alias, String column) {
-        return alias + "." + column;
     }
 }

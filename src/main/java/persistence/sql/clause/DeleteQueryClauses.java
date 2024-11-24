@@ -25,9 +25,9 @@ public record DeleteQueryClauses(List<Clause> clauses) {
         }
 
         public Builder where(Object entity, MetadataLoader<?> loader) {
-            WhereConditionalClause.builder()
+            clauses.add(WhereConditionalClause.builder()
                     .column(loader.getColumnName(loader.getPrimaryKeyField(), nameConverter))
-                    .eq(Clause.toColumnValue(Clause.extractValue(loader.getPrimaryKeyField(), entity)));
+                    .eq(Clause.toColumnValue(Clause.extractValue(loader.getPrimaryKeyField(), entity))));
             return this;
         }
 

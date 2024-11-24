@@ -13,7 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record LeftJoinClause(String table, String leftColumn, String rightColumn, String columns) implements JoinClause {
+public record LeftJoinClause(String table, String leftColumn, String rightColumn,
+                             String columns) implements JoinClause {
 
     /**
      * 두 테이블을 조회하는 LEFT JOIN 절을 생성한다.

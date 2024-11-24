@@ -11,10 +11,10 @@ import java.util.List;
 
 public class EntityEntry {
     private final MetadataLoader<?> loader;
+    private final KeyHolder key;
     private Status status;
     private Object entity;
     private Object snapshot;
-    private final KeyHolder key;
 
     public EntityEntry(MetadataLoader<?> loader, Status status, Object entity, Object snapshot, KeyHolder key) {
         this.loader = loader;
@@ -45,7 +45,6 @@ public class EntityEntry {
         KeyHolder key = new KeyHolder(entity.getClass(), id);
 
         return new EntityEntry(loader, status, entity, createSnapshot(entity, loader), key);
-
     }
 
     @SuppressWarnings("unchecked")
